@@ -1,0 +1,11 @@
+[workspace]
+members = [
+    "serde-reflection",
+]
+
+[profile.release]
+debug = true
+lto = 'thin'
+
+[profile.bench]
+debug = true

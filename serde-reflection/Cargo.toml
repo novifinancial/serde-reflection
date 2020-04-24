@@ -1,0 +1,26 @@
+[package]
+name = "serde-reflection"
+version = "0.1.0"
+description = "Extract representations of Serde data formats"
+documentation = "https://docs.rs/serde-reflection"
+repository = "https://github.com/facebookincubator/serde-reflection"
+authors = ["Mathieu Baudet <mathieubaudet@calibra.com>", "Brandon Williams <bmwill@calibra.com>"]
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+keywords = ["data-structures", "serialization", "serde"]
+categories = ["encoding", "development-tools"]
+edition = "2018"
+exclude = [
+    # Readme template that doesn't need to be included.
+    "README.tpl",
+]
+
+[dependencies]
+thiserror = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+
+[dev-dependencies]
+bincode = "1.2"
+serde_json = "1.0"
+serde_yaml = "0.8"
+serde_bytes = "0.11.3"
