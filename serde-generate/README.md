@@ -11,6 +11,7 @@ extracted by [`serde_reflection`](https://crates.io/crates/serde_reflection).
 
 ### Supported Languages
 
+* C++ 17
 * Python 3
 * Rust 2018
 

@@ -7,7 +7,7 @@
 //! cargo run -p serde-generate -- --help
 //! '''
 
-use serde_generate::{python3, rust, SourceInstaller};
+use serde_generate::{cpp, python3, rust, SourceInstaller};
 use serde_reflection::Registry;
 use std::path::PathBuf;
 use structopt::{clap::arg_enum, StructOpt};
@@ -16,6 +16,7 @@ arg_enum! {
 #[derive(Debug, StructOpt)]
 enum Language {
     Python3,
+    Cpp,
     Rust,
 }
 }
@@ -89,6 +90,7 @@ fn main() {
                     Language::Rust => {
                         rust::output(&mut out, /* with_derive_macros */ true, &registry).unwrap()
                     }
+                    Language::Cpp => cpp::output(&mut out, &registry).unwrap(),
                 }
             }
         }
@@ -100,6 +102,7 @@ fn main() {
                         Box::new(python3::Installer::new(install_dir, serde_package_name_opt))
                     }
                     Language::Rust => Box::new(rust::Installer::new(install_dir)),
+                    Language::Cpp => panic!("not supported"),
                 };
 
             if let Some((registry, name)) = named_registry_opt {

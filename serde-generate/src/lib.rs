@@ -6,6 +6,7 @@
 //!
 //! ## Supported Languages
 //!
+//! * C++ 17
 //! * Python 3
 //! * Rust 2018
 //!
@@ -100,6 +101,8 @@
 
 /// Dependency analysis and topological sort for Serde formats.
 pub mod analyzer;
+/// Support for code-generation in C++
+pub mod cpp;
 /// Support for code-generation in Python 3
 pub mod python3;
 /// Support for code-generation in Rust
