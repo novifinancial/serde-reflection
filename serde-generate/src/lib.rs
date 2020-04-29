@@ -8,9 +8,12 @@
 //!
 //! The following target languages are currently supported:
 //!
-//! * Python 3
 //! * C++ 17
+//! * Python 3
 //! * Rust 2018
+//!
+//! Work in progress:
+//! * Java 8
 //!
 //! ## Supported Encodings
 //!
@@ -111,6 +114,8 @@
 pub mod analyzer;
 /// Support for code-generation in C++
 pub mod cpp;
+/// Support for code-generation in Java
+pub mod java;
 /// Support for code-generation in Python 3
 pub mod python3;
 /// Support for code-generation in Rust

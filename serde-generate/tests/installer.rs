@@ -12,7 +12,7 @@ fn test_that_installed_python_code_parses() {
     let yaml_path = dir.path().join("test.yaml");
     std::fs::write(yaml_path.clone(), serde_yaml::to_string(&registry).unwrap()).unwrap();
 
-    Command::new("cargo")
+    let status = Command::new("cargo")
         .arg("run")
         .arg("-p")
         .arg("serde-generate")
@@ -31,6 +31,7 @@ fn test_that_installed_python_code_parses() {
         .arg(yaml_path)
         .status()
         .unwrap();
+    assert!(status.success());
 
     let python_path = format!(
         "{}:{}",
@@ -54,7 +55,7 @@ fn test_that_installed_python_code_with_package_parses() {
     let yaml_path = dir.path().join("test.yaml");
     std::fs::write(yaml_path.clone(), serde_yaml::to_string(&registry).unwrap()).unwrap();
 
-    Command::new("cargo")
+    let status = Command::new("cargo")
         .arg("run")
         .arg("-p")
         .arg("serde-generate")
@@ -75,6 +76,7 @@ fn test_that_installed_python_code_with_package_parses() {
         .arg(yaml_path)
         .status()
         .unwrap();
+    assert!(status.success());
 
     std::fs::write(
         dir.path().join("my_package").join("__init__.py"),
@@ -106,7 +108,7 @@ fn test_that_installed_rust_code_compiles() {
     let yaml_path = dir.path().join("test.yaml");
     std::fs::write(yaml_path.clone(), serde_yaml::to_string(&registry).unwrap()).unwrap();
 
-    Command::new("cargo")
+    let status = Command::new("cargo")
         .arg("run")
         .arg("-p")
         .arg("serde-generate")
@@ -120,6 +122,7 @@ fn test_that_installed_rust_code_compiles() {
         .arg(yaml_path)
         .status()
         .unwrap();
+    assert!(status.success());
 
     // Use a stable `target` dir to avoid downloading and recompiling crates everytime.
     let target_dir = std::env::current_dir().unwrap().join("../target");
@@ -140,7 +143,7 @@ fn test_that_installed_cpp_code_compiles() {
     let yaml_path = dir.path().join("test.yaml");
     std::fs::write(yaml_path.clone(), serde_yaml::to_string(&registry).unwrap()).unwrap();
 
-    Command::new("cargo")
+    let status = Command::new("cargo")
         .arg("run")
         .arg("-p")
         .arg("serde-generate")
@@ -157,6 +160,7 @@ fn test_that_installed_cpp_code_compiles() {
         .arg("--")
         .status()
         .unwrap();
+    assert!(status.success());
 
     let status = Command::new("clang++")
         .arg("--std=c++17")
@@ -166,6 +170,55 @@ fn test_that_installed_cpp_code_compiles() {
         .arg("-I")
         .arg(dir.path())
         .arg(dir.path().join("test.hpp"))
+        .status()
+        .unwrap();
+    assert!(status.success());
+}
+
+#[test]
+fn test_that_installed_java_code_compiles() {
+    let registry = test_utils::get_registry().unwrap();
+    let dir = tempdir().unwrap();
+    let yaml_path = dir.path().join("test.yaml");
+    std::fs::write(yaml_path.clone(), serde_yaml::to_string(&registry).unwrap()).unwrap();
+
+    let status = Command::new("cargo")
+        .arg("run")
+        .arg("-p")
+        .arg("serde-generate")
+        .arg("--")
+        .arg("--language")
+        .arg("java")
+        .arg("--target-source-dir")
+        .arg(dir.path())
+        .arg("--module-name")
+        .arg("test.types")
+        .arg("--with-runtimes")
+        .arg("serde")
+        .arg("--")
+        .arg(yaml_path)
+        .status()
+        .unwrap();
+    assert!(status.success());
+
+    let paths = std::fs::read_dir(dir.path().join("serde")).unwrap().map(|e| e.unwrap().path());
+    let status = Command::new("javac")
+        .arg("-cp")
+        .arg(dir.path())
+        .arg("-d")
+        .arg(dir.path())
+        .args(paths)
+        .status()
+        .unwrap();
+    assert!(status.success());
+
+    let paths = std::fs::read_dir(dir.path().join("test/types")).unwrap().map(|e| e.unwrap().path());
+    let status = Command::new("javac")
+        .arg("-cp")
+        .arg(dir.path())
+        .arg("-d")
+        .arg(dir.path())
+        .args(paths)
         .status()
         .unwrap();
     assert!(status.success());

@@ -7,7 +7,7 @@
 //! cargo run -p serde-generate -- --help
 //! '''
 
-use serde_generate::{cpp, python3, rust, SourceInstaller};
+use serde_generate::{cpp, java, python3, rust, SourceInstaller};
 use serde_reflection::Registry;
 use std::path::PathBuf;
 use structopt::{clap::arg_enum, StructOpt};
@@ -18,6 +18,7 @@ enum Language {
     Python3,
     Cpp,
     Rust,
+    Java,
 }
 }
 
@@ -93,6 +94,7 @@ fn main() {
                         rust::output(&mut out, /* with_derive_macros */ true, &registry).unwrap()
                     }
                     Language::Cpp => cpp::output(&mut out, &registry, Some(&name)).unwrap(),
+                    Language::Java => java::output(&mut out, &registry, &name).unwrap(),
                 }
             }
         }
@@ -105,6 +107,7 @@ fn main() {
                     }
                     Language::Rust => Box::new(rust::Installer::new(install_dir)),
                     Language::Cpp => Box::new(cpp::Installer::new(install_dir)),
+                    Language::Java => Box::new(java::Installer::new(install_dir)),
                 };
 
             if let Some((registry, name)) = named_registry_opt {
