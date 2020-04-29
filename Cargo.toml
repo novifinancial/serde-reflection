@@ -2,6 +2,8 @@
 members = [
     "serde-name",
     "serde-reflection",
+    "serde-generate",
+    "serde-generate/test_utils",
 ]
 
 [profile.release]

@@ -1,0 +1,15 @@
+[package]
+name = "test-utils"
+version = "0.1.0"
+description = "Local crate used for testing"
+repository = "https://github.com/facebookincubator/serde-reflection"
+authors = ["Mathieu Baudet <mathieubaudet@calibra.com>", "Brandon Williams <bmwill@calibra.com>"]
+license = "MIT OR Apache-2.0"
+edition = "2018"
+publish = false
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde-reflection = { path = "../../serde-reflection", version = "0.3.0" }
+serde_bytes = "0.11.3"
+serde_yaml = "0.8"
