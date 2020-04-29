@@ -1,7 +1,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use serde_generate::{cpp, python3, rust, test_utils, SourceInstaller};
+use serde_generate::{cpp, java, python3, rust, test_utils, SourceInstaller};
 use std::fs::File;
 use std::io::Write;
 use std::process::Command;
@@ -236,4 +236,33 @@ serde_bytes = "0.11"
         .output()
         .unwrap();
     assert!(output.status.success());
+}
+
+#[test]
+fn test_that_java_code_compiles() {
+    let registry = test_utils::get_registry().unwrap();
+    let dir = tempdir().unwrap();
+
+    let source_path = dir.path().join("Test.java");
+    let mut source = File::create(&source_path).unwrap();
+    java::output(&mut source, &registry, "Test").unwrap();
+
+    let paths = std::fs::read_dir("runtime/java/serde").unwrap().map(|e| e.unwrap().path());
+    let status = Command::new("javac")
+        .arg("-d")
+        .arg(dir.path())
+        .args(paths)
+        .status()
+        .unwrap();
+    assert!(status.success());
+
+    let status = Command::new("javac")
+        .arg("-cp")
+        .arg(dir.path())
+        .arg("-d")
+        .arg(dir.path())
+        .arg(source_path)
+        .status()
+        .unwrap();
+    assert!(status.success());
 }

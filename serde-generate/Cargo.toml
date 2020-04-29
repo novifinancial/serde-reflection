@@ -16,6 +16,7 @@ exclude = [
 ]
 
 [dependencies]
+include_dir = "0.6"
 maplit = "1.0.2"
 serde = { version = "1.0.112", features = ["derive"] }
 serde_bytes = "0.11.3"
