@@ -1,8 +1,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use serde_generate::SourceInstaller;
-use serde_generate::{python3, rust, test_utils};
+use serde_generate::{cpp, python3, rust, test_utils, SourceInstaller};
 use std::fs::File;
 use std::io::Write;
 use std::process::Command;
@@ -69,6 +68,28 @@ fn test_that_installed_python_code_passes_pyre_check() {
         .status()
         .unwrap();
     assert!(status.success());
+}
+
+#[test]
+fn test_that_cpp_code_compiles() {
+    let registry = test_utils::get_registry().unwrap();
+    let dir = tempdir().unwrap();
+    let source_path = dir.path().join("test.cpp");
+    let mut source = File::create(&source_path).unwrap();
+    cpp::output(&mut source, &registry).unwrap();
+
+    let output = Command::new("clang++")
+        .arg("--std=c++17")
+        .arg("-c")
+        .arg("-o")
+        .arg(dir.path().join("test.o"))
+        .arg("-I")
+        .arg("runtime/cpp")
+        .arg(source_path)
+        .output()
+        .unwrap();
+    assert_eq!(String::new(), String::from_utf8_lossy(&output.stderr));
+    assert!(output.status.success());
 }
 
 // Quick test using rustc directly.
