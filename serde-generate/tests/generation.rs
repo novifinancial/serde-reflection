@@ -1,7 +1,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use serde_generate::{python3, rust};
+use serde_generate::{cpp, python3, rust};
 use serde_reflection::RegistryOwned;
 use std::fs::File;
 use std::process::Command;
@@ -77,6 +77,28 @@ fn test_that_python_code_parses() {
     python3::output(&mut source, &registry).unwrap();
 
     let output = Command::new("python3").arg(source_path).output().unwrap();
+    assert_eq!(String::new(), String::from_utf8_lossy(&output.stderr));
+    assert!(output.status.success());
+}
+
+#[test]
+fn test_that_cpp_code_compiles() {
+    let registry = get_registry();
+    let dir = tempdir().unwrap();
+    let source_path = dir.path().join("test.cpp");
+    let mut source = File::create(&source_path).unwrap();
+    cpp::output(&mut source, &registry).unwrap();
+
+    let output = Command::new("clang++")
+        .arg("--std=c++17")
+        .arg("-c")
+        .arg("-o")
+        .arg(dir.path().join("test.o"))
+        .arg("-I")
+        .arg("runtime/cpp")
+        .arg(source_path)
+        .output()
+        .unwrap();
     assert_eq!(String::new(), String::from_utf8_lossy(&output.stderr));
     assert!(output.status.success());
 }

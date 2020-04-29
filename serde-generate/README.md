@@ -9,6 +9,7 @@
 ## Serde code-generation library (experimental)
 
 Supported languages:
+* C++ 17
 * Python 3
 * Rust 2018
 

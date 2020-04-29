@@ -4,9 +4,11 @@
 //! # Serde code-generation library (experimental)
 //!
 //! Supported languages:
+//! * C++ 17
 //! * Python 3
 //! * Rust 2018
 
 pub mod analyzer;
+pub mod cpp;
 pub mod python3;
 pub mod rust;
