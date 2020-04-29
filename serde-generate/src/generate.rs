@@ -7,7 +7,7 @@
 //! cargo run -p serde-generate -- --help
 //! '''
 
-use serde_generate::python3;
+use serde_generate::{python3, rust};
 use serde_reflection::Registry;
 use std::path::PathBuf;
 use structopt::{clap::arg_enum, StructOpt};
@@ -16,6 +16,7 @@ arg_enum! {
 #[derive(Debug, StructOpt)]
 enum Language {
     Python3,
+    Rust,
 }
 }
 
@@ -42,5 +43,6 @@ fn main() {
 
     match options.language {
         Language::Python3 => python3::output(&mut out, &registry).unwrap(),
+        Language::Rust => rust::output(&mut out, /* with_derive_macros */ true, &registry).unwrap(),
     }
 }
