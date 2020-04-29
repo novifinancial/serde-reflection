@@ -1,0 +1,31 @@
+[package]
+name = "serde-generate"
+version = "0.1.0"
+description = "Generate (de)serialization code in multiple languages"
+documentation = "https://docs.rs/serde-generate"
+repository = "https://github.com/facebookincubator/serde-reflection"
+authors = ["Mathieu Baudet <mathieubaudet@calibra.com>", "Brandon Williams <bmwill@calibra.com>"]
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+keywords = ["data-structures", "serialization", "serde"]
+categories = ["encoding", "development-tools"]
+edition = "2018"
+exclude = [
+    # Readme template that doesn't need to be included.
+    "README.tpl",
+]
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.8"
+structopt = "0.3.12"
+
+serde-reflection = { path = "../serde-reflection", version = "0.1.0" }
+
+[dev-dependencies]
+tempfile = "3.1"
+
+[[bin]]
+name = "serdegen"
+path = "src/generate.rs"
+test = false

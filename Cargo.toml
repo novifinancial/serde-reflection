@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "serde-reflection",
+    "serde-generate",
 ]
 
 [profile.release]
