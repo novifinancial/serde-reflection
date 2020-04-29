@@ -10,6 +10,8 @@ This repository contains the source code for:
 
 * [`serde-name`](serde-name): a minimal library to compute the Serde name of Rust containers [![serde-name on crates.io](https://img.shields.io/crates/v/serde-name)](https://crates.io/crates/serde-name) [![Documentation (latest release)](https://docs.rs/serde-name/badge.svg)](https://docs.rs/serde-name/) [![Documentation (master)](https://img.shields.io/badge/docs-master-59f)](https://facebookincubator.github.io/serde-reflection/serde_name/)
 
+* [`serde-generate`](serde-generate): a tool to generate Serde-compliant (de)serialization code in other programming languages [![serde-generate on crates.io](https://img.shields.io/crates/v/serde-generate)](https://crates.io/crates/serde-generate) [![Documentation (latest release)](https://docs.rs/serde-generate/badge.svg)](https://docs.rs/serde-generate/) [![Documentation (master)](https://img.shields.io/badge/docs-master-59f)](https://facebookincubator.github.io/serde-reflection/serde_generate/)
+
 The code in this repository is under active development.
 
 ## Use cases
@@ -20,7 +22,7 @@ This project aims to facilitate the implementation of distributed protocols and 
 
 * to detect accidental changes to the data formats (e.g. using version control),
 
-* to generate code in other languages.
+* to generate code in other languages (e.g. using our experimental tool `serde-generate`).
 
 In addition to ensuring an optimal developer experience in Rust, the approach based on Serde and `serde-reflection` empowers protocol designers to experiment and choose the best encoding format for their data: either [one of the encoding formats](https://serde.rs/#data-formats) officially supported by Serde, or [a new encoding format](https://serde.rs/data-format.html) developed in the Serde framework.
 
