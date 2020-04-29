@@ -10,6 +10,7 @@
 
 Supported languages:
 * Python 3
+* Rust 2018
 
 ## Contributing
 

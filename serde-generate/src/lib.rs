@@ -5,6 +5,8 @@
 //!
 //! Supported languages:
 //! * Python 3
+//! * Rust 2018
 
+pub mod analyzer;
 pub mod python3;
-
+pub mod rust;
