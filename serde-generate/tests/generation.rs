@@ -1,7 +1,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use serde_generate::{cpp, python3, rust};
+use serde_generate::{cpp, java, python3, rust};
 use std::fs::File;
 use std::io::Write;
 use std::process::Command;
@@ -46,6 +46,19 @@ fn test_that_cpp_code_compiles() {
         .arg(source_path)
         .output()
         .unwrap();
+    assert_eq!(String::new(), String::from_utf8_lossy(&output.stderr));
+    assert!(output.status.success());
+}
+
+#[test]
+fn test_that_java_code_compiles() {
+    let registry = test_utils::get_registry().unwrap();
+    let dir = tempdir().unwrap();
+    let source_path = dir.path().join("Test.java");
+    let mut source = File::create(&source_path).unwrap();
+    java::output(&mut source, &registry).unwrap();
+
+    let output = Command::new("javac").arg(source_path).output().unwrap();
     assert_eq!(String::new(), String::from_utf8_lossy(&output.stderr));
     assert!(output.status.success());
 }
