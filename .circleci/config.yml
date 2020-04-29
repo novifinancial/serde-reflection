@@ -35,10 +35,10 @@ jobs:
           name: Setup Additional Languages
           command: |
             sudo apt-get update && sudo apt-get upgrade -y
-            sudo apt-get install python3-all-dev python3-numpy clang llvm
+            sudo apt-get install python3-all-dev python3-numpy clang llvm default-jdk
       - run:
           name: Version Information
-          command: rustc --version; cargo --version; rustup --version; python3 --version; clang++ --version
+          command: rustc --version; cargo --version; rustup --version; python3 --version; clang++ --version; javac -version
       - run:
           name: Setup Env
           command: |
