@@ -10,6 +10,7 @@
 
 Supported languages:
 * C++ 17
+* Java 8
 * Python 3
 * Rust 2018
 
