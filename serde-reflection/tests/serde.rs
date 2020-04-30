@@ -340,6 +340,36 @@ fn test_trace_deserialization_with_recursive_types() {
 }
 
 #[test]
+fn test_mixed_tracing_for_multiple_enums() {
+    #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
+    enum Foo {
+        A,
+        B(Bar),
+    }
+
+    #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
+    enum Bar {
+        C,
+        D,
+    }
+
+    let mut samples = Samples::new();
+    let mut tracer = Tracer::new(TracerConfig::default());
+
+    tracer.trace_value(&mut samples, &Bar::D).unwrap();
+    tracer.trace_type::<Foo>(&samples).unwrap();
+    tracer.trace_type::<Bar>(&samples).unwrap();
+
+    let registry = tracer.registry().unwrap();
+    // Note that we do not use the type parameter in the name.
+    let variants = match registry.get("Foo").unwrap() {
+        ContainerFormat::Enum(variants) => variants,
+        _ => panic!("should be an enum"),
+    };
+    assert_eq!(variants.len(), 2);
+}
+
+#[test]
 fn test_value_recording_for_structs() {
     #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
     struct R(u32);

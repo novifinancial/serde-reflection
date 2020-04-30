@@ -426,10 +426,6 @@ impl<'de, 'a> de::Deserializer<'de> for Deserializer<'de, 'a> {
     where
         V: Visitor<'de>,
     {
-        assert!(
-            !variants.is_empty(),
-            "Enums should have at least one variant."
-        );
         self.format.unify(Format::TypeName(name.into()))?;
         // Pre-update the registry.
         self.tracer
@@ -440,26 +436,29 @@ impl<'de, 'a> de::Deserializer<'de> for Deserializer<'de, 'a> {
             Some(ContainerFormat::Enum(x)) => x,
             _ => unreachable!(),
         };
-        let (index, mut variant) = if current_variants.len() == variants.len()
+        // If we have found all the variants OR if the enum is marked as
+        // incomplete already, pick the first index.
+        let index = if current_variants.len() == variants.len()
             || self.tracer.incomplete_enums.contains(name)
         {
-            // If we have found all the variants OR if the enum is marked as
-            // incomplete already, pick the first variant.
-            (0, current_variants[&0].clone())
+            0
         } else {
-            assert!(
-                current_variants.len() < variants.len(),
-                "Current variants cannot exceed the entire list."
-            );
-            // Otherwise, create a new variant format.
-            let index = current_variants.len() as u32;
-            let variant = Named {
-                name: variants[index as usize].into(),
-                value: VariantFormat::Unknown,
-            };
-            (index, variant)
+            let mut index = current_variants.len() as u32;
+            // Scan the range 0..=current_variants.len() downwards to find the next
+            // variant index.
+            while current_variants.contains_key(&index) {
+                index -= 1;
+            }
+            index
         };
-        // Temporarily mark the entry as "incomplete" to force variant #0 in any
+        let mut variant = current_variants.get(&index).cloned().unwrap_or(Named {
+            name: variants
+                .get(index as usize)
+                .expect("variant indexes must be a range 0..variants.len()")
+                .to_string(),
+            value: VariantFormat::Unknown,
+        });
+        // Temporarily mark the entry as "incomplete" to force the first index in any
         // recursive exploration of the same enum.
         self.tracer.incomplete_enums.insert(name.into());
 
