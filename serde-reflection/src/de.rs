@@ -452,10 +452,10 @@ impl<'de, 'a> de::Deserializer<'de> for Deserializer<'de, 'a> {
             index
         };
         let mut variant = known_variants.get(&index).cloned().unwrap_or(Named {
-            name: variants
+            name: (*variants
                 .get(index as usize)
-                .expect("variant indexes must be a non-empty range 0..variants.len()")
-                .to_string(),
+                .expect("variant indexes must be a non-empty range 0..variants.len()"))
+            .to_string(),
             value: VariantFormat::Unknown,
         });
         // Temporarily mark the entry as "incomplete" to force the first index in any
