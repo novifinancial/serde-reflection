@@ -432,29 +432,29 @@ impl<'de, 'a> de::Deserializer<'de> for Deserializer<'de, 'a> {
             .registry
             .entry(name)
             .unify(ContainerFormat::Enum(BTreeMap::new()))?;
-        let current_variants = match self.tracer.registry.get(name) {
+        let known_variants = match self.tracer.registry.get(name) {
             Some(ContainerFormat::Enum(x)) => x,
             _ => unreachable!(),
         };
         // If we have found all the variants OR if the enum is marked as
         // incomplete already, pick the first index.
-        let index = if current_variants.len() == variants.len()
+        let index = if known_variants.len() == variants.len()
             || self.tracer.incomplete_enums.contains(name)
         {
             0
         } else {
-            let mut index = current_variants.len() as u32;
-            // Scan the range 0..=current_variants.len() downwards to find the next
-            // variant index.
-            while current_variants.contains_key(&index) {
+            let mut index = known_variants.len() as u32;
+            // Scan the range 0..=known_variants.len() downwards to find an
+            // unknown variant index.
+            while known_variants.contains_key(&index) {
                 index -= 1;
             }
             index
         };
-        let mut variant = current_variants.get(&index).cloned().unwrap_or(Named {
+        let mut variant = known_variants.get(&index).cloned().unwrap_or(Named {
             name: variants
                 .get(index as usize)
-                .expect("variant indexes must be a range 0..variants.len()")
+                .expect("variant indexes must be a non-empty range 0..variants.len()")
                 .to_string(),
             value: VariantFormat::Unknown,
         });
@@ -466,13 +466,13 @@ impl<'de, 'a> de::Deserializer<'de> for Deserializer<'de, 'a> {
         let inner = EnumDeserializer::new(self.tracer, self.samples, index, &mut variant.value);
         let result = visitor.visit_enum(inner);
         // Finally, update the registry.
-        let current_variants = match self.tracer.registry.get_mut(name) {
+        let known_variants = match self.tracer.registry.get_mut(name) {
             Some(ContainerFormat::Enum(x)) => x,
             _ => unreachable!(),
         };
-        current_variants.insert(index, variant);
+        known_variants.insert(index, variant);
         // Clear the flag "incomplete" if we are done exploring variants.
-        if current_variants.len() == variants.len() {
+        if known_variants.len() == variants.len() {
             self.tracer.incomplete_enums.remove(name);
         }
         result
