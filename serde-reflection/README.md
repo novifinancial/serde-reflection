@@ -6,17 +6,67 @@
 [![License](https://img.shields.io/badge/license-Apache-green.svg)](../LICENSE-APACHE)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](../LICENSE-MIT)
 
-## Serde Reflection
-
-This crate provides a way to extract IDL-like format descriptions for Rust containers
+This crate provides a way to extract format descriptions for Rust containers
 that implement the Serialize and/or Deserialize trait(s) of Serde.
+
+## Quick Start
+
+Very often, Serde traits are only implemented using Serde derive macros.
+In this case, simply
+* call `trace_type` on the desired top-level definitions, then
+* add a call to `trace_type` for each `enum` type. (This will fix any `MissingVariants` error.)
+
+```rust
+#[derive(Deserialize)]
+struct Foo {
+  bar: Bar,
+  choice: Choice,
+}
+
+#[derive(Deserialize)]
+struct Bar(u64);
+
+#[derive(Deserialize)]
+enum Choice { A, B, C }
+
+// Start the tracing session.
+let mut tracer = Tracer::new(TracerConfig::default());
+let samples = Samples::new();
+
+// Trace the desired top-level type(s).
+tracer.trace_type::<Foo>(&samples)?;
+
+// Also trace each enum type separately to fix any `MissingVariants` error.
+tracer.trace_type::<Choice>(&samples)?;
+
+// Obtain the registry of Serde formats and serialize it in YAML.
+let registry = tracer.registry()?;
+let data = serde_yaml::to_string(&registry).unwrap() + "\n";
+assert_eq!(&data, r#"---
+Bar:
+  NEWTYPESTRUCT: U64
+Choice:
+  ENUM:
+    0:
+      A: UNIT
+    1:
+      B: UNIT
+    2:
+      C: UNIT
+Foo:
+  STRUCT:
+    - bar:
+        TYPENAME: Bar
+    - choice:
+        TYPENAME: Choice
+"#);
+```
 
 ## Overview
 
-In the following example, we extract the Serde-generated data-format of two containers
-`Name` and `Person`. We also demonstrate how to handle a custom
-implementation of `ser::de::Deserialize` that would enforce user-defined invariants
-for `Name` values.
+In the following, more complete example, we extract the Serde formats of two containers
+`Name` and `Person` and demonstrate how to handle a custom implementation of `serde::Deserialize`
+for `Name`.
 
 ```rust
 use serde_reflection::{ContainerFormat, Error, Format, Samples, Tracer, TracerConfig};
@@ -173,12 +223,15 @@ Whenever we traverse the graph of type declarations using deserialization callba
 system requires us to return valid Rust values of type `V::Value`, where `V` is the type of
 a given `visitor`. This contraint limits the way we can stop graph traversal to only a few cases.
 
-The first 3 cases are what we have called *possible recursion points* above:
+The first 4 cases are what we have called *possible recursion points* above:
 
 * while visiting an `Option<T>` for the second time, we choose to return the value `None` to stop;
 * while visiting an `Seq<T>` for the second time, we choose to return the empty sequence `[]`;
+* while visiting an `Map<K, V>` for the second time, we choose to return the empty map `{}`;
 * while visiting an `enum T` for the second time, we choose to return the first variant, i.e.
 a "base case" by assumption (1) above.
+
+TODO ([#5](https://github.com/facebookincubator/serde-reflection/issues/5)): the detection of "the second time" above is currently only effective for enums.
 
 In addition to these 3 cases,
 
