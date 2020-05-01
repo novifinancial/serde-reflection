@@ -275,9 +275,10 @@
 //! * while visiting an `enum T` for the second time, we choose to return the first variant, i.e.
 //! a "base case" by assumption (1) above.
 //!
-//! TODO ([#5](https://github.com/facebookincubator/serde-reflection/issues/5)): the detection of "the second time" above is currently only effective for enums.
+//! TODO ([#5](https://github.com/facebookincubator/serde-reflection/issues/5)): the detection of
+//! "the second time" above is currently only effective for enums.
 //!
-//! In addition to these 3 cases,
+//! In addition to the cases above,
 //!
 //! * while visiting a container, if the container's name is mapped to a recorded value,
 //! we MAY decide to use it.
@@ -286,7 +287,8 @@
 //! `NewTypeStruct` and never does in the other cases.
 //!
 //! For efficiency reasons, the current algorithm does not attempt to scan the variants of enums
-//! other than the parameter `T` of the main call `trace_type<T>`.
+//! other than the parameter `T` of the main call `trace_type<T>`. As a consequence, each enum type must be
+//! traced separately.
 
 mod de;
 mod error;
