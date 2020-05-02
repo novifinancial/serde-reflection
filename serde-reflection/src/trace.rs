@@ -120,7 +120,9 @@ impl Tracer {
         T: ?Sized + Serialize,
     {
         let serializer = Serializer::new(self, samples);
-        value.serialize(serializer)
+        let (mut format, sample) = value.serialize(serializer)?;
+        format.reduce();
+        Ok((format, sample))
     }
 
     /// Trace a single deserialization of a particular type.
@@ -135,9 +137,10 @@ impl Tracer {
     where
         T: Deserialize<'de>,
     {
-        let mut format = Format::Unknown;
+        let mut format = Format::unknown();
         let deserializer = Deserializer::new(self, samples, &mut format);
         let value = T::deserialize(deserializer)?;
+        format.reduce();
         Ok((format, value))
     }
 
@@ -150,9 +153,10 @@ impl Tracer {
     where
         S: DeserializeSeed<'de>,
     {
-        let mut format = Format::Unknown;
+        let mut format = Format::unknown();
         let deserializer = Deserializer::new(self, samples, &mut format);
         let value = seed.deserialize(deserializer)?;
+        format.reduce();
         Ok((format, value))
     }
 

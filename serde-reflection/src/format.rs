@@ -1,20 +1,34 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+//! Module defining the Abstract Syntax Tree (AST) of Serde formats.
+//!
+//! Node of the AST are made of the following types:
+//! * `ContainerFormat`: the format of a container (struct or enum),
+//! * `Format`: the format of an unnamed value,
+//! * `Named<Format>`: the format of a field in a struct,
+//! * `VariantFormat`: the format of a variant in a enum,
+//! * `Named<VariantFormat>`: the format of a variant in a enum, together with its name,
+//! * `Variable<Format>`: a variable holding an initially unknown value format,
+//! * `Variable<VariantFormat>`: a variable holding an initially unknown variant format.
+
 use crate::error::{Error, Result};
 use serde::{
     de, ser,
     ser::{SerializeMap, SerializeStruct},
     Deserialize, Serialize,
 };
+use std::cell::{Ref, RefCell, RefMut};
 use std::collections::{btree_map::Entry, BTreeMap};
+use std::ops::DerefMut;
+use std::rc::Rc;
 
 /// Serde-based serialization format for anonymous "value" types.
 #[derive(Serialize, Deserialize, Debug, Eq, Clone, PartialEq)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum Format {
-    /// Placeholder for an unknown format (e.g. after tracing `None` value).
-    Unknown,
+    /// (used internally for tracing) A format whose value is initially unknown.
+    Variable(#[serde(with = "not_implemented")] Variable<Format>),
     /// The name of a container.
     TypeName(String),
 
@@ -85,12 +99,16 @@ pub struct Named<T> {
     pub value: T,
 }
 
+#[derive(Debug, Clone, Default, Eq, PartialEq)]
+/// A mutable holder for an initially unknown value.
+pub struct Variable<T>(Rc<RefCell<Option<T>>>);
+
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
 #[serde(rename_all = "UPPERCASE")]
 /// Description of a variant in an enum.
 pub enum VariantFormat {
-    /// A variant whose format is yet unknown.
-    Unknown,
+    /// (used internally for tracing) A variant whose format is initially unknown.
+    Variable(#[serde(with = "not_implemented")] Variable<VariantFormat>),
     /// A variant without parameters, e.g. `A` in `enum X { A }`
     Unit,
     /// A variant with a single unnamed parameter, e.g. `A` in `enum X { A(u16) }`
@@ -101,21 +119,31 @@ pub enum VariantFormat {
     Struct(Vec<Named<Format>>),
 }
 
+/// Common methods for nodes in the AST of formats.
 pub trait FormatHolder {
     /// Visit all the formats in `self` in a depth-first way.
+    /// Variables are not supported and will cause an error.
     fn visit<'a>(&'a self, f: &mut dyn FnMut(&'a Format) -> Result<()>) -> Result<()>;
 
     /// Mutably visit all the formats in `self` in a depth-first way.
+    /// * Replace variables (if any) with their known values then apply the
+    /// visiting function `f`.
+    /// * Return an error if any variable has still an unknown value (thus cannot be removed).
     fn visit_mut(&mut self, f: &mut dyn FnMut(&mut Format) -> Result<()>) -> Result<()>;
 
-    /// Update `self` in order to match `other`. The changes consist in
-    /// replacing `Unknown` formats and adding missing variants wherever necessary.
-    /// This can be seen as form of a
-    /// [first-order term-unification algorithm](https://en.wikipedia.org/wiki/Unification_(computer_science)).
+    /// Update variables and add missing enum variants so that the terms match.
+    /// This is a special case of [term unification](https://en.wikipedia.org/wiki/Unification_(computer_science)):
+    /// * Variables occurring in `other` must be "fresh" and distinct
+    ///   from each other. By "fresh", we mean that they do not occur in `self`
+    ///   and have no known value yet.
+    /// * If needed, enums in `self` will be extended with new variants taken from `other`.
+    /// * Although the parameter `other` is consumed (i.e. taken by value), all
+    ///   variables occurring either in `self` or `other` are correctly updated.
     fn unify(&mut self, other: Self) -> Result<()>;
 
-    /// Finalize the formats within `self` by making sure they contain no `Unknown` formats
-    /// and that all eligible tuples are compressed into a `TupleArray`.
+    /// Finalize the formats within `self` by removing variables and making sure
+    /// that all eligible tuples are compressed into a `TupleArray`. Return an error
+    /// if any variable has an unknown value.
     fn normalize(&mut self) -> Result<()> {
         self.visit_mut(&mut |format: &mut Format| {
             let normalized = match format {
@@ -143,6 +171,15 @@ pub trait FormatHolder {
             Ok(())
         })
     }
+
+    /// Attempt to remove known variables within `self`. Silently abort
+    /// if some variables have unknown values.
+    fn reduce(&mut self) {
+        self.visit_mut(&mut |_| Ok(())).unwrap_or(())
+    }
+
+    /// Whether this format is a variable with no known value yet.
+    fn is_unknown(&self) -> bool;
 }
 
 fn unification_error<T>(v1: T, v2: T) -> Error
@@ -155,9 +192,7 @@ where
 impl FormatHolder for VariantFormat {
     fn visit<'a>(&'a self, f: &mut dyn FnMut(&'a Format) -> Result<()>) -> Result<()> {
         match self {
-            Self::Unknown => {
-                return Err(Error::UnknownFormat);
-            }
+            Self::Variable(variable) => variable.visit(f)?,
             Self::Unit => (),
             Self::NewType(format) => format.visit(f)?,
             Self::Tuple(formats) => {
@@ -176,11 +211,18 @@ impl FormatHolder for VariantFormat {
 
     fn visit_mut(&mut self, f: &mut dyn FnMut(&mut Format) -> Result<()>) -> Result<()> {
         match self {
-            Self::Unknown => {
-                return Err(Error::UnknownFormat);
+            Self::Variable(variable) => {
+                variable.visit_mut(f)?;
+                // At this point, `variable` is known and points to variable-free content.
+                // Remove the variable.
+                *self = std::mem::take(variable)
+                    .into_inner()
+                    .expect("variable is known");
             }
             Self::Unit => (),
-            Self::NewType(format) => format.visit_mut(f)?,
+            Self::NewType(format) => {
+                format.visit_mut(f)?;
+            }
             Self::Tuple(formats) => {
                 for format in formats {
                     format.visit_mut(f)?;
@@ -201,12 +243,23 @@ impl FormatHolder for VariantFormat {
         // See also https://github.com/rust-lang/rust/issues/68354
         // We make it work using std::mem::take (and the Default trait).
         match (&mut *self, &mut format) {
-            (format1 @ Self::Unknown, format2) => {
-                let format2 = std::mem::take(format2);
-                *format1 = format2;
+            (_, Self::Variable(variable2)) => {
+                assert!(variable2.borrow().is_none());
+                *variable2.borrow_mut() = Some(self.clone());
+            }
+            (Self::Variable(variable1), _) => {
+                let format2 = std::mem::take(&mut format);
+                match variable1.borrow_mut().deref_mut() {
+                    value1 @ None => {
+                        *value1 = Some(format2);
+                    }
+                    Some(format1) => {
+                        format1.unify(format2)?;
+                    }
+                }
             }
 
-            (_, Self::Unknown) | (Self::Unit, Self::Unit) => (),
+            (Self::Unit, Self::Unit) => (),
 
             (Self::NewType(format1), Self::NewType(format2)) => {
                 let format2 = std::mem::take(format2.as_mut());
@@ -241,6 +294,13 @@ impl FormatHolder for VariantFormat {
         }
         Ok(())
     }
+
+    fn is_unknown(&self) -> bool {
+        if let Self::Variable(v) = self {
+            return v.is_unknown();
+        }
+        false
+    }
 }
 
 impl<T> FormatHolder for Named<T>
@@ -260,6 +320,85 @@ where
             return Err(unification_error(&*self, &other));
         }
         self.value.unify(other.value)
+    }
+
+    fn is_unknown(&self) -> bool {
+        false
+    }
+}
+
+impl<T> Variable<T> {
+    pub(crate) fn new(content: Option<T>) -> Self {
+        Self(Rc::new(RefCell::new(content)))
+    }
+
+    fn borrow(&self) -> Ref<Option<T>> {
+        self.0.as_ref().borrow()
+    }
+
+    fn borrow_mut(&mut self) -> RefMut<Option<T>> {
+        self.0.as_ref().borrow_mut()
+    }
+}
+
+impl<T> Variable<T>
+where
+    T: Clone,
+{
+    fn into_inner(self) -> Option<T> {
+        match Rc::try_unwrap(self.0) {
+            Ok(cell) => cell.into_inner(),
+            Err(rc) => rc.borrow().clone(),
+        }
+    }
+}
+
+mod not_implemented {
+    pub fn serialize<T, S>(_: &T, _serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::ser::Serializer,
+    {
+        use serde::ser::Error;
+        Err(S::Error::custom("Cannot serialize variables"))
+    }
+
+    pub fn deserialize<'de, T, D>(_deserializer: D) -> Result<T, D::Error>
+    where
+        D: serde::de::Deserializer<'de>,
+    {
+        use serde::de::Error;
+        Err(D::Error::custom("Cannot deserialize variables"))
+    }
+}
+
+impl<T> FormatHolder for Variable<T>
+where
+    T: FormatHolder + std::fmt::Debug + Clone,
+{
+    fn visit<'a>(&'a self, _f: &mut dyn FnMut(&'a Format) -> Result<()>) -> Result<()> {
+        Err(Error::NotSupported(
+            "Cannot immutability visit formats with variables",
+        ))
+    }
+
+    fn visit_mut(&mut self, f: &mut dyn FnMut(&mut Format) -> Result<()>) -> Result<()> {
+        match self.borrow_mut().deref_mut() {
+            None => Err(Error::UnknownFormat),
+            Some(value) => value.visit_mut(f),
+        }
+    }
+
+    fn unify(&mut self, _other: Variable<T>) -> Result<()> {
+        // Omitting this method because a correct implementation would require
+        // additional assumptions on T (in order to create new variables of type `T`).
+        Err(Error::NotSupported("Cannot unify variables directly"))
+    }
+
+    fn is_unknown(&self) -> bool {
+        match self.borrow().as_ref() {
+            None => true,
+            Some(format) => format.is_unknown(),
+        }
     }
 }
 
@@ -364,14 +503,16 @@ impl FormatHolder for ContainerFormat {
         }
         Ok(())
     }
+
+    fn is_unknown(&self) -> bool {
+        false
+    }
 }
 
 impl FormatHolder for Format {
     fn visit<'a>(&'a self, f: &mut dyn FnMut(&'a Format) -> Result<()>) -> Result<()> {
         match self {
-            Self::Unknown => {
-                return Err(Error::UnknownFormat);
-            }
+            Self::Variable(variable) => variable.visit(f)?,
             Self::TypeName(_)
             | Self::Unit
             | Self::Bool
@@ -415,8 +556,13 @@ impl FormatHolder for Format {
 
     fn visit_mut(&mut self, f: &mut dyn FnMut(&mut Format) -> Result<()>) -> Result<()> {
         match self {
-            Self::Unknown => {
-                return Err(Error::UnknownFormat);
+            Self::Variable(variable) => {
+                variable.visit_mut(f)?;
+                // At this point, `variable` is known and points to variable-free content.
+                // Remove the variable.
+                *self = std::mem::take(variable)
+                    .into_inner()
+                    .expect("variable is known");
             }
             Self::TypeName(_)
             | Self::Unit
@@ -435,7 +581,7 @@ impl FormatHolder for Format {
             | Self::F64
             | Self::Char
             | Self::Str
-            | Self::Bytes => {}
+            | Self::Bytes => (),
 
             Self::Option(format)
             | Self::Seq(format)
@@ -465,13 +611,23 @@ impl FormatHolder for Format {
         // Matching `&mut format` instead of `format` because of
         // "error[E0009]: cannot bind by-move and by-ref in the same pattern"
         match (&mut *self, &mut format) {
-            (format1 @ Self::Unknown, format2) => {
-                let format2 = std::mem::take(format2);
-                *format1 = format2;
+            (_, Self::Variable(variable2)) => {
+                assert!(variable2.borrow().is_none());
+                *variable2.borrow_mut() = Some(self.clone());
+            }
+            (Self::Variable(variable1), _) => {
+                let format2 = std::mem::take(&mut format);
+                match variable1.borrow_mut().deref_mut() {
+                    value1 @ None => {
+                        *value1 = Some(format2);
+                    }
+                    Some(format1) => {
+                        format1.unify(format2)?;
+                    }
+                }
             }
 
-            (_, Self::Unknown)
-            | (Self::Unit, Self::Unit)
+            (Self::Unit, Self::Unit)
             | (Self::Bool, Self::Bool)
             | (Self::I8, Self::I8)
             | (Self::I16, Self::I16)
@@ -534,6 +690,13 @@ impl FormatHolder for Format {
         }
         Ok(())
     }
+
+    fn is_unknown(&self) -> bool {
+        if let Self::Variable(v) = self {
+            return v.is_unknown();
+        }
+        false
+    }
 }
 
 /// Helper trait to update formats in maps.
@@ -556,15 +719,29 @@ where
     }
 }
 
+impl Format {
+    /// Return a format made of a fresh variable with no known value.
+    pub fn unknown() -> Self {
+        Self::Variable(Variable::new(None))
+    }
+}
+
+impl VariantFormat {
+    /// Return a format made of a fresh variable with no known value.
+    pub fn unknown() -> Self {
+        Self::Variable(Variable::new(None))
+    }
+}
+
 impl Default for Format {
     fn default() -> Self {
-        Self::Unknown
+        Self::unknown()
     }
 }
 
 impl Default for VariantFormat {
     fn default() -> Self {
-        Self::Unknown
+        Self::unknown()
     }
 }
 

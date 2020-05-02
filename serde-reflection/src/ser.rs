@@ -99,7 +99,7 @@ impl<'a> ser::Serializer for Serializer<'a> {
     }
 
     fn serialize_none(self) -> Result<(Format, Value)> {
-        Ok((Format::Unknown, Value::Option(None)))
+        Ok((Format::unknown(), Value::Option(None)))
     }
 
     fn serialize_some<T>(self, v: &T) -> Result<(Format, Value)>
@@ -182,7 +182,7 @@ impl<'a> ser::Serializer for Serializer<'a> {
         Ok(SeqSerializer {
             tracer: self.tracer,
             samples: self.samples,
-            format: Format::Unknown,
+            format: Format::unknown(),
             values: Vec::new(),
         })
     }
@@ -232,8 +232,8 @@ impl<'a> ser::Serializer for Serializer<'a> {
         Ok(MapSerializer {
             tracer: self.tracer,
             samples: self.samples,
-            key_format: Format::Unknown,
-            value_format: Format::Unknown,
+            key_format: Format::unknown(),
+            value_format: Format::unknown(),
             values: Vec::new(),
         })
     }
