@@ -3,7 +3,8 @@
 
 use serde::{de::IntoDeserializer, Deserialize, Serialize};
 use serde_reflection::{
-    ContainerFormat, Error, Format, Named, Samples, Tracer, TracerConfig, Value, VariantFormat,
+    ContainerFormat, Error, Format, FormatHolder, Named, Samples, Tracer, TracerConfig, Value,
+    VariantFormat,
 };
 use std::collections::BTreeMap;
 
@@ -113,12 +114,10 @@ fn test_tracers() {
 
     // Format values can serialize and deserialize in text and binary encodings.
     let data = serde_json::to_string_pretty(format).unwrap();
-    println!("{}\n", data);
     let format2 = serde_json::from_str::<ContainerFormat>(&data).unwrap();
     assert_eq!(*format, format2);
 
     let data = serde_yaml::to_string(format).unwrap();
-    println!("{}\n", data);
     let format3 = serde_yaml::from_str::<ContainerFormat>(&data).unwrap();
     assert_eq!(*format, format3);
 
@@ -129,7 +128,8 @@ fn test_tracers() {
     // Tracing deserialization
     let samples = Samples::new();
     let mut tracer = Tracer::new(TracerConfig::default());
-    let (ident, samples) = tracer.trace_type::<E>(&samples).unwrap();
+    let (mut ident, samples) = tracer.trace_type::<E>(&samples).unwrap();
+    ident.normalize().unwrap();
     assert_eq!(ident, Format::TypeName("E".into()));
     assert_eq!(tracer.registry().unwrap().get("E").unwrap(), format);
     assert_eq!(
@@ -337,6 +337,40 @@ fn test_trace_deserialization_with_recursive_types() {
     assert_eq!(variants.len(), 2);
     assert_eq!(variants.get(&0).unwrap().name, "Empty");
     assert_eq!(variants.get(&1).unwrap().name, "Cons");
+}
+
+#[test]
+fn test_tracing_deserialization_for_lists() {
+    #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
+    struct Node {
+        data: u64,
+        next: Option<Box<Node>>,
+    }
+    let samples = Samples::new();
+    let mut tracer = Tracer::new(TracerConfig::default());
+    tracer.trace_type::<Node>(&samples).unwrap();
+    let registry = tracer.registry().unwrap();
+    match registry.get("Node").unwrap() {
+        ContainerFormat::Struct(fields) => assert_eq!(fields.len(), 2),
+        _ => panic!("should be a struct"),
+    }
+}
+
+#[test]
+fn test_tracing_deserialization_for_trees() {
+    #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
+    struct Node {
+        data: u64,
+        children: Vec<Node>,
+    }
+    let samples = Samples::new();
+    let mut tracer = Tracer::new(TracerConfig::default());
+    tracer.trace_type::<Node>(&samples).unwrap();
+    let registry = tracer.registry().unwrap();
+    match registry.get("Node").unwrap() {
+        ContainerFormat::Struct(fields) => assert_eq!(fields.len(), 2),
+        _ => panic!("should be a struct"),
+    }
 }
 
 #[test]

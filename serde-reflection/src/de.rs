@@ -193,14 +193,11 @@ impl<'de, 'a> de::Deserializer<'de> for Deserializer<'de, 'a> {
     where
         V: Visitor<'de>,
     {
+        let mut format = Format::unknown();
         self.format
-            .unify(Format::Option(Box::new(Format::Unknown)))?;
-        let format = match self.format {
-            Format::Option(x) => x,
-            _ => unreachable!(),
-        };
-        if **format == Format::Unknown {
-            let inner = Deserializer::new(self.tracer, self.samples, format.as_mut());
+            .unify(Format::Option(Box::new(format.clone())))?;
+        if format.is_unknown() {
+            let inner = Deserializer::new(self.tracer, self.samples, &mut format);
             visitor.visit_some(inner)
         } else {
             // Cut exploration.
@@ -240,44 +237,35 @@ impl<'de, 'a> de::Deserializer<'de> for Deserializer<'de, 'a> {
                     .visit_newtype_struct(sample.into_deserializer())
                     .map_err(|err| match err {
                         Error::DeserializationError(msg) => {
-                            Error::UnexpectedDeserializationFormat(name, format.clone(), msg)
+                            let mut format = format.clone();
+                            format.reduce();
+                            Error::UnexpectedDeserializationFormat(name, format, msg)
                         }
                         _ => err,
                     });
             }
         }
         // Pre-update the registry.
+        let mut format = Format::unknown();
         self.tracer
             .registry
             .entry(name)
-            .unify(ContainerFormat::NewTypeStruct(Box::new(Format::Unknown)))?;
+            .unify(ContainerFormat::NewTypeStruct(Box::new(format.clone())))?;
         // Compute the format.
-        let mut format = Format::Unknown;
         let inner = Deserializer::new(self.tracer, self.samples, &mut format);
-        let result = visitor.visit_newtype_struct(inner);
-        // Finally, update the registry.
-        match self.tracer.registry.get_mut(name) {
-            Some(ContainerFormat::NewTypeStruct(x)) => {
-                *x = Box::new(format);
-            }
-            _ => unreachable!(),
-        };
-        result
+        visitor.visit_newtype_struct(inner)
     }
 
     fn deserialize_seq<V>(self, visitor: V) -> Result<V::Value>
     where
         V: Visitor<'de>,
     {
-        self.format.unify(Format::Seq(Box::new(Format::Unknown)))?;
-        let format = match self.format {
-            Format::Seq(x) => x,
-            _ => unreachable!(),
-        };
-        if **format == Format::Unknown {
+        let mut format = Format::unknown();
+        self.format.unify(Format::Seq(Box::new(format.clone())))?;
+        if format.is_unknown() {
             // Simulate vector of size 1.
             let inner =
-                SeqDeserializer::new(self.tracer, self.samples, std::iter::once(format.as_mut()));
+                SeqDeserializer::new(self.tracer, self.samples, std::iter::once(&mut format));
             visitor.visit_seq(inner)
         } else {
             // Cut exploration with a vector of size 0.
@@ -290,12 +278,8 @@ impl<'de, 'a> de::Deserializer<'de> for Deserializer<'de, 'a> {
     where
         V: Visitor<'de>,
     {
-        self.format
-            .unify(Format::Tuple(vec![Format::Unknown; len]))?;
-        let formats = match self.format {
-            Format::Tuple(x) => x,
-            _ => unreachable!(),
-        };
+        let mut formats: Vec<_> = std::iter::repeat_with(Format::unknown).take(len).collect();
+        self.format.unify(Format::Tuple(formats.clone()))?;
         let inner = SeqDeserializer::new(self.tracer, self.samples, formats.iter_mut());
         visitor.visit_seq(inner)
     }
@@ -310,52 +294,48 @@ impl<'de, 'a> de::Deserializer<'de> for Deserializer<'de, 'a> {
         V: Visitor<'de>,
     {
         self.format.unify(Format::TypeName(name.into()))?;
-        let mut formats = vec![Format::Unknown; len];
         if self.tracer.config.record_samples_for_tuple_structs {
             // If a value was recorded during serialization, use it.
             if let Some((format, sample)) = self.tracer.get_sample(self.samples, name) {
                 let result = || visitor.visit_seq(sample.seq_values()?.into_seq_deserializer());
                 return result().map_err(|err| match err {
                     Error::DeserializationError(msg) => {
-                        Error::UnexpectedDeserializationFormat(name, format.clone(), msg)
+                        let mut format = format.clone();
+                        format.reduce();
+                        Error::UnexpectedDeserializationFormat(name, format, msg)
                     }
                     _ => err,
                 });
             }
         }
         // Pre-update the registry.
+        let mut formats: Vec<_> = std::iter::repeat_with(Format::unknown).take(len).collect();
         self.tracer
             .registry
             .entry(name)
             .unify(ContainerFormat::TupleStruct(formats.clone()))?;
         // Compute the formats.
         let inner = SeqDeserializer::new(self.tracer, self.samples, formats.iter_mut());
-        let result = visitor.visit_seq(inner);
-        // Finally, update the registry.
-        match self.tracer.registry.get_mut(name) {
-            Some(ContainerFormat::TupleStruct(x)) => {
-                *x = formats;
-            }
-            _ => unreachable!(),
-        };
-        result
+        visitor.visit_seq(inner)
     }
 
     fn deserialize_map<V>(self, visitor: V) -> Result<V::Value>
     where
         V: Visitor<'de>,
     {
+        let mut key_format = Format::unknown();
+        let mut value_format = Format::unknown();
         self.format.unify(Format::Map {
-            key: Box::new(Format::Unknown),
-            value: Box::new(Format::Unknown),
+            key: Box::new(key_format.clone()),
+            value: Box::new(value_format.clone()),
         })?;
-        let formats = match self.format {
-            Format::Map { key, value } => vec![key.as_mut(), value.as_mut()],
-            _ => unreachable!(),
-        };
-        if *formats[0] == Format::Unknown || *formats[1] == Format::Unknown {
+        if key_format.is_unknown() || value_format.is_unknown() {
             // Simulate a map with one entry.
-            let inner = SeqDeserializer::new(self.tracer, self.samples, formats.into_iter());
+            let inner = SeqDeserializer::new(
+                self.tracer,
+                self.samples,
+                vec![&mut key_format, &mut value_format].into_iter(),
+            );
             visitor.visit_map(inner)
         } else {
             // Stop exploration.
@@ -380,20 +360,22 @@ impl<'de, 'a> de::Deserializer<'de> for Deserializer<'de, 'a> {
                 let result = || visitor.visit_seq(sample.seq_values()?.into_seq_deserializer());
                 return result().map_err(|err| match err {
                     Error::DeserializationError(msg) => {
-                        Error::UnexpectedDeserializationFormat(name, format.clone(), msg)
+                        let mut format = format.clone();
+                        format.reduce();
+                        Error::UnexpectedDeserializationFormat(name, format, msg)
                     }
                     _ => err,
                 });
             }
         }
+        // Pre-update the registry.
         let mut formats: Vec<_> = fields
             .iter()
             .map(|&name| Named {
                 name: name.into(),
-                value: Format::Unknown,
+                value: Format::unknown(),
             })
             .collect();
-        // Pre-update the registry.
         self.tracer
             .registry
             .entry(name)
@@ -404,15 +386,7 @@ impl<'de, 'a> de::Deserializer<'de> for Deserializer<'de, 'a> {
             self.samples,
             formats.iter_mut().map(|named| &mut named.value),
         );
-        let result = visitor.visit_seq(inner);
-        // Finally, update the registry.
-        match self.tracer.registry.get_mut(name) {
-            Some(ContainerFormat::Struct(x)) => {
-                *x = formats;
-            }
-            _ => unreachable!(),
-        };
-        result
+        visitor.visit_seq(inner)
     }
 
     // Assumption: The first variant(s) should be "base cases", i.e. not cause infinite recursion
@@ -432,7 +406,7 @@ impl<'de, 'a> de::Deserializer<'de> for Deserializer<'de, 'a> {
             .registry
             .entry(name)
             .unify(ContainerFormat::Enum(BTreeMap::new()))?;
-        let known_variants = match self.tracer.registry.get(name) {
+        let known_variants = match self.tracer.registry.get_mut(name) {
             Some(ContainerFormat::Enum(x)) => x,
             _ => unreachable!(),
         };
@@ -444,38 +418,28 @@ impl<'de, 'a> de::Deserializer<'de> for Deserializer<'de, 'a> {
             0
         } else {
             let mut index = known_variants.len() as u32;
-            // Scan the range 0..=known_variants.len() downwards to find an
-            // unknown variant index.
+            // Scan the range 0..=known_variants.len() downwards to find the next
+            // variant index to explore.
             while known_variants.contains_key(&index) {
                 index -= 1;
             }
             index
         };
-        let mut variant = known_variants.get(&index).cloned().unwrap_or(Named {
+        let variant = known_variants.entry(index).or_insert_with(|| Named {
             name: (*variants
                 .get(index as usize)
                 .expect("variant indexes must be a non-empty range 0..variants.len()"))
             .to_string(),
-            value: VariantFormat::Unknown,
+            value: VariantFormat::unknown(),
         });
-        // Temporarily mark the entry as "incomplete" to force the first index in any
-        // recursive exploration of the same enum.
-        self.tracer.incomplete_enums.insert(name.into());
-
-        // Compute the format for this variant.
-        let inner = EnumDeserializer::new(self.tracer, self.samples, index, &mut variant.value);
-        let result = visitor.visit_enum(inner);
-        // Finally, update the registry.
-        let known_variants = match self.tracer.registry.get_mut(name) {
-            Some(ContainerFormat::Enum(x)) => x,
-            _ => unreachable!(),
-        };
-        known_variants.insert(index, variant);
-        // Clear the flag "incomplete" if we are done exploring variants.
-        if known_variants.len() == variants.len() {
-            self.tracer.incomplete_enums.remove(name);
+        let mut value = variant.value.clone();
+        // Mark the enum as incomplete if this was not the last variant to explore.
+        if known_variants.len() != variants.len() {
+            self.tracer.incomplete_enums.insert(name.into());
         }
-        result
+        // Compute the format for this variant.
+        let inner = EnumDeserializer::new(self.tracer, self.samples, index, &mut value);
+        visitor.visit_enum(inner)
     }
 
     // Not needed since we always deserialize structs as sequences.
@@ -621,13 +585,10 @@ impl<'de, 'a> de::VariantAccess<'de> for EnumDeserializer<'de, 'a> {
     where
         T: DeserializeSeed<'de>,
     {
+        let mut format = Format::unknown();
         self.format
-            .unify(VariantFormat::NewType(Box::new(Format::Unknown)))?;
-        let format = match self.format {
-            VariantFormat::NewType(x) => x.as_mut(),
-            _ => unreachable!(),
-        };
-        let inner = Deserializer::new(self.tracer, self.samples, format);
+            .unify(VariantFormat::NewType(Box::new(format.clone())))?;
+        let inner = Deserializer::new(self.tracer, self.samples, &mut format);
         seed.deserialize(inner)
     }
 
@@ -635,12 +596,8 @@ impl<'de, 'a> de::VariantAccess<'de> for EnumDeserializer<'de, 'a> {
     where
         V: Visitor<'de>,
     {
-        self.format
-            .unify(VariantFormat::Tuple(vec![Format::Unknown; len]))?;
-        let formats = match self.format {
-            VariantFormat::Tuple(x) => x,
-            _ => unreachable!(),
-        };
+        let mut formats: Vec<_> = std::iter::repeat_with(Format::unknown).take(len).collect();
+        self.format.unify(VariantFormat::Tuple(formats.clone()))?;
         let inner = SeqDeserializer::new(self.tracer, self.samples, formats.iter_mut());
         visitor.visit_seq(inner)
     }
@@ -649,19 +606,15 @@ impl<'de, 'a> de::VariantAccess<'de> for EnumDeserializer<'de, 'a> {
     where
         V: Visitor<'de>,
     {
-        let formats: Vec<_> = fields
+        let mut formats: Vec<_> = fields
             .iter()
             .map(|&name| Named {
                 name: name.into(),
-                value: Format::Unknown,
+                value: Format::unknown(),
             })
             .collect();
-        self.format.unify(VariantFormat::Struct(formats))?;
+        self.format.unify(VariantFormat::Struct(formats.clone()))?;
 
-        let formats = match self.format {
-            VariantFormat::Struct(x) => x,
-            _ => unreachable!(),
-        };
         let inner = SeqDeserializer::new(
             self.tracer,
             self.samples,
