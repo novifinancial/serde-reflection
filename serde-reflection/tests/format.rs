@@ -3,6 +3,7 @@
 
 use serde_reflection::{ContainerFormat, Error, Format, FormatHolder, Named, VariantFormat};
 use std::collections::HashSet;
+use std::ops::Deref;
 
 #[test]
 fn test_format_visiting() {
@@ -37,6 +38,74 @@ fn test_format_visiting() {
 
     assert!(VariantFormat::unknown().visit(&mut |_| Ok(())).is_err());
     assert!(Format::unknown().visit(&mut |_| Ok(())).is_err());
+}
+
+// Note: this does not test pointer equality, only referenced content.
+fn assert_variable_contains_value(format: &Format, value: &Format) {
+    match format {
+        Format::Variable(variable) => {
+            assert_eq!(
+                variable
+                    .borrow()
+                    .deref()
+                    .as_ref()
+                    .expect("must contain a value"),
+                value
+            );
+        }
+        _ => panic!(),
+    }
+}
+
+#[test]
+fn test_variable_unification() {
+    let mut x = Format::unknown();
+    let mut y = Format::unknown();
+    let mut z = Format::unknown();
+    x.unify(y.clone()).unwrap();
+    // x is untouched when unifying with y.
+    // We chose to assign y to (a clone of the RC pointer to the refcell of) x.
+    assert_eq!(x, Format::unknown());
+    assert_variable_contains_value(&y, &x);
+
+    x.unify(Format::U8).unwrap();
+    // y is untouched when assigning x alone.
+    assert_variable_contains_value(&y, &x);
+
+    y.unify(z.clone()).unwrap();
+    // We chose to assign z.
+    assert_variable_contains_value(&y, &x);
+    assert_variable_contains_value(&z, &y);
+
+    z.unify(Format::U8).unwrap();
+    // x is unchanged
+    assert_variable_contains_value(&x, &Format::U8);
+    // The clone of y used in z was simplified but not y itself.
+    assert_variable_contains_value(&y, &x);
+    // z was simplified to use the same refcell as x.
+    assert_variable_contains_value(&z, &Format::U8);
+
+    // Re-assigning manually x to confirm.
+    match &x {
+        Format::Variable(variable) => {
+            *variable.borrow_mut() = Some(Format::U16);
+        }
+        _ => panic!(),
+    }
+    assert_variable_contains_value(&z, &Format::U16);
+
+    z.reduce();
+    // We copied out the value of x into z, which is no longer a variable.
+    assert_eq!(z, Format::U16);
+    // Not touching x.
+    assert_ne!(x, Format::U16);
+
+    y.reduce();
+    assert_eq!(y, Format::U16);
+    assert_ne!(x, Format::U16);
+
+    x.reduce();
+    assert_eq!(x, Format::U16);
 }
 
 #[test]
