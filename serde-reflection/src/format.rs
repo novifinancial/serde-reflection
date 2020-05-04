@@ -249,13 +249,22 @@ impl FormatHolder for VariantFormat {
             }
             (Self::Variable(variable1), _) => {
                 let format2 = std::mem::take(&mut format);
-                match variable1.borrow_mut().deref_mut() {
+                let inner_variable = match variable1.borrow_mut().deref_mut() {
                     value1 @ None => {
                         *value1 = Some(format2);
+                        None
                     }
                     Some(format1) => {
                         format1.unify(format2)?;
+                        match format1 {
+                            Self::Variable(variable) => Some(variable.clone()),
+                            _ => None,
+                        }
                     }
+                };
+                // Reduce multiple indirections to a single one.
+                if let Some(variable) = inner_variable {
+                    *variable1 = variable;
                 }
             }
 
@@ -332,11 +341,11 @@ impl<T> Variable<T> {
         Self(Rc::new(RefCell::new(content)))
     }
 
-    fn borrow(&self) -> Ref<Option<T>> {
+    pub fn borrow(&self) -> Ref<Option<T>> {
         self.0.as_ref().borrow()
     }
 
-    fn borrow_mut(&mut self) -> RefMut<Option<T>> {
+    pub fn borrow_mut(&self) -> RefMut<Option<T>> {
         self.0.as_ref().borrow_mut()
     }
 }
@@ -617,13 +626,22 @@ impl FormatHolder for Format {
             }
             (Self::Variable(variable1), _) => {
                 let format2 = std::mem::take(&mut format);
-                match variable1.borrow_mut().deref_mut() {
+                let inner_variable = match variable1.borrow_mut().deref_mut() {
                     value1 @ None => {
                         *value1 = Some(format2);
+                        None
                     }
                     Some(format1) => {
                         format1.unify(format2)?;
+                        match format1 {
+                            Self::Variable(variable) => Some(variable.clone()),
+                            _ => None,
+                        }
                     }
+                };
+                // Reduce multiple indirections to a single one.
+                if let Some(variable) = inner_variable {
+                    *variable1 = variable;
                 }
             }
 
