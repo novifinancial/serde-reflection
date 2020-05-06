@@ -31,7 +31,7 @@ In this case, simply</p>
 <span class="comment">// Also trace each enum type separately to fix any `MissingVariants` error.</span>
 <span class="ident">tracer</span>.<span class="ident">trace_type</span>::<span class="op">&lt;</span><span class="ident">Choice</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">samples</span>)<span class="question-mark">?</span>;
 
-<span class="comment">// Obtain the registry of Serde formats and serialize it in YAML.</span>
+<span class="comment">// Obtain the registry of Serde formats and serialize it in YAML (for instance).</span>
 <span class="kw">let</span> <span class="ident">registry</span> <span class="op">=</span> <span class="ident">tracer</span>.<span class="ident">registry</span>()<span class="question-mark">?</span>;
 <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">serde_yaml</span>::<span class="ident">to_string</span>(<span class="kw-2">&amp;</span><span class="ident">registry</span>).<span class="ident">unwrap</span>() <span class="op">+</span> <span class="string">&quot;\n&quot;</span>;
 <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="kw-2">&amp;</span><span class="ident">data</span>, <span class="string">r#&quot;---

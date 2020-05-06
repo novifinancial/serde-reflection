@@ -343,7 +343,7 @@
 <span class="doccomment">//! // Also trace each enum type separately to fix any `MissingVariants` error.</span>
 <span class="doccomment">//! tracer.trace_type::&lt;Choice&gt;(&amp;samples)?;</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! // Obtain the registry of Serde formats and serialize it in YAML.</span>
+<span class="doccomment">//! // Obtain the registry of Serde formats and serialize it in YAML (for instance).</span>
 <span class="doccomment">//! let registry = tracer.registry()?;</span>
 <span class="doccomment">//! let data = serde_yaml::to_string(&amp;registry).unwrap() + &quot;\n&quot;;</span>
 <span class="doccomment">//! assert_eq!(&amp;data, r#&quot;---</span>
