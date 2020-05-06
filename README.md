@@ -14,7 +14,7 @@ The code in this repository is under active development.
 
 This project aims to facilitate the implementation of distributed protocols and storage protocols using Serde. [Serde](https://serde.rs/) is an essential component of the Rust ecosystem that provides (de)serialization of Rust data structures in [many encoding formats](https://serde.rs/#data-formats).
 
-`serde-reflection` makes it easy to to extract a concise YAML representation of the Serde data formats used in a Rust project. This is useful:
+`serde-reflection` makes it easy to to extract a concise representation of the Serde data formats used in a Rust project. This is useful:
 
 * to detect accidental changes to the data formats (e.g. using version control),
 

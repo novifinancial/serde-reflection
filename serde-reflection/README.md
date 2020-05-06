@@ -39,7 +39,7 @@ tracer.trace_type::<Foo>(&samples)?;
 // Also trace each enum type separately to fix any `MissingVariants` error.
 tracer.trace_type::<Choice>(&samples)?;
 
-// Obtain the registry of Serde formats and serialize it in YAML.
+// Obtain the registry of Serde formats and serialize it in YAML (for instance).
 let registry = tracer.registry()?;
 let data = serde_yaml::to_string(&registry).unwrap() + "\n";
 assert_eq!(&data, r#"---
