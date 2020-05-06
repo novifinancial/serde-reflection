@@ -288,6 +288,10 @@
 <span id="288">288</span>
 <span id="289">289</span>
 <span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -411,7 +415,9 @@
         <span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span> <span class="op">+</span> <span class="ident">Serialize</span>,
     {
         <span class="kw">let</span> <span class="ident">serializer</span> <span class="op">=</span> <span class="ident">Serializer</span>::<span class="ident">new</span>(<span class="self">self</span>, <span class="ident">samples</span>);
-        <span class="ident">value</span>.<span class="ident">serialize</span>(<span class="ident">serializer</span>)
+        <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">format</span>, <span class="ident">sample</span>) <span class="op">=</span> <span class="ident">value</span>.<span class="ident">serialize</span>(<span class="ident">serializer</span>)<span class="question-mark">?</span>;
+        <span class="ident">format</span>.<span class="ident">reduce</span>();
+        <span class="prelude-val">Ok</span>((<span class="ident">format</span>, <span class="ident">sample</span>))
     }
 
     <span class="doccomment">/// Trace a single deserialization of a particular type.</span>
@@ -426,9 +432,10 @@
     <span class="kw">where</span>
         <span class="ident">T</span>: <span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
     {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">format</span> <span class="op">=</span> <span class="ident">Format</span>::<span class="ident">Unknown</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">format</span> <span class="op">=</span> <span class="ident">Format</span>::<span class="ident">unknown</span>();
         <span class="kw">let</span> <span class="ident">deserializer</span> <span class="op">=</span> <span class="ident">Deserializer</span>::<span class="ident">new</span>(<span class="self">self</span>, <span class="ident">samples</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">format</span>);
         <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="ident">T</span>::<span class="ident">deserialize</span>(<span class="ident">deserializer</span>)<span class="question-mark">?</span>;
+        <span class="ident">format</span>.<span class="ident">reduce</span>();
         <span class="prelude-val">Ok</span>((<span class="ident">format</span>, <span class="ident">value</span>))
     }
 
@@ -441,9 +448,10 @@
     <span class="kw">where</span>
         <span class="ident">S</span>: <span class="ident">DeserializeSeed</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
     {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">format</span> <span class="op">=</span> <span class="ident">Format</span>::<span class="ident">Unknown</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">format</span> <span class="op">=</span> <span class="ident">Format</span>::<span class="ident">unknown</span>();
         <span class="kw">let</span> <span class="ident">deserializer</span> <span class="op">=</span> <span class="ident">Deserializer</span>::<span class="ident">new</span>(<span class="self">self</span>, <span class="ident">samples</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">format</span>);
         <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="ident">seed</span>.<span class="ident">deserialize</span>(<span class="ident">deserializer</span>)<span class="question-mark">?</span>;
+        <span class="ident">format</span>.<span class="ident">reduce</span>();
         <span class="prelude-val">Ok</span>((<span class="ident">format</span>, <span class="ident">value</span>))
     }
 

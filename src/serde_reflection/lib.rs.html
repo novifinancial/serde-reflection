@@ -298,9 +298,6 @@
 <span id="298">298</span>
 <span id="299">299</span>
 <span id="300">300</span>
-<span id="301">301</span>
-<span id="302">302</span>
-<span id="303">303</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -579,9 +576,6 @@
 <span class="doccomment">//! * while visiting an `enum T` for the second time, we choose to return the first variant, i.e.</span>
 <span class="doccomment">//! a &quot;base case&quot; by assumption (1) above.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! TODO ([#5](https://github.com/facebookincubator/serde-reflection/issues/5)): the detection of</span>
-<span class="doccomment">//! &quot;the second time&quot; above is currently only effective for enums.</span>
-<span class="doccomment">//!</span>
 <span class="doccomment">//! In addition to the cases above,</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! * while visiting a container, if the container&#39;s name is mapped to a recorded value,</span>
@@ -602,7 +596,7 @@
 <span class="kw">mod</span> <span class="ident">value</span>;
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">error</span>::{<span class="ident">Error</span>, <span class="prelude-ty">Result</span>};
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">format</span>::{<span class="ident">ContainerFormat</span>, <span class="ident">Format</span>, <span class="ident">FormatHolder</span>, <span class="ident">Named</span>, <span class="ident">VariantFormat</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">format</span>::{<span class="ident">ContainerFormat</span>, <span class="ident">Format</span>, <span class="ident">FormatHolder</span>, <span class="ident">Named</span>, <span class="ident">Variable</span>, <span class="ident">VariantFormat</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">trace</span>::{<span class="ident">Registry</span>, <span class="ident">RegistryOwned</span>, <span class="ident">Samples</span>, <span class="ident">Tracer</span>, <span class="ident">TracerConfig</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">value</span>::<span class="ident">Value</span>;
 </pre></div>

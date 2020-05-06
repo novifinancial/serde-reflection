@@ -623,53 +623,6 @@
 <span id="623">623</span>
 <span id="624">624</span>
 <span id="625">625</span>
-<span id="626">626</span>
-<span id="627">627</span>
-<span id="628">628</span>
-<span id="629">629</span>
-<span id="630">630</span>
-<span id="631">631</span>
-<span id="632">632</span>
-<span id="633">633</span>
-<span id="634">634</span>
-<span id="635">635</span>
-<span id="636">636</span>
-<span id="637">637</span>
-<span id="638">638</span>
-<span id="639">639</span>
-<span id="640">640</span>
-<span id="641">641</span>
-<span id="642">642</span>
-<span id="643">643</span>
-<span id="644">644</span>
-<span id="645">645</span>
-<span id="646">646</span>
-<span id="647">647</span>
-<span id="648">648</span>
-<span id="649">649</span>
-<span id="650">650</span>
-<span id="651">651</span>
-<span id="652">652</span>
-<span id="653">653</span>
-<span id="654">654</span>
-<span id="655">655</span>
-<span id="656">656</span>
-<span id="657">657</span>
-<span id="658">658</span>
-<span id="659">659</span>
-<span id="660">660</span>
-<span id="661">661</span>
-<span id="662">662</span>
-<span id="663">663</span>
-<span id="664">664</span>
-<span id="665">665</span>
-<span id="666">666</span>
-<span id="667">667</span>
-<span id="668">668</span>
-<span id="669">669</span>
-<span id="670">670</span>
-<span id="671">671</span>
-<span id="672">672</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -866,14 +819,11 @@
     <span class="kw">where</span>
         <span class="ident">V</span>: <span class="ident">Visitor</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
     {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">format</span> <span class="op">=</span> <span class="ident">Format</span>::<span class="ident">unknown</span>();
         <span class="self">self</span>.<span class="ident">format</span>
-            .<span class="ident">unify</span>(<span class="ident">Format</span>::<span class="prelude-ty">Option</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">Format</span>::<span class="ident">Unknown</span>)))<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">format</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">format</span> {
-            <span class="ident">Format</span>::<span class="prelude-ty">Option</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">x</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable</span><span class="macro">!</span>(),
-        };
-        <span class="kw">if</span> <span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">format</span> <span class="op">=</span><span class="op">=</span> <span class="ident">Format</span>::<span class="ident">Unknown</span> {
-            <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="ident">Deserializer</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">tracer</span>, <span class="self">self</span>.<span class="ident">samples</span>, <span class="ident">format</span>.<span class="ident">as_mut</span>());
+            .<span class="ident">unify</span>(<span class="ident">Format</span>::<span class="prelude-ty">Option</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">format</span>.<span class="ident">clone</span>())))<span class="question-mark">?</span>;
+        <span class="kw">if</span> <span class="ident">format</span>.<span class="ident">is_unknown</span>() {
+            <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="ident">Deserializer</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">tracer</span>, <span class="self">self</span>.<span class="ident">samples</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">format</span>);
             <span class="ident">visitor</span>.<span class="ident">visit_some</span>(<span class="ident">inner</span>)
         } <span class="kw">else</span> {
             <span class="comment">// Cut exploration.</span>
@@ -913,44 +863,35 @@
                     .<span class="ident">visit_newtype_struct</span>(<span class="ident">sample</span>.<span class="ident">into_deserializer</span>())
                     .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">err</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">err</span> {
                         <span class="ident">Error</span>::<span class="ident">DeserializationError</span>(<span class="ident">msg</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                            <span class="ident">Error</span>::<span class="ident">UnexpectedDeserializationFormat</span>(<span class="ident">name</span>, <span class="ident">format</span>.<span class="ident">clone</span>(), <span class="ident">msg</span>)
+                            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">format</span> <span class="op">=</span> <span class="ident">format</span>.<span class="ident">clone</span>();
+                            <span class="ident">format</span>.<span class="ident">reduce</span>();
+                            <span class="ident">Error</span>::<span class="ident">UnexpectedDeserializationFormat</span>(<span class="ident">name</span>, <span class="ident">format</span>, <span class="ident">msg</span>)
                         }
                         <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">err</span>,
                     });
             }
         }
         <span class="comment">// Pre-update the registry.</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">format</span> <span class="op">=</span> <span class="ident">Format</span>::<span class="ident">unknown</span>();
         <span class="self">self</span>.<span class="ident">tracer</span>
             .<span class="ident">registry</span>
             .<span class="ident">entry</span>(<span class="ident">name</span>)
-            .<span class="ident">unify</span>(<span class="ident">ContainerFormat</span>::<span class="ident">NewTypeStruct</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">Format</span>::<span class="ident">Unknown</span>)))<span class="question-mark">?</span>;
+            .<span class="ident">unify</span>(<span class="ident">ContainerFormat</span>::<span class="ident">NewTypeStruct</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">format</span>.<span class="ident">clone</span>())))<span class="question-mark">?</span>;
         <span class="comment">// Compute the format.</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">format</span> <span class="op">=</span> <span class="ident">Format</span>::<span class="ident">Unknown</span>;
         <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="ident">Deserializer</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">tracer</span>, <span class="self">self</span>.<span class="ident">samples</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">format</span>);
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">visitor</span>.<span class="ident">visit_newtype_struct</span>(<span class="ident">inner</span>);
-        <span class="comment">// Finally, update the registry.</span>
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">tracer</span>.<span class="ident">registry</span>.<span class="ident">get_mut</span>(<span class="ident">name</span>) {
-            <span class="prelude-val">Some</span>(<span class="ident">ContainerFormat</span>::<span class="ident">NewTypeStruct</span>(<span class="ident">x</span>)) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw-2">*</span><span class="ident">x</span> <span class="op">=</span> <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">format</span>);
-            }
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable</span><span class="macro">!</span>(),
-        };
-        <span class="ident">result</span>
+        <span class="ident">visitor</span>.<span class="ident">visit_newtype_struct</span>(<span class="ident">inner</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">deserialize_seq</span><span class="op">&lt;</span><span class="ident">V</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">visitor</span>: <span class="ident">V</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">V</span>::<span class="ident">Value</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">V</span>: <span class="ident">Visitor</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
     {
-        <span class="self">self</span>.<span class="ident">format</span>.<span class="ident">unify</span>(<span class="ident">Format</span>::<span class="ident">Seq</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">Format</span>::<span class="ident">Unknown</span>)))<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">format</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">format</span> {
-            <span class="ident">Format</span>::<span class="ident">Seq</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">x</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable</span><span class="macro">!</span>(),
-        };
-        <span class="kw">if</span> <span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">format</span> <span class="op">=</span><span class="op">=</span> <span class="ident">Format</span>::<span class="ident">Unknown</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">format</span> <span class="op">=</span> <span class="ident">Format</span>::<span class="ident">unknown</span>();
+        <span class="self">self</span>.<span class="ident">format</span>.<span class="ident">unify</span>(<span class="ident">Format</span>::<span class="ident">Seq</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">format</span>.<span class="ident">clone</span>())))<span class="question-mark">?</span>;
+        <span class="kw">if</span> <span class="ident">format</span>.<span class="ident">is_unknown</span>() {
             <span class="comment">// Simulate vector of size 1.</span>
             <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span>
-                <span class="ident">SeqDeserializer</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">tracer</span>, <span class="self">self</span>.<span class="ident">samples</span>, <span class="ident">std</span>::<span class="ident">iter</span>::<span class="ident">once</span>(<span class="ident">format</span>.<span class="ident">as_mut</span>()));
+                <span class="ident">SeqDeserializer</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">tracer</span>, <span class="self">self</span>.<span class="ident">samples</span>, <span class="ident">std</span>::<span class="ident">iter</span>::<span class="ident">once</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">format</span>));
             <span class="ident">visitor</span>.<span class="ident">visit_seq</span>(<span class="ident">inner</span>)
         } <span class="kw">else</span> {
             <span class="comment">// Cut exploration with a vector of size 0.</span>
@@ -963,12 +904,8 @@
     <span class="kw">where</span>
         <span class="ident">V</span>: <span class="ident">Visitor</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
     {
-        <span class="self">self</span>.<span class="ident">format</span>
-            .<span class="ident">unify</span>(<span class="ident">Format</span>::<span class="ident">Tuple</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Format</span>::<span class="ident">Unknown</span>; <span class="ident">len</span>]))<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">formats</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">format</span> {
-            <span class="ident">Format</span>::<span class="ident">Tuple</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">x</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable</span><span class="macro">!</span>(),
-        };
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">formats</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">iter</span>::<span class="ident">repeat_with</span>(<span class="ident">Format</span>::<span class="ident">unknown</span>).<span class="ident">take</span>(<span class="ident">len</span>).<span class="ident">collect</span>();
+        <span class="self">self</span>.<span class="ident">format</span>.<span class="ident">unify</span>(<span class="ident">Format</span>::<span class="ident">Tuple</span>(<span class="ident">formats</span>.<span class="ident">clone</span>()))<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="ident">SeqDeserializer</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">tracer</span>, <span class="self">self</span>.<span class="ident">samples</span>, <span class="ident">formats</span>.<span class="ident">iter_mut</span>());
         <span class="ident">visitor</span>.<span class="ident">visit_seq</span>(<span class="ident">inner</span>)
     }
@@ -983,52 +920,48 @@
         <span class="ident">V</span>: <span class="ident">Visitor</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
     {
         <span class="self">self</span>.<span class="ident">format</span>.<span class="ident">unify</span>(<span class="ident">Format</span>::<span class="ident">TypeName</span>(<span class="ident">name</span>.<span class="ident">into</span>()))<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">formats</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Format</span>::<span class="ident">Unknown</span>; <span class="ident">len</span>];
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">tracer</span>.<span class="ident">config</span>.<span class="ident">record_samples_for_tuple_structs</span> {
             <span class="comment">// If a value was recorded during serialization, use it.</span>
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">format</span>, <span class="ident">sample</span>)) <span class="op">=</span> <span class="self">self</span>.<span class="ident">tracer</span>.<span class="ident">get_sample</span>(<span class="self">self</span>.<span class="ident">samples</span>, <span class="ident">name</span>) {
                 <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="op">|</span><span class="op">|</span> <span class="ident">visitor</span>.<span class="ident">visit_seq</span>(<span class="ident">sample</span>.<span class="ident">seq_values</span>()<span class="question-mark">?</span>.<span class="ident">into_seq_deserializer</span>());
                 <span class="kw">return</span> <span class="ident">result</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">err</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">err</span> {
                     <span class="ident">Error</span>::<span class="ident">DeserializationError</span>(<span class="ident">msg</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                        <span class="ident">Error</span>::<span class="ident">UnexpectedDeserializationFormat</span>(<span class="ident">name</span>, <span class="ident">format</span>.<span class="ident">clone</span>(), <span class="ident">msg</span>)
+                        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">format</span> <span class="op">=</span> <span class="ident">format</span>.<span class="ident">clone</span>();
+                        <span class="ident">format</span>.<span class="ident">reduce</span>();
+                        <span class="ident">Error</span>::<span class="ident">UnexpectedDeserializationFormat</span>(<span class="ident">name</span>, <span class="ident">format</span>, <span class="ident">msg</span>)
                     }
                     <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">err</span>,
                 });
             }
         }
         <span class="comment">// Pre-update the registry.</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">formats</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">iter</span>::<span class="ident">repeat_with</span>(<span class="ident">Format</span>::<span class="ident">unknown</span>).<span class="ident">take</span>(<span class="ident">len</span>).<span class="ident">collect</span>();
         <span class="self">self</span>.<span class="ident">tracer</span>
             .<span class="ident">registry</span>
             .<span class="ident">entry</span>(<span class="ident">name</span>)
             .<span class="ident">unify</span>(<span class="ident">ContainerFormat</span>::<span class="ident">TupleStruct</span>(<span class="ident">formats</span>.<span class="ident">clone</span>()))<span class="question-mark">?</span>;
         <span class="comment">// Compute the formats.</span>
         <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="ident">SeqDeserializer</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">tracer</span>, <span class="self">self</span>.<span class="ident">samples</span>, <span class="ident">formats</span>.<span class="ident">iter_mut</span>());
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">visitor</span>.<span class="ident">visit_seq</span>(<span class="ident">inner</span>);
-        <span class="comment">// Finally, update the registry.</span>
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">tracer</span>.<span class="ident">registry</span>.<span class="ident">get_mut</span>(<span class="ident">name</span>) {
-            <span class="prelude-val">Some</span>(<span class="ident">ContainerFormat</span>::<span class="ident">TupleStruct</span>(<span class="ident">x</span>)) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw-2">*</span><span class="ident">x</span> <span class="op">=</span> <span class="ident">formats</span>;
-            }
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable</span><span class="macro">!</span>(),
-        };
-        <span class="ident">result</span>
+        <span class="ident">visitor</span>.<span class="ident">visit_seq</span>(<span class="ident">inner</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">deserialize_map</span><span class="op">&lt;</span><span class="ident">V</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">visitor</span>: <span class="ident">V</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">V</span>::<span class="ident">Value</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">V</span>: <span class="ident">Visitor</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
     {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">key_format</span> <span class="op">=</span> <span class="ident">Format</span>::<span class="ident">unknown</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">value_format</span> <span class="op">=</span> <span class="ident">Format</span>::<span class="ident">unknown</span>();
         <span class="self">self</span>.<span class="ident">format</span>.<span class="ident">unify</span>(<span class="ident">Format</span>::<span class="ident">Map</span> {
-            <span class="ident">key</span>: <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">Format</span>::<span class="ident">Unknown</span>),
-            <span class="ident">value</span>: <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">Format</span>::<span class="ident">Unknown</span>),
+            <span class="ident">key</span>: <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">key_format</span>.<span class="ident">clone</span>()),
+            <span class="ident">value</span>: <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">value_format</span>.<span class="ident">clone</span>()),
         })<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">formats</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">format</span> {
-            <span class="ident">Format</span>::<span class="ident">Map</span> { <span class="ident">key</span>, <span class="ident">value</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">key</span>.<span class="ident">as_mut</span>(), <span class="ident">value</span>.<span class="ident">as_mut</span>()],
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable</span><span class="macro">!</span>(),
-        };
-        <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">formats</span>[<span class="number">0</span>] <span class="op">=</span><span class="op">=</span> <span class="ident">Format</span>::<span class="ident">Unknown</span> <span class="op">|</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">formats</span>[<span class="number">1</span>] <span class="op">=</span><span class="op">=</span> <span class="ident">Format</span>::<span class="ident">Unknown</span> {
+        <span class="kw">if</span> <span class="ident">key_format</span>.<span class="ident">is_unknown</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">value_format</span>.<span class="ident">is_unknown</span>() {
             <span class="comment">// Simulate a map with one entry.</span>
-            <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="ident">SeqDeserializer</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">tracer</span>, <span class="self">self</span>.<span class="ident">samples</span>, <span class="ident">formats</span>.<span class="ident">into_iter</span>());
+            <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="ident">SeqDeserializer</span>::<span class="ident">new</span>(
+                <span class="self">self</span>.<span class="ident">tracer</span>,
+                <span class="self">self</span>.<span class="ident">samples</span>,
+                <span class="macro">vec</span><span class="macro">!</span>[<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">key_format</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">value_format</span>].<span class="ident">into_iter</span>(),
+            );
             <span class="ident">visitor</span>.<span class="ident">visit_map</span>(<span class="ident">inner</span>)
         } <span class="kw">else</span> {
             <span class="comment">// Stop exploration.</span>
@@ -1053,20 +986,22 @@
                 <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="op">|</span><span class="op">|</span> <span class="ident">visitor</span>.<span class="ident">visit_seq</span>(<span class="ident">sample</span>.<span class="ident">seq_values</span>()<span class="question-mark">?</span>.<span class="ident">into_seq_deserializer</span>());
                 <span class="kw">return</span> <span class="ident">result</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">err</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">err</span> {
                     <span class="ident">Error</span>::<span class="ident">DeserializationError</span>(<span class="ident">msg</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                        <span class="ident">Error</span>::<span class="ident">UnexpectedDeserializationFormat</span>(<span class="ident">name</span>, <span class="ident">format</span>.<span class="ident">clone</span>(), <span class="ident">msg</span>)
+                        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">format</span> <span class="op">=</span> <span class="ident">format</span>.<span class="ident">clone</span>();
+                        <span class="ident">format</span>.<span class="ident">reduce</span>();
+                        <span class="ident">Error</span>::<span class="ident">UnexpectedDeserializationFormat</span>(<span class="ident">name</span>, <span class="ident">format</span>, <span class="ident">msg</span>)
                     }
                     <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">err</span>,
                 });
             }
         }
+        <span class="comment">// Pre-update the registry.</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">formats</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">fields</span>
             .<span class="ident">iter</span>()
             .<span class="ident">map</span>(<span class="op">|</span><span class="kw-2">&amp;</span><span class="ident">name</span><span class="op">|</span> <span class="ident">Named</span> {
                 <span class="ident">name</span>: <span class="ident">name</span>.<span class="ident">into</span>(),
-                <span class="ident">value</span>: <span class="ident">Format</span>::<span class="ident">Unknown</span>,
+                <span class="ident">value</span>: <span class="ident">Format</span>::<span class="ident">unknown</span>(),
             })
             .<span class="ident">collect</span>();
-        <span class="comment">// Pre-update the registry.</span>
         <span class="self">self</span>.<span class="ident">tracer</span>
             .<span class="ident">registry</span>
             .<span class="ident">entry</span>(<span class="ident">name</span>)
@@ -1077,15 +1012,7 @@
             <span class="self">self</span>.<span class="ident">samples</span>,
             <span class="ident">formats</span>.<span class="ident">iter_mut</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">named</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">named</span>.<span class="ident">value</span>),
         );
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">visitor</span>.<span class="ident">visit_seq</span>(<span class="ident">inner</span>);
-        <span class="comment">// Finally, update the registry.</span>
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">tracer</span>.<span class="ident">registry</span>.<span class="ident">get_mut</span>(<span class="ident">name</span>) {
-            <span class="prelude-val">Some</span>(<span class="ident">ContainerFormat</span>::<span class="ident">Struct</span>(<span class="ident">x</span>)) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw-2">*</span><span class="ident">x</span> <span class="op">=</span> <span class="ident">formats</span>;
-            }
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable</span><span class="macro">!</span>(),
-        };
-        <span class="ident">result</span>
+        <span class="ident">visitor</span>.<span class="ident">visit_seq</span>(<span class="ident">inner</span>)
     }
 
     <span class="comment">// Assumption: The first variant(s) should be &quot;base cases&quot;, i.e. not cause infinite recursion</span>
@@ -1105,7 +1032,7 @@
             .<span class="ident">registry</span>
             .<span class="ident">entry</span>(<span class="ident">name</span>)
             .<span class="ident">unify</span>(<span class="ident">ContainerFormat</span>::<span class="ident">Enum</span>(<span class="ident">BTreeMap</span>::<span class="ident">new</span>()))<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">known_variants</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">tracer</span>.<span class="ident">registry</span>.<span class="ident">get</span>(<span class="ident">name</span>) {
+        <span class="kw">let</span> <span class="ident">known_variants</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">tracer</span>.<span class="ident">registry</span>.<span class="ident">get_mut</span>(<span class="ident">name</span>) {
             <span class="prelude-val">Some</span>(<span class="ident">ContainerFormat</span>::<span class="ident">Enum</span>(<span class="ident">x</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">x</span>,
             <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable</span><span class="macro">!</span>(),
         };
@@ -1117,38 +1044,28 @@
             <span class="number">0</span>
         } <span class="kw">else</span> {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">index</span> <span class="op">=</span> <span class="ident">known_variants</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>;
-            <span class="comment">// Scan the range 0..=known_variants.len() downwards to find an</span>
-            <span class="comment">// unknown variant index.</span>
+            <span class="comment">// Scan the range 0..=known_variants.len() downwards to find the next</span>
+            <span class="comment">// variant index to explore.</span>
             <span class="kw">while</span> <span class="ident">known_variants</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">index</span>) {
                 <span class="ident">index</span> <span class="op">-</span><span class="op">=</span> <span class="number">1</span>;
             }
             <span class="ident">index</span>
         };
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">variant</span> <span class="op">=</span> <span class="ident">known_variants</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">index</span>).<span class="ident">cloned</span>().<span class="ident">unwrap_or</span>(<span class="ident">Named</span> {
+        <span class="kw">let</span> <span class="ident">variant</span> <span class="op">=</span> <span class="ident">known_variants</span>.<span class="ident">entry</span>(<span class="ident">index</span>).<span class="ident">or_insert_with</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">Named</span> {
             <span class="ident">name</span>: (<span class="kw-2">*</span><span class="ident">variants</span>
                 .<span class="ident">get</span>(<span class="ident">index</span> <span class="kw">as</span> <span class="ident">usize</span>)
                 .<span class="ident">expect</span>(<span class="string">&quot;variant indexes must be a non-empty range 0..variants.len()&quot;</span>))
             .<span class="ident">to_string</span>(),
-            <span class="ident">value</span>: <span class="ident">VariantFormat</span>::<span class="ident">Unknown</span>,
+            <span class="ident">value</span>: <span class="ident">VariantFormat</span>::<span class="ident">unknown</span>(),
         });
-        <span class="comment">// Temporarily mark the entry as &quot;incomplete&quot; to force the first index in any</span>
-        <span class="comment">// recursive exploration of the same enum.</span>
-        <span class="self">self</span>.<span class="ident">tracer</span>.<span class="ident">incomplete_enums</span>.<span class="ident">insert</span>(<span class="ident">name</span>.<span class="ident">into</span>());
-
-        <span class="comment">// Compute the format for this variant.</span>
-        <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="ident">EnumDeserializer</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">tracer</span>, <span class="self">self</span>.<span class="ident">samples</span>, <span class="ident">index</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">variant</span>.<span class="ident">value</span>);
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">visitor</span>.<span class="ident">visit_enum</span>(<span class="ident">inner</span>);
-        <span class="comment">// Finally, update the registry.</span>
-        <span class="kw">let</span> <span class="ident">known_variants</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">tracer</span>.<span class="ident">registry</span>.<span class="ident">get_mut</span>(<span class="ident">name</span>) {
-            <span class="prelude-val">Some</span>(<span class="ident">ContainerFormat</span>::<span class="ident">Enum</span>(<span class="ident">x</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">x</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable</span><span class="macro">!</span>(),
-        };
-        <span class="ident">known_variants</span>.<span class="ident">insert</span>(<span class="ident">index</span>, <span class="ident">variant</span>);
-        <span class="comment">// Clear the flag &quot;incomplete&quot; if we are done exploring variants.</span>
-        <span class="kw">if</span> <span class="ident">known_variants</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">variants</span>.<span class="ident">len</span>() {
-            <span class="self">self</span>.<span class="ident">tracer</span>.<span class="ident">incomplete_enums</span>.<span class="ident">remove</span>(<span class="ident">name</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">value</span> <span class="op">=</span> <span class="ident">variant</span>.<span class="ident">value</span>.<span class="ident">clone</span>();
+        <span class="comment">// Mark the enum as incomplete if this was not the last variant to explore.</span>
+        <span class="kw">if</span> <span class="ident">known_variants</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">variants</span>.<span class="ident">len</span>() {
+            <span class="self">self</span>.<span class="ident">tracer</span>.<span class="ident">incomplete_enums</span>.<span class="ident">insert</span>(<span class="ident">name</span>.<span class="ident">into</span>());
         }
-        <span class="ident">result</span>
+        <span class="comment">// Compute the format for this variant.</span>
+        <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="ident">EnumDeserializer</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">tracer</span>, <span class="self">self</span>.<span class="ident">samples</span>, <span class="ident">index</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">value</span>);
+        <span class="ident">visitor</span>.<span class="ident">visit_enum</span>(<span class="ident">inner</span>)
     }
 
     <span class="comment">// Not needed since we always deserialize structs as sequences.</span>
@@ -1294,13 +1211,10 @@
     <span class="kw">where</span>
         <span class="ident">T</span>: <span class="ident">DeserializeSeed</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
     {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">format</span> <span class="op">=</span> <span class="ident">Format</span>::<span class="ident">unknown</span>();
         <span class="self">self</span>.<span class="ident">format</span>
-            .<span class="ident">unify</span>(<span class="ident">VariantFormat</span>::<span class="ident">NewType</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">Format</span>::<span class="ident">Unknown</span>)))<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">format</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">format</span> {
-            <span class="ident">VariantFormat</span>::<span class="ident">NewType</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">x</span>.<span class="ident">as_mut</span>(),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable</span><span class="macro">!</span>(),
-        };
-        <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="ident">Deserializer</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">tracer</span>, <span class="self">self</span>.<span class="ident">samples</span>, <span class="ident">format</span>);
+            .<span class="ident">unify</span>(<span class="ident">VariantFormat</span>::<span class="ident">NewType</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">format</span>.<span class="ident">clone</span>())))<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="ident">Deserializer</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">tracer</span>, <span class="self">self</span>.<span class="ident">samples</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">format</span>);
         <span class="ident">seed</span>.<span class="ident">deserialize</span>(<span class="ident">inner</span>)
     }
 
@@ -1308,12 +1222,8 @@
     <span class="kw">where</span>
         <span class="ident">V</span>: <span class="ident">Visitor</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
     {
-        <span class="self">self</span>.<span class="ident">format</span>
-            .<span class="ident">unify</span>(<span class="ident">VariantFormat</span>::<span class="ident">Tuple</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Format</span>::<span class="ident">Unknown</span>; <span class="ident">len</span>]))<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">formats</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">format</span> {
-            <span class="ident">VariantFormat</span>::<span class="ident">Tuple</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">x</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable</span><span class="macro">!</span>(),
-        };
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">formats</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">iter</span>::<span class="ident">repeat_with</span>(<span class="ident">Format</span>::<span class="ident">unknown</span>).<span class="ident">take</span>(<span class="ident">len</span>).<span class="ident">collect</span>();
+        <span class="self">self</span>.<span class="ident">format</span>.<span class="ident">unify</span>(<span class="ident">VariantFormat</span>::<span class="ident">Tuple</span>(<span class="ident">formats</span>.<span class="ident">clone</span>()))<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="ident">SeqDeserializer</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">tracer</span>, <span class="self">self</span>.<span class="ident">samples</span>, <span class="ident">formats</span>.<span class="ident">iter_mut</span>());
         <span class="ident">visitor</span>.<span class="ident">visit_seq</span>(<span class="ident">inner</span>)
     }
@@ -1322,19 +1232,15 @@
     <span class="kw">where</span>
         <span class="ident">V</span>: <span class="ident">Visitor</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
     {
-        <span class="kw">let</span> <span class="ident">formats</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">fields</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">formats</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">fields</span>
             .<span class="ident">iter</span>()
             .<span class="ident">map</span>(<span class="op">|</span><span class="kw-2">&amp;</span><span class="ident">name</span><span class="op">|</span> <span class="ident">Named</span> {
                 <span class="ident">name</span>: <span class="ident">name</span>.<span class="ident">into</span>(),
-                <span class="ident">value</span>: <span class="ident">Format</span>::<span class="ident">Unknown</span>,
+                <span class="ident">value</span>: <span class="ident">Format</span>::<span class="ident">unknown</span>(),
             })
             .<span class="ident">collect</span>();
-        <span class="self">self</span>.<span class="ident">format</span>.<span class="ident">unify</span>(<span class="ident">VariantFormat</span>::<span class="ident">Struct</span>(<span class="ident">formats</span>))<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">format</span>.<span class="ident">unify</span>(<span class="ident">VariantFormat</span>::<span class="ident">Struct</span>(<span class="ident">formats</span>.<span class="ident">clone</span>()))<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">formats</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">format</span> {
-            <span class="ident">VariantFormat</span>::<span class="ident">Struct</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">x</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable</span><span class="macro">!</span>(),
-        };
         <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="ident">SeqDeserializer</span>::<span class="ident">new</span>(
             <span class="self">self</span>.<span class="ident">tracer</span>,
             <span class="self">self</span>.<span class="ident">samples</span>,
