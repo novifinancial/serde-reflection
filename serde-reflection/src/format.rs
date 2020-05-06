@@ -27,7 +27,7 @@ use std::rc::Rc;
 #[derive(Serialize, Deserialize, Debug, Eq, Clone, PartialEq)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum Format {
-    /// (used internally for tracing) A format whose value is initially unknown.
+    /// A format whose value is initially unknown. Used internally for tracing. Not (de)serializable.
     Variable(#[serde(with = "not_implemented")] Variable<Format>),
     /// The name of a container.
     TypeName(String),
@@ -107,7 +107,7 @@ pub struct Variable<T>(Rc<RefCell<Option<T>>>);
 #[serde(rename_all = "UPPERCASE")]
 /// Description of a variant in an enum.
 pub enum VariantFormat {
-    /// (used internally for tracing) A variant whose format is initially unknown.
+    /// A variant whose format is initially unknown. Used internally for tracing. Not (de)serializable.
     Variable(#[serde(with = "not_implemented")] Variable<VariantFormat>),
     /// A variant without parameters, e.g. `A` in `enum X { A }`
     Unit,

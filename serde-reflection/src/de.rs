@@ -442,7 +442,6 @@ impl<'de, 'a> de::Deserializer<'de> for Deserializer<'de, 'a> {
         visitor.visit_enum(inner)
     }
 
-    // Not needed since we always deserialize structs as sequences.
     fn deserialize_identifier<V>(self, _visitor: V) -> Result<V::Value>
     where
         V: Visitor<'de>,
