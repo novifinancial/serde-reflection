@@ -215,7 +215,7 @@ declarations.
 
 (2) If a type runs custom validation checks during deserialization, sample values must have been provided
 previously by calling `trace_value`. Besides, the corresponding registered formats
-must not contain `Unknown` parts.
+must not contain unknown parts.
 
 ### Design Considerations
 
