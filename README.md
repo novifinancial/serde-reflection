@@ -8,6 +8,8 @@ This repository contains the source code for:
 
 * [`serde-reflection`](serde-reflection): a library to extract and represent Serde data formats [![serde-reflection on crates.io](https://img.shields.io/crates/v/serde-reflection)](https://crates.io/crates/serde-reflection) [![Documentation (latest release)](https://docs.rs/serde-reflection/badge.svg)](https://docs.rs/serde-reflection/) [![Documentation (master)](https://img.shields.io/badge/docs-master-59f)](https://facebookincubator.github.io/serde-reflection/serde_reflection/)
 
+* [`serde-name`](serde-name): a minimal library meant to quickly compute the Serde name of Rust structs and enums [![serde-name on crates.io](https://img.shields.io/crates/v/serde-name)](https://crates.io/crates/serde-name) [![Documentation (latest release)](https://docs.rs/serde-name/badge.svg)](https://docs.rs/serde-name/) [![Documentation (master)](https://img.shields.io/badge/docs-master-59f)](https://facebookincubator.github.io/serde-reflection/serde_name/)
+
 The code in this repository is under active development.
 
 ## Use cases
@@ -23,6 +25,8 @@ This project aims to facilitate the implementation of distributed protocols and 
 In addition to ensuring an optimal developer experience in Rust, the approach based on Serde and `serde-reflection` empowers protocol designers to experiment and choose the best encoding format for their data: either [one of the encoding formats](https://serde.rs/#data-formats) officially supported by Serde, or [a new encoding format](https://serde.rs/data-format.html) developed in the Serde framework.
 
 This project was initially motivated by the need for canonical serialization and cryptographic hashing in the [Libra](https://github.com/libra/libra) project.
+
+In this context, `serde-name` has been used to provide predictable cryptographic seeds for Rust containers.
 
 ## Contributing
 
