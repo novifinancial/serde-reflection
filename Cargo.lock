@@ -68,6 +68,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde-name"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde-reflection",
+ "thiserror",
+]
+
+[[package]]
 name = "serde-reflection"
 version = "0.2.0"
 dependencies = [
