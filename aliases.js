@@ -3,6 +3,7 @@ ALIASES["proc_macro2"] = {};
 ALIASES["quote"] = {};
 ALIASES["serde"] = {};
 ALIASES["serde_derive"] = {};
+ALIASES["serde_name"] = {};
 ALIASES["serde_reflection"] = {};
 ALIASES["syn"] = {};
 ALIASES["thiserror"] = {};
