@@ -18,17 +18,8 @@ fn output_preambule(out: &mut dyn Write) -> Result<()> {
         out,
         r#"# pyre-ignore-all-errors
 from dataclasses import dataclass
-import numpy as np
 import typing
-
-class char(str):
-    pass
-
-class int128(typing.Tuple[np.int64, np.uint64]):
-    pass
-
-class uint128(typing.Tuple[np.uint64, np.uint64]):
-    pass
+import serde_types as st
 "#
     )
 }
@@ -37,21 +28,21 @@ fn quote_type(format: &Format) -> String {
     use Format::*;
     match format {
         TypeName(x) => format!("\"{}\"", x), // Need quotes because of circular dependencies.
-        Unit => "None".into(),
-        Bool => "np.bool".into(),
-        I8 => "np.int8".into(),
-        I16 => "np.int16".into(),
-        I32 => "np.int32".into(),
-        I64 => "np.int64".into(),
-        I128 => "int128".into(),
-        U8 => "np.uint8".into(),
-        U16 => "np.uint16".into(),
-        U32 => "np.uint32".into(),
-        U64 => "np.uint64".into(),
-        U128 => "uint128".into(),
-        F32 => "np.float32".into(),
-        F64 => "np.float64".into(),
-        Char => "char".into(),
+        Unit => "st.unit".into(),
+        Bool => "st.bool".into(),
+        I8 => "st.int8".into(),
+        I16 => "st.int16".into(),
+        I32 => "st.int32".into(),
+        I64 => "st.int64".into(),
+        I128 => "st.int128".into(),
+        U8 => "st.uint8".into(),
+        U16 => "st.uint16".into(),
+        U32 => "st.uint32".into(),
+        U64 => "st.uint64".into(),
+        U128 => "st.uint128".into(),
+        F32 => "st.float32".into(),
+        F64 => "st.float64".into(),
+        Char => "st.char".into(),
         Str => "str".into(),
         Bytes => "bytes".into(),
 

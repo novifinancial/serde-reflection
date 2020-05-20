@@ -14,7 +14,15 @@ fn test_that_python_code_parses() {
     let mut source = File::create(&source_path).unwrap();
     python3::output(&mut source, &registry).unwrap();
 
-    let output = Command::new("python3").arg(source_path).output().unwrap();
+    let python_path = format!(
+        "{}:runtime/python",
+        std::env::var("PYTHONPATH").unwrap_or(String::new())
+    );
+    let output = Command::new("python3")
+        .arg(source_path)
+        .env("PYTHONPATH", python_path)
+        .output()
+        .unwrap();
     assert_eq!(String::new(), String::from_utf8_lossy(&output.stderr));
     assert!(output.status.success());
 }
