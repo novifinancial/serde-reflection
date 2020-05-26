@@ -220,7 +220,7 @@ impl<'de, 'a> de::Deserializer<'de> for Deserializer<'de, 'a> {
         self.format.unify(Format::TypeName(name.into()))?;
         self.tracer
             .registry
-            .entry(name)
+            .entry(name.to_string())
             .unify(ContainerFormat::UnitStruct)?;
         visitor.visit_unit()
     }
@@ -249,7 +249,7 @@ impl<'de, 'a> de::Deserializer<'de> for Deserializer<'de, 'a> {
         let mut format = Format::unknown();
         self.tracer
             .registry
-            .entry(name)
+            .entry(name.to_string())
             .unify(ContainerFormat::NewTypeStruct(Box::new(format.clone())))?;
         // Compute the format.
         let inner = Deserializer::new(self.tracer, self.samples, &mut format);
@@ -312,7 +312,7 @@ impl<'de, 'a> de::Deserializer<'de> for Deserializer<'de, 'a> {
         let mut formats: Vec<_> = std::iter::repeat_with(Format::unknown).take(len).collect();
         self.tracer
             .registry
-            .entry(name)
+            .entry(name.to_string())
             .unify(ContainerFormat::TupleStruct(formats.clone()))?;
         // Compute the formats.
         let inner = SeqDeserializer::new(self.tracer, self.samples, formats.iter_mut());
@@ -378,7 +378,7 @@ impl<'de, 'a> de::Deserializer<'de> for Deserializer<'de, 'a> {
             .collect();
         self.tracer
             .registry
-            .entry(name)
+            .entry(name.to_string())
             .unify(ContainerFormat::Struct(formats.clone()))?;
         // Compute the formats.
         let inner = SeqDeserializer::new(
@@ -404,7 +404,7 @@ impl<'de, 'a> de::Deserializer<'de> for Deserializer<'de, 'a> {
         // Pre-update the registry.
         self.tracer
             .registry
-            .entry(name)
+            .entry(name.to_string())
             .unify(ContainerFormat::Enum(BTreeMap::new()))?;
         let known_variants = match self.tracer.registry.get_mut(name) {
             Some(ContainerFormat::Enum(x)) => x,

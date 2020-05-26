@@ -216,7 +216,7 @@
 //! let mut tracer = Tracer::new(TracerConfig::default());
 //! let mut samples = Samples::new();
 //! tracer.trace_value(&mut samples, &FullName { first: "", middle: None, last: "" })?;
-//! assert_eq!(tracer.registry().unwrap_err(), Error::UnknownFormatInContainer("FullName"));
+//! assert_eq!(tracer.registry().unwrap_err(), Error::UnknownFormatInContainer("FullName".to_string()));
 //! # Ok(())
 //! # }
 //! ```
@@ -296,5 +296,5 @@ mod value;
 
 pub use error::{Error, Result};
 pub use format::{ContainerFormat, Format, FormatHolder, Named, Variable, VariantFormat};
-pub use trace::{Registry, RegistryOwned, Samples, Tracer, TracerConfig};
+pub use trace::{Registry, Samples, Tracer, TracerConfig};
 pub use value::Value;
