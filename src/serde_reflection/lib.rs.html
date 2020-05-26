@@ -517,7 +517,7 @@
 <span class="doccomment">//! let mut tracer = Tracer::new(TracerConfig::default());</span>
 <span class="doccomment">//! let mut samples = Samples::new();</span>
 <span class="doccomment">//! tracer.trace_value(&amp;mut samples, &amp;FullName { first: &quot;&quot;, middle: None, last: &quot;&quot; })?;</span>
-<span class="doccomment">//! assert_eq!(tracer.registry().unwrap_err(), Error::UnknownFormatInContainer(&quot;FullName&quot;));</span>
+<span class="doccomment">//! assert_eq!(tracer.registry().unwrap_err(), Error::UnknownFormatInContainer(&quot;FullName&quot;.to_string()));</span>
 <span class="doccomment">//! # Ok(())</span>
 <span class="doccomment">//! # }</span>
 <span class="doccomment">//! ```</span>
@@ -597,7 +597,7 @@
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">error</span>::{<span class="ident">Error</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">format</span>::{<span class="ident">ContainerFormat</span>, <span class="ident">Format</span>, <span class="ident">FormatHolder</span>, <span class="ident">Named</span>, <span class="ident">Variable</span>, <span class="ident">VariantFormat</span>};
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">trace</span>::{<span class="ident">Registry</span>, <span class="ident">RegistryOwned</span>, <span class="ident">Samples</span>, <span class="ident">Tracer</span>, <span class="ident">TracerConfig</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">trace</span>::{<span class="ident">Registry</span>, <span class="ident">Samples</span>, <span class="ident">Tracer</span>, <span class="ident">TracerConfig</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">value</span>::<span class="ident">Value</span>;
 </pre></div>
 </section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "serde_reflection";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>

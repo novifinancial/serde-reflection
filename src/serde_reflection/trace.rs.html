@@ -289,9 +289,6 @@
 <span id="289">289</span>
 <span id="290">290</span>
 <span id="291">291</span>
-<span id="292">292</span>
-<span id="293">293</span>
-<span id="294">294</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -307,10 +304,7 @@
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">collections</span>::{<span class="ident">BTreeMap</span>, <span class="ident">BTreeSet</span>};
 
 <span class="doccomment">/// A map of container formats.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Registry</span> <span class="op">=</span> <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">ContainerFormat</span><span class="op">&gt;</span>;
-
-<span class="doccomment">/// Similar to `Registry` but compatible with `serde::de::DeserializeOwned`.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">RegistryOwned</span> <span class="op">=</span> <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">ContainerFormat</span><span class="op">&gt;</span>;
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Registry</span> <span class="op">=</span> <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">ContainerFormat</span><span class="op">&gt;</span>;
 
 <span class="doccomment">/// Structure to drive the tracing of Serde serialization and deserialization.</span>
 <span class="doccomment">/// This typically aims at computing a `Registry`.</span>
@@ -512,7 +506,7 @@
         <span class="kw">for</span> (<span class="ident">name</span>, <span class="ident">format</span>) <span class="kw">in</span> <span class="ident">registry</span>.<span class="ident">iter_mut</span>() {
             <span class="ident">format</span>
                 .<span class="ident">normalize</span>()
-                .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="ident">UnknownFormatInContainer</span>(<span class="ident">name</span>))<span class="question-mark">?</span>;
+                .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="ident">UnknownFormatInContainer</span>(<span class="ident">name</span>.<span class="ident">clone</span>()))<span class="question-mark">?</span>;
         }
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">incomplete_enums</span>.<span class="ident">is_empty</span>() {
             <span class="prelude-val">Ok</span>(<span class="ident">registry</span>)
@@ -541,7 +535,7 @@
         <span class="ident">value</span>: <span class="ident">Value</span>,
         <span class="ident">record_value</span>: <span class="ident">bool</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">Format</span>, <span class="ident">Value</span>)<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">registry</span>.<span class="ident">entry</span>(<span class="ident">name</span>).<span class="ident">unify</span>(<span class="ident">format</span>)<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">registry</span>.<span class="ident">entry</span>(<span class="ident">name</span>.<span class="ident">to_string</span>()).<span class="ident">unify</span>(<span class="ident">format</span>)<span class="question-mark">?</span>;
         <span class="kw">if</span> <span class="ident">record_value</span> {
             <span class="ident">samples</span>.<span class="ident">values</span>.<span class="ident">insert</span>(<span class="ident">name</span>, <span class="ident">value</span>.<span class="ident">clone</span>());
         }
