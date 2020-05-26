@@ -12,10 +12,7 @@ use serde::{de::DeserializeSeed, Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
 /// A map of container formats.
-pub type Registry = BTreeMap<&'static str, ContainerFormat>;
-
-/// Similar to `Registry` but compatible with `serde::de::DeserializeOwned`.
-pub type RegistryOwned = BTreeMap<String, ContainerFormat>;
+pub type Registry = BTreeMap<String, ContainerFormat>;
 
 /// Structure to drive the tracing of Serde serialization and deserialization.
 /// This typically aims at computing a `Registry`.
@@ -217,7 +214,7 @@ impl Tracer {
         for (name, format) in registry.iter_mut() {
             format
                 .normalize()
-                .map_err(|_| Error::UnknownFormatInContainer(name))?;
+                .map_err(|_| Error::UnknownFormatInContainer(name.clone()))?;
         }
         if self.incomplete_enums.is_empty() {
             Ok(registry)
@@ -246,7 +243,7 @@ impl Tracer {
         value: Value,
         record_value: bool,
     ) -> Result<(Format, Value)> {
-        self.registry.entry(name).unify(format)?;
+        self.registry.entry(name.to_string()).unify(format)?;
         if record_value {
             samples.values.insert(name, value.clone());
         }
