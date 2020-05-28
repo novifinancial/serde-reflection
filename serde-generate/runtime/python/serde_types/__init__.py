@@ -6,6 +6,7 @@
 import numpy as np
 from dataclasses import dataclass
 
+
 @dataclass(init=False)
 class uint128:
     high: np.uint64
@@ -13,7 +14,7 @@ class uint128:
 
     def __init__(self, num):
         self.high = np.uint64(num >> 64)
-        self.low = np.uint64(num & 0xffffffffffffffff)
+        self.low = np.uint64(num & 0xFFFFFFFFFFFFFFFF)
 
     def __int__(self):
         return (int(self.high) << 64) | int(self.low)
@@ -26,7 +27,7 @@ class int128:
 
     def __init__(self, num):
         self.high = np.int64(num >> 64)
-        self.low = np.uint64(num & 0xffffffffffffffff)
+        self.low = np.uint64(num & 0xFFFFFFFFFFFFFFFF)
 
     def __int__(self):
         return (int(self.high) << 64) | int(self.low)

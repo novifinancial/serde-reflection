@@ -86,12 +86,12 @@ fn output_variant(
     match variant {
         Unit => writeln!(
             out,
-            "@dataclass\nclass _{}_{}({}):\n    INDEX = {}\n",
+            "\n@dataclass\nclass _{}_{}({}):\n    INDEX = {}\n",
             base, name, base, index,
         ),
         NewType(format) => writeln!(
             out,
-            "@dataclass\nclass _{}_{}({}):\n    INDEX = {}\n    value: {}\n",
+            "\n@dataclass\nclass _{}_{}({}):\n    INDEX = {}\n    value: {}\n",
             base,
             name,
             base,
@@ -100,7 +100,7 @@ fn output_variant(
         ),
         Tuple(formats) => writeln!(
             out,
-            "@dataclass\nclass _{}_{}({}):\n    INDEX = {}\n    value: typing.Tuple[{}]\n",
+            "\n@dataclass\nclass _{}_{}({}):\n    INDEX = {}\n    value: typing.Tuple[{}]\n",
             base,
             name,
             base,
@@ -110,7 +110,7 @@ fn output_variant(
         Struct(fields) => {
             writeln!(
                 out,
-                "@dataclass\nclass _{}_{}({}):\n    INDEX = {}",
+                "\n@dataclass\nclass _{}_{}({}):\n    INDEX = {}",
                 base, name, base, index
             )?;
             output_fields(out, 4, fields)?;
@@ -136,6 +136,7 @@ fn output_variant_aliases(
     base: &str,
     variants: &BTreeMap<u32, Named<VariantFormat>>,
 ) -> Result<()> {
+    writeln!(out)?;
     for variant in variants.values() {
         writeln!(
             out,
@@ -149,26 +150,26 @@ fn output_variant_aliases(
 fn output_container(out: &mut dyn Write, name: &str, format: &ContainerFormat) -> Result<()> {
     use ContainerFormat::*;
     match format {
-        UnitStruct => writeln!(out, "@dataclass\nclass {}:\n    pass\n", name),
+        UnitStruct => writeln!(out, "\n@dataclass\nclass {}:\n    pass\n", name),
         NewTypeStruct(format) => writeln!(
             out,
-            "@dataclass\nclass {}:\n    value: {}\n",
+            "\n@dataclass\nclass {}:\n    value: {}\n",
             name,
             quote_type(format)
         ),
         TupleStruct(formats) => writeln!(
             out,
-            "@dataclass\nclass {}:\n    value: typing.Tuple[{}]\n",
+            "\n@dataclass\nclass {}:\n    value: typing.Tuple[{}]\n",
             name,
             quote_types(formats)
         ),
         Struct(fields) => {
-            writeln!(out, "@dataclass\nclass {}:", name)?;
+            writeln!(out, "\n@dataclass\nclass {}:", name)?;
             output_fields(out, 4, fields)?;
             writeln!(out)
         }
         Enum(variants) => {
-            writeln!(out, "class {}:\n    pass\n", name)?;
+            writeln!(out, "\nclass {}:\n    pass\n", name)?;
             output_variants(out, name, variants)?;
             output_variant_aliases(out, name, variants)?;
             writeln!(

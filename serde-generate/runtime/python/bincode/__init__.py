@@ -10,6 +10,7 @@ import serde_types as st
 import typing
 from typing import get_type_hints
 
+
 def decode_length(content: bytes) -> typing.Tuple[int, bytes]:
     return (int.from_bytes(content[:8], byteorder="little"), content[8:])
 
@@ -49,48 +50,74 @@ def encode_bytes(value: bytes) -> bytes:
 def not_implemented():
     raise NotImplementedError
 
+
 primitive_encode_map = {
     st.bool: lambda x: int(x).to_bytes(1, "little", signed=False),
-
     st.uint8: lambda x: int(x).to_bytes(1, "little", signed=False),
     st.uint16: lambda x: int(x).to_bytes(2, "little", signed=False),
     st.uint32: lambda x: int(x).to_bytes(4, "little", signed=False),
     st.uint64: lambda x: int(x).to_bytes(8, "little", signed=False),
     st.uint128: lambda x: int(x).to_bytes(16, "little", signed=False),
-
     st.int8: lambda x: int(x).to_bytes(1, "little", signed=True),
     st.int16: lambda x: int(x).to_bytes(2, "little", signed=True),
     st.int32: lambda x: int(x).to_bytes(4, "little", signed=True),
     st.int64: lambda x: int(x).to_bytes(8, "little", signed=True),
     st.int128: lambda x: int(x).to_bytes(16, "little", signed=True),
-
     st.float32: lambda x: not_implemented(),
     st.float64: lambda x: not_implemented(),
-    st.unit: lambda x: b'',
-
+    st.unit: lambda x: b"",
     st.char: lambda x: not_implemented(),
     str: lambda x: encode_str(x),
     bytes: lambda x: encode_bytes(x),
 }
 
 primitive_decode_map = {
-    st.bool: lambda content: (st.bool(int.from_bytes(content[:1], byteorder="little", signed=False)), content[1:]),
-
-    st.uint8: lambda content: (st.uint8(int.from_bytes(content[:1], byteorder="little", signed=False)), content[1:]),
-    st.uint16: lambda content: (st.uint16(int.from_bytes(content[:2], byteorder="little", signed=False)), content[2:]),
-    st.uint32: lambda content: (st.uint32(int.from_bytes(content[:4], byteorder="little", signed=False)), content[4:]),
-    st.uint64: lambda content: (st.uint64(int.from_bytes(content[:8], byteorder="little", signed=False)), content[8:]),
-    st.uint128: lambda content: (st.uint128(int.from_bytes(content[:16], byteorder="little", signed=False)), content[16:]),
-
-    st.int8: lambda content: (st.int8(int.from_bytes(content[:1], byteorder="little", signed=True)), content[1:]),
-    st.int16: lambda content: (st.int16(int.from_bytes(content[:2], byteorder="little", signed=True)), content[2:]),
-    st.int32: lambda content: (st.int32(int.from_bytes(content[:4], byteorder="little", signed=True)), content[4:]),
-    st.int64: lambda content: (st.int64(int.from_bytes(content[:8], byteorder="little", signed=True)), content[8:]),
-    st.int128: lambda content: (st.int128(int.from_bytes(content[:16], byteorder="little", signed=True)), content[16:]),
-
+    st.bool: lambda content: (
+        st.bool(int.from_bytes(content[:1], byteorder="little", signed=False)),
+        content[1:],
+    ),
+    st.uint8: lambda content: (
+        st.uint8(int.from_bytes(content[:1], byteorder="little", signed=False)),
+        content[1:],
+    ),
+    st.uint16: lambda content: (
+        st.uint16(int.from_bytes(content[:2], byteorder="little", signed=False)),
+        content[2:],
+    ),
+    st.uint32: lambda content: (
+        st.uint32(int.from_bytes(content[:4], byteorder="little", signed=False)),
+        content[4:],
+    ),
+    st.uint64: lambda content: (
+        st.uint64(int.from_bytes(content[:8], byteorder="little", signed=False)),
+        content[8:],
+    ),
+    st.uint128: lambda content: (
+        st.uint128(int.from_bytes(content[:16], byteorder="little", signed=False)),
+        content[16:],
+    ),
+    st.int8: lambda content: (
+        st.int8(int.from_bytes(content[:1], byteorder="little", signed=True)),
+        content[1:],
+    ),
+    st.int16: lambda content: (
+        st.int16(int.from_bytes(content[:2], byteorder="little", signed=True)),
+        content[2:],
+    ),
+    st.int32: lambda content: (
+        st.int32(int.from_bytes(content[:4], byteorder="little", signed=True)),
+        content[4:],
+    ),
+    st.int64: lambda content: (
+        st.int64(int.from_bytes(content[:8], byteorder="little", signed=True)),
+        content[8:],
+    ),
+    st.int128: lambda content: (
+        st.int128(int.from_bytes(content[:16], byteorder="little", signed=True)),
+        content[16:],
+    ),
     st.float32: lambda content: not_implemented(),
     st.float64: lambda content: not_implemented(),
-
     st.unit: lambda content: (None, content),
     st.char: lambda content: not_implemented(),
     str: lambda content: decode_str(content),
@@ -120,9 +147,9 @@ def serialize(obj: typing.Any, obj_type) -> bytes:
         elif getattr(obj_type, "__origin__") == typing.Union:  # Option
             assert len(types) == 2 and types[1] == type(None)
             if obj is None:
-                result += b'\x00'
+                result += b"\x00"
             else:
-                result += b'\x01'
+                result += b"\x01"
                 result += serialize(obj, types[0])
 
         elif getattr(obj_type, "__origin__") == dict:  # Map
