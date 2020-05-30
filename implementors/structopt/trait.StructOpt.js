@@ -1,0 +1,4 @@
+(function() {var implementors = {};
+implementors["serdegen"] = [{"text":"impl <a class=\"trait\" href=\"structopt/trait.StructOpt.html\" title=\"trait structopt::StructOpt\">StructOpt</a> for <a class=\"enum\" href=\"serdegen/enum.Language.html\" title=\"enum serdegen::Language\">Language</a>","synthetic":false,"types":["serdegen::Language"]},{"text":"impl <a class=\"trait\" href=\"structopt/trait.StructOpt.html\" title=\"trait structopt::StructOpt\">StructOpt</a> for <a class=\"struct\" href=\"serdegen/struct.Options.html\" title=\"struct serdegen::Options\">Options</a>","synthetic":false,"types":["serdegen::Options"]}];
+implementors["structopt"] = [];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
