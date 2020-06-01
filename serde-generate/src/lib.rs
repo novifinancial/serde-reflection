@@ -6,4 +6,5 @@
 //! Supported languages:
 //! * Python 3
 
+pub mod analyzer;
 pub mod python3;

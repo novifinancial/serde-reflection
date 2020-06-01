@@ -261,6 +261,7 @@ version = "0.1.0"
 dependencies = [
  "bincode",
  "hex",
+ "maplit",
  "serde",
  "serde-reflection",
  "serde_bytes",
