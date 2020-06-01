@@ -25,22 +25,10 @@ pub fn output(
 }
 
 fn output_preambule(out: &mut dyn Write, with_derive_macros: bool) -> Result<()> {
-    let serde_imports = if with_derive_macros {
-        r#"
-use serde::{Serialize, Deserialize};
-use serde_bytes::ByteBuf;"#
-    } else {
-        // for testing
-        "type ByteBuf = Vec<u8>;"
-    };
-    writeln!(
-        out,
-        r#"
-#![allow(unused_imports)]{}
-use std::collections::BTreeMap;
-"#,
-        serde_imports
-    )
+    if with_derive_macros {
+        writeln!(out, "use serde::{{Serialize, Deserialize}};\n")?;
+    }
+    Ok(())
 }
 
 fn quote_type(format: &Format, known_sizes: Option<&HashSet<&str>>) -> String {
@@ -70,12 +58,12 @@ fn quote_type(format: &Format, known_sizes: Option<&HashSet<&str>>) -> String {
         F64 => "f64".into(),
         Char => "char".into(),
         Str => "String".into(),
-        Bytes => "ByteBuf".into(),
+        Bytes => "serde_bytes::ByteBuf".into(),
 
         Option(format) => format!("Option<{}>", quote_type(format, known_sizes)),
         Seq(format) => format!("Vec<{}>", quote_type(format, None)),
         Map { key, value } => format!(
-            "BTreeMap<{}, {}>",
+            "std::collections::BTreeMap<{}, {}>",
             quote_type(key, None),
             quote_type(value, None)
         ),
