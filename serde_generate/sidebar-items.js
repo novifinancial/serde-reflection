@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["python3",""]]});
+initSidebarItems({"mod":[["analyzer",""],["python3",""],["rust",""]]});
