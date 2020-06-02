@@ -69,10 +69,7 @@ assert t != s
     )
     .unwrap();
 
-    let python_path = format!(
-        "{}:runtime/python",
-        std::env::var("PYTHONPATH").unwrap_or(String::new())
-    );
+    let python_path = std::env::var("PYTHONPATH").unwrap_or_default() + ":runtime/python";
     let output = Command::new("python3")
         .arg(source_path)
         .env("PYTHONPATH", python_path)
