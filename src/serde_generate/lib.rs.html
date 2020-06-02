@@ -105,7 +105,6 @@
 <span id="105">105</span>
 <span id="106">106</span>
 <span id="107">107</span>
-<span id="108">108</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -131,7 +130,7 @@
 <span class="doccomment">//! saved on disk.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Assuming that a `serde_reflection::Registry` object has been serialized in a YAML file `test.yaml`,</span>
-<span class="doccomment">//! the following command will generate python class definitions and write them into `test.py`.</span>
+<span class="doccomment">//! the following command will generate Python class definitions and write them into `test.py`.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```bash</span>
 <span class="doccomment">//! cargo run -p serde-generate -- --language python3 test.yaml &gt; test.py</span>
@@ -143,9 +142,9 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! For testing purposes, we use the Bincode encoding format provided by the</span>
 <span class="doccomment">//! [`bincode`](https://docs.rs/bincode/1.2.1/bincode/) crate in Rust and</span>
-<span class="doccomment">//! provide an experimental Bincode runtime in python.</span>
+<span class="doccomment">//! provide an experimental Bincode runtime in Python.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! The following example shows how to transfer a value from Rust to Python using bincode.</span>
+<span class="doccomment">//! In the following example, we transfer a `Test` value from Rust to Python using bincode.</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//! use serde::{Deserialize, Serialize};</span>
 <span class="doccomment">//! use serde_reflection::{Registry, Samples, Tracer, TracerConfig};</span>
@@ -158,7 +157,7 @@
 <span class="doccomment">//! }</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # fn main() -&gt; Result&lt;(), std::io::Error&gt; {</span>
-<span class="doccomment">//! // Obtain the Serde format of `Test`</span>
+<span class="doccomment">//! // Obtain the Serde format of `Test`.</span>
 <span class="doccomment">//! let mut tracer = Tracer::new(TracerConfig::default());</span>
 <span class="doccomment">//! tracer.trace_type::&lt;Test&gt;(&amp;Samples::new()).unwrap();</span>
 <span class="doccomment">//! let registry = tracer.registry().unwrap();</span>
@@ -174,7 +173,6 @@
 <span class="doccomment">//! from dataclasses import dataclass</span>
 <span class="doccomment">//! import typing</span>
 <span class="doccomment">//! import serde_types as st</span>
-<span class="doccomment">//! #</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! @dataclass</span>
 <span class="doccomment">//! class Test:</span>
@@ -196,7 +194,7 @@
 <span class="doccomment">//!   hex::encode(&amp;bincode::serialize(&amp;Test { a: vec![4, 6], b: (3, 5) }).unwrap()),</span>
 <span class="doccomment">//! )?;</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! // Execute the python code.</span>
+<span class="doccomment">//! // Execute the Python code.</span>
 <span class="doccomment">//! let mut child = std::process::Command::new(&quot;python3&quot;)</span>
 <span class="doccomment">//!   .arg(&quot;-&quot;)</span>
 <span class="doccomment">//!   .env(&quot;PYTHONPATH&quot;, std::env::var(&quot;PYTHONPATH&quot;).unwrap_or_default() + &quot;:runtime/python&quot;)</span>
