@@ -19,8 +19,7 @@ fn output_preambule(out: &mut dyn Write) -> Result<()> {
         r#"# pyre-ignore-all-errors
 from dataclasses import dataclass
 import typing
-import serde_types as st
-"#
+import serde_types as st"#
     )
 }
 

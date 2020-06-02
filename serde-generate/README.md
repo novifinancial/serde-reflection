@@ -27,7 +27,7 @@ Together with the library `serde_generate`, we provide a simple binary tool to p
 saved on disk.
 
 Assuming that a `serde_reflection::Registry` object has been serialized in a YAML file `test.yaml`,
-the following command will generate python class definitions and write them into `test.py`.
+the following command will generate Python class definitions and write them into `test.py`.
 
 ```bash
 cargo run -p serde-generate -- --language python3 test.yaml > test.py
@@ -39,9 +39,9 @@ See the help message of the tool with `--help` for more options.
 
 For testing purposes, we use the Bincode encoding format provided by the
 [`bincode`](https://docs.rs/bincode/1.2.1/bincode/) crate in Rust and
-provide an experimental Bincode runtime in python.
+provide an experimental Bincode runtime in Python.
 
-The following example shows how to transfer a value from Rust to Python using bincode.
+In the following example, we transfer a `Test` value from Rust to Python using bincode.
 ```rust
 use serde::{Deserialize, Serialize};
 use serde_reflection::{Registry, Samples, Tracer, TracerConfig};
@@ -53,7 +53,7 @@ struct Test {
     b: (u32, u32),
 }
 
-// Obtain the Serde format of `Test`
+// Obtain the Serde format of `Test`.
 let mut tracer = Tracer::new(TracerConfig::default());
 tracer.trace_type::<Test>(&Samples::new()).unwrap();
 let registry = tracer.registry().unwrap();
@@ -67,7 +67,6 @@ assert_eq!(
 from dataclasses import dataclass
 import typing
 import serde_types as st
-#
 
 @dataclass
 class Test:
@@ -89,7 +88,7 @@ assert value == Test(a=[4, 6], b=(3, 5))
   hex::encode(&bincode::serialize(&Test { a: vec![4, 6], b: (3, 5) }).unwrap()),
 )?;
 
-// Execute the python code.
+// Execute the Python code.
 let mut child = std::process::Command::new("python3")
   .arg("-")
   .env("PYTHONPATH", std::env::var("PYTHONPATH").unwrap_or_default() + ":runtime/python")
