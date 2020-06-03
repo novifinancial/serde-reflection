@@ -59,8 +59,8 @@
 //! serde_generate::python3::output(&mut source, &registry)?;
 //! assert_eq!(
 //! #  "\n".to_string() + &
-//!   String::from_utf8_lossy(&source),
-//!   r#"
+//!     String::from_utf8_lossy(&source),
+//!     r#"
 //! # # pyre-ignore-all-errors
 //! from dataclasses import dataclass
 //! import typing
@@ -76,22 +76,22 @@
 //! // Append some test code to demonstrate Bincode deserialization
 //! // using the runtime in `serde_generate/runtime/python/bincode`.
 //! writeln!(
-//!   source,
-//!   r#"
+//!     source,
+//!     r#"
 //! import bincode
 //!
 //! value, _ = bincode.deserialize(bytes.fromhex("{}"), Test)
 //! assert value == Test(a=[4, 6], b=(3, 5))
 //! "#,
-//!   hex::encode(&bincode::serialize(&Test { a: vec![4, 6], b: (3, 5) }).unwrap()),
+//!     hex::encode(&bincode::serialize(&Test { a: vec![4, 6], b: (3, 5) }).unwrap()),
 //! )?;
 //!
 //! // Execute the Python code.
 //! let mut child = std::process::Command::new("python3")
-//!   .arg("-")
-//!   .env("PYTHONPATH", std::env::var("PYTHONPATH").unwrap_or_default() + ":runtime/python")
-//!   .stdin(std::process::Stdio::piped())
-//!   .spawn()?;
+//!     .arg("-")
+//!     .env("PYTHONPATH", std::env::var("PYTHONPATH").unwrap_or_default() + ":runtime/python")
+//!     .stdin(std::process::Stdio::piped())
+//!     .spawn()?;
 //! child.stdin.as_mut().unwrap().write_all(&source)?;
 //! let output = child.wait_with_output()?;
 //! assert!(output.status.success());
