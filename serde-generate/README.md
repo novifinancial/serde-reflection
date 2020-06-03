@@ -11,8 +11,8 @@ extracted by [`serde_reflection`](https://crates.io/crates/serde_reflection).
 
 ### Supported Languages
 
-* C++ 17
 * Python 3
+* C++ 17
 * Rust 2018
 
 ### Supported Encodings
@@ -36,11 +36,11 @@ cargo run -p serde-generate -- --language python3 test.yaml > test.py
 
 See the help message of the tool with `--help` for more options.
 
-### Bincode Runtime(s)
+### Bincode Runtimes
 
 For testing purposes, we use the Bincode encoding format provided by the
 [`bincode`](https://docs.rs/bincode/1.2.1/bincode/) crate in Rust and
-provide an experimental Bincode runtime in Python.
+provide experimental Bincode runtimes in Python and C++.
 
 In the following example, we transfer a `Test` value from Rust to Python using bincode.
 ```rust
