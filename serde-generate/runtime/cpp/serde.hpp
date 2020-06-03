@@ -15,9 +15,29 @@
 #include <variant>
 #include <vector>
 
-// Placeholder types for 128-bit integers.
-using uint128_t = std::tuple<uint64_t, uint64_t>;
-using int128_t = std::tuple<int64_t, uint64_t>;
+// Basic implementation for 128-bit unsigned integers.
+struct uint128_t {
+    uint64_t high;
+    uint64_t low;
+
+    friend bool operator==(const uint128_t &, const uint128_t &);
+};
+
+bool operator==(const uint128_t &lhs, const uint128_t &rhs) {
+    return lhs.high == rhs.high && lhs.low == lhs.low;
+}
+
+// 128-bit signed integers.
+struct int128_t {
+    int64_t high;
+    uint64_t low;
+
+    friend bool operator==(const int128_t &, const int128_t &);
+};
+
+bool operator==(const int128_t &lhs, const int128_t &rhs) {
+    return lhs.high == rhs.high && lhs.low == lhs.low;
+}
 
 // Trait to enable serialization of values of type T.
 // This is similar to the `serde::Serialize` trait in Rust.

@@ -11,8 +11,8 @@ use tempfile::tempdir;
 
 #[derive(Serialize, Deserialize)]
 struct Test {
-    a: Vec<u64>,
-    b: (u32, u32),
+    a: Vec<u32>,
+    b: (i64, u64),
     c: Choice,
 }
 
@@ -219,7 +219,7 @@ fn test_cpp_bincode_runtime_on_simple_date() {
 
     let reference = bincode::serialize(&Test {
         a: vec![4, 6],
-        b: (3, 5),
+        b: (-3, 5),
         c: Choice::C { x: 7 },
     })
     .unwrap();
@@ -235,8 +235,8 @@ int main() {{
     auto deserializer = BincodeDeserializer(input);
     auto test = Deserializable<Test>::deserialize(deserializer);
 
-    auto a = std::vector<uint64_t> {{4, 6}};
-    auto b = std::array<uint32_t, 2> {{3, 5}};
+    auto a = std::vector<uint32_t> {{4, 6}};
+    auto b = std::tuple<int64_t, uint64_t> {{-3, 5}};
     auto c = Choice {{ Choice::C {{ 7 }} }};
     auto test2 = Test {{a, b, c}};
 
