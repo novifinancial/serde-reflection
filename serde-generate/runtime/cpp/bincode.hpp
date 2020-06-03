@@ -118,8 +118,8 @@ void BincodeSerializer::serialize_u64(uint64_t value) {
 }
 
 void BincodeSerializer::serialize_u128(const uint128_t &value) {
-    serialize_u64(std::get<1>(value));
-    serialize_u64(std::get<0>(value));
+    serialize_u64(value.low);
+    serialize_u64(value.high);
 }
 
 void BincodeSerializer::serialize_i8(int8_t value) {
@@ -139,8 +139,8 @@ void BincodeSerializer::serialize_i64(int64_t value) {
 }
 
 void BincodeSerializer::serialize_i128(const int128_t &value) {
-    serialize_u64(std::get<1>(value));
-    serialize_u64((uint64_t)std::get<0>(value));
+    serialize_u64(value.low);
+    serialize_i64(value.high);
 }
 
 void BincodeSerializer::serialize_len(size_t value) {
@@ -205,9 +205,10 @@ uint64_t BincodeDeserializer::deserialize_u64() {
 }
 
 uint128_t BincodeDeserializer::deserialize_u128() {
-    auto low = deserialize_u64();
-    auto hi = deserialize_u64();
-    return std::tuple{hi, low};
+    uint128_t result;
+    result.low = deserialize_u64();
+    result.high = deserialize_u64();
+    return result;
 }
 
 int8_t BincodeDeserializer::deserialize_i8() {
@@ -227,9 +228,10 @@ int64_t BincodeDeserializer::deserialize_i64() {
 }
 
 int128_t BincodeDeserializer::deserialize_i128() {
-    auto low = deserialize_u64();
-    auto hi = deserialize_i64();
-    return std::tuple{hi, low};
+    int128_t result;
+    result.low = deserialize_u64();
+    result.high = deserialize_i64();
+    return result;
 }
 
 size_t BincodeDeserializer::deserialize_len() {
