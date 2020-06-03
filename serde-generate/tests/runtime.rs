@@ -227,6 +227,7 @@ fn test_cpp_bincode_runtime_on_simple_date() {
     writeln!(
         source,
         r#"
+#include <cassert>
 #include "bincode.hpp"
 
 int main() {{
@@ -308,6 +309,7 @@ fn test_cpp_bincode_runtime_on_supported_types() {
     writeln!(
         source,
         r#"
+#include <cassert>
 #include "bincode.hpp"
 
 int main() {{
