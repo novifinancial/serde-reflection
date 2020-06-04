@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use maplit::{btreemap, btreeset};
-use serde_generate::analyzer;
+use serde_generate::{analyzer, test_utils};
 
 #[test]
 fn test_topological_sort() {

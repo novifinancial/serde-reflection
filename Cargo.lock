@@ -268,7 +268,6 @@ dependencies = [
  "serde_yaml",
  "structopt",
  "tempfile",
- "test-utils",
 ]
 
 [[package]]
@@ -399,17 +398,6 @@ dependencies = [
  "redox_syscall",
  "remove_dir_all",
  "winapi",
-]
-
-[[package]]
-name = "test-utils"
-version = "0.1.0"
-dependencies = [
- "maplit",
- "serde",
- "serde-reflection",
- "serde_bytes",
- "serde_yaml",
 ]
 
 [[package]]

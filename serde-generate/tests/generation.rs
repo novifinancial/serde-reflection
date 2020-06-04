@@ -1,7 +1,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use serde_generate::{python3, rust};
+use serde_generate::{python3, rust, test_utils};
 use std::fs::File;
 use std::io::Write;
 use std::process::Command;
