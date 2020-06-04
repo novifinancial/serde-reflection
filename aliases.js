@@ -26,7 +26,6 @@ ALIASES["structopt"] = {};
 ALIASES["structopt_derive"] = {};
 ALIASES["syn"] = {};
 ALIASES["syn_mid"] = {};
-ALIASES["test_utils"] = {};
 ALIASES["textwrap"] = {};
 ALIASES["thiserror"] = {};
 ALIASES["thiserror_impl"] = {};
