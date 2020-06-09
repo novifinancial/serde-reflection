@@ -221,10 +221,10 @@ struct Serializable<std::optional<T>> {
     static void serialize(const std::optional<T> &option,
                           Serializer &serializer) {
         if (option.has_value()) {
-            serializer.serialize_u8(1);
+            serializer.serialize_option_tag(true);
             Serializable<T>::serialize(option.value(), serializer);
         } else {
-            serializer.serialize_u8(0);
+            serializer.serialize_option_tag(false);
         }
     }
 };
@@ -465,13 +465,10 @@ template <typename T>
 struct Deserializable<std::optional<T>> {
     template <typename Deserializer>
     static std::optional<T> deserialize(Deserializer &deserializer) {
-        auto tag = deserializer.deserialize_u8();
-        if (tag == 0) {
+        auto tag = deserializer.deserialize_option_tag();
+        if (!tag) {
             return {};
         } else {
-            if (tag != 1) {
-                throw "invalid option tag";
-            }
             return {Deserializable<T>::deserialize(deserializer)};
         }
     }
