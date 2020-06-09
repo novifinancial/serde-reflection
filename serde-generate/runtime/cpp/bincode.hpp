@@ -33,6 +33,7 @@ class BincodeSerializer {
 
     void serialize_len(size_t value);
     void serialize_variant_index(size_t value);
+    void serialize_option_tag(bool value);
 
     std::vector<uint8_t> bytes() && { return std::move(bytes_); }
 };
@@ -71,6 +72,7 @@ class BincodeDeserializer {
 
     size_t deserialize_len();
     size_t deserialize_variant_index();
+    bool deserialize_option_tag();
 };
 
 void BincodeSerializer::serialize_str(const std::string &value) {
@@ -149,6 +151,10 @@ void BincodeSerializer::serialize_len(size_t value) {
 
 void BincodeSerializer::serialize_variant_index(size_t value) {
     serialize_u32((uint32_t)value);
+}
+
+void BincodeSerializer::serialize_option_tag(bool value) {
+    serialize_bool(value);
 }
 
 std::string BincodeDeserializer::deserialize_str() {
@@ -240,4 +246,8 @@ size_t BincodeDeserializer::deserialize_len() {
 
 size_t BincodeDeserializer::deserialize_variant_index() {
     return (size_t)deserialize_u32();
+}
+
+bool BincodeDeserializer::deserialize_option_tag() {
+    return deserialize_bool();
 }
