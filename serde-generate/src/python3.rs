@@ -7,14 +7,14 @@ use std::io::{Result, Write};
 use std::path::PathBuf;
 
 pub fn output(out: &mut dyn Write, registry: &Registry) -> Result<()> {
-    output_preambule(out)?;
+    output_preamble(out)?;
     for (name, format) in registry {
         output_container(out, name, format)?;
     }
     Ok(())
 }
 
-fn output_preambule(out: &mut dyn Write) -> Result<()> {
+fn output_preamble(out: &mut dyn Write) -> Result<()> {
     writeln!(
         out,
         r#"# pyre-ignore-all-errors

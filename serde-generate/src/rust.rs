@@ -15,7 +15,7 @@ pub fn output(
     let dependencies = analyzer::get_dependency_map(registry)?;
     let entries = analyzer::best_effort_topological_sort(&dependencies);
 
-    output_preambule(out, with_derive_macros)?;
+    output_preamble(out, with_derive_macros)?;
     let mut known_sizes = HashSet::new();
     for name in entries {
         let format = &registry[name];
@@ -25,7 +25,7 @@ pub fn output(
     Ok(())
 }
 
-fn output_preambule(out: &mut dyn Write, with_derive_macros: bool) -> Result<()> {
+fn output_preamble(out: &mut dyn Write, with_derive_macros: bool) -> Result<()> {
     if with_derive_macros {
         writeln!(out, "use serde::{{Serialize, Deserialize}};\n")?;
     }
