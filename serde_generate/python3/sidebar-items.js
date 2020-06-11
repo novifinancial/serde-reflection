@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["output",""]]});
+initSidebarItems({"fn":[["output",""]],"struct":[["Installer",""]]});
