@@ -33,7 +33,7 @@ fn test_that_installed_python_code_parses() {
 
     let python_path = format!(
         "{}:{}",
-        std::env::var("PYTHONPATH").unwrap_or(String::new()),
+        std::env::var("PYTHONPATH").unwrap_or_default(),
         dir.path().to_string_lossy(),
     );
     let output = Command::new("python3")

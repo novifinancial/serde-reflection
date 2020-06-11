@@ -116,7 +116,7 @@ for encoding in encodings:
 
     let python_path = format!(
         "{}:runtime/python",
-        std::env::var("PYTHONPATH").unwrap_or(String::new())
+        std::env::var("PYTHONPATH").unwrap_or_default()
     );
     let output = Command::new("python3")
         .arg(source_path)
