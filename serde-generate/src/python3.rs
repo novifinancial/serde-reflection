@@ -4,6 +4,7 @@
 use serde_reflection::{ContainerFormat, Format, Named, Registry, VariantFormat};
 use std::collections::BTreeMap;
 use std::io::{Result, Write};
+use std::path::PathBuf;
 
 pub fn output(out: &mut dyn Write, registry: &Registry) -> Result<()> {
     output_preambule(out)?;
@@ -182,5 +183,55 @@ fn output_container(out: &mut dyn Write, name: &str, format: &ContainerFormat) -
                     .join("")
             )
         }
+    }
+}
+
+pub struct Installer {
+    install_dir: PathBuf,
+}
+
+impl Installer {
+    pub fn new(install_dir: PathBuf) -> Self {
+        Installer { install_dir }
+    }
+
+    fn open_module_init_file(&self, name: &str) -> Result<std::fs::File> {
+        let dir_path = self.install_dir.join(name);
+        std::fs::create_dir_all(&dir_path)?;
+        std::fs::File::create(dir_path.join("__init__.py"))
+    }
+}
+
+impl crate::SourceInstaller for Installer {
+    type Error = Box<dyn std::error::Error>;
+
+    fn install_module(
+        &self,
+        name: &str,
+        registry: &Registry,
+    ) -> std::result::Result<(), Self::Error> {
+        let mut file = self.open_module_init_file(name)?;
+        output(&mut file, registry)?;
+        Ok(())
+    }
+
+    fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {
+        let mut file = self.open_module_init_file("serde_types")?;
+        write!(
+            file,
+            "{}",
+            include_str!("../runtime/python/serde_types/__init__.py")
+        )?;
+        Ok(())
+    }
+
+    fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error> {
+        let mut file = self.open_module_init_file("bincode")?;
+        write!(
+            file,
+            "{}",
+            include_str!("../runtime/python/bincode/__init__.py")
+        )?;
+        Ok(())
     }
 }
