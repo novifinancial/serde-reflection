@@ -109,3 +109,21 @@ pub mod rust;
 #[doc(hidden)]
 /// Utility functions to help testing code generators.
 pub mod test_utils;
+
+/// How to copy generated source code and available runtimes for a given language.
+pub trait SourceInstaller {
+    type Error;
+
+    /// Create a module exposing the container types contained in the registry.
+    fn install_module(
+        &self,
+        name: &str,
+        registry: &serde_reflection::Registry,
+    ) -> std::result::Result<(), Self::Error>;
+
+    /// Install the serde runtime.
+    fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error>;
+
+    /// Install the bincode runtime.
+    fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error>;
+}

@@ -5,6 +5,7 @@ use crate::analyzer;
 use serde_reflection::{ContainerFormat, Format, Named, Registry, VariantFormat};
 use std::collections::{BTreeMap, HashSet};
 use std::io::{Result, Write};
+use std::path::PathBuf;
 
 pub fn output(
     out: &mut dyn Write,
@@ -188,5 +189,61 @@ fn output_container(
             output_variants(out, variants, known_sizes)?;
             writeln!(out, "}}\n")
         }
+    }
+}
+
+pub struct Installer {
+    install_dir: PathBuf,
+}
+
+impl Installer {
+    pub fn new(install_dir: PathBuf) -> Self {
+        Installer { install_dir }
+    }
+
+    fn runtimes_not_implemented() -> std::result::Result<(), Box<dyn std::error::Error>> {
+        Err(Box::new(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            "Installing runtimes is not implemented: use cargo instead",
+        )))
+    }
+}
+
+impl crate::SourceInstaller for Installer {
+    type Error = Box<dyn std::error::Error>;
+
+    fn install_module(
+        &self,
+        name: &str,
+        registry: &Registry,
+    ) -> std::result::Result<(), Self::Error> {
+        let dir_path = self.install_dir.join(name);
+        std::fs::create_dir_all(&dir_path)?;
+        let mut cargo = std::fs::File::create(&dir_path.join("Cargo.toml"))?;
+        write!(
+            cargo,
+            r#"[package]
+name = "{}"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+serde = {{ version = "1.0", features = ["derive"] }}
+serde_bytes = "0.11"
+"#,
+            name,
+        )?;
+        std::fs::create_dir(dir_path.join("src"))?;
+        let source_path = dir_path.join("src/lib.rs");
+        let mut source = std::fs::File::create(&source_path)?;
+        output(&mut source, /* with_derive_macros */ true, &registry)
+    }
+
+    fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {
+        Self::runtimes_not_implemented()
+    }
+
+    fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error> {
+        Self::runtimes_not_implemented()
     }
 }
