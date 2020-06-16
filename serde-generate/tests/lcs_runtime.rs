@@ -1,6 +1,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+use libra_canonical_serialization as lcs;
 use serde::{Deserialize, Serialize};
 use serde_generate::{python3, rust, test_utils};
 use serde_reflection::{Registry, Result, Samples, Tracer, TracerConfig};
@@ -32,14 +33,14 @@ fn get_local_registry() -> Result<Registry> {
 }
 
 #[test]
-fn test_python_bincode_runtime_on_simple_data() {
+fn test_python_lcs_runtime_on_simple_data() {
     let registry = get_local_registry().unwrap();
     let dir = tempdir().unwrap();
     let source_path = dir.path().join("test.py");
     let mut source = File::create(&source_path).unwrap();
     python3::output(&mut source, &registry).unwrap();
 
-    let reference = bincode::serialize(&Test {
+    let reference = lcs::to_bytes(&Test {
         a: vec![4, 6],
         b: (3, 5),
         c: Choice::C { x: 7 },
@@ -48,20 +49,20 @@ fn test_python_bincode_runtime_on_simple_data() {
     writeln!(
         source,
         r#"
-import bincode
+import lcs
 
 value = Test([4, 6], (3, 5), Choice.C(7))
 
-s = bincode.serialize(value, Test)
+s = lcs.serialize(value, Test)
 assert s == bytes.fromhex("{}")
 
-v, buffer = bincode.deserialize(s, Test)
+v, buffer = lcs.deserialize(s, Test)
 assert len(buffer) == 0
 assert v == value
 assert v.c.x == 7
 
 v.b = (3, 0)
-t = bincode.serialize(v, Test)
+t = lcs.serialize(v, Test)
 assert len(t) == len(s)
 assert t != s
 "#,
@@ -83,7 +84,7 @@ assert t != s
 }
 
 #[test]
-fn test_python_bincode_runtime_on_all_supported_types() {
+fn test_python_lcs_runtime_on_all_supported_types() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
     let source_path = dir.path().join("test.py");
@@ -93,21 +94,21 @@ fn test_python_bincode_runtime_on_all_supported_types() {
     let values = test_utils::get_sample_values();
     let hex_encodings: Vec<_> = values
         .iter()
-        .map(|v| format!("'{}'", hex::encode(&bincode::serialize(&v).unwrap())))
+        .map(|v| format!("'{}'", hex::encode(&lcs::to_bytes(&v).unwrap())))
         .collect();
 
     writeln!(
         source,
         r#"
-import bincode
+import lcs
 
 encodings = [bytes.fromhex(s) for s in [{}]]
 
 for encoding in encodings:
-    v, buffer = bincode.deserialize(encoding, SerdeData)
+    v, buffer = lcs.deserialize(encoding, SerdeData)
     assert len(buffer) == 0
 
-    s = bincode.serialize(v, SerdeData)
+    s = lcs.serialize(v, SerdeData)
     assert s == encoding
 "#,
         hex_encodings.join(", ")
@@ -132,7 +133,7 @@ for encoding in encodings:
 
 // Full test using cargo. This may take a while.
 #[test]
-fn test_rust_bincode_runtime() {
+fn test_rust_lcs_runtime() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
     std::fs::write(
@@ -144,9 +145,9 @@ edition = "2018"
 
 [dependencies]
 hex = "0.4.2"
-serde = { version = "1.0", features = ["derive"] }
+serde = { version = "1.0.112", features = ["derive"] }
 serde_bytes = "0.11"
-bincode = "1.2"
+libra-canonical-serialization = { git = "https://github.com/libra/libra.git", branch = "testnet" }
 
 [workspace]
 "#,
@@ -160,20 +161,22 @@ bincode = "1.2"
     let values = test_utils::get_sample_values();
     let hex_encodings: Vec<_> = values
         .iter()
-        .map(|v| format!("\"{}\"", hex::encode(&bincode::serialize(&v).unwrap())))
+        .map(|v| format!("\"{}\"", hex::encode(&lcs::to_bytes(&v).unwrap())))
         .collect();
 
     writeln!(
         source,
         r#"
+use libra_canonical_serialization as lcs;
+
 fn main() {{
     let hex_encodings = vec![{}];
 
     for hex_encoding in hex_encodings {{
         let encoding = hex::decode(hex_encoding).unwrap();
-        let value = bincode::deserialize::<SerdeData>(&encoding).unwrap();
+        let value = lcs::from_bytes::<SerdeData>(&encoding).unwrap();
 
-        let s = bincode::serialize(&value).unwrap();
+        let s = lcs::to_bytes(&value).unwrap();
         assert_eq!(s, encoding);
     }}
 }}
