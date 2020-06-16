@@ -26,6 +26,7 @@ fn test_that_installed_python_code_parses() {
         .arg("--with-runtimes")
         .arg("serde")
         .arg("bincode")
+        .arg("lcs")
         .arg("--")
         .arg(yaml_path)
         .status()
@@ -38,7 +39,7 @@ fn test_that_installed_python_code_parses() {
     );
     let output = Command::new("python3")
         .arg("-c")
-        .arg("import serde_types; import bincode; import test_types")
+        .arg("import serde_types; import bincode; import lcs; import test_types")
         .env("PYTHONPATH", python_path)
         .output()
         .unwrap();

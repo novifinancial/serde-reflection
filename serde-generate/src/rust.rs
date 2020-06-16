@@ -246,4 +246,8 @@ serde_bytes = "0.11"
     fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error> {
         Self::runtimes_not_implemented()
     }
+
+    fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
+        Self::runtimes_not_implemented()
+    }
 }

@@ -234,4 +234,14 @@ impl crate::SourceInstaller for Installer {
         )?;
         Ok(())
     }
+
+    fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
+        let mut file = self.open_module_init_file("lcs")?;
+        write!(
+            file,
+            "{}",
+            include_str!("../runtime/python/lcs/__init__.py")
+        )?;
+        Ok(())
+    }
 }
