@@ -25,6 +25,7 @@ arg_enum! {
 enum Runtime {
     Serde,
     Bincode,
+    LCS,
 }
 }
 
@@ -40,7 +41,7 @@ struct Options {
     #[structopt(long, possible_values = &Language::variants(), case_insensitive = true, default_value = "Python3")]
     language: Language,
 
-    #[structopt(long)]
+    #[structopt(long, possible_values = &Runtime::variants(), case_insensitive = true)]
     with_runtimes: Vec<Runtime>,
 
     #[structopt(long)]
@@ -100,6 +101,7 @@ fn main() {
                 match runtime {
                     Runtime::Serde => installer.install_serde_runtime().unwrap(),
                     Runtime::Bincode => installer.install_bincode_runtime().unwrap(),
+                    Runtime::LCS => installer.install_lcs_runtime().unwrap(),
                 }
             }
         }

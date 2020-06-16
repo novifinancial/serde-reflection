@@ -126,4 +126,7 @@ pub trait SourceInstaller {
 
     /// Install the bincode runtime.
     fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error>;
+
+    /// Install the Libra Canonical Serialization (LCS) runtime.
+    fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error>;
 }
