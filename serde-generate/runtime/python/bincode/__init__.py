@@ -162,18 +162,27 @@ def serialize(obj: typing.Any, obj_type) -> bytes:
             raise ValueError("Unexpected type", obj_type)
 
     else:
+        if not dataclasses.is_dataclass(obj_type):  # Enum
+            if not hasattr(obj_type, "VARIANTS"):
+                raise ValueError("Unexpected type", obj_type)
+            if not hasattr(obj, "INDEX"):
+                raise ValueError("Wrong Value for the type", obj, obj_type)
+            result += encode_variant_index(obj.__class__.INDEX)
+            # Proceed to variant
+            obj_type = obj_type.VARIANTS[obj.__class__.INDEX]
+            if not dataclasses.is_dataclass(obj_type):
+                raise ValueError("Unexpected type", obj_type)
+
         if not isinstance(obj, obj_type):
             raise ValueError("Wrong Value for the type", obj, obj_type)
 
-        if hasattr(obj.__class__, "INDEX"):  # Variant
-            result += encode_variant_index(obj.__class__.INDEX)
-
         # Content of struct or variant
-        typing_hints = get_type_hints(obj.__class__)
-        for (key, val) in obj.__dict__.items():
-            if key.startswith("__"):
-                continue
-            result += serialize(val, typing_hints[key])
+        fields = dataclasses.fields(obj_type)
+        types = get_type_hints(obj_type)
+        for field in fields:
+            field_type = types[field.name]
+            field_value = obj.__dict__[field.name]
+            result += serialize(field_value, field_type)
 
     return result
 
