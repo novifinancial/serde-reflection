@@ -105,6 +105,8 @@
 <span id="105">105</span>
 <span id="106">106</span>
 <span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -133,6 +135,7 @@
 <span class="kw">enum</span> <span class="ident">Runtime</span> {
     <span class="ident">Serde</span>,
     <span class="ident">Bincode</span>,
+    <span class="ident">LCS</span>,
 }
 }
 
@@ -148,7 +151,7 @@
     <span class="attribute">#[<span class="ident">structopt</span>(<span class="ident">long</span>, <span class="ident">possible_values</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">Language</span>::<span class="ident">variants</span>(), <span class="ident">case_insensitive</span> <span class="op">=</span> <span class="bool-val">true</span>, <span class="ident">default_value</span> <span class="op">=</span> <span class="string">&quot;Python3&quot;</span>)]</span>
     <span class="ident">language</span>: <span class="ident">Language</span>,
 
-    <span class="attribute">#[<span class="ident">structopt</span>(<span class="ident">long</span>)]</span>
+    <span class="attribute">#[<span class="ident">structopt</span>(<span class="ident">long</span>, <span class="ident">possible_values</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">Runtime</span>::<span class="ident">variants</span>(), <span class="ident">case_insensitive</span> <span class="op">=</span> <span class="bool-val">true</span>)]</span>
     <span class="ident">with_runtimes</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span>,
 
     <span class="attribute">#[<span class="ident">structopt</span>(<span class="ident">long</span>)]</span>
@@ -208,6 +211,7 @@
                 <span class="kw">match</span> <span class="ident">runtime</span> {
                     <span class="ident">Runtime</span>::<span class="ident">Serde</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">installer</span>.<span class="ident">install_serde_runtime</span>().<span class="ident">unwrap</span>(),
                     <span class="ident">Runtime</span>::<span class="ident">Bincode</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">installer</span>.<span class="ident">install_bincode_runtime</span>().<span class="ident">unwrap</span>(),
+                    <span class="ident">Runtime</span>::<span class="ident">LCS</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">installer</span>.<span class="ident">install_lcs_runtime</span>().<span class="ident">unwrap</span>(),
                 }
             }
         }

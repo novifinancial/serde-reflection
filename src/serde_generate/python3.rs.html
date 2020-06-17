@@ -235,6 +235,16 @@
 <span id="235">235</span>
 <span id="236">236</span>
 <span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -469,6 +479,16 @@ import serde_types as st&quot;#</span>
             <span class="ident">file</span>,
             <span class="string">&quot;{}&quot;</span>,
             <span class="macro">include_str</span><span class="macro">!</span>(<span class="string">&quot;../runtime/python/bincode/__init__.py&quot;</span>)
+        )<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">fn</span> <span class="ident">install_lcs_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">open_module_init_file</span>(<span class="string">&quot;lcs&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">write</span><span class="macro">!</span>(
+            <span class="ident">file</span>,
+            <span class="string">&quot;{}&quot;</span>,
+            <span class="macro">include_str</span><span class="macro">!</span>(<span class="string">&quot;../runtime/python/lcs/__init__.py&quot;</span>)
         )<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
