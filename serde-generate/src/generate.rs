@@ -53,20 +53,20 @@ struct Options {
 
     /// Module name for the Serde formats installed in the `target_source_dir`.
     #[structopt(long)]
-    name: Option<String>,
+    module_name: Option<String>,
 
-    /// Optional name of a package/namespace that contains the generated modules (useful in Python).
+    /// Optional package name where to find the `serde_types` module (useful in Python).
     #[structopt(long)]
-    package_name: Option<String>,
+    serde_package_name: Option<String>,
 }
 
 fn main() {
     let options = Options::from_args();
-    let package_name_opt = options.package_name.clone();
+    let serde_package_name_opt = options.serde_package_name.clone();
     let named_registry_opt = match &options.input {
         None => None,
         Some(input) => {
-            let name = options.name.clone().unwrap_or_else(|| {
+            let name = options.module_name.clone().unwrap_or_else(|| {
                 input
                     .file_stem()
                     .expect("failed to deduce module name from input path")
@@ -97,7 +97,7 @@ fn main() {
             let installer: Box<dyn SourceInstaller<Error = Box<dyn std::error::Error>>> =
                 match options.language {
                     Language::Python3 => {
-                        Box::new(python3::Installer::new(install_dir, package_name_opt))
+                        Box::new(python3::Installer::new(install_dir, serde_package_name_opt))
                     }
                     Language::Rust => Box::new(rust::Installer::new(install_dir)),
                 };
