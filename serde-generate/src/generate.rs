@@ -35,24 +35,34 @@ enum Runtime {
     about = "Generate code for Serde containers"
 )]
 struct Options {
+    /// Path to the YAML-encoded Serde formats.
     #[structopt(parse(from_os_str))]
     input: Option<PathBuf>,
 
+    /// Language for code generation.
     #[structopt(long, possible_values = &Language::variants(), case_insensitive = true, default_value = "Python3")]
     language: Language,
 
+    /// Directory where to write generated modules (otherwise print code on stdout).
+    #[structopt(long)]
+    target_source_dir: Option<PathBuf>,
+
+    /// Optional runtimes to install in the `target_source_dir`.
     #[structopt(long, possible_values = &Runtime::variants(), case_insensitive = true)]
     with_runtimes: Vec<Runtime>,
 
+    /// Module name for the Serde formats installed in the `target_source_dir`.
     #[structopt(long)]
     name: Option<String>,
 
+    /// Optional name of a package/namespace that contains the generated modules (useful in Python).
     #[structopt(long)]
-    target_source_dir: Option<PathBuf>,
+    package_name: Option<String>,
 }
 
 fn main() {
     let options = Options::from_args();
+    let package_name_opt = options.package_name.clone();
     let named_registry_opt = match &options.input {
         None => None,
         Some(input) => {
@@ -86,7 +96,9 @@ fn main() {
         Some(install_dir) => {
             let installer: Box<dyn SourceInstaller<Error = Box<dyn std::error::Error>>> =
                 match options.language {
-                    Language::Python3 => Box::new(python3::Installer::new(install_dir)),
+                    Language::Python3 => {
+                        Box::new(python3::Installer::new(install_dir, package_name_opt))
+                    }
                     Language::Rust => Box::new(rust::Installer::new(install_dir)),
                 };
 
