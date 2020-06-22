@@ -48,6 +48,58 @@ fn test_that_installed_python_code_parses() {
 }
 
 #[test]
+fn test_that_installed_python_code_with_package_parses() {
+    let registry = test_utils::get_registry().unwrap();
+    let dir = tempdir().unwrap();
+    let yaml_path = dir.path().join("test.yaml");
+    std::fs::write(yaml_path.clone(), serde_yaml::to_string(&registry).unwrap()).unwrap();
+
+    Command::new("cargo")
+        .arg("run")
+        .arg("-p")
+        .arg("serde-generate")
+        .arg("--")
+        .arg("--language")
+        .arg("python3")
+        .arg("--target-source-dir")
+        .arg(dir.path().join("my_package"))
+        .arg("--name")
+        .arg("test_types")
+        .arg("--package-name")
+        .arg("my_package")
+        .arg("--with-runtimes")
+        .arg("serde")
+        .arg("bincode")
+        .arg("lcs")
+        .arg("--")
+        .arg(yaml_path)
+        .status()
+        .unwrap();
+
+    std::fs::write(
+        dir.path().join("my_package").join("__init__.py"),
+        r#"
+__all__ = ["lcs", "serde", "bincode", "test_types"]
+"#,
+    )
+    .unwrap();
+
+    let python_path = format!(
+        "{}:{}",
+        std::env::var("PYTHONPATH").unwrap_or_default(),
+        dir.path().to_string_lossy(),
+    );
+    let output = Command::new("python3")
+        .arg("-c")
+        .arg("from my_package import serde_types; from my_package import bincode; from my_package import lcs; from my_package import test_types")
+        .env("PYTHONPATH", python_path)
+        .output()
+        .unwrap();
+    assert_eq!(String::new(), String::from_utf8_lossy(&output.stderr));
+    assert!(output.status.success());
+}
+
+#[test]
 fn test_that_installed_rust_code_compiles() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();

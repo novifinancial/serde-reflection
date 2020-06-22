@@ -7,20 +7,36 @@ use std::io::{Result, Write};
 use std::path::PathBuf;
 
 pub fn output(out: &mut dyn Write, registry: &Registry) -> Result<()> {
-    output_preamble(out)?;
+    output_preamble(out, None)?;
     for (name, format) in registry {
         output_container(out, name, format)?;
     }
     Ok(())
 }
 
-fn output_preamble(out: &mut dyn Write) -> Result<()> {
+fn output_with_optional_serde_package(
+    out: &mut dyn Write,
+    registry: &Registry,
+    serde_package_name: Option<String>,
+) -> Result<()> {
+    output_preamble(out, serde_package_name)?;
+    for (name, format) in registry {
+        output_container(out, name, format)?;
+    }
+    Ok(())
+}
+
+fn output_preamble(out: &mut dyn Write, serde_package_name: Option<String>) -> Result<()> {
     writeln!(
         out,
         r#"# pyre-ignore-all-errors
 from dataclasses import dataclass
 import typing
-import serde_types as st"#
+{}import serde_types as st"#,
+        match serde_package_name {
+            None => "".to_string(),
+            Some(name) => format!("from {} ", name),
+        }
     )
 }
 
@@ -188,17 +204,31 @@ fn output_container(out: &mut dyn Write, name: &str, format: &ContainerFormat) -
 
 pub struct Installer {
     install_dir: PathBuf,
+    serde_package_name: Option<String>,
 }
 
 impl Installer {
-    pub fn new(install_dir: PathBuf) -> Self {
-        Installer { install_dir }
+    pub fn new(install_dir: PathBuf, serde_package_name: Option<String>) -> Self {
+        Installer {
+            install_dir,
+            serde_package_name,
+        }
     }
 
     fn open_module_init_file(&self, name: &str) -> Result<std::fs::File> {
         let dir_path = self.install_dir.join(name);
         std::fs::create_dir_all(&dir_path)?;
         std::fs::File::create(dir_path.join("__init__.py"))
+    }
+
+    fn fix_serde_package(&self, content: &str) -> String {
+        match &self.serde_package_name {
+            None => content.into(),
+            Some(name) => content.replace(
+                "import serde_types",
+                &format!("from {} import serde_types", name),
+            ),
+        }
     }
 }
 
@@ -211,7 +241,7 @@ impl crate::SourceInstaller for Installer {
         registry: &Registry,
     ) -> std::result::Result<(), Self::Error> {
         let mut file = self.open_module_init_file(name)?;
-        output(&mut file, registry)?;
+        output_with_optional_serde_package(&mut file, registry, self.serde_package_name.clone())?;
         Ok(())
     }
 
@@ -220,7 +250,7 @@ impl crate::SourceInstaller for Installer {
         write!(
             file,
             "{}",
-            include_str!("../runtime/python/serde_types/__init__.py")
+            self.fix_serde_package(include_str!("../runtime/python/serde_types/__init__.py"))
         )?;
         Ok(())
     }
@@ -230,7 +260,7 @@ impl crate::SourceInstaller for Installer {
         write!(
             file,
             "{}",
-            include_str!("../runtime/python/bincode/__init__.py")
+            self.fix_serde_package(include_str!("../runtime/python/bincode/__init__.py"))
         )?;
         Ok(())
     }
@@ -240,7 +270,7 @@ impl crate::SourceInstaller for Installer {
         write!(
             file,
             "{}",
-            include_str!("../runtime/python/lcs/__init__.py")
+            self.fix_serde_package(include_str!("../runtime/python/lcs/__init__.py"))
         )?;
         Ok(())
     }
