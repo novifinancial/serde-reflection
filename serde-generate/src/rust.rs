@@ -7,6 +7,10 @@ use std::collections::{BTreeMap, HashSet};
 use std::io::{Result, Write};
 use std::path::PathBuf;
 
+/// Write container definitions in Rust.
+/// * All definitions will be made public.
+/// * The crate `serde_bytes` may be required.
+/// * If `with_derive_macros` is true, the crate `serde` is required.
 pub fn output(
     out: &mut dyn Write,
     with_derive_macros: bool,
@@ -19,10 +23,46 @@ pub fn output(
     let mut known_sizes = HashSet::new();
     for name in entries {
         let format = &registry[name];
-        output_container(out, with_derive_macros, name, format, &known_sizes)?;
+        output_container(
+            out,
+            with_derive_macros,
+            /* track visibility */ true,
+            name,
+            format,
+            &known_sizes,
+        )?;
         known_sizes.insert(name);
     }
     Ok(())
+}
+
+/// For each container, generate a Rust definition suitable for documentation purposes.
+pub fn quote_container_definitions(
+    registry: &Registry,
+) -> std::result::Result<BTreeMap<String, String>, Box<dyn std::error::Error>> {
+    let dependencies = analyzer::get_dependency_map(registry)?;
+    let entries = analyzer::best_effort_topological_sort(&dependencies);
+
+    let mut result = BTreeMap::new();
+    let mut known_sizes = HashSet::new();
+    for name in entries {
+        let format = &registry[name];
+        let mut content = Vec::new();
+        output_container(
+            &mut content,
+            /* with derive macros */ false,
+            /* track visibility */ false,
+            name,
+            format,
+            &known_sizes,
+        )?;
+        known_sizes.insert(name);
+        result.insert(
+            name.to_string(),
+            String::from_utf8_lossy(&content).trim().to_string() + "\n",
+        );
+    }
+    Ok(result)
 }
 
 fn output_preamble(out: &mut dyn Write, with_derive_macros: bool) -> Result<()> {
@@ -153,39 +193,43 @@ fn output_variants(
 fn output_container(
     out: &mut dyn Write,
     with_derive_macros: bool,
+    track_visibility: bool,
     name: &str,
     format: &ContainerFormat,
     known_sizes: &HashSet<&str>,
 ) -> Result<()> {
     use ContainerFormat::*;
-    let traits = if with_derive_macros {
-        "#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd)]\n"
+    let mut prefix = if with_derive_macros {
+        "#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd)]\n".to_string()
     } else {
-        ""
+        String::new()
     };
+    if track_visibility {
+        prefix.push_str("pub ");
+    }
     match format {
-        UnitStruct => writeln!(out, "{}pub struct {};\n", traits, name),
+        UnitStruct => writeln!(out, "{}struct {};\n", prefix, name),
         NewTypeStruct(format) => writeln!(
             out,
-            "{}pub struct {}({});\n",
-            traits,
+            "{}struct {}({});\n",
+            prefix,
             name,
             quote_type(format, Some(known_sizes))
         ),
         TupleStruct(formats) => writeln!(
             out,
-            "{}pub struct {}({});\n",
-            traits,
+            "{}struct {}({});\n",
+            prefix,
             name,
             quote_types(formats, Some(known_sizes))
         ),
         Struct(fields) => {
-            writeln!(out, "{}pub struct {} {{", traits, name)?;
-            output_fields(out, 4, fields, true, known_sizes)?;
+            writeln!(out, "{}struct {} {{", prefix, name)?;
+            output_fields(out, 4, fields, track_visibility, known_sizes)?;
             writeln!(out, "}}\n")
         }
         Enum(variants) => {
-            writeln!(out, "{}pub enum {} {{", traits, name)?;
+            writeln!(out, "{}enum {} {{", prefix, name)?;
             output_variants(out, variants, known_sizes)?;
             writeln!(out, "}}\n")
         }

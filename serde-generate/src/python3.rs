@@ -6,6 +6,9 @@ use std::collections::BTreeMap;
 use std::io::{Result, Write};
 use std::path::PathBuf;
 
+/// Write container definitions in Python.
+/// * The packages `dataclasses` and `typing` are assumed to be available.
+/// * The module `serde_types` is assumed to be available.
 pub fn output(out: &mut dyn Write, registry: &Registry) -> Result<()> {
     output_preamble(out, None)?;
     for (name, format) in registry {
