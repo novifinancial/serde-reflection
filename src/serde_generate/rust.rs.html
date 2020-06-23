@@ -251,6 +251,50 @@
 <span id="251">251</span>
 <span id="252">252</span>
 <span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -261,6 +305,10 @@
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::{<span class="prelude-ty">Result</span>, <span class="ident">Write</span>};
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">path</span>::<span class="ident">PathBuf</span>;
 
+<span class="doccomment">/// Write container definitions in Rust.</span>
+<span class="doccomment">/// * All definitions will be made public.</span>
+<span class="doccomment">/// * The crate `serde_bytes` may be required.</span>
+<span class="doccomment">/// * If `with_derive_macros` is true, the crate `serde` is required.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">output</span>(
     <span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>,
     <span class="ident">with_derive_macros</span>: <span class="ident">bool</span>,
@@ -273,10 +321,46 @@
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">known_sizes</span> <span class="op">=</span> <span class="ident">HashSet</span>::<span class="ident">new</span>();
     <span class="kw">for</span> <span class="ident">name</span> <span class="kw">in</span> <span class="ident">entries</span> {
         <span class="kw">let</span> <span class="ident">format</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">registry</span>[<span class="ident">name</span>];
-        <span class="ident">output_container</span>(<span class="ident">out</span>, <span class="ident">with_derive_macros</span>, <span class="ident">name</span>, <span class="ident">format</span>, <span class="kw-2">&amp;</span><span class="ident">known_sizes</span>)<span class="question-mark">?</span>;
+        <span class="ident">output_container</span>(
+            <span class="ident">out</span>,
+            <span class="ident">with_derive_macros</span>,
+            <span class="comment">/* track visibility */</span> <span class="bool-val">true</span>,
+            <span class="ident">name</span>,
+            <span class="ident">format</span>,
+            <span class="kw-2">&amp;</span><span class="ident">known_sizes</span>,
+        )<span class="question-mark">?</span>;
         <span class="ident">known_sizes</span>.<span class="ident">insert</span>(<span class="ident">name</span>);
     }
     <span class="prelude-val">Ok</span>(())
+}
+
+<span class="doccomment">/// For each container, generate a Rust definition suitable for documentation purposes.</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">quote_container_definitions</span>(
+    <span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">Registry</span>,
+) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">String</span><span class="op">&gt;</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">dependencies</span> <span class="op">=</span> <span class="ident">analyzer</span>::<span class="ident">get_dependency_map</span>(<span class="ident">registry</span>)<span class="question-mark">?</span>;
+    <span class="kw">let</span> <span class="ident">entries</span> <span class="op">=</span> <span class="ident">analyzer</span>::<span class="ident">best_effort_topological_sort</span>(<span class="kw-2">&amp;</span><span class="ident">dependencies</span>);
+
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">BTreeMap</span>::<span class="ident">new</span>();
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">known_sizes</span> <span class="op">=</span> <span class="ident">HashSet</span>::<span class="ident">new</span>();
+    <span class="kw">for</span> <span class="ident">name</span> <span class="kw">in</span> <span class="ident">entries</span> {
+        <span class="kw">let</span> <span class="ident">format</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">registry</span>[<span class="ident">name</span>];
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">content</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">new</span>();
+        <span class="ident">output_container</span>(
+            <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">content</span>,
+            <span class="comment">/* with derive macros */</span> <span class="bool-val">false</span>,
+            <span class="comment">/* track visibility */</span> <span class="bool-val">false</span>,
+            <span class="ident">name</span>,
+            <span class="ident">format</span>,
+            <span class="kw-2">&amp;</span><span class="ident">known_sizes</span>,
+        )<span class="question-mark">?</span>;
+        <span class="ident">known_sizes</span>.<span class="ident">insert</span>(<span class="ident">name</span>);
+        <span class="ident">result</span>.<span class="ident">insert</span>(
+            <span class="ident">name</span>.<span class="ident">to_string</span>(),
+            <span class="ident">String</span>::<span class="ident">from_utf8_lossy</span>(<span class="kw-2">&amp;</span><span class="ident">content</span>).<span class="ident">trim</span>().<span class="ident">to_string</span>() <span class="op">+</span> <span class="string">&quot;\n&quot;</span>,
+        );
+    }
+    <span class="prelude-val">Ok</span>(<span class="ident">result</span>)
 }
 
 <span class="kw">fn</span> <span class="ident">output_preamble</span>(<span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>, <span class="ident">with_derive_macros</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
@@ -407,39 +491,43 @@
 <span class="kw">fn</span> <span class="ident">output_container</span>(
     <span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>,
     <span class="ident">with_derive_macros</span>: <span class="ident">bool</span>,
+    <span class="ident">track_visibility</span>: <span class="ident">bool</span>,
     <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
     <span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">ContainerFormat</span>,
     <span class="ident">known_sizes</span>: <span class="kw-2">&amp;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>,
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">use</span> <span class="ident">ContainerFormat</span>::<span class="kw-2">*</span>;
-    <span class="kw">let</span> <span class="ident">traits</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">with_derive_macros</span> {
-        <span class="string">&quot;#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd)]\n&quot;</span>
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">prefix</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">with_derive_macros</span> {
+        <span class="string">&quot;#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd)]\n&quot;</span>.<span class="ident">to_string</span>()
     } <span class="kw">else</span> {
-        <span class="string">&quot;&quot;</span>
+        <span class="ident">String</span>::<span class="ident">new</span>()
     };
+    <span class="kw">if</span> <span class="ident">track_visibility</span> {
+        <span class="ident">prefix</span>.<span class="ident">push_str</span>(<span class="string">&quot;pub &quot;</span>);
+    }
     <span class="kw">match</span> <span class="ident">format</span> {
-        <span class="ident">UnitStruct</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;{}pub struct {};\n&quot;</span>, <span class="ident">traits</span>, <span class="ident">name</span>),
+        <span class="ident">UnitStruct</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;{}struct {};\n&quot;</span>, <span class="ident">prefix</span>, <span class="ident">name</span>),
         <span class="ident">NewTypeStruct</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">writeln</span><span class="macro">!</span>(
             <span class="ident">out</span>,
-            <span class="string">&quot;{}pub struct {}({});\n&quot;</span>,
-            <span class="ident">traits</span>,
+            <span class="string">&quot;{}struct {}({});\n&quot;</span>,
+            <span class="ident">prefix</span>,
             <span class="ident">name</span>,
             <span class="ident">quote_type</span>(<span class="ident">format</span>, <span class="prelude-val">Some</span>(<span class="ident">known_sizes</span>))
         ),
         <span class="ident">TupleStruct</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">writeln</span><span class="macro">!</span>(
             <span class="ident">out</span>,
-            <span class="string">&quot;{}pub struct {}({});\n&quot;</span>,
-            <span class="ident">traits</span>,
+            <span class="string">&quot;{}struct {}({});\n&quot;</span>,
+            <span class="ident">prefix</span>,
             <span class="ident">name</span>,
             <span class="ident">quote_types</span>(<span class="ident">formats</span>, <span class="prelude-val">Some</span>(<span class="ident">known_sizes</span>))
         ),
         <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;{}pub struct {} {{&quot;</span>, <span class="ident">traits</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
-            <span class="ident">output_fields</span>(<span class="ident">out</span>, <span class="number">4</span>, <span class="ident">fields</span>, <span class="bool-val">true</span>, <span class="ident">known_sizes</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;{}struct {} {{&quot;</span>, <span class="ident">prefix</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
+            <span class="ident">output_fields</span>(<span class="ident">out</span>, <span class="number">4</span>, <span class="ident">fields</span>, <span class="ident">track_visibility</span>, <span class="ident">known_sizes</span>)<span class="question-mark">?</span>;
             <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)
         }
         <span class="ident">Enum</span>(<span class="ident">variants</span>) <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;{}pub enum {} {{&quot;</span>, <span class="ident">traits</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;{}enum {} {{&quot;</span>, <span class="ident">prefix</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
             <span class="ident">output_variants</span>(<span class="ident">out</span>, <span class="ident">variants</span>, <span class="ident">known_sizes</span>)<span class="question-mark">?</span>;
             <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)
         }

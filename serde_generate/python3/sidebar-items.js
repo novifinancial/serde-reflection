@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["output",""]],"struct":[["Installer",""]]});
+initSidebarItems({"fn":[["output","Write container definitions in Python. * The packages `dataclasses` and `typing` are assumed to be available. * The module `serde_types` is assumed to be available."]],"struct":[["Installer",""]]});

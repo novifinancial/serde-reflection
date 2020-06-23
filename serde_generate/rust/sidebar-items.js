@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["output",""]],"struct":[["Installer",""]]});
+initSidebarItems({"fn":[["output","Write container definitions in Rust. * All definitions will be made public. * The crate `serde_bytes` may be required. * If `with_derive_macros` is true, the crate `serde` is required."],["quote_container_definitions","For each container, generate a Rust definition suitable for documentation purposes."]],"struct":[["Installer",""]]});
