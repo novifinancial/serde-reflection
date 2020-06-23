@@ -35,6 +35,8 @@ class BincodeSerializer {
     void serialize_variant_index(size_t value);
     void serialize_option_tag(bool value);
 
+    static constexpr bool enforce_strict_map_ordering = false;
+
     std::vector<uint8_t> bytes() && { return std::move(bytes_); }
 };
 
@@ -73,6 +75,8 @@ class BincodeDeserializer {
     size_t deserialize_len();
     size_t deserialize_variant_index();
     bool deserialize_option_tag();
+
+    static constexpr bool enforce_strict_map_ordering = false;
 };
 
 inline void BincodeSerializer::serialize_str(const std::string &value) {

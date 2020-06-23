@@ -3,7 +3,7 @@
 
 use libra_canonical_serialization as lcs;
 use serde::{Deserialize, Serialize};
-use serde_generate::{python3, rust, test_utils};
+use serde_generate::{cpp, python3, rust, test_utils};
 use serde_reflection::{Registry, Result, Samples, Tracer, TracerConfig};
 use std::fs::File;
 use std::io::Write;
@@ -12,8 +12,8 @@ use tempfile::tempdir;
 
 #[derive(Serialize, Deserialize)]
 struct Test {
-    a: Vec<u64>,
-    b: (u32, u32),
+    a: Vec<u32>,
+    b: (i64, u64),
     c: Choice,
 }
 
@@ -198,4 +198,149 @@ fn main() {{
     std::io::stdout().write_all(&output.stdout).unwrap();
     std::io::stderr().write_all(&output.stderr).unwrap();
     assert!(output.status.success());
+}
+
+#[test]
+fn test_cpp_lcs_runtime_on_simple_date() {
+    let registry = get_local_registry().unwrap();
+    let dir = tempdir().unwrap();
+    let source_path = dir.path().join("test.cpp");
+    let mut source = File::create(&source_path).unwrap();
+    cpp::output(&mut source, &registry).unwrap();
+
+    let reference = lcs::to_bytes(&Test {
+        a: vec![4, 6],
+        b: (-3, 5),
+        c: Choice::C { x: 7 },
+    })
+    .unwrap();
+
+    writeln!(
+        source,
+        r#"
+#include <cassert>
+#include "lcs.hpp"
+
+int main() {{
+    std::vector<uint8_t> input = {{{}}};
+
+    auto deserializer = LcsDeserializer(input);
+    auto test = Deserializable<Test>::deserialize(deserializer);
+
+    auto a = std::vector<uint32_t> {{4, 6}};
+    auto b = std::tuple<int64_t, uint64_t> {{-3, 5}};
+    auto c = Choice {{ Choice::C {{ 7 }} }};
+    auto test2 = Test {{a, b, c}};
+
+    assert(test == test2);
+
+    auto serializer = LcsSerializer();
+    Serializable<Test>::serialize(test2, serializer);
+    auto output = std::move(serializer).bytes();
+
+    assert(input == output);
+
+    return 0;
+}}
+"#,
+        reference
+            .iter()
+            .map(|x| format!("0x{:02x}", x))
+            .collect::<Vec<_>>()
+            .join(", ")
+    )
+    .unwrap();
+
+    let output = Command::new("clang++")
+        .arg("--std=c++17")
+        .arg("-o")
+        .arg(dir.path().join("test"))
+        .arg("-I")
+        .arg("runtime/cpp")
+        .arg(source_path)
+        .output()
+        .unwrap();
+    std::io::stdout().write(&output.stdout).unwrap();
+    std::io::stderr().write(&output.stderr).unwrap();
+    assert_eq!(String::new(), String::from_utf8_lossy(&output.stderr));
+    assert!(output.status.success());
+
+    let output = Command::new(dir.path().join("test")).output().unwrap();
+    std::io::stdout().write(&output.stdout).unwrap();
+    std::io::stderr().write(&output.stderr).unwrap();
+    assert_eq!(String::new(), String::from_utf8_lossy(&output.stderr));
+    assert!(output.status.success());
+}
+
+#[test]
+fn test_cpp_lcs_runtime_on_supported_types() {
+    let registry = test_utils::get_registry().unwrap();
+    let dir = tempdir().unwrap();
+    let source_path = dir.path().join("test.cpp");
+    let mut source = File::create(&source_path).unwrap();
+    cpp::output(&mut source, &registry).unwrap();
+
+    let values = test_utils::get_sample_values();
+    let encodings = values
+        .iter()
+        .map(|v| {
+            let bytes = lcs::to_bytes(&v).unwrap();
+            format!(
+                "std::vector<uint8_t>{{{}}}",
+                bytes
+                    .iter()
+                    .map(|x| format!("0x{:02x}", x))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            )
+        })
+        .collect::<Vec<_>>()
+        .join(", ");
+
+    writeln!(
+        source,
+        r#"
+#include <iostream>
+#include <cassert>
+#include "lcs.hpp"
+
+int main() {{
+    try {{
+        std::vector<std::vector<uint8_t>> inputs = {{{}}};
+
+        for (auto input: inputs) {{
+            auto deserializer = LcsDeserializer(input);
+            auto test = Deserializable<SerdeData>::deserialize(deserializer);
+
+            auto serializer = LcsSerializer();
+            Serializable<SerdeData>::serialize(test, serializer);
+            auto output = std::move(serializer).bytes();
+
+            assert(input == output);
+        }}
+        return 0;
+    }} catch (char const* e) {{
+        std::cout << "Error: " << e << '\n';
+        return -1;
+    }}
+}}
+"#,
+        encodings
+    )
+    .unwrap();
+
+    let status = Command::new("clang++")
+        .arg("--std=c++17")
+        .arg("-g")
+        .arg("-o")
+        .arg(dir.path().join("test"))
+        .arg("-I")
+        .arg("runtime/cpp")
+        .arg(source_path)
+        .status()
+        .unwrap();
+    assert!(status.success());
+
+    let status = Command::new(dir.path().join("test")).status().unwrap();
+    assert!(status.success());
 }
