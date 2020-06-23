@@ -261,9 +261,16 @@ struct Serializable<std::map<K, V, Allocator>> {
     static void serialize(const std::map<K, V, Allocator> &value,
                           Serializer &serializer) {
         serializer.serialize_len(value.size());
+        std::vector<size_t> offsets;
         for (const auto &item : value) {
+            if constexpr (Serializer::enforce_strict_map_ordering) {
+                offsets.push_back(serializer.get_buffer_offset());
+            }
             Serializable<K>::serialize(item.first, serializer);
             Serializable<V>::serialize(item.second, serializer);
+        }
+        if constexpr (Serializer::enforce_strict_map_ordering) {
+            serializer.sort_last_entries(std::move(offsets));
         }
     }
 };
@@ -495,10 +502,24 @@ struct Deserializable<std::map<K, V>> {
     static std::map<K, V> deserialize(Deserializer &deserializer) {
         std::map<K, V> result;
         size_t len = deserializer.deserialize_len();
+        std::optional<std::tuple<size_t, size_t>> previous_key_slice;
         for (size_t i = 0; i < len; i++) {
-            auto key = Deserializable<K>::deserialize(deserializer);
-            auto value = Deserializable<V>::deserialize(deserializer);
-            result.insert({key, value});
+            if constexpr (Deserializer::enforce_strict_map_ordering) {
+                auto start = deserializer.get_buffer_offset();
+                auto key = Deserializable<K>::deserialize(deserializer);
+                auto end = deserializer.get_buffer_offset();
+                if (previous_key_slice.has_value()) {
+                    deserializer.check_that_key_slices_are_increasing(
+                        previous_key_slice.value(), {start, end});
+                }
+                previous_key_slice = {start, end};
+                auto value = Deserializable<V>::deserialize(deserializer);
+                result.insert({key, value});
+            } else {
+                auto key = Deserializable<K>::deserialize(deserializer);
+                auto value = Deserializable<V>::deserialize(deserializer);
+                result.insert({key, value});
+            }
         }
         return result;
     }
