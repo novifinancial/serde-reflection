@@ -196,3 +196,15 @@ fn main() {{
     std::io::stderr().write_all(&output.stderr).unwrap();
     assert!(output.status.success());
 }
+
+#[test]
+fn test_rust_documentation_on_simple_data() {
+    let registry = get_local_registry().unwrap();
+    let definitions = rust::quote_container_definitions(&registry).unwrap();
+    assert_eq!(definitions.len(), 2);
+    assert!(definitions.get("Test").unwrap().starts_with("struct Test"));
+    assert!(definitions
+        .get("Choice")
+        .unwrap()
+        .starts_with("enum Choice"));
+}
