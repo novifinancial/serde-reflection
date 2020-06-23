@@ -23,7 +23,7 @@ struct uint128_t {
     friend bool operator==(const uint128_t &, const uint128_t &);
 };
 
-bool operator==(const uint128_t &lhs, const uint128_t &rhs) {
+inline bool operator==(const uint128_t &lhs, const uint128_t &rhs) {
     return lhs.high == rhs.high && lhs.low == lhs.low;
 }
 
@@ -35,7 +35,7 @@ struct int128_t {
     friend bool operator==(const int128_t &, const int128_t &);
 };
 
-bool operator==(const int128_t &lhs, const int128_t &rhs) {
+inline bool operator==(const int128_t &lhs, const int128_t &rhs) {
     return lhs.high == rhs.high && lhs.low == lhs.low;
 }
 
