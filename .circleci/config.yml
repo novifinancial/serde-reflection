@@ -35,7 +35,8 @@ jobs:
           name: Setup Additional Languages
           command: |
             sudo apt-get update && sudo apt-get upgrade -y
-            sudo apt-get install python3-all-dev python3-numpy
+            sudo apt-get install python3-all-dev python3-pip python3-numpy
+            python3 -m pip install pyre-check
       - run:
           name: Version Information
           command: rustc --version; cargo --version; rustup --version; python3 --version
