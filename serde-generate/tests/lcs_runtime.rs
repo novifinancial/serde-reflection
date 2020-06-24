@@ -51,7 +51,7 @@ fn test_python_lcs_runtime_on_simple_data() {
         r#"
 import lcs
 
-value = Test([4, 6], (3, 5), Choice.C(7))
+value = Test([4, 6], (3, 5), Choice__C(7))
 
 s = lcs.serialize(value, Test)
 assert s == bytes.fromhex("{}")

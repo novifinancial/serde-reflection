@@ -1,11 +1,9 @@
 # Copyright (c) Facebook, Inc. and its affiliates
 # SPDX-License-Identifier: MIT OR Apache-2.0
 
-# pyre-ignore-all-errors
-
 import numpy as np
 from dataclasses import dataclass
-
+import typing
 
 @dataclass(init=False)
 class uint128:
@@ -43,9 +41,9 @@ class char:
         self.value = s
 
 
-unit = type(None)
+unit = typing.Type[None]
 
-bool = np.bool
+bool = bool
 int8 = np.int8
 int16 = np.int16
 int32 = np.int32

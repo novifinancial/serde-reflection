@@ -1,6 +1,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+use serde_generate::SourceInstaller;
 use serde_generate::{python3, rust, test_utils};
 use std::fs::File;
 use std::io::Write;
@@ -19,13 +20,55 @@ fn test_that_python_code_parses() {
         "{}:runtime/python",
         std::env::var("PYTHONPATH").unwrap_or_default()
     );
-    let output = Command::new("python3")
+    let status = Command::new("python3")
         .arg(source_path)
         .env("PYTHONPATH", python_path)
-        .output()
+        .status()
         .unwrap();
-    assert_eq!(String::new(), String::from_utf8_lossy(&output.stderr));
-    assert!(output.status.success());
+    assert!(status.success());
+}
+
+#[test]
+fn test_that_installed_python_code_passes_pyre_check() {
+    let registry = test_utils::get_registry().unwrap();
+    let dir = tempdir().unwrap();
+
+    let installer =
+        python3::Installer::new(dir.path().join("src").into(), /* serde package */ None);
+    installer.install_module("test", &registry).unwrap();
+    installer.install_serde_runtime().unwrap();
+    installer.install_bincode_runtime().unwrap();
+    installer.install_lcs_runtime().unwrap();
+
+    // Sadly, we have to manage numpy typeshed manually for now until the next release of numpy.
+    let status = Command::new("cp")
+        .arg("-r")
+        .arg("runtime/python/typeshed")
+        .arg(dir.path())
+        .status()
+        .unwrap();
+    assert!(status.success());
+
+    let mut pyre_config = File::create(dir.path().join(".pyre_configuration")).unwrap();
+    writeln!(
+        &mut pyre_config,
+        r#"{{
+  "source_directories": [
+    "src"
+  ],
+  "search_path": [
+    "typeshed"
+  ]
+}}"#,
+    )
+    .unwrap();
+
+    let status = Command::new("pyre")
+        .current_dir(dir.path())
+        .arg("check")
+        .status()
+        .unwrap();
+    assert!(status.success());
 }
 
 // Quick test using rustc directly.

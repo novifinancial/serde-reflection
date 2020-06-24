@@ -1,8 +1,6 @@
 # Copyright (c) Facebook, Inc. and its affiliates
 # SPDX-License-Identifier: MIT OR Apache-2.0
 
-# pyre-ignore-all-errors
-
 import dataclasses
 import collections
 

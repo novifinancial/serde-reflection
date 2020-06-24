@@ -61,7 +61,6 @@
 //! #  "\n".to_string() + &
 //!     String::from_utf8_lossy(&source),
 //!     r#"
-//! # # pyre-ignore-all-errors
 //! from dataclasses import dataclass
 //! import typing
 //! import serde_types as st
