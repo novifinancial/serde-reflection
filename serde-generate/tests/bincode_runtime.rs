@@ -333,7 +333,7 @@ int main() {{
     )
     .unwrap();
 
-    let output = Command::new("clang++")
+    let status = Command::new("clang++")
         .arg("--std=c++17")
         .arg("-g")
         .arg("-o")
@@ -341,12 +341,9 @@ int main() {{
         .arg("-I")
         .arg("runtime/cpp")
         .arg(source_path)
-        .output()
+        .status()
         .unwrap();
-    std::io::stdout().write(&output.stdout).unwrap();
-    std::io::stderr().write(&output.stderr).unwrap();
-    assert_eq!(String::new(), String::from_utf8_lossy(&output.stderr));
-    assert!(output.status.success());
+    assert!(status.success());
 
     let output = Command::new(dir.path().join("test")).output().unwrap();
     std::io::stdout().write(&output.stdout).unwrap();
