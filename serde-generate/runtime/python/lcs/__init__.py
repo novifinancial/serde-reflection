@@ -1,8 +1,6 @@
 # Copyright (c) Facebook, Inc. and its affiliates
 # SPDX-License-Identifier: MIT OR Apache-2.0
 
-# pyre-ignore-all-errors
-
 import dataclasses
 import collections
 
@@ -15,7 +13,7 @@ LCS_MAX_LENGTH = 1 << 31
 LCS_MAX_U32 = 1 << 32 - 1
 
 
-def decode_uleb128_as_u32(content: bytes) -> typing.Tuple[st.uint32, bytes]:
+def decode_uleb128_as_u32(content: bytes) -> typing.Tuple[int, bytes]:
     value = 0
     for shift in range(0, 32, 7):
         byte = int.from_bytes(content[0:1], "little", signed=False)

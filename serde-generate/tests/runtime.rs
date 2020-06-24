@@ -50,7 +50,7 @@ fn test_python_bincode_runtime_on_simple_data() {
         r#"
 import bincode
 
-value = Test([4, 6], (3, 5), Choice.C(7))
+value = Test([4, 6], (3, 5), Choice__C(7))
 
 s = bincode.serialize(value, Test)
 assert s == bytes.fromhex("{}")

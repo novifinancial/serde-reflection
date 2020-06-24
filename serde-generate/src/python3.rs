@@ -32,8 +32,7 @@ fn output_with_optional_serde_package(
 fn output_preamble(out: &mut dyn Write, serde_package_name: Option<String>) -> Result<()> {
     writeln!(
         out,
-        r#"# pyre-ignore-all-errors
-from dataclasses import dataclass
+        r#"from dataclasses import dataclass
 import typing
 {}import serde_types as st"#,
         match serde_package_name {
@@ -105,12 +104,12 @@ fn output_variant(
     match variant {
         Unit => writeln!(
             out,
-            "\n@dataclass\nclass _{}_{}({}):\n    INDEX = {}\n",
+            "\n@dataclass\nclass {}__{}({}):\n    INDEX = {}\n",
             base, name, base, index,
         ),
         NewType(format) => writeln!(
             out,
-            "\n@dataclass\nclass _{}_{}({}):\n    INDEX = {}\n    value: {}\n",
+            "\n@dataclass\nclass {}__{}({}):\n    INDEX = {}\n    value: {}\n",
             base,
             name,
             base,
@@ -119,7 +118,7 @@ fn output_variant(
         ),
         Tuple(formats) => writeln!(
             out,
-            "\n@dataclass\nclass _{}_{}({}):\n    INDEX = {}\n    value: typing.Tuple[{}]\n",
+            "\n@dataclass\nclass {}__{}({}):\n    INDEX = {}\n    value: typing.Tuple[{}]\n",
             base,
             name,
             base,
@@ -129,7 +128,7 @@ fn output_variant(
         Struct(fields) => {
             writeln!(
                 out,
-                "\n@dataclass\nclass _{}_{}({}):\n    INDEX = {}",
+                "\n@dataclass\nclass {}__{}({}):\n    INDEX = {}",
                 base, name, base, index
             )?;
             output_fields(out, 4, fields)?;
@@ -146,22 +145,6 @@ fn output_variants(
 ) -> Result<()> {
     for (index, variant) in variants {
         output_variant(out, base, &variant.name, *index, &variant.value)?;
-    }
-    Ok(())
-}
-
-fn output_variant_aliases(
-    out: &mut dyn Write,
-    base: &str,
-    variants: &BTreeMap<u32, Named<VariantFormat>>,
-) -> Result<()> {
-    writeln!(out)?;
-    for variant in variants.values() {
-        writeln!(
-            out,
-            "{}.{} = _{}_{}",
-            base, &variant.name, base, &variant.name
-        )?;
     }
     Ok(())
 }
@@ -188,16 +171,16 @@ fn output_container(out: &mut dyn Write, name: &str, format: &ContainerFormat) -
             writeln!(out)
         }
         Enum(variants) => {
-            writeln!(out, "\nclass {}:\n    pass\n", name)?;
+            // Initializing VARIANTS with a temporary value for typechecking purposes.
+            writeln!(out, "\nclass {}:\n    VARIANTS = []\n", name)?;
             output_variants(out, name, variants)?;
-            output_variant_aliases(out, name, variants)?;
             writeln!(
                 out,
                 "{}.VARIANTS = [\n{}]\n",
                 name,
                 variants
                     .iter()
-                    .map(|(_, v)| format!("    {}.{},\n", name, v.name))
+                    .map(|(_, v)| format!("    {}__{},\n", name, v.name))
                     .collect::<Vec<_>>()
                     .join("")
             )
