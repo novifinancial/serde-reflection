@@ -11,6 +11,10 @@ import typing
 from typing import get_type_hints
 
 
+LCS_MAX_LENGTH = 1 << 31
+LCS_MAX_U32 = 1 << 32 - 1
+
+
 def decode_uleb128_as_u32(content: bytes) -> typing.Tuple[st.uint32, bytes]:
     value = 0
     for shift in range(0, 32, 7):
@@ -18,19 +22,19 @@ def decode_uleb128_as_u32(content: bytes) -> typing.Tuple[st.uint32, bytes]:
         content = content[1:]
         digit = byte & 0x7F
         value |= digit << shift
+        if value > LCS_MAX_U32:
+            raise ValueError("Overflow while parsing uleb128-encoded uint32 value")
         if digit == byte:
             if shift > 0 and digit == 0:
                 raise ValueError("Invalid uleb128 number (unexpected zero digit)")
-            break
+            return value, content
 
-    if value >= 1 << 32:
-        raise ValueError("Overflow while parsing uleb128-encoded uint32 value")
-    return value, content
+    raise ValueError("Overflow while parsing uleb128-encoded uint32 value")
 
 
 def decode_length(content: bytes) -> typing.Tuple[int, bytes]:
     value, content = decode_uleb128_as_u32(content)
-    if value > 1 << 31:
+    if value > LCS_MAX_LENGTH:
         raise ValueError("Length exceeds the maximum supported value.")
     return value, content
 
@@ -61,6 +65,8 @@ def encode_u32_as_uleb128(value: int) -> bytes:
 
 
 def encode_length(value: int) -> bytes:
+    if value > LCS_MAX_LENGTH:
+        raise ValueError("Length exceeds the maximum supported value.")
     return encode_u32_as_uleb128(value)
 
 
