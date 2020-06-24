@@ -102,7 +102,7 @@ fn main() {
                         Box::new(python3::Installer::new(install_dir, serde_package_name_opt))
                     }
                     Language::Rust => Box::new(rust::Installer::new(install_dir)),
-                    Language::Cpp => panic!("not supported"),
+                    Language::Cpp => Box::new(cpp::Installer::new(install_dir)),
                 };
 
             if let Some((registry, name)) = named_registry_opt {
