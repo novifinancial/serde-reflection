@@ -5,6 +5,7 @@ use crate::analyzer;
 use serde_reflection::{ContainerFormat, Format, Named, Registry, VariantFormat};
 use std::collections::{BTreeMap, HashSet};
 use std::io::{Result, Write};
+use std::path::PathBuf;
 
 // TODO:
 // * optional namespace
@@ -337,5 +338,52 @@ fn output_container_traits(
             }
             Ok(())
         }
+    }
+}
+
+pub struct Installer {
+    install_dir: PathBuf,
+}
+
+impl Installer {
+    pub fn new(install_dir: PathBuf) -> Self {
+        Installer { install_dir }
+    }
+
+    fn create_header_file(&self, name: &str) -> Result<std::fs::File> {
+        let dir_path = &self.install_dir;
+        std::fs::create_dir_all(dir_path)?;
+        std::fs::File::create(dir_path.join(name.to_string() + ".hpp"))
+    }
+}
+
+impl crate::SourceInstaller for Installer {
+    type Error = Box<dyn std::error::Error>;
+
+    fn install_module(
+        &self,
+        name: &str,
+        registry: &Registry,
+    ) -> std::result::Result<(), Self::Error> {
+        let mut file = self.create_header_file(name)?;
+        output(&mut file, &registry)
+    }
+
+    fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {
+        let mut file = self.create_header_file("serde")?;
+        write!(file, "{}", include_str!("../runtime/cpp/serde.hpp"))?;
+        Ok(())
+    }
+
+    fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error> {
+        let mut file = self.create_header_file("bincode")?;
+        write!(file, "{}", include_str!("../runtime/cpp/bincode.hpp"))?;
+        Ok(())
+    }
+
+    fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
+        let mut file = self.create_header_file("lcs")?;
+        write!(file, "{}", include_str!("../runtime/cpp/lcs.hpp"))?;
+        Ok(())
     }
 }

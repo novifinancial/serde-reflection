@@ -130,3 +130,42 @@ fn test_that_installed_rust_code_compiles() {
         .unwrap();
     assert!(status.success());
 }
+
+#[test]
+fn test_that_installed_cpp_code_compiles() {
+    let registry = test_utils::get_registry().unwrap();
+    let dir = tempdir().unwrap();
+    let yaml_path = dir.path().join("test.yaml");
+    std::fs::write(yaml_path.clone(), serde_yaml::to_string(&registry).unwrap()).unwrap();
+
+    Command::new("cargo")
+        .arg("run")
+        .arg("-p")
+        .arg("serde-generate")
+        .arg("--")
+        .arg("--language")
+        .arg("cpp")
+        .arg("--target-source-dir")
+        .arg(dir.path())
+        .arg(yaml_path)
+        .arg("--with-runtimes")
+        .arg("serde")
+        .arg("bincode")
+        .arg("lcs")
+        .arg("--")
+        .status()
+        .unwrap();
+
+    let output = Command::new("clang++")
+        .arg("--std=c++17")
+        .arg("-c")
+        .arg("-o")
+        .arg(dir.path().join("test.o"))
+        .arg("-I")
+        .arg(dir.path())
+        .arg(dir.path().join("test.hpp"))
+        .output()
+        .unwrap();
+    assert_eq!(String::new(), String::from_utf8_lossy(&output.stderr));
+    assert!(output.status.success());
+}

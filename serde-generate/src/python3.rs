@@ -201,7 +201,7 @@ impl Installer {
         }
     }
 
-    fn open_module_init_file(&self, name: &str) -> Result<std::fs::File> {
+    fn create_module_init_file(&self, name: &str) -> Result<std::fs::File> {
         let dir_path = self.install_dir.join(name);
         std::fs::create_dir_all(&dir_path)?;
         std::fs::File::create(dir_path.join("__init__.py"))
@@ -226,13 +226,13 @@ impl crate::SourceInstaller for Installer {
         name: &str,
         registry: &Registry,
     ) -> std::result::Result<(), Self::Error> {
-        let mut file = self.open_module_init_file(name)?;
+        let mut file = self.create_module_init_file(name)?;
         output_with_optional_serde_package(&mut file, registry, self.serde_package_name.clone())?;
         Ok(())
     }
 
     fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {
-        let mut file = self.open_module_init_file("serde_types")?;
+        let mut file = self.create_module_init_file("serde_types")?;
         write!(
             file,
             "{}",
@@ -242,7 +242,7 @@ impl crate::SourceInstaller for Installer {
     }
 
     fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error> {
-        let mut file = self.open_module_init_file("bincode")?;
+        let mut file = self.create_module_init_file("bincode")?;
         write!(
             file,
             "{}",
@@ -252,7 +252,7 @@ impl crate::SourceInstaller for Installer {
     }
 
     fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        let mut file = self.open_module_init_file("lcs")?;
+        let mut file = self.create_module_init_file("lcs")?;
         write!(
             file,
             "{}",
