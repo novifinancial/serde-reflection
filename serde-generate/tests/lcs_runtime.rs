@@ -204,9 +204,9 @@ fn main() {{
 fn test_cpp_lcs_runtime_on_simple_date() {
     let registry = get_local_registry().unwrap();
     let dir = tempdir().unwrap();
-    let source_path = dir.path().join("test.cpp");
-    let mut source = File::create(&source_path).unwrap();
-    cpp::output(&mut source, &registry).unwrap();
+    let header_path = dir.path().join("test.hpp");
+    let mut header = File::create(&header_path).unwrap();
+    cpp::output(&mut header, &registry).unwrap();
 
     let reference = lcs::to_bytes(&Test {
         a: vec![4, 6],
@@ -215,11 +215,14 @@ fn test_cpp_lcs_runtime_on_simple_date() {
     })
     .unwrap();
 
+    let source_path = dir.path().join("test.cpp");
+    let mut source = File::create(&source_path).unwrap();
     writeln!(
         source,
         r#"
 #include <cassert>
 #include "lcs.hpp"
+#include "test.hpp"
 
 int main() {{
     std::vector<uint8_t> input = {{{}}};
@@ -276,9 +279,9 @@ int main() {{
 fn test_cpp_lcs_runtime_on_supported_types() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
-    let source_path = dir.path().join("test.cpp");
-    let mut source = File::create(&source_path).unwrap();
-    cpp::output(&mut source, &registry).unwrap();
+    let header_path = dir.path().join("test.hpp");
+    let mut header = File::create(&header_path).unwrap();
+    cpp::output(&mut header, &registry).unwrap();
 
     let values = test_utils::get_sample_values();
     let encodings = values
@@ -297,12 +300,15 @@ fn test_cpp_lcs_runtime_on_supported_types() {
         .collect::<Vec<_>>()
         .join(", ");
 
+    let source_path = dir.path().join("test.cpp");
+    let mut source = File::create(&source_path).unwrap();
     writeln!(
         source,
         r#"
 #include <iostream>
 #include <cassert>
 #include "lcs.hpp"
+#include "test.hpp"
 
 int main() {{
     try {{

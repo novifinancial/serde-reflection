@@ -38,7 +38,14 @@ pub fn output(
 }
 
 fn output_preambule(out: &mut dyn std::io::Write) -> Result<()> {
-    writeln!(out, "#include \"serde.hpp\"\n")
+    writeln!(
+        out,
+        r#"
+#pragma once
+
+#include "serde.hpp"
+"#
+    )
 }
 
 /// If known_sizes is present, we must try to return a type with a known size as well.
