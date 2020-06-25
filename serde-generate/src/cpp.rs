@@ -67,12 +67,12 @@ fn quote_type(format: &Format, known_sizes: Option<&HashSet<&str>>, namespace: &
         I16 => "int16_t".into(),
         I32 => "int32_t".into(),
         I64 => "int64_t".into(),
-        I128 => "int128_t".into(),
+        I128 => "serde::int128_t".into(),
         U8 => "uint8_t".into(),
         U16 => "uint16_t".into(),
         U32 => "uint32_t".into(),
         U64 => "uint64_t".into(),
-        U128 => "uint128_t".into(),
+        U128 => "serde::uint128_t".into(),
         F32 => "float".into(),
         F64 => "double".into(),
         Char => "char32_t".into(),
@@ -256,13 +256,13 @@ fn output_struct_serializable(
         r#"
 template <>
 template <typename Serializer>
-void Serializable<{}>::serialize(const {} &obj, Serializer &serializer) {{"#,
+void serde::Serializable<{}>::serialize(const {} &obj, Serializer &serializer) {{"#,
         name, name,
     )?;
     for field in fields {
         writeln!(
             out,
-            "    Serializable<decltype(obj.{})>::serialize(obj.{}, serializer);",
+            "    serde::Serializable<decltype(obj.{})>::serialize(obj.{}, serializer);",
             field, field,
         )?;
     }
@@ -279,14 +279,14 @@ fn output_struct_deserializable(
         r#"
 template <>
 template <typename Deserializer>
-{} Deserializable<{}>::deserialize(Deserializer &deserializer) {{
+{} serde::Deserializable<{}>::deserialize(Deserializer &deserializer) {{
     {} obj;"#,
         name, name, name,
     )?;
     for field in fields {
         writeln!(
             out,
-            "    obj.{} = Deserializable<decltype(obj.{})>::deserialize(deserializer);",
+            "    obj.{} = serde::Deserializable<decltype(obj.{})>::deserialize(deserializer);",
             field, field,
         )?;
     }

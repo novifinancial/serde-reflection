@@ -15,6 +15,8 @@
 #include <variant>
 #include <vector>
 
+namespace serde {
+
 // Basic implementation for 128-bit unsigned integers.
 struct uint128_t {
     uint64_t high;
@@ -578,3 +580,5 @@ struct Deserializable<std::variant<Types...>> {
         return cases.at(index)(deserializer);
     }
 };
+
+} // end of namespace serde

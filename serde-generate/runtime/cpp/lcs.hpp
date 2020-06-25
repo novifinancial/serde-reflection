@@ -7,6 +7,8 @@
 
 #include "serde.hpp"
 
+namespace serde {
+
 // Maximum length supported for LCS sequences and maps.
 constexpr size_t LCS_MAX_LENGTH = 1ull << 31;
 
@@ -344,3 +346,5 @@ inline void LcsDeserializer::check_that_key_slices_are_increasing(
               "expected order";
     }
 }
+
+} // end of namespace serde

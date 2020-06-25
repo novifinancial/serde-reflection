@@ -224,6 +224,8 @@ fn test_cpp_lcs_runtime_on_simple_date() {
 #include "lcs.hpp"
 #include "test.hpp"
 
+using namespace serde;
+
 int main() {{
     std::vector<uint8_t> input = {{{}}};
 
@@ -309,6 +311,8 @@ fn test_cpp_lcs_runtime_on_supported_types() {
 #include <cassert>
 #include "lcs.hpp"
 #include "test.hpp"
+
+using namespace serde;
 
 int main() {{
     try {{
