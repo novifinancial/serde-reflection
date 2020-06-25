@@ -10,8 +10,10 @@ use std::path::PathBuf;
 pub fn output(
     out: &mut dyn Write,
     registry: &Registry,
+    namespace: Option<&str>,
 ) -> std::result::Result<(), Box<dyn std::error::Error>> {
-    output_preambule(out)?;
+    output_preamble(out)?;
+    output_open_namespace(out, namespace)?;
 
     let dependencies = analyzer::get_dependency_map(registry)?;
     let entries = analyzer::best_effort_topological_sort(&dependencies);
@@ -25,19 +27,20 @@ pub fn output(
             }
         }
         let format = &registry[name];
-        output_container(out, name, format, &known_sizes)?;
+        output_container(out, name, format, &known_sizes, namespace)?;
         known_sizes.insert(name);
         known_names.insert(name);
     }
 
+    output_close_namespace(out, namespace)?;
     writeln!(out)?;
     for (name, format) in registry {
-        output_container_traits(out, name, format)?;
+        output_container_traits(out, &name, format, namespace)?;
     }
     Ok(())
 }
 
-fn output_preambule(out: &mut dyn std::io::Write) -> Result<()> {
+fn output_preamble(out: &mut dyn std::io::Write) -> Result<()> {
     writeln!(
         out,
         r#"
@@ -48,18 +51,37 @@ fn output_preambule(out: &mut dyn std::io::Write) -> Result<()> {
     )
 }
 
+fn output_open_namespace(out: &mut dyn std::io::Write, namespace: Option<&str>) -> Result<()> {
+    if let Some(name) = namespace {
+        writeln!(out, "\nnamespace {} {{", name,)?;
+    }
+    Ok(())
+}
+
+fn output_close_namespace(out: &mut dyn std::io::Write, namespace: Option<&str>) -> Result<()> {
+    if let Some(name) = namespace {
+        writeln!(out, "}} // end of namespace {}", name,)?;
+    }
+    Ok(())
+}
+
 /// If known_sizes is present, we must try to return a type with a known size as well.
-fn quote_type(format: &Format, known_sizes: Option<&HashSet<&str>>, namespace: &str) -> String {
+/// A non-empty `namespace_prefix` is required when the type is quoted from a nested struct.
+fn quote_type(
+    format: &Format,
+    known_sizes: Option<&HashSet<&str>>,
+    namespace_prefix: &str,
+) -> String {
     use Format::*;
     match format {
         TypeName(x) => {
             if let Some(set) = known_sizes {
                 if !set.contains(x.as_str()) {
                     // Cannot use unique_ptr because we need a copy constructor (e.g. for vectors).
-                    return format!("std::shared_ptr<{}{}>", namespace, x);
+                    return format!("std::shared_ptr<{}{}>", namespace_prefix, x);
                 }
             }
-            format!("{}{}", namespace, x)
+            format!("{}{}", namespace_prefix, x)
         }
         Unit => "std::monostate".into(),
         Bool => "bool".into(),
@@ -81,21 +103,24 @@ fn quote_type(format: &Format, known_sizes: Option<&HashSet<&str>>, namespace: &
 
         Option(format) => format!(
             "std::optional<{}>",
-            quote_type(format, known_sizes, namespace)
+            quote_type(format, known_sizes, namespace_prefix)
         ),
-        Seq(format) => format!("std::vector<{}>", quote_type(format, None, namespace)),
+        Seq(format) => format!(
+            "std::vector<{}>",
+            quote_type(format, None, namespace_prefix)
+        ),
         Map { key, value } => format!(
             "std::map<{}, {}>",
-            quote_type(key, None, namespace),
-            quote_type(value, None, namespace)
+            quote_type(key, None, namespace_prefix),
+            quote_type(value, None, namespace_prefix)
         ),
         Tuple(formats) => format!(
             "std::tuple<{}>",
-            quote_types(formats, known_sizes, namespace)
+            quote_types(formats, known_sizes, namespace_prefix)
         ),
         TupleArray { content, size } => format!(
             "std::array<{}, {}>",
-            quote_type(content, known_sizes, namespace),
+            quote_type(content, known_sizes, namespace_prefix),
             *size
         ),
 
@@ -103,10 +128,14 @@ fn quote_type(format: &Format, known_sizes: Option<&HashSet<&str>>, namespace: &
     }
 }
 
-fn quote_types(formats: &[Format], known_sizes: Option<&HashSet<&str>>, namespace: &str) -> String {
+fn quote_types(
+    formats: &[Format],
+    known_sizes: Option<&HashSet<&str>>,
+    namespace_prefix: &str,
+) -> String {
     formats
         .iter()
-        .map(|x| quote_type(x, known_sizes, namespace))
+        .map(|x| quote_type(x, known_sizes, namespace_prefix))
         .collect::<Vec<_>>()
         .join(", ")
 }
@@ -116,7 +145,7 @@ fn output_fields(
     indentation: usize,
     fields: &[Named<Format>],
     known_sizes: &HashSet<&str>,
-    namespace: &str,
+    namespace_prefix: &str,
 ) -> Result<()> {
     let tab = " ".repeat(indentation);
     for field in fields {
@@ -124,7 +153,7 @@ fn output_fields(
             out,
             "{}{} {};",
             tab,
-            quote_type(&field.value, Some(known_sizes), namespace),
+            quote_type(&field.value, Some(known_sizes), namespace_prefix),
             field.name
         )?;
     }
@@ -136,28 +165,33 @@ fn output_variant(
     name: &str,
     variant: &VariantFormat,
     known_sizes: &HashSet<&str>,
+    namespace: Option<&str>,
 ) -> Result<()> {
     use VariantFormat::*;
     let operator = format!("friend bool operator==(const {}&, const {}&);", name, name);
+    let namespace_prefix = match namespace {
+        None => "::".into(),
+        Some(name) => format!("{}::", name),
+    };
     match variant {
         Unit => writeln!(out, "    struct {} {{\n        {}\n    }};", name, operator),
         NewType(format) => writeln!(
             out,
             "    struct {} {{\n        {} value;\n        {}\n    }};",
             name,
-            quote_type(format, Some(known_sizes), "::"),
+            quote_type(format, Some(known_sizes), &namespace_prefix),
             operator,
         ),
         Tuple(formats) => writeln!(
             out,
             "    struct {} {{\n        std::tuple<{}> value;\n        {}\n    }};",
             name,
-            quote_types(formats, Some(known_sizes), "::"),
+            quote_types(formats, Some(known_sizes), &namespace_prefix),
             operator
         ),
         Struct(fields) => {
             writeln!(out, "    struct {} {{", name)?;
-            output_fields(out, 8, fields, known_sizes, "::")?;
+            output_fields(out, 8, fields, known_sizes, &namespace_prefix)?;
             writeln!(out, "        {}\n    }};", operator)
         }
         Variable(_) => panic!("incorrect value"),
@@ -168,10 +202,11 @@ fn output_variants(
     out: &mut dyn std::io::Write,
     variants: &BTreeMap<u32, Named<VariantFormat>>,
     known_sizes: &HashSet<&str>,
+    namespace: Option<&str>,
 ) -> Result<()> {
     for (expected_index, (index, variant)) in variants.iter().enumerate() {
         assert_eq!(*index, expected_index as u32);
-        output_variant(out, &variant.name, &variant.value, known_sizes)?;
+        output_variant(out, &variant.name, &variant.value, known_sizes, namespace)?;
     }
     Ok(())
 }
@@ -185,6 +220,7 @@ fn output_container(
     name: &str,
     format: &ContainerFormat,
     known_sizes: &HashSet<&str>,
+    namespace: Option<&str>,
 ) -> Result<()> {
     use ContainerFormat::*;
     let operator = format!("friend bool operator==(const {}&, const {}&);", name, name);
@@ -211,7 +247,7 @@ fn output_container(
         }
         Enum(variants) => {
             writeln!(out, "struct {} {{", name)?;
-            output_variants(out, variants, known_sizes)?;
+            output_variants(out, variants, known_sizes, namespace)?;
             writeln!(
                 out,
                 "    std::variant<{}> value;\n    {}\n}};\n",
@@ -293,10 +329,21 @@ template <typename Deserializer>
     writeln!(out, "    return obj;\n}}")
 }
 
-fn output_struct_traits(out: &mut dyn std::io::Write, name: &str, fields: &[&str]) -> Result<()> {
+fn output_struct_traits(
+    out: &mut dyn std::io::Write,
+    name: &str,
+    fields: &[&str],
+    namespace: Option<&str>,
+) -> Result<()> {
+    output_open_namespace(out, namespace)?;
     output_struct_equality_test(out, name, fields)?;
-    output_struct_serializable(out, name, fields)?;
-    output_struct_deserializable(out, name, fields)
+    output_close_namespace(out, namespace)?;
+    let namespaced_name = match namespace {
+        None => name.into(),
+        Some(prefix) => format!("{}::{}", prefix, name),
+    };
+    output_struct_serializable(out, &namespaced_name, fields)?;
+    output_struct_deserializable(out, &namespaced_name, fields)
 }
 
 fn get_variant_fields(format: &VariantFormat) -> Vec<&str> {
@@ -317,12 +364,13 @@ fn output_container_traits(
     out: &mut dyn std::io::Write,
     name: &str,
     format: &ContainerFormat,
+    namespace: Option<&str>,
 ) -> Result<()> {
     use ContainerFormat::*;
     match format {
-        UnitStruct => output_struct_traits(out, name, &[]),
-        NewTypeStruct(_format) => output_struct_traits(out, name, &["value"]),
-        TupleStruct(_formats) => output_struct_traits(out, name, &["value"]),
+        UnitStruct => output_struct_traits(out, name, &[], namespace),
+        NewTypeStruct(_format) => output_struct_traits(out, name, &["value"], namespace),
+        TupleStruct(_formats) => output_struct_traits(out, name, &["value"], namespace),
         Struct(fields) => output_struct_traits(
             out,
             name,
@@ -330,14 +378,16 @@ fn output_container_traits(
                 .iter()
                 .map(|field| field.name.as_str())
                 .collect::<Vec<_>>(),
+            namespace,
         ),
         Enum(variants) => {
-            output_struct_traits(out, name, &["value"])?;
+            output_struct_traits(out, name, &["value"], namespace)?;
             for variant in variants.values() {
                 output_struct_traits(
                     out,
                     &format!("{}::{}", name, variant.name),
                     &get_variant_fields(&variant.value),
+                    namespace,
                 )?;
             }
             Ok(())
@@ -370,7 +420,7 @@ impl crate::SourceInstaller for Installer {
         registry: &Registry,
     ) -> std::result::Result<(), Self::Error> {
         let mut file = self.create_header_file(name)?;
-        output(&mut file, &registry)
+        output(&mut file, &registry, Some(name))
     }
 
     fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {

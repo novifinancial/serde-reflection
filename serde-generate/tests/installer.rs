@@ -156,7 +156,7 @@ fn test_that_installed_cpp_code_compiles() {
         .status()
         .unwrap();
 
-    let output = Command::new("clang++")
+    let status = Command::new("clang++")
         .arg("--std=c++17")
         .arg("-c")
         .arg("-o")
@@ -164,8 +164,7 @@ fn test_that_installed_cpp_code_compiles() {
         .arg("-I")
         .arg(dir.path())
         .arg(dir.path().join("test.hpp"))
-        .output()
+        .status()
         .unwrap();
-    assert_eq!(String::new(), String::from_utf8_lossy(&output.stderr));
-    assert!(output.status.success());
+    assert!(status.success());
 }
