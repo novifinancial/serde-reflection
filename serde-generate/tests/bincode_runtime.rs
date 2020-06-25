@@ -215,7 +215,7 @@ fn test_cpp_bincode_runtime_on_simple_date() {
     let dir = tempdir().unwrap();
     let header_path = dir.path().join("test.hpp");
     let mut header = File::create(&header_path).unwrap();
-    cpp::output(&mut header, &registry).unwrap();
+    cpp::output(&mut header, &registry, Some("test")).unwrap();
 
     let reference = bincode::serialize(&Test {
         a: vec![4, 6],
@@ -234,6 +234,8 @@ fn test_cpp_bincode_runtime_on_simple_date() {
 #include "test.hpp"
 
 using namespace serde;
+using test::Choice;
+using test::Test;
 
 int main() {{
     std::vector<uint8_t> input = {{{}}};
@@ -292,7 +294,7 @@ fn test_cpp_bincode_runtime_on_supported_types() {
     let dir = tempdir().unwrap();
     let header_path = dir.path().join("test.hpp");
     let mut header = File::create(&header_path).unwrap();
-    cpp::output(&mut header, &registry).unwrap();
+    cpp::output(&mut header, &registry, None).unwrap();
 
     let values = test_utils::get_sample_values();
     let encodings = values

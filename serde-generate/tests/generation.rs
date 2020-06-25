@@ -76,7 +76,7 @@ fn test_that_cpp_code_compiles() {
     let dir = tempdir().unwrap();
     let header_path = dir.path().join("test.hpp");
     let mut header = File::create(&header_path).unwrap();
-    cpp::output(&mut header, &registry).unwrap();
+    cpp::output(&mut header, &registry, None).unwrap();
 
     let source_path = dir.path().join("test.cpp");
     let mut source = File::create(&source_path).unwrap();

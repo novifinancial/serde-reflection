@@ -82,7 +82,7 @@ fn main() {
 
     match options.target_source_dir {
         None => {
-            if let Some((registry, _)) = named_registry_opt {
+            if let Some((registry, name)) = named_registry_opt {
                 let stdout = std::io::stdout();
                 let mut out = stdout.lock();
                 match options.language {
@@ -90,7 +90,7 @@ fn main() {
                     Language::Rust => {
                         rust::output(&mut out, /* with_derive_macros */ true, &registry).unwrap()
                     }
-                    Language::Cpp => cpp::output(&mut out, &registry).unwrap(),
+                    Language::Cpp => cpp::output(&mut out, &registry, Some(&name)).unwrap(),
                 }
             }
         }
