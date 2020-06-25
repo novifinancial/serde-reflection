@@ -233,6 +233,8 @@ fn test_cpp_bincode_runtime_on_simple_date() {
 #include "bincode.hpp"
 #include "test.hpp"
 
+using namespace serde;
+
 int main() {{
     std::vector<uint8_t> input = {{{}}};
 
@@ -317,6 +319,8 @@ fn test_cpp_bincode_runtime_on_supported_types() {
 #include <cassert>
 #include "bincode.hpp"
 #include "test.hpp"
+
+using namespace serde;
 
 int main() {{
     std::vector<std::vector<uint8_t>> inputs = {{{}}};

@@ -5,6 +5,8 @@
 
 #include "serde.hpp"
 
+namespace serde {
+
 class BincodeSerializer {
     std::vector<uint8_t> bytes_;
 
@@ -267,3 +269,5 @@ inline size_t BincodeDeserializer::deserialize_variant_index() {
 inline bool BincodeDeserializer::deserialize_option_tag() {
     return deserialize_bool();
 }
+
+} // end of namespace serde
