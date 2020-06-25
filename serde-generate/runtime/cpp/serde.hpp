@@ -205,10 +205,10 @@ struct Serializable<int128_t> {
 // --- Derivation of Serializable for composite types ---
 
 // Unique pointers (non-nullable)
-template <typename T, typename Deleter>
-struct Serializable<std::unique_ptr<T, Deleter>> {
+template <typename T>
+struct Serializable<std::shared_ptr<T>> {
     template <typename Serializer>
-    static void serialize(const std::unique_ptr<T, Deleter> &value,
+    static void serialize(const std::shared_ptr<T> &value,
                           Serializer &serializer) {
         Serializable<T>::serialize(*value, serializer);
     }
@@ -459,10 +459,10 @@ struct Deserializable<int128_t> {
 
 // Unique pointers
 template <typename T>
-struct Deserializable<std::unique_ptr<T>> {
+struct Deserializable<std::shared_ptr<T>> {
     template <typename Deserializer>
-    static std::unique_ptr<T> deserialize(Deserializer &deserializer) {
-        return std::make_unique<T>(
+    static std::shared_ptr<T> deserialize(Deserializer &deserializer) {
+        return std::make_shared<T>(
             Deserializable<T>::deserialize(deserializer));
     }
 };

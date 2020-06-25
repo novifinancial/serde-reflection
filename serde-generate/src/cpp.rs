@@ -7,10 +7,6 @@ use std::collections::{BTreeMap, HashSet};
 use std::io::{Result, Write};
 use std::path::PathBuf;
 
-// TODO:
-// * optional namespace
-// * optionally use `using` for newtype/tuple structs and variants, as well as enums
-
 pub fn output(
     out: &mut dyn Write,
     registry: &Registry,
@@ -52,7 +48,8 @@ fn quote_type(format: &Format, known_sizes: Option<&HashSet<&str>>, namespace: &
         TypeName(x) => {
             if let Some(set) = known_sizes {
                 if !set.contains(x.as_str()) {
-                    return format!("std::unique_ptr<{}{}>", namespace, x);
+                    // Cannot use unique_ptr because we need a copy constructor (e.g. for vectors).
+                    return format!("std::shared_ptr<{}{}>", namespace, x);
                 }
             }
             format!("{}{}", namespace, x)
