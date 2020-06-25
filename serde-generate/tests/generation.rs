@@ -74,9 +74,21 @@ fn test_that_installed_python_code_passes_pyre_check() {
 fn test_that_cpp_code_compiles() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
+    let header_path = dir.path().join("test.hpp");
+    let mut header = File::create(&header_path).unwrap();
+    cpp::output(&mut header, &registry).unwrap();
+
     let source_path = dir.path().join("test.cpp");
     let mut source = File::create(&source_path).unwrap();
-    cpp::output(&mut source, &registry).unwrap();
+    writeln!(
+        source,
+        r#"
+#include <cassert>
+#include "bincode.hpp"
+#include "test.hpp"
+"#
+    )
+    .unwrap();
 
     let output = Command::new("clang++")
         .arg("--std=c++17")
