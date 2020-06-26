@@ -104,6 +104,77 @@ fn test_that_cpp_code_compiles() {
     assert!(output.status.success());
 }
 
+#[test]
+fn test_that_cpp_code_links() {
+    let registry = test_utils::get_registry().unwrap();
+    let dir = tempdir().unwrap();
+    let header_path = dir.path().join("test.hpp");
+    let mut header = File::create(&header_path).unwrap();
+    cpp::output(&mut header, &registry, None).unwrap();
+
+    let source_path = dir.path().join("lib.cpp");
+    let mut source = File::create(&source_path).unwrap();
+    writeln!(
+        source,
+        r#"
+#include "lcs.hpp"
+#include "test.hpp"
+
+using namespace serde;
+
+std::vector<uint8_t> serialize_data(SerdeData data) {{
+    auto serializer = LcsSerializer();
+    Serializable<SerdeData>::serialize(data, serializer);
+    return std::move(serializer).bytes();
+}}
+
+SerdeData deserialize_data(const std::vector<uint8_t> &input) {{
+    auto deserializer = LcsDeserializer(input);
+    return Deserializable<SerdeData>::deserialize(deserializer);
+}}
+"#
+    )
+    .unwrap();
+
+    let source_path = dir.path().join("main.cpp");
+    let mut source = File::create(&source_path).unwrap();
+    writeln!(
+        source,
+        r#"
+#include "test.hpp"
+
+using namespace serde;
+
+extern std::vector<uint8_t> serialize_data(SerdeData data);
+
+extern SerdeData deserialize_data(const std::vector<uint8_t> &bytes);
+
+bool test(const std::vector<uint8_t>& input) {{
+    auto output = serialize_data(deserialize_data(input));
+    return input == output;
+}}
+
+int main() {{
+    // dummy
+    return test({{}});
+}}
+"#
+    )
+    .unwrap();
+
+    let status = Command::new("clang++")
+        .arg("--std=c++17")
+        .arg("-I")
+        .arg("runtime/cpp")
+        .arg("-o")
+        .arg(dir.path().join("main"))
+        .arg(dir.path().join("lib.cpp"))
+        .arg(dir.path().join("main.cpp"))
+        .status()
+        .unwrap();
+    assert!(status.success());
+}
+
 // Quick test using rustc directly.
 #[test]
 fn test_that_rust_code_compiles() {

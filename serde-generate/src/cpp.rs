@@ -269,7 +269,7 @@ fn output_struct_equality_test(
 ) -> Result<()> {
     writeln!(
         out,
-        "bool operator==(const {} &lhs, const {} &rhs) {{",
+        "inline bool operator==(const {} &lhs, const {} &rhs) {{",
         name, name,
     )?;
     for field in fields {
