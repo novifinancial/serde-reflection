@@ -129,6 +129,9 @@
 <span id="129">129</span>
 <span id="130">130</span>
 <span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -139,6 +142,7 @@
 <span class="doccomment">//! ## Supported Languages</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! * Python 3</span>
+<span class="doccomment">//! * C++ 17</span>
 <span class="doccomment">//! * Rust 2018</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ## Supported Encodings</span>
@@ -162,11 +166,11 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! See the help message of the tool with `--help` for more options.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! ## Bincode Runtime(s)</span>
+<span class="doccomment">//! ## Bincode Runtimes</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! For testing purposes, we use the Bincode encoding format provided by the</span>
 <span class="doccomment">//! [`bincode`](https://docs.rs/bincode/1.2.1/bincode/) crate in Rust and</span>
-<span class="doccomment">//! provide an experimental Bincode runtime in Python.</span>
+<span class="doccomment">//! provide experimental Bincode runtimes in Python and C++.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! In the following example, we transfer a `Test` value from Rust to Python using bincode.</span>
 <span class="doccomment">//! ```</span>
@@ -232,6 +236,8 @@
 
 <span class="doccomment">/// Dependency analysis and topological sort for Serde formats.</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">analyzer</span>;
+<span class="doccomment">/// Support for code-generation in C++</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">cpp</span>;
 <span class="doccomment">/// Support for code-generation in Python 3</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">python3</span>;
 <span class="doccomment">/// Support for code-generation in Rust</span>

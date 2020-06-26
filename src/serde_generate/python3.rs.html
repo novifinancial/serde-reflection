@@ -465,7 +465,7 @@ import typing
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">open_module_init_file</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">File</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">create_module_init_file</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">File</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">dir_path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">install_dir</span>.<span class="ident">join</span>(<span class="ident">name</span>);
         <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">create_dir_all</span>(<span class="kw-2">&amp;</span><span class="ident">dir_path</span>)<span class="question-mark">?</span>;
         <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">File</span>::<span class="ident">create</span>(<span class="ident">dir_path</span>.<span class="ident">join</span>(<span class="string">&quot;__init__.py&quot;</span>))
@@ -490,13 +490,13 @@ import typing
         <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
         <span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">Registry</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">open_module_init_file</span>(<span class="ident">name</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">create_module_init_file</span>(<span class="ident">name</span>)<span class="question-mark">?</span>;
         <span class="ident">output_with_optional_serde_package</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">file</span>, <span class="ident">registry</span>, <span class="self">self</span>.<span class="ident">serde_package_name</span>.<span class="ident">clone</span>())<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">fn</span> <span class="ident">install_serde_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">open_module_init_file</span>(<span class="string">&quot;serde_types&quot;</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">create_module_init_file</span>(<span class="string">&quot;serde_types&quot;</span>)<span class="question-mark">?</span>;
         <span class="macro">write</span><span class="macro">!</span>(
             <span class="ident">file</span>,
             <span class="string">&quot;{}&quot;</span>,
@@ -506,7 +506,7 @@ import typing
     }
 
     <span class="kw">fn</span> <span class="ident">install_bincode_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">open_module_init_file</span>(<span class="string">&quot;bincode&quot;</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">create_module_init_file</span>(<span class="string">&quot;bincode&quot;</span>)<span class="question-mark">?</span>;
         <span class="macro">write</span><span class="macro">!</span>(
             <span class="ident">file</span>,
             <span class="string">&quot;{}&quot;</span>,
@@ -516,7 +516,7 @@ import typing
     }
 
     <span class="kw">fn</span> <span class="ident">install_lcs_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">open_module_init_file</span>(<span class="string">&quot;lcs&quot;</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">create_module_init_file</span>(<span class="string">&quot;lcs&quot;</span>)<span class="question-mark">?</span>;
         <span class="macro">write</span><span class="macro">!</span>(
             <span class="ident">file</span>,
             <span class="string">&quot;{}&quot;</span>,
