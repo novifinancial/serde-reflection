@@ -53,6 +53,8 @@ struct Options {
     with_runtimes: Vec<Runtime>,
 
     /// Module name for the Serde formats installed in the `target_source_dir`.
+    /// Rust crates may contain a version number separated with a colon, e.g. "test:1.2.0".
+    /// (By default, the installer will use version "0.1.0".)
     #[structopt(long)]
     module_name: Option<String>,
 

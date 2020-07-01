@@ -113,6 +113,8 @@ fn test_that_installed_rust_code_compiles() {
         .arg("--")
         .arg("--language")
         .arg("rust")
+        .arg("--module-name")
+        .arg("testing:0.2.0")
         .arg("--target-source-dir")
         .arg(dir.path())
         .arg(yaml_path)
@@ -122,7 +124,7 @@ fn test_that_installed_rust_code_compiles() {
     // Use a stable `target` dir to avoid downloading and recompiling crates everytime.
     let target_dir = std::env::current_dir().unwrap().join("../target");
     let status = Command::new("cargo")
-        .current_dir(dir.path().join("test"))
+        .current_dir(dir.path().join("testing"))
         .arg("build")
         .arg("--target-dir")
         .arg(target_dir)
