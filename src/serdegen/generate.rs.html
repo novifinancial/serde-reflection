@@ -122,6 +122,8 @@
 <span id="122">122</span>
 <span id="123">123</span>
 <span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -178,6 +180,8 @@
     <span class="ident">with_runtimes</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span>,
 
     <span class="doccomment">/// Module name for the Serde formats installed in the `target_source_dir`.</span>
+    <span class="doccomment">/// Rust crates may contain a version number separated with a colon, e.g. &quot;test:1.2.0&quot;.</span>
+    <span class="doccomment">/// (By default, the installer will use version &quot;0.1.0&quot;.)</span>
     <span class="attribute">#[<span class="ident">structopt</span>(<span class="ident">long</span>)]</span>
     <span class="ident">module_name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
 
