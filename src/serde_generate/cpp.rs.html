@@ -713,7 +713,7 @@
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="macro">writeln</span><span class="macro">!</span>(
         <span class="ident">out</span>,
-        <span class="string">&quot;bool operator==(const {} &amp;lhs, const {} &amp;rhs) {{&quot;</span>,
+        <span class="string">&quot;inline bool operator==(const {} &amp;lhs, const {} &amp;rhs) {{&quot;</span>,
         <span class="ident">name</span>, <span class="ident">name</span>,
     )<span class="question-mark">?</span>;
     <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
