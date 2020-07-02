@@ -83,7 +83,6 @@ fn test_that_cpp_code_compiles() {
     writeln!(
         source,
         r#"
-#include <cassert>
 #include "bincode.hpp"
 #include "test.hpp"
 "#
