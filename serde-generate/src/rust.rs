@@ -66,6 +66,13 @@ pub fn quote_container_definitions(
 }
 
 fn output_preamble(out: &mut dyn Write, with_derive_macros: bool) -> Result<()> {
+    writeln!(
+        out,
+        r#"#![allow(unused_imports)]
+use serde_bytes::ByteBuf as Bytes;
+use std::collections::BTreeMap as Map;
+"#
+    )?;
     if with_derive_macros {
         writeln!(out, "use serde::{{Serialize, Deserialize}};\n")?;
     }
@@ -99,12 +106,12 @@ fn quote_type(format: &Format, known_sizes: Option<&HashSet<&str>>) -> String {
         F64 => "f64".into(),
         Char => "char".into(),
         Str => "String".into(),
-        Bytes => "serde_bytes::ByteBuf".into(),
+        Bytes => "Bytes".into(),
 
         Option(format) => format!("Option<{}>", quote_type(format, known_sizes)),
         Seq(format) => format!("Vec<{}>", quote_type(format, None)),
         Map { key, value } => format!(
-            "std::collections::BTreeMap<{}, {}>",
+            "Map<{}, {}>",
             quote_type(key, None),
             quote_type(value, None)
         ),
