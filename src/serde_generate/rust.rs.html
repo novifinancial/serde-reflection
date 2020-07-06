@@ -303,6 +303,13 @@
 <span id="303">303</span>
 <span id="304">304</span>
 <span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -372,6 +379,13 @@
 }
 
 <span class="kw">fn</span> <span class="ident">output_preamble</span>(<span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>, <span class="ident">with_derive_macros</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="macro">writeln</span><span class="macro">!</span>(
+        <span class="ident">out</span>,
+        <span class="string">r#&quot;#![allow(unused_imports)]
+use serde_bytes::ByteBuf as Bytes;
+use std::collections::BTreeMap as Map;
+&quot;#</span>
+    )<span class="question-mark">?</span>;
     <span class="kw">if</span> <span class="ident">with_derive_macros</span> {
         <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;use serde::{{Serialize, Deserialize}};\n&quot;</span>)<span class="question-mark">?</span>;
     }
@@ -405,12 +419,12 @@
         <span class="ident">F64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;f64&quot;</span>.<span class="ident">into</span>(),
         <span class="ident">Char</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;char&quot;</span>.<span class="ident">into</span>(),
         <span class="ident">Str</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;String&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">Bytes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;serde_bytes::ByteBuf&quot;</span>.<span class="ident">into</span>(),
+        <span class="ident">Bytes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Bytes&quot;</span>.<span class="ident">into</span>(),
 
         <span class="prelude-ty">Option</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;Option&lt;{}&gt;&quot;</span>, <span class="ident">quote_type</span>(<span class="ident">format</span>, <span class="ident">known_sizes</span>)),
         <span class="ident">Seq</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;Vec&lt;{}&gt;&quot;</span>, <span class="ident">quote_type</span>(<span class="ident">format</span>, <span class="prelude-val">None</span>)),
         <span class="ident">Map</span> { <span class="ident">key</span>, <span class="ident">value</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
-            <span class="string">&quot;std::collections::BTreeMap&lt;{}, {}&gt;&quot;</span>,
+            <span class="string">&quot;Map&lt;{}, {}&gt;&quot;</span>,
             <span class="ident">quote_type</span>(<span class="ident">key</span>, <span class="prelude-val">None</span>),
             <span class="ident">quote_type</span>(<span class="ident">value</span>, <span class="prelude-val">None</span>)
         ),
