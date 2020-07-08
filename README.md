@@ -4,36 +4,83 @@
 [![License](https://img.shields.io/badge/license-Apache-green.svg)](LICENSE-APACHE)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE-MIT)
 
-This repository contains the source code for:
 
-* [`serde-reflection`](serde-reflection): a library to extract and represent Serde data formats [![serde-reflection on crates.io](https://img.shields.io/crates/v/serde-reflection)](https://crates.io/crates/serde-reflection) [![Documentation (latest release)](https://docs.rs/serde-reflection/badge.svg)](https://docs.rs/serde-reflection/) [![Documentation (master)](https://img.shields.io/badge/docs-master-59f)](https://facebookincubator.github.io/serde-reflection/serde_reflection/)
+This project aims to bring the features of a traditional IDL to Rust and Serde.
 
-* [`serde-generate`](serde-generate): a tool to generate type definitions and provide (de)serialization in other programming languages [![serde-generate on crates.io](https://img.shields.io/crates/v/serde-generate)](https://crates.io/crates/serde-generate) [![Documentation (latest release)](https://docs.rs/serde-generate/badge.svg)](https://docs.rs/serde-generate/) [![Documentation (master)](https://img.shields.io/badge/docs-master-59f)](https://facebookincubator.github.io/serde-reflection/serde_generate/)
+* [`serde-reflection`](serde-reflection) is a library to extract Serde data formats [![serde-reflection on crates.io](https://img.shields.io/crates/v/serde-reflection)](https://crates.io/crates/serde-reflection) [![Documentation (latest release)](https://docs.rs/serde-reflection/badge.svg)](https://docs.rs/serde-reflection/) [![Documentation (master)](https://img.shields.io/badge/docs-master-59f)](https://facebookincubator.github.io/serde-reflection/serde_reflection/)
 
-* [`serde-name`](serde-name): a minimal library to compute the Serde name of Rust containers [![serde-name on crates.io](https://img.shields.io/crates/v/serde-name)](https://crates.io/crates/serde-name) [![Documentation (latest release)](https://docs.rs/serde-name/badge.svg)](https://docs.rs/serde-name/) [![Documentation (master)](https://img.shields.io/badge/docs-master-59f)](https://facebookincubator.github.io/serde-reflection/serde_name/)
+* [`serde-generate`](serde-generate) is a library and a tool to generate type definitions and provide (de)serialization in other programming languages [![serde-generate on crates.io](https://img.shields.io/crates/v/serde-generate)](https://crates.io/crates/serde-generate) [![Documentation (latest release)](https://docs.rs/serde-generate/badge.svg)](https://docs.rs/serde-generate/) [![Documentation (master)](https://img.shields.io/badge/docs-master-59f)](https://facebookincubator.github.io/serde-reflection/serde_generate/)
+
+* [`serde-name`](serde-name) is a minimal library to compute Serde names at runtime [![serde-name on crates.io](https://img.shields.io/crates/v/serde-name)](https://crates.io/crates/serde-name) [![Documentation (latest release)](https://docs.rs/serde-name/badge.svg)](https://docs.rs/serde-name/) [![Documentation (master)](https://img.shields.io/badge/docs-master-59f)](https://facebookincubator.github.io/serde-reflection/serde_name/)
+
+The code in this repository is still under active development.
 
 
-The code in this repository is under active development.
+## Quick Start
 
-## Use cases
+See [this example](serde-generate/README.md#quick-start-with-python-and-bincode) to transfer data from Rust to Python using the Bincode format.
 
-This project aims to facilitate the implementation of distributed protocols and storage protocols using Serde. [Serde](https://serde.rs/) is an essential component of the Rust ecosystem that provides (de)serialization of Rust data structures in [many encoding formats](https://serde.rs/#data-formats).
 
-`serde-reflection` makes it easy to to extract a concise representation of the Serde data formats used in a Rust project. This is useful:
+## Use Cases
 
-* to detect accidental changes to the data formats (e.g. using version control),
+### Data Format Specifications
 
-* to generate code using our tool `serde-generate` and interoperate with other languages.
+The [Serde](https://serde.rs/) library is an essential component of the Rust ecosystem that provides (de)serialization of Rust data structures in [many encodings](https://serde.rs/#data-formats). In practice, Serde implements the (de)serialization of user data structures using derive macros `#[derive(Serialize, Deserialize)]`.
 
-In addition to ensuring an optimal developer experience in Rust, the approach based on Serde and `serde-reflection` empowers protocol designers to experiment and choose the best encoding format for their data: either [one of the encoding formats](https://serde.rs/#data-formats) officially supported by Serde, or [a new encoding format](https://serde.rs/data-format.html) developed in the Serde framework.
+[`serde-reflection`](serde-reflection) analyzes the result of Serde macros to turn Rust type definitions into a representation of their Serde data layout. For instance, the following definition
+```rust
+#[derive(Serialize, Deserialize)]
+enum Foo { A(u64), B, C }
+```
+entails a registry containing one [data format](https://facebookincubator.github.io/serde-reflection/serde_reflection/enum.ContainerFormat.html) and represented as follows in YAML syntax:
+```
+---
+Foo:
+  ENUM:
+    0:
+      A:
+        NEWTYPE:
+          U64
+    1:
+      B: UNIT
+    2:
+      C: UNIT
+```
 
-This project was initially motivated by the need for canonical serialization and cryptographic hashing in the [Libra](https://github.com/libra/libra) project.
+This format summarizes how a value of type `Foo` would be encoded by Serde in any encoding. For instance, in Bincode, we deduce that `Foo::B` is encoded as a 32-bit integer `1`.
 
-In this context, `serde-name` has been used to provide predictable cryptographic seeds for Rust containers.
+One difficulty often associated with Serde is that small modifications in Rust may silently change the specifications of the protocol. For instance, changing `enum Foo { A(u64), B, C }` into `enum Foo { A(u64), C, B }` does not break Rust compilation. Thanks to `serde-reflection`, one can now solve this issue in a simple way: commit Serde formats as a file in the version control system (VCS) and add a non-regression test.
+
+
+### Language Interoperability
+
+The data formats extracted by `serde-reflection` also serve as basis for code generation with the tool [`serde-generate`](serde-generate). Specifically, `serde-generate` takes a registry of Serde data formats as input and translates them into type definitions for other programming languages such as Python and C++.
+
+For instance, the definition of `Foo` above translates into C++ as follows: (omitting methods)
+```
+struct Foo {
+    struct A {
+        uint64_t value;
+    };
+    struct B {};
+    struct C {};
+    std::variant<A, B, C> value;
+};
+```
+
+To provide (de)serialization, the code generated by `serde-generate` is completed by runtime libraries in each target language and for each supported binary encoding.
+
+### Benefits
+
+In addition to ensuring an optimal developer experience in Rust, the modular approach based on Serde and `serde-reflection` makes it easy to experiment with new binary encodings. We believe that this approach can greatly facilitate the implementation of distributed protocols and storage protocols in Rust.
+
+This project was initially motivated by the need for canonical serialization and cryptographic hashing in the [Libra](https://github.com/libra/libra) project. In this context, [`serde-name`](serde-name) has been used to provide predictable cryptographic seeds for Rust containers.
+
 
 ## Contributing
 
 See the [CONTRIBUTING](CONTRIBUTING.md) file for how to help out.
+
 
 ## License
 
