@@ -49,7 +49,7 @@ Foo:
 
 This format summarizes how a value of type `Foo` would be encoded by Serde in any encoding. For instance, in Bincode, we deduce that `Foo::B` is encoded as a 32-bit integer `1`.
 
-One difficulty often associated with Serde is that small modifications in Rust may silently change the specifications of the protocol. For instance, changing `enum Foo { A(u64), B, C }` into `enum Foo { A(u64), C, B }` does not break Rust compilation. Thanks to `serde-reflection`, one can now solve this issue in a simple way: commit Serde formats as a file in the version control system (VCS) and add a non-regression test.
+One difficulty often associated with Serde is that small modifications in Rust may silently change the specifications of the protocol. For instance, changing `enum Foo { A(u64), B, C }` into `enum Foo { A(u64), C, B }` does not break Rust compilation but it changes the serialization of `Foo::B`. Thanks to `serde-reflection`, one can now solve this issue in a simple way: commit Serde formats as a file in the version control system (VCS) and add a non-regression test.
 
 
 ### Language Interoperability
