@@ -10,6 +10,7 @@ import java.math.BigInteger;
 import serde.Unsigned;
 import serde.Int128;
 import serde.Bytes;
+import serde.Slice;
 
 public class BincodeDeserializer implements serde.Deserializer {
     ByteBuffer input;
@@ -123,4 +124,10 @@ public class BincodeDeserializer implements serde.Deserializer {
     public boolean deserialize_option_tag() throws Exception {
         return deserialize_bool().booleanValue();
     }
+
+    public boolean enforce_strict_map_ordering() { return false; }
+
+    public int get_buffer_offset() { return input.position(); }
+
+    public void check_that_key_slices_are_increasing(Slice key1, Slice key2) throws Exception {}
 }

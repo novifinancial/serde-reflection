@@ -5,16 +5,16 @@ package lcs;
 
 import java.lang.Exception;
 import java.math.BigInteger;
-import java.io.ByteArrayOutputStream;
 import serde.Unsigned;
 import serde.Int128;
 import serde.Bytes;
+import serde.Slice;
 
 public class LcsSerializer implements serde.Serializer {
-    private ByteArrayOutputStream output;
+    private MyByteArrayOutputStream output;
 
     public LcsSerializer() {
-        output = new ByteArrayOutputStream();
+        output = new MyByteArrayOutputStream();
     }
 
     public void serialize_str(String value) throws Exception {
@@ -136,7 +136,47 @@ public class LcsSerializer implements serde.Serializer {
         output.write((value ? (byte)1 : (byte)0));
     }
 
+    public boolean enforce_strict_map_ordering() { return true; }
+
+    public int get_buffer_offset() { return output.size(); }
+
+    public void sort_last_entries(int[] offsets) {
+        if (offsets.length <= 1) {
+            return;
+        }
+        int offset0 = offsets[0];
+        byte[] content = output.getBuffer();
+        Slice[] slices = new Slice[offsets.length];
+        for (int i = 0; i < offsets.length - 1; i++) {
+            slices[i] = new Slice(offsets[i], offsets[i+1]);
+        }
+        slices[offsets.length - 1] = new Slice(offsets[offsets.length - 1], output.size());
+
+        java.util.Arrays.sort(slices, new java.util.Comparator<Slice>() {
+            @Override
+            public int compare(Slice slice1, Slice slice2) {
+                return Slice.compare_bytes(content, slice1, slice2);
+            }
+        });
+
+        byte[] old_content = new byte[output.size() - offset0];
+        System.arraycopy(content, offset0, old_content, 0, output.size() - offset0);
+
+        int position = offset0;
+        for (int i = 0; i < offsets.length; i++) {
+            int start = slices[i].start;
+            int end = slices[i].end;
+            System.arraycopy(old_content, start - offset0, content, position, end - start);
+            position += end - start;
+        }
+    }
+
     public byte[] get_bytes() {
         return output.toByteArray();
+    }
+
+    // Local extension to provide access to the underlying buffer.
+    static class MyByteArrayOutputStream extends java.io.ByteArrayOutputStream {
+        byte[] getBuffer() { return buf; }
     }
 }

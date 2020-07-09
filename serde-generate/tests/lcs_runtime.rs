@@ -524,3 +524,29 @@ public class Main {{
         .unwrap();
     assert!(status.success());
 }
+
+#[test]
+fn test_java_lcs_runtime_autotest() {
+    let dir = tempdir().unwrap();
+    let paths = std::iter::empty()
+        .chain(std::fs::read_dir("runtime/java/serde").unwrap())
+        .chain(std::fs::read_dir("runtime/java/lcs").unwrap())
+        .map(|e| e.unwrap().path());
+    let status = Command::new("javac")
+        .arg("-Xlint")
+        .arg("-d")
+        .arg(dir.path())
+        .args(paths)
+        .status()
+        .unwrap();
+    assert!(status.success());
+
+    let status = Command::new("java")
+        .arg("-enableassertions")
+        .arg("-cp")
+        .arg(dir.path())
+        .arg("lcs.LcsTest")
+        .status()
+        .unwrap();
+    assert!(status.success());
+}

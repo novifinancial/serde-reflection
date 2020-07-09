@@ -6,6 +6,7 @@ package serde;
 import java.lang.Exception;
 import java.math.BigInteger;
 import serde.Bytes;
+import serde.Slice;
 
 public interface Deserializer {
     String deserialize_str() throws Exception;
@@ -32,4 +33,8 @@ public interface Deserializer {
     long deserialize_len() throws Exception;
     int deserialize_variant_index() throws Exception;
     boolean deserialize_option_tag() throws Exception;
+
+    boolean enforce_strict_map_ordering();
+    int get_buffer_offset();
+    void check_that_key_slices_are_increasing(Slice key1, Slice key2) throws Exception;
 }
