@@ -33,5 +33,9 @@ public interface Serializer {
     void serialize_variant_index(int value) throws Exception;
     void serialize_option_tag(boolean value) throws Exception;
 
+    boolean enforce_strict_map_ordering();
+    int get_buffer_offset();
+    void sort_last_entries(int[] offsets);
+
     byte[] get_bytes();
 }

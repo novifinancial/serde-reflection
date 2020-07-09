@@ -10,6 +10,7 @@ import java.math.BigInteger;
 import serde.Unsigned;
 import serde.Int128;
 import serde.Bytes;
+import serde.Slice;
 
 public class LcsDeserializer implements serde.Deserializer {
     ByteBuffer input;
@@ -142,4 +143,15 @@ public class LcsDeserializer implements serde.Deserializer {
     public boolean deserialize_option_tag() throws Exception {
         return deserialize_bool().booleanValue();
     }
+
+    public boolean enforce_strict_map_ordering() { return true; }
+
+    public int get_buffer_offset() { return input.position(); }
+
+    public void check_that_key_slices_are_increasing(Slice key1, Slice key2) throws Exception {
+        if (Slice.compare_bytes(input.array(), key1, key2) >= 0) {
+            throw new Exception("Error while decoding map: keys are not serialized in the expected order");
+        }
+    }
+
 }

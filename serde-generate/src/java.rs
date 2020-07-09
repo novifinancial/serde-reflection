@@ -262,9 +262,17 @@ fn output_serialization_helper(out: &mut dyn Write, name: &str, format0: &Format
                 out,
                 r#"
         serializer.serialize_len(value.size());
+        int[] offsets = new int[value.size()];
+        int count = 0;
         for (java.util.Map.Entry<{}, {}> entry : value.entrySet()) {{
+            if (serializer.enforce_strict_map_ordering()) {{
+                offsets[count++] = serializer.get_buffer_offset();
+            }}
             {}
             {}
+        }}
+        if (serializer.enforce_strict_map_ordering()) {{
+            serializer.sort_last_entries(offsets);
         }}
 "#,
                 quote_type(key, ""),
@@ -332,40 +340,52 @@ fn output_deserialization_helper(out: &mut dyn Write, name: &str, format0: &Form
                 out,
                 r#"
         long length = deserializer.deserialize_len();
-        java.util.List<{}> obj = new java.util.ArrayList<{}>((int) length);
+        java.util.List<{0}> obj = new java.util.ArrayList<{0}>((int) length);
         for (long i = 0; i < length; i++) {{
-            obj.add({});
+            obj.add({1});
         }}
         return obj;
 "#,
-                quote_type(format, ""),
                 quote_type(format, ""),
                 quote_deserialize(format, "")
             )?;
         }
 
         Map { key, value } => {
-            let key_type = quote_type(key, "");
-            let value_type = quote_type(value, "");
             write!(
                 out,
                 r#"
         long length = deserializer.deserialize_len();
-        java.util.Map<{}, {}> obj = new java.util.HashMap<{}, {}>();
-        for (long i = 0; i < length; i++) {{
-            {} key = {};
-            {} value = {};
-            obj.put(key, value);
+        java.util.Map<{0}, {1}> obj = new java.util.HashMap<{0}, {1}>();
+        if (deserializer.enforce_strict_map_ordering()) {{
+            int previous_key_start = 0;
+            int previous_key_end = 0;
+            for (long i = 0; i < length; i++) {{
+                int key_start = deserializer.get_buffer_offset();
+                {0} key = {2};
+                int key_end = deserializer.get_buffer_offset();
+                if (i > 0) {{
+                    deserializer.check_that_key_slices_are_increasing(
+			new serde.Slice(previous_key_start, previous_key_end),
+                        new serde.Slice(key_start, key_end));
+                }}
+                previous_key_start = key_start;
+                previous_key_end = key_end;
+                {1} value = {3};
+                obj.put(key, value);
+            }}
+        }} else {{
+            for (long i = 0; i < length; i++) {{
+                {0} key = {2};
+                {1} value = {3};
+                obj.put(key, value);
+            }}
         }}
         return obj;
 "#,
-                key_type,
-                value_type,
-                key_type,
-                value_type,
-                key_type,
+                quote_type(key, ""),
+                quote_type(value, ""),
                 quote_deserialize(key, ""),
-                value_type,
                 quote_deserialize(value, ""),
             )?;
         }
@@ -373,8 +393,7 @@ fn output_deserialization_helper(out: &mut dyn Write, name: &str, format0: &Form
         Tuple(formats) => {
             writeln!(
                 out,
-                "\n        {} obj = new {}();",
-                quote_type(format0, ""),
+                "\n        {0} obj = new {0}();",
                 quote_type(format0, "")
             )?;
             for (index, format) in formats.iter().enumerate() {
@@ -392,15 +411,13 @@ fn output_deserialization_helper(out: &mut dyn Write, name: &str, format0: &Form
             write!(
                 out,
                 r#"
-        {}[] obj = new {}[{}];
-        for (int i = 0; i < {}; i++) {{
-            obj[i] = {};
+        {0}[] obj = new {0}[{1}];
+        for (int i = 0; i < {1}; i++) {{
+            obj[i] = {2};
         }}
         return obj;
 "#,
                 quote_type(content, ""),
-                quote_type(content, ""),
-                size,
                 size,
                 quote_deserialize(content, "")
             )?;
@@ -583,12 +600,12 @@ fn output_struct_or_variant_container(
     // Equality
     writeln!(
         out,
-        r#"{}    public boolean equals(Object obj) {{
-{}        if (this == obj) return true;
-{}        if (obj == null) return false;
-{}        if (getClass() != obj.getClass()) return false;
-{}        {} other = ({}) obj;"#,
-        tab, tab, tab, tab, tab, name, name,
+        r#"{0}    public boolean equals(Object obj) {{
+{0}        if (this == obj) return true;
+{0}        if (obj == null) return false;
+{0}        if (getClass() != obj.getClass()) return false;
+{0}        {1} other = ({1}) obj;"#,
+        tab, name,
     )?;
     for field in fields {
         writeln!(
@@ -602,14 +619,14 @@ fn output_struct_or_variant_container(
     // Hashing
     writeln!(
         out,
-        "{}    public int hashCode() {{\n{}        int value = 7;",
-        tab, tab
+        "{0}    public int hashCode() {{\n{0}        int value = 7;",
+        tab
     )?;
     for field in fields {
         writeln!(
             out,
-            "{}        value = 31 * value + (this.{} != null ? this.{}.hashCode() : 0);",
-            tab, &field.name, &field.name,
+            "{0}        value = 31 * value + (this.{1} != null ? this.{1}.hashCode() : 0);",
+            tab, &field.name
         )?;
     }
     writeln!(out, "{}        return value;", tab)?;

@@ -128,6 +128,14 @@ public class BincodeSerializer implements serde.Serializer {
         output.write((value ? (byte)1 : (byte)0));
     }
 
+    public boolean enforce_strict_map_ordering() { return false; }
+
+    public int get_buffer_offset() { return output.size(); }
+
+    public void sort_last_entries(int[] offsets) {
+        // Only relevant when enforce_strict_map_ordering() == true.
+    }
+
     public byte[] get_bytes() {
         return output.toByteArray();
     }
