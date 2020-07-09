@@ -32,8 +32,7 @@ fn test_that_installed_python_code_passes_pyre_check() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
 
-    let installer =
-        python3::Installer::new(dir.path().join("src").into(), /* serde package */ None);
+    let installer = python3::Installer::new(dir.path().join("src"), /* serde package */ None);
     installer.install_module("test", &registry).unwrap();
     installer.install_serde_runtime().unwrap();
     installer.install_bincode_runtime().unwrap();

@@ -70,16 +70,12 @@ assert t != s
     .unwrap();
 
     let python_path = std::env::var("PYTHONPATH").unwrap_or_default() + ":runtime/python";
-    let output = Command::new("python3")
+    let status = Command::new("python3")
         .arg(source_path)
         .env("PYTHONPATH", python_path)
-        .output()
+        .status()
         .unwrap();
-
-    std::io::stdout().write_all(&output.stdout).unwrap();
-    std::io::stderr().write_all(&output.stderr).unwrap();
-    assert_eq!(String::new(), String::from_utf8_lossy(&output.stderr));
-    assert!(output.status.success());
+    assert!(status.success());
 }
 
 #[test]
@@ -118,16 +114,12 @@ for encoding in encodings:
         "{}:runtime/python",
         std::env::var("PYTHONPATH").unwrap_or_default()
     );
-    let output = Command::new("python3")
+    let status = Command::new("python3")
         .arg(source_path)
         .env("PYTHONPATH", python_path)
-        .output()
+        .status()
         .unwrap();
-
-    std::io::stdout().write_all(&output.stdout).unwrap();
-    std::io::stderr().write_all(&output.stderr).unwrap();
-    assert_eq!(String::new(), String::from_utf8_lossy(&output.stderr));
-    assert!(output.status.success());
+    assert!(status.success());
 }
 
 // Full test using cargo. This may take a while.
@@ -184,17 +176,14 @@ fn main() {{
 
     // Use a stable `target` dir to avoid downloading and recompiling crates everytime.
     let target_dir = std::env::current_dir().unwrap().join("../target");
-    let output = Command::new("cargo")
+    let status = Command::new("cargo")
         .current_dir(dir.path())
         .arg("run")
         .arg("--target-dir")
         .arg(target_dir)
-        .output()
+        .status()
         .unwrap();
-
-    std::io::stdout().write_all(&output.stdout).unwrap();
-    std::io::stderr().write_all(&output.stderr).unwrap();
-    assert!(output.status.success());
+    assert!(status.success());
 }
 
 #[test]
@@ -267,25 +256,19 @@ int main() {{
     )
     .unwrap();
 
-    let output = Command::new("clang++")
+    let status = Command::new("clang++")
         .arg("--std=c++17")
         .arg("-o")
         .arg(dir.path().join("test"))
         .arg("-I")
         .arg("runtime/cpp")
         .arg(source_path)
-        .output()
+        .status()
         .unwrap();
-    std::io::stdout().write(&output.stdout).unwrap();
-    std::io::stderr().write(&output.stderr).unwrap();
-    assert_eq!(String::new(), String::from_utf8_lossy(&output.stderr));
-    assert!(output.status.success());
+    assert!(status.success());
 
-    let output = Command::new(dir.path().join("test")).output().unwrap();
-    std::io::stdout().write(&output.stdout).unwrap();
-    std::io::stderr().write(&output.stderr).unwrap();
-    assert_eq!(String::new(), String::from_utf8_lossy(&output.stderr));
-    assert!(output.status.success());
+    let status = Command::new(dir.path().join("test")).status().unwrap();
+    assert!(status.success());
 }
 
 #[test]
@@ -357,9 +340,6 @@ int main() {{
         .unwrap();
     assert!(status.success());
 
-    let output = Command::new(dir.path().join("test")).output().unwrap();
-    std::io::stdout().write(&output.stdout).unwrap();
-    std::io::stderr().write(&output.stderr).unwrap();
-    assert_eq!(String::new(), String::from_utf8_lossy(&output.stderr));
-    assert!(output.status.success());
+    let status = Command::new(dir.path().join("test")).status().unwrap();
+    assert!(status.success());
 }
