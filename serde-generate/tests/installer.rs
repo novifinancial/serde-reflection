@@ -201,7 +201,9 @@ fn test_that_installed_java_code_compiles() {
         .unwrap();
     assert!(status.success());
 
-    let paths = std::fs::read_dir(dir.path().join("serde")).unwrap().map(|e| e.unwrap().path());
+    let paths = std::fs::read_dir(dir.path().join("serde"))
+        .unwrap()
+        .map(|e| e.unwrap().path());
     let status = Command::new("javac")
         .arg("-cp")
         .arg(dir.path())
@@ -212,7 +214,9 @@ fn test_that_installed_java_code_compiles() {
         .unwrap();
     assert!(status.success());
 
-    let paths = std::fs::read_dir(dir.path().join("test/types")).unwrap().map(|e| e.unwrap().path());
+    let paths = std::fs::read_dir(dir.path().join("test/types"))
+        .unwrap()
+        .map(|e| e.unwrap().path());
     let status = Command::new("javac")
         .arg("-cp")
         .arg(dir.path())
