@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use include_dir::include_dir;
-use serde_reflection::{ContainerFormat, Format, Named, Registry, VariantFormat};
+use serde_reflection::{ContainerFormat, Format, FormatHolder, Named, Registry, VariantFormat};
 use std::collections::BTreeMap;
 use std::io::{Result, Write};
 use std::path::PathBuf;
@@ -10,10 +10,17 @@ use std::path::PathBuf;
 pub fn output(out: &mut dyn Write, registry: &Registry, class_name: &str) -> Result<()> {
     output_preambule(out, None)?;
 
-    writeln!(out, "public class {} {{", class_name)?;
+    writeln!(out, "public class {} {{\n", class_name)?;
     for (name, format) in registry {
-        output_container(out, name, format, /* nested class */ true)?;
+        output_container(
+            out,
+            name,
+            format,
+            /* nested class */ true,
+            &format!("{}.", class_name),
+        )?;
     }
+    output_trait_helpers(out, registry, /* nested class */ true)?;
     writeln!(out, "}}")
 }
 
@@ -24,14 +31,19 @@ fn output_preambule(out: &mut dyn Write, package_name: Option<&str>) -> Result<(
     writeln!(
         out,
         r#"
+import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Optional;
+import java.util.Map;
 import java.util.Vector;
 import java.util.SortedMap;
+import java.util.TreeMap;
+import serde.Deserializer;
 import serde.FixedLength;
 import serde.Int128;
 import serde.Unsigned;
+import serde.Serializer;
 import serde.Tuple2;
 import serde.Tuple3;
 import serde.Tuple4;
@@ -41,10 +53,11 @@ import serde.Tuple6;
     )
 }
 
-fn quote_type(format: &Format) -> String {
+/// A non-empty `package_prefix` is required when the type is quoted from a nested struct.
+fn quote_type(format: &Format, package_prefix: &str) -> String {
     use Format::*;
     match format {
-        TypeName(x) => x.to_string(),
+        TypeName(x) => format!("{}{}", package_prefix, x),
         Unit => "Void".into(),
         Bool => "Boolean".into(),
         I8 => "Byte".into(),
@@ -63,81 +76,561 @@ fn quote_type(format: &Format) -> String {
         Str => "String".into(),
         Bytes => "ByteBuffer".into(),
 
-        Option(format) => format!("Optional<{}>", quote_type(format)),
-        Seq(format) => format!("Vector<{}>", quote_type(format)),
-        Map { key, value } => format!("SortedMap<{}, {}>", quote_type(key), quote_type(value)),
-        Tuple(formats) => format!("Tuple{}<{}>", formats.len(), quote_types(formats)),
+        Option(format) => format!("Optional<{}>", quote_type(format, package_prefix)),
+        Seq(format) => format!("Vector<{}>", quote_type(format, package_prefix)),
+        Map { key, value } => format!(
+            "SortedMap<{}, {}>",
+            quote_type(key, package_prefix),
+            quote_type(value, package_prefix)
+        ),
+        Tuple(formats) => format!(
+            "Tuple{}<{}>",
+            formats.len(),
+            quote_types(formats, package_prefix)
+        ),
         TupleArray { content, size } => format!(
             "@FixedLength(length={}) Vector<{}>",
             size,
-            quote_type(content)
+            quote_type(content, package_prefix)
         ),
         Variable(_) => panic!("unexpected value"),
     }
 }
 
-fn quote_types(formats: &[Format]) -> String {
+fn quote_types(formats: &[Format], package_prefix: &str) -> String {
     formats
         .iter()
-        .map(quote_type)
+        .map(|f| quote_type(f, package_prefix))
         .collect::<Vec<_>>()
         .join(", ")
 }
 
-fn output_fields(out: &mut dyn Write, indentation: usize, fields: &[Named<Format>]) -> Result<()> {
+fn output_trait_helpers(
+    out: &mut dyn Write,
+    registry: &Registry,
+    nested_class: bool,
+) -> Result<()> {
+    let mut subtypes = BTreeMap::new();
+    for format in registry.values() {
+        format
+            .visit(&mut |f| {
+                if needs_helper(f) {
+                    subtypes.insert(mangle_type(f), f.clone());
+                }
+                Ok(())
+            })
+            .unwrap();
+    }
+    let prefix = if nested_class { "static " } else { "" };
+    writeln!(out, "{}class TraitHelpers {{", prefix)?;
+    for (mangled_name, subtype) in &subtypes {
+        output_serialization_helper(out, mangled_name, subtype)?;
+        output_deserialization_helper(out, mangled_name, subtype)?;
+    }
+    writeln!(out, "}}\n")
+}
+
+fn mangle_type(format: &Format) -> String {
+    use Format::*;
+    match format {
+        TypeName(x) => x.to_string(),
+        Unit => "unit".into(),
+        Bool => "bool".into(),
+        I8 => "i8".into(),
+        I16 => "i16".into(),
+        I32 => "i32".into(),
+        I64 => "i64".into(),
+        I128 => "i128".into(),
+        U8 => "u8".into(),
+        U16 => "u16".into(),
+        U32 => "u32".into(),
+        U64 => "u64".into(),
+        U128 => "u128".into(),
+        F32 => "f32".into(),
+        F64 => "f64".into(),
+        Char => "char".into(),
+        Str => "str".into(),
+        Bytes => "bytes".into(),
+
+        Option(format) => format!("option_{}", mangle_type(format)),
+        Seq(format) => format!("vector_{}", mangle_type(format)),
+        Map { key, value } => format!("map_{}_to_{}", mangle_type(key), mangle_type(value)),
+        Tuple(formats) => format!(
+            "tuple{}_{}",
+            formats.len(),
+            formats
+                .iter()
+                .map(mangle_type)
+                .collect::<Vec<_>>()
+                .join("_")
+        ),
+        TupleArray { content, size } => format!("array{}_{}_array", size, mangle_type(content)),
+        Variable(_) => panic!("unexpected value"),
+    }
+}
+
+fn needs_helper(format: &Format) -> bool {
+    use Format::*;
+    match format {
+        Option(_) | Seq(_) | Map { .. } | Tuple(_) | TupleArray { .. } => true,
+        _ => false,
+    }
+}
+
+fn quote_serialize_value(value: &str, format: &Format) -> String {
+    use Format::*;
+    match format {
+        TypeName(_) => format!("{}.serialize(serializer);", value),
+        Unit => format!("serializer.serialize_unit({});", value),
+        Bool => format!("serializer.serialize_bool({});", value),
+        I8 => format!("serializer.serialize_i8({});", value),
+        I16 => format!("serializer.serialize_i16({});", value),
+        I32 => format!("serializer.serialize_i32({});", value),
+        I64 => format!("serializer.serialize_i64({});", value),
+        I128 => format!("serializer.serialize_i128({});", value),
+        U8 => format!("serializer.serialize_u8({});", value),
+        U16 => format!("serializer.serialize_u16({});", value),
+        U32 => format!("serializer.serialize_u32({});", value),
+        U64 => format!("serializer.serialize_u64({});", value),
+        U128 => format!("serializer.serialize_u128({});", value),
+        F32 => format!("serializer.serialize_f32({});", value),
+        F64 => format!("serializer.serialize_f64({});", value),
+        Char => format!("serializer.serialize_char({});", value),
+        Str => format!("serializer.serialize_str({});", value),
+        Bytes => format!("serializer.serialize_bytes({});", value),
+        _ => format!(
+            "TraitHelpers.serialize_{}({}, serializer);",
+            mangle_type(format),
+            value
+        ),
+    }
+}
+
+fn quote_deserialize(format: &Format, package_prefix: &str) -> String {
+    use Format::*;
+    match format {
+        TypeName(name) => format!("{}{}.deserialize(deserializer)", package_prefix, name),
+        Unit => "deserializer.deserialize_unit()".to_string(),
+        Bool => "deserializer.deserialize_bool()".to_string(),
+        I8 => "deserializer.deserialize_i8()".to_string(),
+        I16 => "deserializer.deserialize_i16()".to_string(),
+        I32 => "deserializer.deserialize_i32()".to_string(),
+        I64 => "deserializer.deserialize_i64()".to_string(),
+        I128 => "deserializer.deserialize_i128()".to_string(),
+        U8 => "deserializer.deserialize_u8()".to_string(),
+        U16 => "deserializer.deserialize_u16()".to_string(),
+        U32 => "deserializer.deserialize_u32()".to_string(),
+        U64 => "deserializer.deserialize_u64()".to_string(),
+        U128 => "deserializer.deserialize_u128()".to_string(),
+        F32 => "deserializer.deserialize_f32()".to_string(),
+        F64 => "deserializer.deserialize_f64()".to_string(),
+        Char => "deserializer.deserialize_char()".to_string(),
+        Str => "deserializer.deserialize_str()".to_string(),
+        Bytes => "deserializer.deserialize_bytes()".to_string(),
+        _ => format!(
+            "TraitHelpers.deserialize_{}(deserializer)",
+            mangle_type(format),
+        ),
+    }
+}
+
+fn output_serialization_helper(out: &mut dyn Write, name: &str, format0: &Format) -> Result<()> {
+    use Format::*;
+
+    write!(
+        out,
+        "    static void serialize_{}({} value, Serializer serializer) throws IOException {{",
+        name,
+        quote_type(format0, "")
+    )?;
+    match format0 {
+        Option(format) => {
+            write!(
+                out,
+                r#"
+        if (value.isPresent()) {{
+            serializer.serialize_option_tag(true);
+            {}
+        }} else {{
+            serializer.serialize_option_tag(false);
+        }}
+"#,
+                quote_serialize_value("value.get()", format)
+            )?;
+        }
+
+        Seq(format) => {
+            write!(
+                out,
+                r#"
+        serializer.serialize_len(value.size());
+        for ({} item : value) {{
+            {}
+        }}
+"#,
+                quote_type(format, ""),
+                quote_serialize_value("item", format)
+            )?;
+        }
+
+        Map { key, value } => {
+            write!(
+                out,
+                r#"
+        serializer.serialize_len(value.size());
+        for (Map.Entry<{}, {}> entry : value.entrySet()) {{
+            {}
+            {}
+        }}
+"#,
+                quote_type(key, ""),
+                quote_type(value, ""),
+                quote_serialize_value("entry.getKey()", key),
+                quote_serialize_value("entry.getValue()", value)
+            )?;
+        }
+
+        Tuple(formats) => {
+            writeln!(out)?;
+            for (index, format) in formats.iter().enumerate() {
+                let expr = format!("value.field{}", index);
+                writeln!(out, "        {}", quote_serialize_value(&expr, format))?;
+            }
+        }
+
+        TupleArray { content, size } => {
+            write!(
+                out,
+                r#"
+        assert value.size() == {};
+        for ({} item : value) {{
+            {}
+        }}
+"#,
+                size,
+                quote_type(content, ""),
+                quote_serialize_value("item", content),
+            )?;
+        }
+
+        _ => panic!("unexpected case"),
+    }
+    writeln!(out, "    }}\n")
+}
+
+fn output_deserialization_helper(out: &mut dyn Write, name: &str, format0: &Format) -> Result<()> {
+    use Format::*;
+
+    write!(
+        out,
+        "    static {} deserialize_{}(Deserializer deserializer) throws IOException {{",
+        quote_type(format0, ""),
+        name,
+    )?;
+    match format0 {
+        Option(format) => {
+            write!(
+                out,
+                r#"
+        boolean tag = deserializer.deserialize_option_tag();
+        if (tag) {{
+            return Optional.empty();
+        }} else {{
+            return Optional.of({});
+        }}
+"#,
+                quote_deserialize(format, "")
+            )?;
+        }
+
+        Seq(format) => {
+            write!(
+                out,
+                r#"
+        long length = deserializer.deserialize_len();
+        Vector<{}> obj = new Vector<{}>((int) length);
+        for (long i = 0; i < length; i++) {{
+            obj.add({});
+        }}
+        return obj;
+"#,
+                quote_type(format, ""),
+                quote_type(format, ""),
+                quote_deserialize(format, "")
+            )?;
+        }
+
+        Map { key, value } => {
+            let key_type = quote_type(key, "");
+            let value_type = quote_type(value, "");
+            write!(
+                out,
+                r#"
+        long length = deserializer.deserialize_len();
+        SortedMap<{}, {}> obj = new TreeMap<{}, {}>();
+        for (long i = 0; i < length; i++) {{
+            {} key = {};
+            {} value = {};
+            obj.put(key, value);
+        }}
+        return obj;
+"#,
+                key_type,
+                value_type,
+                key_type,
+                value_type,
+                key_type,
+                quote_deserialize(key, ""),
+                value_type,
+                quote_deserialize(value, ""),
+            )?;
+        }
+
+        Tuple(formats) => {
+            writeln!(
+                out,
+                "\n        {} obj = new {}();",
+                quote_type(format0, ""),
+                quote_type(format0, "")
+            )?;
+            for (index, format) in formats.iter().enumerate() {
+                writeln!(
+                    out,
+                    "        obj.field{} = {};",
+                    index,
+                    quote_deserialize(format, "")
+                )?;
+            }
+            writeln!(out, "        return obj;")?;
+        }
+
+        TupleArray { content, size } => {
+            write!(
+                out,
+                r#"
+        Vector<{}> obj = new Vector<{}>({});
+        for (long i = 0; i < {}; i++) {{
+            obj.add({});
+        }}
+        return obj;
+"#,
+                quote_type(content, ""),
+                quote_type(content, ""),
+                size,
+                size,
+                quote_deserialize(content, "")
+            )?;
+        }
+
+        _ => panic!("unexpected case"),
+    }
+    writeln!(out, "    }}\n")
+}
+
+fn output_fields(
+    out: &mut dyn Write,
+    indentation: usize,
+    fields: &[Named<Format>],
+    package_prefix: &str,
+) -> Result<()> {
     let tab = " ".repeat(indentation);
     for field in fields {
         writeln!(
             out,
-            "{} public {} {};",
+            "{}public {} {};",
             tab,
-            quote_type(&field.value),
+            quote_type(&field.value, package_prefix),
             field.name
         )?;
     }
     Ok(())
 }
 
+fn output_struct_variant(
+    out: &mut dyn Write,
+    base: &str,
+    index: u32,
+    name: &str,
+    fields: &[Named<Format>],
+    package_prefix: &str,
+) -> Result<()> {
+    let class = format!("    public static class {} extends {}", name, base);
+    writeln!(out, "\n{} {{", class)?;
+    output_fields(out, 8, fields, package_prefix)?;
+    writeln!(
+        out,
+        r#"
+        public void serialize(Serializer serializer) throws IOException {{
+            serializer.serialize_variant_index({});"#,
+        index,
+    )?;
+    for field in fields {
+        writeln!(
+            out,
+            "            {}",
+            quote_serialize_value(&field.name, &field.value)
+        )?;
+    }
+    writeln!(out, "        }}\n")?;
+    writeln!(
+        out,
+        "        void load(Deserializer deserializer) throws IOException {{"
+    )?;
+    for field in fields {
+        writeln!(
+            out,
+            "            {} = {};",
+            field.name,
+            quote_deserialize(&field.value, package_prefix)
+        )?;
+    }
+    writeln!(out, "        }}")?;
+    writeln!(out, "    }}")
+}
+
 fn output_variant(
     out: &mut dyn Write,
     base: &str,
+    index: u32,
     name: &str,
     variant: &VariantFormat,
+    package_prefix: &str,
 ) -> Result<()> {
     use VariantFormat::*;
-    let class = format!("    public static class {} extends {}", name, base);
-    match variant {
-        Unit => writeln!(out, "\n{} {{}}", class),
-        NewType(format) => writeln!(
-            out,
-            "\n{} {{\n        public {} value;\n    }}",
-            class,
-            quote_type(format),
-        ),
-        Tuple(formats) => writeln!(
-            out,
-            "\n{} {{\n        public {} value;\n    }}",
-            class,
-            quote_type(&Format::Tuple(formats.clone())),
-        ),
-        Struct(fields) => {
-            writeln!(out, "\n{} {{", class)?;
-            output_fields(out, 8, fields)?;
-            writeln!(out, "    }}")
-        }
+    let fields = match variant {
+        Unit => Vec::new(),
+        NewType(format) => vec![Named {
+            name: "value".to_string(),
+            value: format.as_ref().clone(),
+        }],
+        Tuple(formats) => formats
+            .iter()
+            .enumerate()
+            .map(|(i, f)| Named {
+                name: format!("field{}", i),
+                value: f.clone(),
+            })
+            .collect(),
+        Struct(fields) => fields.clone(),
         Variable(_) => panic!("incorrect value"),
-    }
+    };
+    output_struct_variant(out, base, index, name, &fields, package_prefix)
 }
 
 fn output_variants(
     out: &mut dyn Write,
     base: &str,
     variants: &BTreeMap<u32, Named<VariantFormat>>,
+    package_prefix: &str,
 ) -> Result<()> {
-    for (_index, variant) in variants {
-        output_variant(out, base, &variant.name, &variant.value)?;
+    for (index, variant) in variants {
+        output_variant(
+            out,
+            base,
+            *index,
+            &variant.name,
+            &variant.value,
+            package_prefix,
+        )?;
     }
     Ok(())
+}
+
+fn output_struct_container(
+    out: &mut dyn Write,
+    name: &str,
+    fields: &[Named<Format>],
+    nested_class: bool,
+    package_prefix: &str,
+) -> Result<()> {
+    let prefix = if nested_class {
+        "public static "
+    } else {
+        "public "
+    };
+    writeln!(out, "{}class {} {{", prefix, name)?;
+    output_fields(out, 4, fields, package_prefix)?;
+    writeln!(
+        out,
+        "\n    public void serialize(Serializer serializer) throws IOException {{"
+    )?;
+    for field in fields {
+        writeln!(
+            out,
+            "        {}",
+            quote_serialize_value(&field.name, &field.value)
+        )?;
+    }
+    writeln!(out, "    }}\n")?;
+    writeln!(
+        out,
+        "    public static {} deserialize(Deserializer deserializer) throws IOException {{",
+        name,
+    )?;
+    writeln!(out, "        {} obj = new {}();", name, name)?;
+    for field in fields {
+        writeln!(
+            out,
+            "        obj.{} = {};",
+            field.name,
+            quote_deserialize(&field.value, package_prefix)
+        )?;
+    }
+    writeln!(out, "        return obj;",)?;
+    writeln!(out, "    }}")?;
+    writeln!(out, "}}\n")
+}
+
+fn output_enum_container(
+    out: &mut dyn Write,
+    name: &str,
+    variants: &BTreeMap<u32, Named<VariantFormat>>,
+    nested_class: bool,
+    package_prefix: &str,
+) -> Result<()> {
+    let prefix = if nested_class {
+        "public static "
+    } else {
+        "public "
+    };
+    writeln!(out, "{}abstract class {} {{", prefix, name)?;
+    writeln!(
+        out,
+        "    abstract public void serialize(Serializer serializer) throws IOException;",
+    )?;
+    writeln!(
+        out,
+        "    abstract void load(Deserializer deserializer) throws IOException;",
+    )?;
+    write!(
+        out,
+        r#"
+    public static {} deserialize(Deserializer deserializer) throws IOException {{
+        {} obj;
+        int index = deserializer.deserialize_variant_index();
+        switch (index) {{
+"#,
+        name, name,
+    )?;
+    for (index, variant) in variants {
+        writeln!(
+            out,
+            "            case {}: obj = new {}(); break;",
+            index, variant.name,
+        )?;
+    }
+    writeln!(
+        out,
+        "            default: throw new IOException(\"Unknown variant index for {}: \" + index);",
+        name,
+    )?;
+    writeln!(out, "        }}",)?;
+    writeln!(
+        out,
+        "        obj.load(deserializer);\n        return obj;\n    }}",
+    )?;
+    output_variants(out, name, variants, package_prefix)?;
+    writeln!(out, "}}\n")
 }
 
 fn output_container(
@@ -145,44 +638,37 @@ fn output_container(
     name: &str,
     format: &ContainerFormat,
     nested_class: bool,
+    package_prefix: &str,
 ) -> Result<()> {
     use ContainerFormat::*;
-    let prefix = if nested_class {
-        "public static "
-    } else {
-        "public "
-    };
     match format {
-        UnitStruct => writeln!(out, "{}class {} {{}}\n", prefix, name),
-        NewTypeStruct(format) => writeln!(
+        UnitStruct => output_struct_container(out, name, &[], nested_class, package_prefix),
+        NewTypeStruct(format) => output_struct_container(
             out,
-            "{}class {} {{\n    public {} value;\n}}\n",
-            prefix,
             name,
-            quote_type(format)
+            &[Named {
+                name: "value".to_string(),
+                value: format.as_ref().clone(),
+            }],
+            nested_class,
+            package_prefix,
         ),
-        TupleStruct(formats) => writeln!(
+        TupleStruct(formats) => output_struct_container(
             out,
-            "{}class {} {{\n    public {} value;\n}}\n",
-            prefix,
             name,
-            quote_type(&Format::Tuple(formats.clone()))
+            &formats
+                .iter()
+                .enumerate()
+                .map(|(i, f)| Named {
+                    name: format!("field{}", i),
+                    value: f.clone(),
+                })
+                .collect::<Vec<_>>(),
+            nested_class,
+            package_prefix,
         ),
-        Struct(fields) => {
-            writeln!(out, "{}class {} {{", prefix, name)?;
-            output_fields(out, 4, fields)?;
-            writeln!(out, "}}\n")
-        }
-        Enum(variants) => {
-            writeln!(
-                out,
-                r#"{}abstract class {} {{"#,
-                prefix,
-                name
-            )?;
-            output_variants(out, name, variants)?;
-            writeln!(out, "}}")
-        }
+        Struct(fields) => output_struct_container(out, name, fields, nested_class, package_prefix),
+        Enum(variants) => output_enum_container(out, name, variants, nested_class, package_prefix),
     }
 }
 
@@ -214,8 +700,17 @@ impl crate::SourceInstaller for Installer {
         for (name, format) in registry {
             let mut file = std::fs::File::create(dir_path.join(name.to_string() + ".java"))?;
             output_preambule(&mut file, Some(package_name))?;
-            output_container(&mut file, name, format, /* nested class */ false)?;
+            output_container(
+                &mut file,
+                name,
+                format,
+                /* nested class */ false,
+                &format!("{}.", package_name),
+            )?;
         }
+        let mut file = std::fs::File::create(dir_path.join("TraitHelpers.java"))?;
+        output_preambule(&mut file, Some(package_name))?;
+        output_trait_helpers(&mut file, registry, /* nested class */ false)?;
         Ok(())
     }
 
