@@ -12,7 +12,7 @@ import java.util.SortedMap;
 
 public interface Serializer {
     void serialize_str(String value) throws IOException;
-    void serialize_bytes(ByteBuffer value) throws IOException;
+    void serialize_bytes(byte[] value) throws IOException;
 
     void serialize_bool(Boolean value) throws IOException;
     void serialize_unit(Void value) throws IOException;

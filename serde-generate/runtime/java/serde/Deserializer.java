@@ -12,7 +12,7 @@ import java.util.SortedMap;
 
 public interface Deserializer {
     String deserialize_str() throws IOException;
-    ByteBuffer deserialize_bytes() throws IOException;
+    byte[] deserialize_bytes() throws IOException;
 
     Boolean deserialize_bool() throws IOException;
     Void deserialize_unit() throws IOException;

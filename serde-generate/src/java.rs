@@ -33,14 +33,13 @@ fn output_preambule(out: &mut dyn Write, package_name: Option<&str>) -> Result<(
         r#"
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
 import java.util.Optional;
+import java.util.ArrayList;
 import java.util.Map;
-import java.util.Vector;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import serde.ArrayLen;
 import serde.Deserializer;
-import serde.FixedLength;
 import serde.Int128;
 import serde.Unsigned;
 import serde.Serializer;
@@ -74,10 +73,10 @@ fn quote_type(format: &Format, package_prefix: &str) -> String {
         F64 => "Double".into(),
         Char => "Character".into(),
         Str => "String".into(),
-        Bytes => "ByteBuffer".into(),
+        Bytes => "byte[]".into(),
 
         Option(format) => format!("Optional<{}>", quote_type(format, package_prefix)),
-        Seq(format) => format!("Vector<{}>", quote_type(format, package_prefix)),
+        Seq(format) => format!("ArrayList<{}>", quote_type(format, package_prefix)),
         Map { key, value } => format!(
             "SortedMap<{}, {}>",
             quote_type(key, package_prefix),
@@ -89,9 +88,9 @@ fn quote_type(format: &Format, package_prefix: &str) -> String {
             quote_types(formats, package_prefix)
         ),
         TupleArray { content, size } => format!(
-            "@FixedLength(length={}) Vector<{}>",
-            size,
-            quote_type(content, package_prefix)
+            "{} @ArrayLen({}) []>",
+            quote_type(content, package_prefix),
+            size
         ),
         Variable(_) => panic!("unexpected value"),
     }
@@ -348,7 +347,7 @@ fn output_deserialization_helper(out: &mut dyn Write, name: &str, format0: &Form
                 out,
                 r#"
         long length = deserializer.deserialize_len();
-        Vector<{}> obj = new Vector<{}>((int) length);
+        ArrayList<{}> obj = new ArrayList<{}>((int) length);
         for (long i = 0; i < length; i++) {{
             obj.add({});
         }}
@@ -408,7 +407,7 @@ fn output_deserialization_helper(out: &mut dyn Write, name: &str, format0: &Form
             write!(
                 out,
                 r#"
-        Vector<{}> obj = new Vector<{}>({});
+        ArrayList<{}> obj = new ArrayList<{}>({});
         for (long i = 0; i < {}; i++) {{
             obj.add({});
         }}
