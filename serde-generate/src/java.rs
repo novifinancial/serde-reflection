@@ -36,8 +36,7 @@ import java.math.BigInteger;
 import java.util.Optional;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.HashMap;
 import serde.ArrayLen;
 import serde.Deserializer;
 import serde.Int128;
@@ -78,7 +77,7 @@ fn quote_type(format: &Format, package_prefix: &str) -> String {
         Option(format) => format!("Optional<{}>", quote_type(format, package_prefix)),
         Seq(format) => format!("ArrayList<{}>", quote_type(format, package_prefix)),
         Map { key, value } => format!(
-            "SortedMap<{}, {}>",
+            "Map<{}, {}>",
             quote_type(key, package_prefix),
             quote_type(value, package_prefix)
         ),
@@ -366,7 +365,7 @@ fn output_deserialization_helper(out: &mut dyn Write, name: &str, format0: &Form
                 out,
                 r#"
         long length = deserializer.deserialize_len();
-        SortedMap<{}, {}> obj = new TreeMap<{}, {}>();
+        Map<{}, {}> obj = new HashMap<{}, {}>();
         for (long i = 0; i < length; i++) {{
             {} key = {};
             {} value = {};
@@ -426,91 +425,6 @@ fn output_deserialization_helper(out: &mut dyn Write, name: &str, format0: &Form
     writeln!(out, "    }}\n")
 }
 
-fn output_fields(
-    out: &mut dyn Write,
-    indentation: usize,
-    fields: &[Named<Format>],
-    package_prefix: &str,
-) -> Result<()> {
-    let tab = " ".repeat(indentation);
-    for field in fields {
-        writeln!(
-            out,
-            "{}public {} {};",
-            tab,
-            quote_type(&field.value, package_prefix),
-            field.name
-        )?;
-    }
-    Ok(())
-}
-
-fn output_struct_variant(
-    out: &mut dyn Write,
-    base: &str,
-    index: u32,
-    name: &str,
-    fields: &[Named<Format>],
-    package_prefix: &str,
-) -> Result<()> {
-    writeln!(
-        out,
-        "\n    public static class {} extends {} {{",
-        name, base
-    )?;
-    output_fields(out, 8, fields, package_prefix)?;
-    // Nullary constructor.
-    writeln!(out, "\n        public {}() {{}}", name)?;
-    // N-ary constructor if N > 0.
-    if !fields.is_empty() {
-        writeln!(
-            out,
-            "\n        public {}({}) {{",
-            name,
-            fields
-                .iter()
-                .map(|f| format!("{} {}", quote_type(&f.value, package_prefix), &f.name))
-                .collect::<Vec<_>>()
-                .join(", ")
-        )?;
-        for field in fields {
-            writeln!(out, "            this.{} = {};", &field.name, &field.name,)?;
-        }
-        writeln!(out, "        }}")?;
-    }
-    // Serialize
-    writeln!(
-        out,
-        r#"
-        public void serialize(Serializer serializer) throws IOException {{
-            serializer.serialize_variant_index({});"#,
-        index,
-    )?;
-    for field in fields {
-        writeln!(
-            out,
-            "            {}",
-            quote_serialize_value(&field.name, &field.value)
-        )?;
-    }
-    writeln!(out, "        }}\n")?;
-    // Load
-    writeln!(
-        out,
-        "        void load(Deserializer deserializer) throws IOException {{"
-    )?;
-    for field in fields {
-        writeln!(
-            out,
-            "            {} = {};",
-            field.name,
-            quote_deserialize(&field.value, package_prefix)
-        )?;
-    }
-    writeln!(out, "        }}")?;
-    writeln!(out, "    }}")
-}
-
 fn output_variant(
     out: &mut dyn Write,
     base: &str,
@@ -537,7 +451,16 @@ fn output_variant(
         Struct(fields) => fields.clone(),
         Variable(_) => panic!("incorrect value"),
     };
-    output_struct_variant(out, base, index, name, &fields, package_prefix)
+    output_struct_or_variant_container(
+        out,
+        4,
+        Some(base),
+        Some(index),
+        name,
+        &fields,
+        false,
+        package_prefix,
+    )
 }
 
 fn output_variants(
@@ -559,27 +482,50 @@ fn output_variants(
     Ok(())
 }
 
-fn output_struct_container(
+fn output_struct_or_variant_container(
     out: &mut dyn Write,
+    indentation: usize,
+    variant_base: Option<&str>,
+    variant_index: Option<u32>,
     name: &str,
     fields: &[Named<Format>],
     nested_class: bool,
     package_prefix: &str,
 ) -> Result<()> {
-    let prefix = if nested_class {
-        "public static "
+    let tab = " ".repeat(indentation);
+    // Beginning of class
+    if let Some(base) = variant_base {
+        writeln!(
+            out,
+            "\n{}public static class {} extends {} {{",
+            tab, name, base
+        )?;
     } else {
-        "public "
-    };
-    writeln!(out, "{}class {} {{", prefix, name)?;
-    output_fields(out, 4, fields, package_prefix)?;
+        let prefix = if nested_class {
+            "public static "
+        } else {
+            "public "
+        };
+        writeln!(out, "{}{}class {} {{", tab, prefix, name)?;
+    }
+    // Fields
+    for field in fields {
+        writeln!(
+            out,
+            "{}    public {} {};",
+            tab,
+            quote_type(&field.value, package_prefix),
+            field.name
+        )?;
+    }
     // Nullary constructor.
-    writeln!(out, "\n    public {}() {{}}", name)?;
+    writeln!(out, "\n{}    public {}() {{}}", tab, name)?;
     // N-ary constructor if N > 0.
     if !fields.is_empty() {
         writeln!(
             out,
-            "\n    public {}({}) {{",
+            "\n{}    public {}({}) {{",
+            tab,
             name,
             fields
                 .iter()
@@ -588,41 +534,102 @@ fn output_struct_container(
                 .join(", ")
         )?;
         for field in fields {
-            writeln!(out, "       this.{} = {};", &field.name, &field.name,)?;
+            writeln!(out, "{}       this.{} = {};", tab, &field.name, &field.name,)?;
         }
-        writeln!(out, "    }}")?;
+        writeln!(out, "{}    }}", tab)?;
     }
     // Serialize
     writeln!(
         out,
-        "\n    public void serialize(Serializer serializer) throws IOException {{"
+        "\n{}    public void serialize(Serializer serializer) throws IOException {{",
+        tab,
     )?;
+    if let Some(index) = variant_index {
+        writeln!(
+            out,
+            "{}        serializer.serialize_variant_index({});",
+            tab, index
+        )?;
+    }
     for field in fields {
         writeln!(
             out,
-            "        {}",
+            "{}        {}",
+            tab,
             quote_serialize_value(&field.name, &field.value)
         )?;
     }
-    writeln!(out, "    }}\n")?;
-    // Deserialize
-    writeln!(
-        out,
-        "    public static {} deserialize(Deserializer deserializer) throws IOException {{",
-        name,
-    )?;
-    writeln!(out, "        {} obj = new {}();", name, name)?;
+    writeln!(out, "{}    }}\n", tab)?;
+    // Deserialize (struct) or Load (variant)
+    if variant_index.is_none() {
+        writeln!(
+            out,
+            "{}    public static {} deserialize(Deserializer deserializer) throws IOException {{",
+            tab, name,
+        )?;
+        writeln!(out, "{}        {} obj = new {}();", tab, name, name)?;
+    } else {
+        writeln!(
+            out,
+            "{}    void load(Deserializer deserializer) throws IOException {{",
+            tab,
+        )?;
+    }
     for field in fields {
         writeln!(
             out,
-            "        obj.{} = {};",
+            "{}        {}.{} = {};",
+            tab,
+            if variant_index.is_none() {
+                "obj"
+            } else {
+                "this"
+            },
             field.name,
             quote_deserialize(&field.value, package_prefix)
         )?;
     }
-    writeln!(out, "        return obj;",)?;
-    writeln!(out, "    }}")?;
-    writeln!(out, "}}\n")
+    if variant_index.is_none() {
+        writeln!(out, "{}        return obj;", tab)?;
+    }
+    writeln!(out, "{}    }}\n", tab)?;
+    // Equality
+    writeln!(
+        out,
+        r#"{}    public boolean equals(Object obj) {{
+{}        if (this == obj) return true;
+{}        if (obj == null) return false;
+{}        if (getClass() != obj.getClass()) return false;
+{}        {} other = ({}) obj;"#,
+        tab, tab, tab, tab, tab, name, name,
+    )?;
+    for field in fields {
+        writeln!(
+            out,
+            "{}        if (!this.{}.equals(other.{})) {{ return false; }}",
+            tab, &field.name, &field.name,
+        )?;
+    }
+    writeln!(out, "{}        return true;", tab)?;
+    writeln!(out, "{}    }}\n", tab)?;
+    // Hashing
+    writeln!(
+        out,
+        "{}    public int hashCode() {{\n{}        int value = 7;",
+        tab, tab
+    )?;
+    for field in fields {
+        writeln!(
+            out,
+            "{}        value = 31 * value + this.{}.hashCode();",
+            tab, &field.name,
+        )?;
+    }
+    writeln!(out, "{}        return value;", tab)?;
+    writeln!(out, "{}    }}", tab)?;
+
+    // End of class
+    writeln!(out, "{}}}\n", tab)
 }
 
 fn output_enum_container(
@@ -685,35 +692,35 @@ fn output_container(
     package_prefix: &str,
 ) -> Result<()> {
     use ContainerFormat::*;
-    match format {
-        UnitStruct => output_struct_container(out, name, &[], nested_class, package_prefix),
-        NewTypeStruct(format) => output_struct_container(
-            out,
-            name,
-            &[Named {
-                name: "value".to_string(),
-                value: format.as_ref().clone(),
-            }],
-            nested_class,
-            package_prefix,
-        ),
-        TupleStruct(formats) => output_struct_container(
-            out,
-            name,
-            &formats
-                .iter()
-                .enumerate()
-                .map(|(i, f)| Named {
-                    name: format!("field{}", i),
-                    value: f.clone(),
-                })
-                .collect::<Vec<_>>(),
-            nested_class,
-            package_prefix,
-        ),
-        Struct(fields) => output_struct_container(out, name, fields, nested_class, package_prefix),
-        Enum(variants) => output_enum_container(out, name, variants, nested_class, package_prefix),
-    }
+    let fields = match format {
+        UnitStruct => Vec::new(),
+        NewTypeStruct(format) => vec![Named {
+            name: "value".to_string(),
+            value: format.as_ref().clone(),
+        }],
+        TupleStruct(formats) => formats
+            .iter()
+            .enumerate()
+            .map(|(i, f)| Named {
+                name: format!("field{}", i),
+                value: f.clone(),
+            })
+            .collect::<Vec<_>>(),
+        Struct(fields) => fields.clone(),
+        Enum(variants) => {
+            return output_enum_container(out, name, variants, nested_class, package_prefix);
+        }
+    };
+    output_struct_or_variant_container(
+        out,
+        0,
+        None,
+        None,
+        name,
+        &fields,
+        nested_class,
+        package_prefix,
+    )
 }
 
 pub struct Installer {
