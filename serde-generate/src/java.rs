@@ -453,9 +453,32 @@ fn output_struct_variant(
     fields: &[Named<Format>],
     package_prefix: &str,
 ) -> Result<()> {
-    let class = format!("    public static class {} extends {}", name, base);
-    writeln!(out, "\n{} {{", class)?;
+    writeln!(
+        out,
+        "\n    public static class {} extends {} {{",
+        name, base
+    )?;
     output_fields(out, 8, fields, package_prefix)?;
+    // Nullary constructor.
+    writeln!(out, "\n        public {}() {{}}", name)?;
+    // N-ary constructor if N > 0.
+    if !fields.is_empty() {
+        writeln!(
+            out,
+            "\n        public {}({}) {{",
+            name,
+            fields
+                .iter()
+                .map(|f| format!("{} {}", quote_type(&f.value, package_prefix), &f.name))
+                .collect::<Vec<_>>()
+                .join(", ")
+        )?;
+        for field in fields {
+            writeln!(out, "            this.{} = {};", &field.name, &field.name,)?;
+        }
+        writeln!(out, "        }}")?;
+    }
+    // Serialize
     writeln!(
         out,
         r#"
@@ -471,6 +494,7 @@ fn output_struct_variant(
         )?;
     }
     writeln!(out, "        }}\n")?;
+    // Load
     writeln!(
         out,
         "        void load(Deserializer deserializer) throws IOException {{"
@@ -549,6 +573,26 @@ fn output_struct_container(
     };
     writeln!(out, "{}class {} {{", prefix, name)?;
     output_fields(out, 4, fields, package_prefix)?;
+    // Nullary constructor.
+    writeln!(out, "\n    public {}() {{}}", name)?;
+    // N-ary constructor if N > 0.
+    if !fields.is_empty() {
+        writeln!(
+            out,
+            "\n    public {}({}) {{",
+            name,
+            fields
+                .iter()
+                .map(|f| format!("{} {}", quote_type(&f.value, package_prefix), &f.name))
+                .collect::<Vec<_>>()
+                .join(", ")
+        )?;
+        for field in fields {
+            writeln!(out, "       this.{} = {};", &field.name, &field.name,)?;
+        }
+        writeln!(out, "    }}")?;
+    }
+    // Serialize
     writeln!(
         out,
         "\n    public void serialize(Serializer serializer) throws IOException {{"
@@ -561,6 +605,7 @@ fn output_struct_container(
         )?;
     }
     writeln!(out, "    }}\n")?;
+    // Deserialize
     writeln!(
         out,
         "    public static {} deserialize(Deserializer deserializer) throws IOException {{",
