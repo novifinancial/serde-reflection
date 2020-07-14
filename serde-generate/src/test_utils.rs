@@ -22,6 +22,7 @@ pub enum SerdeData {
     },
     ListWithMutualRecursion(List<Box<SerdeData>>),
     TreeWithMutualRecursion(Tree<Box<SerdeData>>),
+    TupleArray([u32; 3]),
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -201,7 +202,9 @@ pub fn get_sample_values() -> Vec<SerdeData> {
         }],
     });
 
-    vec![v0, v1, v2, v2bis, v3, v4, v5, v6, v7, v8]
+    let v9 = SerdeData::TupleArray([0, 2, 3]);
+
+    vec![v0, v1, v2, v2bis, v3, v4, v5, v6, v7, v8, v9]
 }
 
 #[test]
@@ -298,6 +301,12 @@ SerdeData:
       TreeWithMutualRecursion:
         NEWTYPE:
           TYPENAME: Tree
+    8:
+      TupleArray:
+        NEWTYPE:
+          TUPLEARRAY:
+            CONTENT: U32
+            SIZE: 3
 Struct:
   STRUCT:
     - x: U32

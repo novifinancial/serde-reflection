@@ -88,7 +88,7 @@ fn quote_type(format: &Format, package_prefix: &str) -> String {
             quote_types(formats, package_prefix)
         ),
         TupleArray { content, size } => format!(
-            "{} @ArrayLen({}) []>",
+            "{} @ArrayLen(length={}) []",
             quote_type(content, package_prefix),
             size
         ),
@@ -301,7 +301,7 @@ fn output_serialization_helper(out: &mut dyn Write, name: &str, format0: &Format
             write!(
                 out,
                 r#"
-        assert value.size() == {};
+        assert value.length == {};
         for ({} item : value) {{
             {}
         }}
@@ -407,9 +407,9 @@ fn output_deserialization_helper(out: &mut dyn Write, name: &str, format0: &Form
             write!(
                 out,
                 r#"
-        ArrayList<{}> obj = new ArrayList<{}>({});
-        for (long i = 0; i < {}; i++) {{
-            obj.add({});
+        {}[] obj = new {}[{}];
+        for (int i = 0; i < {}; i++) {{
+            obj[i] = {};
         }}
         return obj;
 "#,
