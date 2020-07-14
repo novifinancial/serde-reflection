@@ -31,24 +31,10 @@ fn output_preambule(out: &mut dyn Write, package_name: Option<&str>) -> Result<(
     writeln!(
         out,
         r#"
-import java.io.IOException;
 import java.math.BigInteger;
-import java.util.Optional;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
-import serde.ArrayLen;
-import serde.Deserializer;
-import serde.Int128;
-import serde.Unsigned;
-import serde.Serializer;
-import serde.Tuple2;
-import serde.Tuple3;
-import serde.Tuple4;
-import serde.Tuple5;
-import serde.Tuple6;
 "#
-    )
+    )?;
+    Ok(())
 }
 
 /// A non-empty `package_prefix` is required when the type is quoted from a nested struct.
@@ -62,32 +48,32 @@ fn quote_type(format: &Format, package_prefix: &str) -> String {
         I16 => "Short".into(),
         I32 => "Integer".into(),
         I64 => "Long".into(),
-        I128 => "@Int128 BigInteger".into(),
-        U8 => "@Unsigned Byte".into(),
-        U16 => "@Unsigned Short".into(),
-        U32 => "@Unsigned Integer".into(),
-        U64 => "@Unsigned Long".into(),
-        U128 => "@Unsigned @Int128 BigInteger".into(),
+        I128 => "@serde.Int128 BigInteger".into(),
+        U8 => "@serde.Unsigned Byte".into(),
+        U16 => "@serde.Unsigned Short".into(),
+        U32 => "@serde.Unsigned Integer".into(),
+        U64 => "@serde.Unsigned Long".into(),
+        U128 => "@serde.Unsigned @serde.Int128 BigInteger".into(),
         F32 => "Float".into(),
         F64 => "Double".into(),
         Char => "Character".into(),
         Str => "String".into(),
         Bytes => "byte[]".into(),
 
-        Option(format) => format!("Optional<{}>", quote_type(format, package_prefix)),
-        Seq(format) => format!("ArrayList<{}>", quote_type(format, package_prefix)),
+        Option(format) => format!("java.util.Optional<{}>", quote_type(format, package_prefix)),
+        Seq(format) => format!("java.util.List<{}>", quote_type(format, package_prefix)),
         Map { key, value } => format!(
-            "Map<{}, {}>",
+            "java.util.Map<{}, {}>",
             quote_type(key, package_prefix),
             quote_type(value, package_prefix)
         ),
         Tuple(formats) => format!(
-            "Tuple{}<{}>",
+            "serde.Tuple{}<{}>",
             formats.len(),
             quote_types(formats, package_prefix)
         ),
         TupleArray { content, size } => format!(
-            "{} @ArrayLen(length={}) []",
+            "{} @serde.ArrayLen(length={}) []",
             quote_type(content, package_prefix),
             size
         ),
@@ -237,7 +223,7 @@ fn output_serialization_helper(out: &mut dyn Write, name: &str, format0: &Format
 
     write!(
         out,
-        "    static void serialize_{}({} value, Serializer serializer) throws IOException {{",
+        "    static void serialize_{}({} value, serde.Serializer serializer) throws java.io.IOException {{",
         name,
         quote_type(format0, "")
     )?;
@@ -276,7 +262,7 @@ fn output_serialization_helper(out: &mut dyn Write, name: &str, format0: &Format
                 out,
                 r#"
         serializer.serialize_len(value.size());
-        for (Map.Entry<{}, {}> entry : value.entrySet()) {{
+        for (java.util.Map.Entry<{}, {}> entry : value.entrySet()) {{
             {}
             {}
         }}
@@ -321,7 +307,7 @@ fn output_deserialization_helper(out: &mut dyn Write, name: &str, format0: &Form
 
     write!(
         out,
-        "    static {} deserialize_{}(Deserializer deserializer) throws IOException {{",
+        "    static {} deserialize_{}(serde.Deserializer deserializer) throws java.io.IOException {{",
         quote_type(format0, ""),
         name,
     )?;
@@ -332,9 +318,9 @@ fn output_deserialization_helper(out: &mut dyn Write, name: &str, format0: &Form
                 r#"
         boolean tag = deserializer.deserialize_option_tag();
         if (tag) {{
-            return Optional.empty();
+            return java.util.Optional.empty();
         }} else {{
-            return Optional.of({});
+            return java.util.Optional.of({});
         }}
 "#,
                 quote_deserialize(format, "")
@@ -346,7 +332,7 @@ fn output_deserialization_helper(out: &mut dyn Write, name: &str, format0: &Form
                 out,
                 r#"
         long length = deserializer.deserialize_len();
-        ArrayList<{}> obj = new ArrayList<{}>((int) length);
+        java.util.List<{}> obj = new java.util.ArrayList<{}>((int) length);
         for (long i = 0; i < length; i++) {{
             obj.add({});
         }}
@@ -365,7 +351,7 @@ fn output_deserialization_helper(out: &mut dyn Write, name: &str, format0: &Form
                 out,
                 r#"
         long length = deserializer.deserialize_len();
-        Map<{}, {}> obj = new HashMap<{}, {}>();
+        java.util.Map<{}, {}> obj = new java.util.HashMap<{}, {}>();
         for (long i = 0; i < length; i++) {{
             {} key = {};
             {} value = {};
@@ -541,7 +527,7 @@ fn output_struct_or_variant_container(
     // Serialize
     writeln!(
         out,
-        "\n{}    public void serialize(Serializer serializer) throws IOException {{",
+        "\n{}    public void serialize(serde.Serializer serializer) throws java.io.IOException {{",
         tab,
     )?;
     if let Some(index) = variant_index {
@@ -564,14 +550,14 @@ fn output_struct_or_variant_container(
     if variant_index.is_none() {
         writeln!(
             out,
-            "{}    public static {} deserialize(Deserializer deserializer) throws IOException {{",
+            "{}    public static {} deserialize(serde.Deserializer deserializer) throws java.io.IOException {{",
             tab, name,
         )?;
         writeln!(out, "{}        {} obj = new {}();", tab, name, name)?;
     } else {
         writeln!(
             out,
-            "{}    void load(Deserializer deserializer) throws IOException {{",
+            "{}    void load(serde.Deserializer deserializer) throws java.io.IOException {{",
             tab,
         )?;
     }
@@ -647,16 +633,16 @@ fn output_enum_container(
     writeln!(out, "{}abstract class {} {{", prefix, name)?;
     writeln!(
         out,
-        "    abstract public void serialize(Serializer serializer) throws IOException;",
+        "    abstract public void serialize(serde.Serializer serializer) throws java.io.IOException;",
     )?;
     writeln!(
         out,
-        "    abstract void load(Deserializer deserializer) throws IOException;",
+        "    abstract void load(serde.Deserializer deserializer) throws java.io.IOException;",
     )?;
     write!(
         out,
         r#"
-    public static {} deserialize(Deserializer deserializer) throws IOException {{
+    public static {} deserialize(serde.Deserializer deserializer) throws java.io.IOException {{
         {} obj;
         int index = deserializer.deserialize_variant_index();
         switch (index) {{
@@ -672,7 +658,7 @@ fn output_enum_container(
     }
     writeln!(
         out,
-        "            default: throw new IOException(\"Unknown variant index for {}: \" + index);",
+        "            default: throw new java.io.IOException(\"Unknown variant index for {}: \" + index);",
         name,
     )?;
     writeln!(out, "        }}",)?;
