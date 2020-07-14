@@ -25,7 +25,7 @@ pub enum Error {
     UnknownFormat,
     #[error("Incomplete tracing detected inside container: {0}")]
     UnknownFormatInContainer(String),
-    #[error("Missing variants detected for specific enums")]
+    #[error("Missing variants detected for specific enums: {0:?}")]
     MissingVariants(Vec<String>),
 }
 
