@@ -468,6 +468,7 @@ fn output_variants(
     Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
 fn output_struct_or_variant_container(
     out: &mut dyn Write,
     indentation: usize,
