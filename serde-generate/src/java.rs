@@ -58,7 +58,7 @@ fn quote_type(format: &Format, package_prefix: &str) -> String {
         F64 => "Double".into(),
         Char => "Character".into(),
         Str => "String".into(),
-        Bytes => "byte[]".into(),
+        Bytes => "serde.Bytes".into(),
 
         Option(format) => format!("java.util.Optional<{}>", quote_type(format, package_prefix)),
         Seq(format) => format!("java.util.List<{}>", quote_type(format, package_prefix)),
@@ -223,7 +223,7 @@ fn output_serialization_helper(out: &mut dyn Write, name: &str, format0: &Format
 
     write!(
         out,
-        "    static void serialize_{}({} value, serde.Serializer serializer) throws java.io.IOException {{",
+        "    static void serialize_{}({} value, serde.Serializer serializer) throws java.lang.Exception {{",
         name,
         quote_type(format0, "")
     )?;
@@ -307,7 +307,7 @@ fn output_deserialization_helper(out: &mut dyn Write, name: &str, format0: &Form
 
     write!(
         out,
-        "    static {} deserialize_{}(serde.Deserializer deserializer) throws java.io.IOException {{",
+        "    static {} deserialize_{}(serde.Deserializer deserializer) throws java.lang.Exception {{",
         quote_type(format0, ""),
         name,
     )?;
@@ -317,7 +317,7 @@ fn output_deserialization_helper(out: &mut dyn Write, name: &str, format0: &Form
                 out,
                 r#"
         boolean tag = deserializer.deserialize_option_tag();
-        if (tag) {{
+        if (!tag) {{
             return java.util.Optional.empty();
         }} else {{
             return java.util.Optional.of({});
@@ -528,7 +528,7 @@ fn output_struct_or_variant_container(
     // Serialize
     writeln!(
         out,
-        "\n{}    public void serialize(serde.Serializer serializer) throws java.io.IOException {{",
+        "\n{}    public void serialize(serde.Serializer serializer) throws java.lang.Exception {{",
         tab,
     )?;
     if let Some(index) = variant_index {
@@ -551,14 +551,14 @@ fn output_struct_or_variant_container(
     if variant_index.is_none() {
         writeln!(
             out,
-            "{}    public static {} deserialize(serde.Deserializer deserializer) throws java.io.IOException {{",
+            "{}    public static {} deserialize(serde.Deserializer deserializer) throws java.lang.Exception {{",
             tab, name,
         )?;
         writeln!(out, "{}        {} obj = new {}();", tab, name, name)?;
     } else {
         writeln!(
             out,
-            "{}    void load(serde.Deserializer deserializer) throws java.io.IOException {{",
+            "{}    void load(serde.Deserializer deserializer) throws java.lang.Exception {{",
             tab,
         )?;
     }
@@ -593,8 +593,8 @@ fn output_struct_or_variant_container(
     for field in fields {
         writeln!(
             out,
-            "{}        if (!this.{}.equals(other.{})) {{ return false; }}",
-            tab, &field.name, &field.name,
+            "{0}            if (!java.util.Objects.equals(this.{1}, other.{1})) {{ return false; }}",
+            tab, &field.name,
         )?;
     }
     writeln!(out, "{}        return true;", tab)?;
@@ -608,8 +608,8 @@ fn output_struct_or_variant_container(
     for field in fields {
         writeln!(
             out,
-            "{}        value = 31 * value + this.{}.hashCode();",
-            tab, &field.name,
+            "{}        value = 31 * value + (this.{} != null ? this.{}.hashCode() : 0);",
+            tab, &field.name, &field.name,
         )?;
     }
     writeln!(out, "{}        return value;", tab)?;
@@ -634,16 +634,16 @@ fn output_enum_container(
     writeln!(out, "{}abstract class {} {{", prefix, name)?;
     writeln!(
         out,
-        "    abstract public void serialize(serde.Serializer serializer) throws java.io.IOException;",
+        "    abstract public void serialize(serde.Serializer serializer) throws java.lang.Exception;",
     )?;
     writeln!(
         out,
-        "    abstract void load(serde.Deserializer deserializer) throws java.io.IOException;",
+        "    abstract void load(serde.Deserializer deserializer) throws java.lang.Exception;",
     )?;
     write!(
         out,
         r#"
-    public static {} deserialize(serde.Deserializer deserializer) throws java.io.IOException {{
+    public static {} deserialize(serde.Deserializer deserializer) throws java.lang.Exception {{
         {} obj;
         int index = deserializer.deserialize_variant_index();
         switch (index) {{
@@ -659,7 +659,7 @@ fn output_enum_container(
     }
     writeln!(
         out,
-        "            default: throw new java.io.IOException(\"Unknown variant index for {}: \" + index);",
+        "            default: throw new java.lang.Exception(\"Unknown variant index for {}: \" + index);",
         name,
     )?;
     writeln!(out, "        }}",)?;

@@ -3,6 +3,8 @@
 
 package serde;
 
+import java.util.Objects;
+
 public class Tuple4<T0, T1, T2, T3> {
     public T0 field0;
     public T1 field1;
@@ -22,20 +24,20 @@ public class Tuple4<T0, T1, T2, T3> {
         if (this == obj) return true;
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
-        Tuple4 other = (Tuple4) obj;
-        if (!this.field0.equals(other.field0)) { return false; }
-        if (!this.field1.equals(other.field1)) { return false; }
-        if (!this.field2.equals(other.field2)) { return false; }
-        if (!this.field3.equals(other.field3)) { return false; }
+        Tuple4<?,?,?,?> other = (Tuple4) obj;
+        if (!Objects.equals(this.field0, other.field0)) { return false; }
+        if (!Objects.equals(this.field1, other.field1)) { return false; }
+        if (!Objects.equals(this.field2, other.field2)) { return false; }
+        if (!Objects.equals(this.field3, other.field3)) { return false; }
         return true;
     }
 
     public int hashCode() {
         int value = 7;
-        value = 31 * value + this.field0.hashCode();
-        value = 31 * value + this.field1.hashCode();
-        value = 31 * value + this.field2.hashCode();
-        value = 31 * value + this.field3.hashCode();
+        value = 31 * value + (this.field0 != null ? this.field0.hashCode() : 0);
+        value = 31 * value + (this.field1 != null ? this.field1.hashCode() : 0);
+        value = 31 * value + (this.field2 != null ? this.field2.hashCode() : 0);
+        value = 31 * value + (this.field3 != null ? this.field3.hashCode() : 0);
         return value;
     }
 

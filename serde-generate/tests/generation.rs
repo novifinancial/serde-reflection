@@ -250,6 +250,7 @@ fn test_that_java_code_compiles() {
         .unwrap()
         .map(|e| e.unwrap().path());
     let status = Command::new("javac")
+        .arg("-Xlint")
         .arg("-d")
         .arg(dir.path())
         .args(paths)
@@ -258,6 +259,7 @@ fn test_that_java_code_compiles() {
     assert!(status.success());
 
     let status = Command::new("javac")
+        .arg("-Xlint")
         .arg("-cp")
         .arg(dir.path())
         .arg("-d")
