@@ -62,6 +62,11 @@ Foo:
 "#);
 ```
 
+## Troubleshooting
+
+The error type used in this crate provides a method `error.explanation()` to help with
+troubleshooting during format tracing.
+
 ## Overview
 
 In the following, more complete example, we extract the Serde formats of two containers
@@ -174,7 +179,7 @@ formats that are partially unknown.
 let mut tracer = Tracer::new(TracerConfig::default());
 let mut samples = Samples::new();
 tracer.trace_value(&mut samples, &FullName { first: "", middle: None, last: "" })?;
-assert_eq!(tracer.registry().unwrap_err(), Error::UnknownFormatInContainer("FullName"));
+assert_eq!(tracer.registry().unwrap_err(), Error::UnknownFormatInContainer("FullName".to_string()));
 ```
 
 For this reason, we introduce a complementary set of APIs to trace deserialization of types.

@@ -64,6 +64,11 @@
 //! # }
 //! ```
 //!
+//! # Troubleshooting
+//!
+//! The error type used in this crate provides a method `error.explanation()` to help with
+//! troubleshooting during format tracing.
+//!
 //! # Overview
 //!
 //! In the following, more complete example, we extract the Serde formats of two containers
