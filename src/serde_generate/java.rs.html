@@ -733,6 +733,44 @@
 <span id="733">733</span>
 <span id="734">734</span>
 <span id="735">735</span>
+<span id="736">736</span>
+<span id="737">737</span>
+<span id="738">738</span>
+<span id="739">739</span>
+<span id="740">740</span>
+<span id="741">741</span>
+<span id="742">742</span>
+<span id="743">743</span>
+<span id="744">744</span>
+<span id="745">745</span>
+<span id="746">746</span>
+<span id="747">747</span>
+<span id="748">748</span>
+<span id="749">749</span>
+<span id="750">750</span>
+<span id="751">751</span>
+<span id="752">752</span>
+<span id="753">753</span>
+<span id="754">754</span>
+<span id="755">755</span>
+<span id="756">756</span>
+<span id="757">757</span>
+<span id="758">758</span>
+<span id="759">759</span>
+<span id="760">760</span>
+<span id="761">761</span>
+<span id="762">762</span>
+<span id="763">763</span>
+<span id="764">764</span>
+<span id="765">765</span>
+<span id="766">766</span>
+<span id="767">767</span>
+<span id="768">768</span>
+<span id="769">769</span>
+<span id="770">770</span>
+<span id="771">771</span>
+<span id="772">772</span>
+<span id="773">773</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -767,26 +805,10 @@
     <span class="macro">writeln</span><span class="macro">!</span>(
         <span class="ident">out</span>,
         <span class="string">r#&quot;
-import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
-import java.util.Optional;
-import java.util.Map;
-import java.util.Vector;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import serde.Deserializer;
-import serde.FixedLength;
-import serde.Int128;
-import serde.Unsigned;
-import serde.Serializer;
-import serde.Tuple2;
-import serde.Tuple3;
-import serde.Tuple4;
-import serde.Tuple5;
-import serde.Tuple6;
 &quot;#</span>
-    )
+    )<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(())
 }
 
 <span class="doccomment">/// A non-empty `package_prefix` is required when the type is quoted from a nested struct.</span>
@@ -800,34 +822,34 @@ import serde.Tuple6;
         <span class="ident">I16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Short&quot;</span>.<span class="ident">into</span>(),
         <span class="ident">I32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Integer&quot;</span>.<span class="ident">into</span>(),
         <span class="ident">I64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Long&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">I128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@Int128 BigInteger&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">U8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@Unsigned Byte&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">U16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@Unsigned Short&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">U32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@Unsigned Integer&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">U64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@Unsigned Long&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">U128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@Unsigned @Int128 BigInteger&quot;</span>.<span class="ident">into</span>(),
+        <span class="ident">I128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@serde.Int128 BigInteger&quot;</span>.<span class="ident">into</span>(),
+        <span class="ident">U8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@serde.Unsigned Byte&quot;</span>.<span class="ident">into</span>(),
+        <span class="ident">U16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@serde.Unsigned Short&quot;</span>.<span class="ident">into</span>(),
+        <span class="ident">U32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@serde.Unsigned Integer&quot;</span>.<span class="ident">into</span>(),
+        <span class="ident">U64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@serde.Unsigned Long&quot;</span>.<span class="ident">into</span>(),
+        <span class="ident">U128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@serde.Unsigned @serde.Int128 BigInteger&quot;</span>.<span class="ident">into</span>(),
         <span class="ident">F32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Float&quot;</span>.<span class="ident">into</span>(),
         <span class="ident">F64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Double&quot;</span>.<span class="ident">into</span>(),
         <span class="ident">Char</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Character&quot;</span>.<span class="ident">into</span>(),
         <span class="ident">Str</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;String&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">Bytes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;ByteBuffer&quot;</span>.<span class="ident">into</span>(),
+        <span class="ident">Bytes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;byte[]&quot;</span>.<span class="ident">into</span>(),
 
-        <span class="prelude-ty">Option</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;Optional&lt;{}&gt;&quot;</span>, <span class="ident">quote_type</span>(<span class="ident">format</span>, <span class="ident">package_prefix</span>)),
-        <span class="ident">Seq</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;Vector&lt;{}&gt;&quot;</span>, <span class="ident">quote_type</span>(<span class="ident">format</span>, <span class="ident">package_prefix</span>)),
+        <span class="prelude-ty">Option</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;java.util.Optional&lt;{}&gt;&quot;</span>, <span class="ident">quote_type</span>(<span class="ident">format</span>, <span class="ident">package_prefix</span>)),
+        <span class="ident">Seq</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;java.util.List&lt;{}&gt;&quot;</span>, <span class="ident">quote_type</span>(<span class="ident">format</span>, <span class="ident">package_prefix</span>)),
         <span class="ident">Map</span> { <span class="ident">key</span>, <span class="ident">value</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
-            <span class="string">&quot;SortedMap&lt;{}, {}&gt;&quot;</span>,
+            <span class="string">&quot;java.util.Map&lt;{}, {}&gt;&quot;</span>,
             <span class="ident">quote_type</span>(<span class="ident">key</span>, <span class="ident">package_prefix</span>),
             <span class="ident">quote_type</span>(<span class="ident">value</span>, <span class="ident">package_prefix</span>)
         ),
         <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
-            <span class="string">&quot;Tuple{}&lt;{}&gt;&quot;</span>,
+            <span class="string">&quot;serde.Tuple{}&lt;{}&gt;&quot;</span>,
             <span class="ident">formats</span>.<span class="ident">len</span>(),
             <span class="ident">quote_types</span>(<span class="ident">formats</span>, <span class="ident">package_prefix</span>)
         ),
         <span class="ident">TupleArray</span> { <span class="ident">content</span>, <span class="ident">size</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
-            <span class="string">&quot;@FixedLength(length={}) Vector&lt;{}&gt;&quot;</span>,
-            <span class="ident">size</span>,
-            <span class="ident">quote_type</span>(<span class="ident">content</span>, <span class="ident">package_prefix</span>)
+            <span class="string">&quot;{} @serde.ArrayLen(length={}) []&quot;</span>,
+            <span class="ident">quote_type</span>(<span class="ident">content</span>, <span class="ident">package_prefix</span>),
+            <span class="ident">size</span>
         ),
         <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;unexpected value&quot;</span>),
     }
@@ -975,7 +997,7 @@ import serde.Tuple6;
 
     <span class="macro">write</span><span class="macro">!</span>(
         <span class="ident">out</span>,
-        <span class="string">&quot;    static void serialize_{}({} value, Serializer serializer) throws IOException {{&quot;</span>,
+        <span class="string">&quot;    static void serialize_{}({} value, serde.Serializer serializer) throws java.io.IOException {{&quot;</span>,
         <span class="ident">name</span>,
         <span class="ident">quote_type</span>(<span class="ident">format0</span>, <span class="string">&quot;&quot;</span>)
     )<span class="question-mark">?</span>;
@@ -1014,7 +1036,7 @@ import serde.Tuple6;
                 <span class="ident">out</span>,
                 <span class="string">r#&quot;
         serializer.serialize_len(value.size());
-        for (Map.Entry&lt;{}, {}&gt; entry : value.entrySet()) {{
+        for (java.util.Map.Entry&lt;{}, {}&gt; entry : value.entrySet()) {{
             {}
             {}
         }}
@@ -1038,7 +1060,7 @@ import serde.Tuple6;
             <span class="macro">write</span><span class="macro">!</span>(
                 <span class="ident">out</span>,
                 <span class="string">r#&quot;
-        assert value.size() == {};
+        assert value.length == {};
         for ({} item : value) {{
             {}
         }}
@@ -1059,7 +1081,7 @@ import serde.Tuple6;
 
     <span class="macro">write</span><span class="macro">!</span>(
         <span class="ident">out</span>,
-        <span class="string">&quot;    static {} deserialize_{}(Deserializer deserializer) throws IOException {{&quot;</span>,
+        <span class="string">&quot;    static {} deserialize_{}(serde.Deserializer deserializer) throws java.io.IOException {{&quot;</span>,
         <span class="ident">quote_type</span>(<span class="ident">format0</span>, <span class="string">&quot;&quot;</span>),
         <span class="ident">name</span>,
     )<span class="question-mark">?</span>;
@@ -1070,9 +1092,9 @@ import serde.Tuple6;
                 <span class="string">r#&quot;
         boolean tag = deserializer.deserialize_option_tag();
         if (tag) {{
-            return Optional.empty();
+            return java.util.Optional.empty();
         }} else {{
-            return Optional.of({});
+            return java.util.Optional.of({});
         }}
 &quot;#</span>,
                 <span class="ident">quote_deserialize</span>(<span class="ident">format</span>, <span class="string">&quot;&quot;</span>)
@@ -1084,7 +1106,7 @@ import serde.Tuple6;
                 <span class="ident">out</span>,
                 <span class="string">r#&quot;
         long length = deserializer.deserialize_len();
-        Vector&lt;{}&gt; obj = new Vector&lt;{}&gt;((int) length);
+        java.util.List&lt;{}&gt; obj = new java.util.ArrayList&lt;{}&gt;((int) length);
         for (long i = 0; i &lt; length; i++) {{
             obj.add({});
         }}
@@ -1103,7 +1125,7 @@ import serde.Tuple6;
                 <span class="ident">out</span>,
                 <span class="string">r#&quot;
         long length = deserializer.deserialize_len();
-        SortedMap&lt;{}, {}&gt; obj = new TreeMap&lt;{}, {}&gt;();
+        java.util.Map&lt;{}, {}&gt; obj = new java.util.HashMap&lt;{}, {}&gt;();
         for (long i = 0; i &lt; length; i++) {{
             {} key = {};
             {} value = {};
@@ -1144,9 +1166,9 @@ import serde.Tuple6;
             <span class="macro">write</span><span class="macro">!</span>(
                 <span class="ident">out</span>,
                 <span class="string">r#&quot;
-        Vector&lt;{}&gt; obj = new Vector&lt;{}&gt;({});
-        for (long i = 0; i &lt; {}; i++) {{
-            obj.add({});
+        {}[] obj = new {}[{}];
+        for (int i = 0; i &lt; {}; i++) {{
+            obj[i] = {};
         }}
         return obj;
 &quot;#</span>,
@@ -1161,67 +1183,6 @@ import serde.Tuple6;
         <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;unexpected case&quot;</span>),
     }
     <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;    }}\n&quot;</span>)
-}
-
-<span class="kw">fn</span> <span class="ident">output_fields</span>(
-    <span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>,
-    <span class="ident">indentation</span>: <span class="ident">usize</span>,
-    <span class="ident">fields</span>: <span class="kw-2">&amp;</span>[<span class="ident">Named</span><span class="op">&lt;</span><span class="ident">Format</span><span class="op">&gt;</span>],
-    <span class="ident">package_prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">tab</span> <span class="op">=</span> <span class="string">&quot; &quot;</span>.<span class="ident">repeat</span>(<span class="ident">indentation</span>);
-    <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
-        <span class="macro">writeln</span><span class="macro">!</span>(
-            <span class="ident">out</span>,
-            <span class="string">&quot;{}public {} {};&quot;</span>,
-            <span class="ident">tab</span>,
-            <span class="ident">quote_type</span>(<span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>, <span class="ident">package_prefix</span>),
-            <span class="ident">field</span>.<span class="ident">name</span>
-        )<span class="question-mark">?</span>;
-    }
-    <span class="prelude-val">Ok</span>(())
-}
-
-<span class="kw">fn</span> <span class="ident">output_struct_variant</span>(
-    <span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>,
-    <span class="ident">base</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-    <span class="ident">index</span>: <span class="ident">u32</span>,
-    <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-    <span class="ident">fields</span>: <span class="kw-2">&amp;</span>[<span class="ident">Named</span><span class="op">&lt;</span><span class="ident">Format</span><span class="op">&gt;</span>],
-    <span class="ident">package_prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">class</span> <span class="op">=</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;    public static class {} extends {}&quot;</span>, <span class="ident">name</span>, <span class="ident">base</span>);
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;\n{} {{&quot;</span>, <span class="ident">class</span>)<span class="question-mark">?</span>;
-    <span class="ident">output_fields</span>(<span class="ident">out</span>, <span class="number">8</span>, <span class="ident">fields</span>, <span class="ident">package_prefix</span>)<span class="question-mark">?</span>;
-    <span class="macro">writeln</span><span class="macro">!</span>(
-        <span class="ident">out</span>,
-        <span class="string">r#&quot;
-        public void serialize(Serializer serializer) throws IOException {{
-            serializer.serialize_variant_index({});&quot;#</span>,
-        <span class="ident">index</span>,
-    )<span class="question-mark">?</span>;
-    <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
-        <span class="macro">writeln</span><span class="macro">!</span>(
-            <span class="ident">out</span>,
-            <span class="string">&quot;            {}&quot;</span>,
-            <span class="ident">quote_serialize_value</span>(<span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>)
-        )<span class="question-mark">?</span>;
-    }
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;        }}\n&quot;</span>)<span class="question-mark">?</span>;
-    <span class="macro">writeln</span><span class="macro">!</span>(
-        <span class="ident">out</span>,
-        <span class="string">&quot;        void load(Deserializer deserializer) throws IOException {{&quot;</span>
-    )<span class="question-mark">?</span>;
-    <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
-        <span class="macro">writeln</span><span class="macro">!</span>(
-            <span class="ident">out</span>,
-            <span class="string">&quot;            {} = {};&quot;</span>,
-            <span class="ident">field</span>.<span class="ident">name</span>,
-            <span class="ident">quote_deserialize</span>(<span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>, <span class="ident">package_prefix</span>)
-        )<span class="question-mark">?</span>;
-    }
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;        }}&quot;</span>)<span class="question-mark">?</span>;
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;    }}&quot;</span>)
 }
 
 <span class="kw">fn</span> <span class="ident">output_variant</span>(
@@ -1250,7 +1211,16 @@ import serde.Tuple6;
         <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">fields</span>.<span class="ident">clone</span>(),
         <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;incorrect value&quot;</span>),
     };
-    <span class="ident">output_struct_variant</span>(<span class="ident">out</span>, <span class="ident">base</span>, <span class="ident">index</span>, <span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">fields</span>, <span class="ident">package_prefix</span>)
+    <span class="ident">output_struct_or_variant_container</span>(
+        <span class="ident">out</span>,
+        <span class="number">4</span>,
+        <span class="prelude-val">Some</span>(<span class="ident">base</span>),
+        <span class="prelude-val">Some</span>(<span class="ident">index</span>),
+        <span class="ident">name</span>,
+        <span class="kw-2">&amp;</span><span class="ident">fields</span>,
+        <span class="bool-val">false</span>,
+        <span class="ident">package_prefix</span>,
+    )
 }
 
 <span class="kw">fn</span> <span class="ident">output_variants</span>(
@@ -1272,49 +1242,155 @@ import serde.Tuple6;
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="kw">fn</span> <span class="ident">output_struct_container</span>(
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy</span>::<span class="ident">too_many_arguments</span>)]</span>
+<span class="kw">fn</span> <span class="ident">output_struct_or_variant_container</span>(
     <span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>,
+    <span class="ident">indentation</span>: <span class="ident">usize</span>,
+    <span class="ident">variant_base</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>,
+    <span class="ident">variant_index</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
     <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
     <span class="ident">fields</span>: <span class="kw-2">&amp;</span>[<span class="ident">Named</span><span class="op">&lt;</span><span class="ident">Format</span><span class="op">&gt;</span>],
     <span class="ident">nested_class</span>: <span class="ident">bool</span>,
     <span class="ident">package_prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">prefix</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">nested_class</span> {
-        <span class="string">&quot;public static &quot;</span>
+    <span class="kw">let</span> <span class="ident">tab</span> <span class="op">=</span> <span class="string">&quot; &quot;</span>.<span class="ident">repeat</span>(<span class="ident">indentation</span>);
+    <span class="comment">// Beginning of class</span>
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">base</span>) <span class="op">=</span> <span class="ident">variant_base</span> {
+        <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="ident">out</span>,
+            <span class="string">&quot;\n{}public static class {} extends {} {{&quot;</span>,
+            <span class="ident">tab</span>, <span class="ident">name</span>, <span class="ident">base</span>
+        )<span class="question-mark">?</span>;
     } <span class="kw">else</span> {
-        <span class="string">&quot;public &quot;</span>
-    };
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;{}class {} {{&quot;</span>, <span class="ident">prefix</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
-    <span class="ident">output_fields</span>(<span class="ident">out</span>, <span class="number">4</span>, <span class="ident">fields</span>, <span class="ident">package_prefix</span>)<span class="question-mark">?</span>;
-    <span class="macro">writeln</span><span class="macro">!</span>(
-        <span class="ident">out</span>,
-        <span class="string">&quot;\n    public void serialize(Serializer serializer) throws IOException {{&quot;</span>
-    )<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">prefix</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">nested_class</span> {
+            <span class="string">&quot;public static &quot;</span>
+        } <span class="kw">else</span> {
+            <span class="string">&quot;public &quot;</span>
+        };
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;{}{}class {} {{&quot;</span>, <span class="ident">tab</span>, <span class="ident">prefix</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
+    }
+    <span class="comment">// Fields</span>
     <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
         <span class="macro">writeln</span><span class="macro">!</span>(
             <span class="ident">out</span>,
-            <span class="string">&quot;        {}&quot;</span>,
+            <span class="string">&quot;{}    public {} {};&quot;</span>,
+            <span class="ident">tab</span>,
+            <span class="ident">quote_type</span>(<span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>, <span class="ident">package_prefix</span>),
+            <span class="ident">field</span>.<span class="ident">name</span>
+        )<span class="question-mark">?</span>;
+    }
+    <span class="comment">// Nullary constructor.</span>
+    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;\n{}    public {}() {{}}&quot;</span>, <span class="ident">tab</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
+    <span class="comment">// N-ary constructor if N &gt; 0.</span>
+    <span class="kw">if</span> <span class="op">!</span><span class="ident">fields</span>.<span class="ident">is_empty</span>() {
+        <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="ident">out</span>,
+            <span class="string">&quot;\n{}    public {}({}) {{&quot;</span>,
+            <span class="ident">tab</span>,
+            <span class="ident">name</span>,
+            <span class="ident">fields</span>
+                .<span class="ident">iter</span>()
+                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{} {}&quot;</span>, <span class="ident">quote_type</span>(<span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">value</span>, <span class="ident">package_prefix</span>), <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">name</span>))
+                .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
+                .<span class="ident">join</span>(<span class="string">&quot;, &quot;</span>)
+        )<span class="question-mark">?</span>;
+        <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
+            <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;{}       this.{} = {};&quot;</span>, <span class="ident">tab</span>, <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>,)<span class="question-mark">?</span>;
+        }
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;{}    }}&quot;</span>, <span class="ident">tab</span>)<span class="question-mark">?</span>;
+    }
+    <span class="comment">// Serialize</span>
+    <span class="macro">writeln</span><span class="macro">!</span>(
+        <span class="ident">out</span>,
+        <span class="string">&quot;\n{}    public void serialize(serde.Serializer serializer) throws java.io.IOException {{&quot;</span>,
+        <span class="ident">tab</span>,
+    )<span class="question-mark">?</span>;
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">index</span>) <span class="op">=</span> <span class="ident">variant_index</span> {
+        <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="ident">out</span>,
+            <span class="string">&quot;{}        serializer.serialize_variant_index({});&quot;</span>,
+            <span class="ident">tab</span>, <span class="ident">index</span>
+        )<span class="question-mark">?</span>;
+    }
+    <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
+        <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="ident">out</span>,
+            <span class="string">&quot;{}        {}&quot;</span>,
+            <span class="ident">tab</span>,
             <span class="ident">quote_serialize_value</span>(<span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>)
         )<span class="question-mark">?</span>;
     }
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;    }}\n&quot;</span>)<span class="question-mark">?</span>;
-    <span class="macro">writeln</span><span class="macro">!</span>(
-        <span class="ident">out</span>,
-        <span class="string">&quot;    public static {} deserialize(Deserializer deserializer) throws IOException {{&quot;</span>,
-        <span class="ident">name</span>,
-    )<span class="question-mark">?</span>;
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;        {} obj = new {}();&quot;</span>, <span class="ident">name</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
+    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;{}    }}\n&quot;</span>, <span class="ident">tab</span>)<span class="question-mark">?</span>;
+    <span class="comment">// Deserialize (struct) or Load (variant)</span>
+    <span class="kw">if</span> <span class="ident">variant_index</span>.<span class="ident">is_none</span>() {
+        <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="ident">out</span>,
+            <span class="string">&quot;{}    public static {} deserialize(serde.Deserializer deserializer) throws java.io.IOException {{&quot;</span>,
+            <span class="ident">tab</span>, <span class="ident">name</span>,
+        )<span class="question-mark">?</span>;
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;{}        {} obj = new {}();&quot;</span>, <span class="ident">tab</span>, <span class="ident">name</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
+    } <span class="kw">else</span> {
+        <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="ident">out</span>,
+            <span class="string">&quot;{}    void load(serde.Deserializer deserializer) throws java.io.IOException {{&quot;</span>,
+            <span class="ident">tab</span>,
+        )<span class="question-mark">?</span>;
+    }
     <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
         <span class="macro">writeln</span><span class="macro">!</span>(
             <span class="ident">out</span>,
-            <span class="string">&quot;        obj.{} = {};&quot;</span>,
+            <span class="string">&quot;{}        {}.{} = {};&quot;</span>,
+            <span class="ident">tab</span>,
+            <span class="kw">if</span> <span class="ident">variant_index</span>.<span class="ident">is_none</span>() {
+                <span class="string">&quot;obj&quot;</span>
+            } <span class="kw">else</span> {
+                <span class="string">&quot;this&quot;</span>
+            },
             <span class="ident">field</span>.<span class="ident">name</span>,
             <span class="ident">quote_deserialize</span>(<span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>, <span class="ident">package_prefix</span>)
         )<span class="question-mark">?</span>;
     }
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;        return obj;&quot;</span>,)<span class="question-mark">?</span>;
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;    }}&quot;</span>)<span class="question-mark">?</span>;
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)
+    <span class="kw">if</span> <span class="ident">variant_index</span>.<span class="ident">is_none</span>() {
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;{}        return obj;&quot;</span>, <span class="ident">tab</span>)<span class="question-mark">?</span>;
+    }
+    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;{}    }}\n&quot;</span>, <span class="ident">tab</span>)<span class="question-mark">?</span>;
+    <span class="comment">// Equality</span>
+    <span class="macro">writeln</span><span class="macro">!</span>(
+        <span class="ident">out</span>,
+        <span class="string">r#&quot;{}    public boolean equals(Object obj) {{
+{}        if (this == obj) return true;
+{}        if (obj == null) return false;
+{}        if (getClass() != obj.getClass()) return false;
+{}        {} other = ({}) obj;&quot;#</span>,
+        <span class="ident">tab</span>, <span class="ident">tab</span>, <span class="ident">tab</span>, <span class="ident">tab</span>, <span class="ident">tab</span>, <span class="ident">name</span>, <span class="ident">name</span>,
+    )<span class="question-mark">?</span>;
+    <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
+        <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="ident">out</span>,
+            <span class="string">&quot;{}        if (!this.{}.equals(other.{})) {{ return false; }}&quot;</span>,
+            <span class="ident">tab</span>, <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>,
+        )<span class="question-mark">?</span>;
+    }
+    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;{}        return true;&quot;</span>, <span class="ident">tab</span>)<span class="question-mark">?</span>;
+    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;{}    }}\n&quot;</span>, <span class="ident">tab</span>)<span class="question-mark">?</span>;
+    <span class="comment">// Hashing</span>
+    <span class="macro">writeln</span><span class="macro">!</span>(
+        <span class="ident">out</span>,
+        <span class="string">&quot;{}    public int hashCode() {{\n{}        int value = 7;&quot;</span>,
+        <span class="ident">tab</span>, <span class="ident">tab</span>
+    )<span class="question-mark">?</span>;
+    <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
+        <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="ident">out</span>,
+            <span class="string">&quot;{}        value = 31 * value + this.{}.hashCode();&quot;</span>,
+            <span class="ident">tab</span>, <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>,
+        )<span class="question-mark">?</span>;
+    }
+    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;{}        return value;&quot;</span>, <span class="ident">tab</span>)<span class="question-mark">?</span>;
+    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;{}    }}&quot;</span>, <span class="ident">tab</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// End of class</span>
+    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;{}}}\n&quot;</span>, <span class="ident">tab</span>)
 }
 
 <span class="kw">fn</span> <span class="ident">output_enum_container</span>(
@@ -1332,16 +1408,16 @@ import serde.Tuple6;
     <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;{}abstract class {} {{&quot;</span>, <span class="ident">prefix</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
     <span class="macro">writeln</span><span class="macro">!</span>(
         <span class="ident">out</span>,
-        <span class="string">&quot;    abstract public void serialize(Serializer serializer) throws IOException;&quot;</span>,
+        <span class="string">&quot;    abstract public void serialize(serde.Serializer serializer) throws java.io.IOException;&quot;</span>,
     )<span class="question-mark">?</span>;
     <span class="macro">writeln</span><span class="macro">!</span>(
         <span class="ident">out</span>,
-        <span class="string">&quot;    abstract void load(Deserializer deserializer) throws IOException;&quot;</span>,
+        <span class="string">&quot;    abstract void load(serde.Deserializer deserializer) throws java.io.IOException;&quot;</span>,
     )<span class="question-mark">?</span>;
     <span class="macro">write</span><span class="macro">!</span>(
         <span class="ident">out</span>,
         <span class="string">r#&quot;
-    public static {} deserialize(Deserializer deserializer) throws IOException {{
+    public static {} deserialize(serde.Deserializer deserializer) throws java.io.IOException {{
         {} obj;
         int index = deserializer.deserialize_variant_index();
         switch (index) {{
@@ -1357,7 +1433,7 @@ import serde.Tuple6;
     }
     <span class="macro">writeln</span><span class="macro">!</span>(
         <span class="ident">out</span>,
-        <span class="string">&quot;            default: throw new IOException(\&quot;Unknown variant index for {}: \&quot; + index);&quot;</span>,
+        <span class="string">&quot;            default: throw new java.io.IOException(\&quot;Unknown variant index for {}: \&quot; + index);&quot;</span>,
         <span class="ident">name</span>,
     )<span class="question-mark">?</span>;
     <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;        }}&quot;</span>,)<span class="question-mark">?</span>;
@@ -1377,35 +1453,35 @@ import serde.Tuple6;
     <span class="ident">package_prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">use</span> <span class="ident">ContainerFormat</span>::<span class="kw-2">*</span>;
-    <span class="kw">match</span> <span class="ident">format</span> {
-        <span class="ident">UnitStruct</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">output_struct_container</span>(<span class="ident">out</span>, <span class="ident">name</span>, <span class="kw-2">&amp;</span>[], <span class="ident">nested_class</span>, <span class="ident">package_prefix</span>),
-        <span class="ident">NewTypeStruct</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">output_struct_container</span>(
-            <span class="ident">out</span>,
-            <span class="ident">name</span>,
-            <span class="kw-2">&amp;</span>[<span class="ident">Named</span> {
-                <span class="ident">name</span>: <span class="string">&quot;value&quot;</span>.<span class="ident">to_string</span>(),
-                <span class="ident">value</span>: <span class="ident">format</span>.<span class="ident">as_ref</span>().<span class="ident">clone</span>(),
-            }],
-            <span class="ident">nested_class</span>,
-            <span class="ident">package_prefix</span>,
-        ),
-        <span class="ident">TupleStruct</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">output_struct_container</span>(
-            <span class="ident">out</span>,
-            <span class="ident">name</span>,
-            <span class="kw-2">&amp;</span><span class="ident">formats</span>
-                .<span class="ident">iter</span>()
-                .<span class="ident">enumerate</span>()
-                .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">f</span>)<span class="op">|</span> <span class="ident">Named</span> {
-                    <span class="ident">name</span>: <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;field{}&quot;</span>, <span class="ident">i</span>),
-                    <span class="ident">value</span>: <span class="ident">f</span>.<span class="ident">clone</span>(),
-                })
-                .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>(),
-            <span class="ident">nested_class</span>,
-            <span class="ident">package_prefix</span>,
-        ),
-        <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">output_struct_container</span>(<span class="ident">out</span>, <span class="ident">name</span>, <span class="ident">fields</span>, <span class="ident">nested_class</span>, <span class="ident">package_prefix</span>),
-        <span class="ident">Enum</span>(<span class="ident">variants</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">output_enum_container</span>(<span class="ident">out</span>, <span class="ident">name</span>, <span class="ident">variants</span>, <span class="ident">nested_class</span>, <span class="ident">package_prefix</span>),
-    }
+    <span class="kw">let</span> <span class="ident">fields</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">format</span> {
+        <span class="ident">UnitStruct</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Vec</span>::<span class="ident">new</span>(),
+        <span class="ident">NewTypeStruct</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Named</span> {
+            <span class="ident">name</span>: <span class="string">&quot;value&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="ident">value</span>: <span class="ident">format</span>.<span class="ident">as_ref</span>().<span class="ident">clone</span>(),
+        }],
+        <span class="ident">TupleStruct</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">formats</span>
+            .<span class="ident">iter</span>()
+            .<span class="ident">enumerate</span>()
+            .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">f</span>)<span class="op">|</span> <span class="ident">Named</span> {
+                <span class="ident">name</span>: <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;field{}&quot;</span>, <span class="ident">i</span>),
+                <span class="ident">value</span>: <span class="ident">f</span>.<span class="ident">clone</span>(),
+            })
+            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>(),
+        <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">fields</span>.<span class="ident">clone</span>(),
+        <span class="ident">Enum</span>(<span class="ident">variants</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="kw">return</span> <span class="ident">output_enum_container</span>(<span class="ident">out</span>, <span class="ident">name</span>, <span class="ident">variants</span>, <span class="ident">nested_class</span>, <span class="ident">package_prefix</span>);
+        }
+    };
+    <span class="ident">output_struct_or_variant_container</span>(
+        <span class="ident">out</span>,
+        <span class="number">0</span>,
+        <span class="prelude-val">None</span>,
+        <span class="prelude-val">None</span>,
+        <span class="ident">name</span>,
+        <span class="kw-2">&amp;</span><span class="ident">fields</span>,
+        <span class="ident">nested_class</span>,
+        <span class="ident">package_prefix</span>,
+    )
 }
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Installer</span> {

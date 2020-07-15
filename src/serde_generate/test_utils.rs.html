@@ -318,6 +318,15 @@
 <span id="318">318</span>
 <span id="319">319</span>
 <span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -343,6 +352,7 @@
     },
     <span class="ident">ListWithMutualRecursion</span>(<span class="ident">List</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">SerdeData</span><span class="op">&gt;</span><span class="op">&gt;</span>),
     <span class="ident">TreeWithMutualRecursion</span>(<span class="ident">Tree</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">SerdeData</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+    <span class="ident">TupleArray</span>([<span class="ident">u32</span>; <span class="number">3</span>]),
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">PartialEq</span>)]</span>
@@ -522,7 +532,9 @@
         }],
     });
 
-    <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">v0</span>, <span class="ident">v1</span>, <span class="ident">v2</span>, <span class="ident">v2bis</span>, <span class="ident">v3</span>, <span class="ident">v4</span>, <span class="ident">v5</span>, <span class="ident">v6</span>, <span class="ident">v7</span>, <span class="ident">v8</span>]
+    <span class="kw">let</span> <span class="ident">v9</span> <span class="op">=</span> <span class="ident">SerdeData</span>::<span class="ident">TupleArray</span>([<span class="number">0</span>, <span class="number">2</span>, <span class="number">3</span>]);
+
+    <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">v0</span>, <span class="ident">v1</span>, <span class="ident">v2</span>, <span class="ident">v2bis</span>, <span class="ident">v3</span>, <span class="ident">v4</span>, <span class="ident">v5</span>, <span class="ident">v6</span>, <span class="ident">v7</span>, <span class="ident">v8</span>, <span class="ident">v9</span>]
 }
 
 <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -619,6 +631,12 @@ SerdeData:
       TreeWithMutualRecursion:
         NEWTYPE:
           TYPENAME: Tree
+    8:
+      TupleArray:
+        NEWTYPE:
+          TUPLEARRAY:
+            CONTENT: U32
+            SIZE: 3
 Struct:
   STRUCT:
     - x: U32
