@@ -184,7 +184,10 @@ fn test_trace_deserialization_with_custom_invariants() {
     // Type trace alone cannot guess a valid value for `Name`.
     assert_eq!(
         tracer.trace_type::<Person>(&samples).unwrap_err(),
-        Error::Custom(format!("Invalid name {}", "")),
+        Error::Custom(format!(
+            "Failed to deserialize value: \"Invalid name {}\"",
+            ""
+        )),
     );
 
     // Let's trace a sample Rust value first. We obtain an abstract value as a side effect.
