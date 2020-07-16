@@ -149,6 +149,16 @@ pub fn get_sample_values() -> Vec<SerdeData> {
         f_map: BTreeMap::new(),
     });
 
+    let v2ter = SerdeData::OtherTypes(OtherTypes {
+        f_string: vec!["1"; 1000].join(""),
+        f_bytes: ByteBuf::from(vec![1u8; 300000]),
+        f_option: None,
+        f_unit: (),
+        f_seq: Vec::new(),
+        f_tuple: (4, 5),
+        f_map: BTreeMap::new(),
+    });
+
     let v3 = SerdeData::UnitVariant;
 
     let v4 = SerdeData::NewTypeVariant("test".to_string());
@@ -204,7 +214,7 @@ pub fn get_sample_values() -> Vec<SerdeData> {
 
     let v9 = SerdeData::TupleArray([0, 2, 3]);
 
-    vec![v0, v1, v2, v2bis, v3, v4, v5, v6, v7, v8, v9]
+    vec![v0, v1, v2, v2bis, v2ter, v3, v4, v5, v6, v7, v8, v9]
 }
 
 #[test]

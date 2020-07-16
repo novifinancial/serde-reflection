@@ -97,7 +97,7 @@ class LcsDeserializer {
 
 inline void LcsSerializer::serialize_u32_as_uleb128(uint32_t value) {
     while (value >= 0x80) {
-        bytes_.push_back((uint8_t)value & 0x7F);
+        bytes_.push_back((uint8_t)((value & 0x7F) | 0x80));
         value = value >> 7;
     }
     bytes_.push_back((uint8_t)value);
