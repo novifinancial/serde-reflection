@@ -1,7 +1,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use include_dir::include_dir;
+use include_dir::include_dir as include_directory;
 use serde_reflection::{ContainerFormat, Format, FormatHolder, Named, Registry, VariantFormat};
 use std::collections::BTreeMap;
 use std::io::{Result, Write};
@@ -718,6 +718,20 @@ impl Installer {
     pub fn new(install_dir: PathBuf) -> Self {
         Installer { install_dir }
     }
+
+    fn install_runtime(
+        &self,
+        source_dir: include_dir::Dir,
+        name: &str,
+    ) -> std::result::Result<(), Box<dyn std::error::Error>> {
+        let dir_path = self.install_dir.join(name);
+        std::fs::create_dir_all(&dir_path)?;
+        for entry in source_dir.files() {
+            let mut file = std::fs::File::create(dir_path.join(entry.path()))?;
+            file.write_all(entry.contents())?;
+        }
+        Ok(())
+    }
 }
 
 impl crate::SourceInstaller for Installer {
@@ -753,18 +767,11 @@ impl crate::SourceInstaller for Installer {
     }
 
     fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {
-        let source_dir = include_dir!("runtime/java/serde");
-        let dir_path = self.install_dir.join("serde");
-        std::fs::create_dir_all(&dir_path)?;
-        for entry in source_dir.files() {
-            let mut file = std::fs::File::create(dir_path.join(entry.path()))?;
-            file.write_all(entry.contents())?;
-        }
-        Ok(())
+        self.install_runtime(include_directory!("runtime/java/serde"), "serde")
     }
 
     fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error> {
-        panic!("not implemented")
+        self.install_runtime(include_directory!("runtime/java/bincode"), "bincode")
     }
 
     fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
