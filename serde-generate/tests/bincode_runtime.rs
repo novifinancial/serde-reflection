@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use serde::{Deserialize, Serialize};
-use serde_generate::{cpp, python3, rust, test_utils};
+use serde_generate::{cpp, java, python3, rust, test_utils};
 use serde_reflection::{Registry, Result, Samples, Tracer, TracerConfig};
 use std::fs::File;
 use std::io::Write;
@@ -199,7 +199,7 @@ fn test_rust_documentation_on_simple_data() {
 }
 
 #[test]
-fn test_cpp_bincode_runtime_on_simple_date() {
+fn test_cpp_bincode_runtime_on_simple_data() {
     let registry = get_local_registry().unwrap();
     let dir = tempdir().unwrap();
     let header_path = dir.path().join("test.hpp");
@@ -341,5 +341,192 @@ int main() {{
     assert!(status.success());
 
     let status = Command::new(dir.path().join("test")).status().unwrap();
+    assert!(status.success());
+}
+
+#[test]
+fn test_java_bincode_runtime_on_simple_data() {
+    let registry = get_local_registry().unwrap();
+    let dir = tempdir().unwrap();
+
+    let mut source = File::create(&dir.path().join("Testing.java")).unwrap();
+    java::output(&mut source, &registry, "Testing").unwrap();
+
+    let reference = bincode::serialize(&Test {
+        a: vec![4, 6],
+        b: (-3, 5),
+        c: Choice::C { x: 7 },
+    })
+    .unwrap();
+
+    let mut source = File::create(&dir.path().join("Main.java")).unwrap();
+    writeln!(
+        source,
+        r#"
+import java.util.List;
+import java.util.Arrays;
+import serde.Deserializer;
+import serde.Serializer;
+import serde.Unsigned;
+import serde.Tuple2;
+import bincode.BincodeDeserializer;
+import bincode.BincodeSerializer;
+
+public class Main {{
+    public static void main(String[] args) throws java.lang.Exception {{
+        byte[] input = new byte[] {{{}}};
+
+        Deserializer deserializer = new BincodeDeserializer(input);
+        Testing.Test test = Testing.Test.deserialize(deserializer);
+
+        List<@Unsigned Integer> a = Arrays.asList(4, 6);
+        Tuple2<Long, @Unsigned Long> b = new Tuple2<>(new Long(-3), new Long(5));
+        Testing.Choice c = new Testing.Choice.C(new Byte((byte) 7));
+        Testing.Test test2 = new Testing.Test(a, b, c);
+
+        assert test.equals(test2);
+
+        Serializer serializer = new BincodeSerializer();
+        test2.serialize(serializer);
+        byte[] output = serializer.get_bytes();
+
+        assert java.util.Arrays.equals(input, output);
+    }}
+}}
+"#,
+        reference
+            .iter()
+            .map(|x| format!("{}", *x as i8))
+            .collect::<Vec<_>>()
+            .join(", ")
+    )
+    .unwrap();
+
+    let paths = std::iter::empty()
+        .chain(std::fs::read_dir("runtime/java/serde").unwrap())
+        .chain(std::fs::read_dir("runtime/java/bincode").unwrap())
+        .map(|e| e.unwrap().path());
+    let status = Command::new("javac")
+        .arg("-Xlint")
+        .arg("-d")
+        .arg(dir.path())
+        .args(paths)
+        .status()
+        .unwrap();
+    assert!(status.success());
+
+    let status = Command::new("javac")
+        .arg("-Xlint")
+        .arg("-cp")
+        .arg(dir.path())
+        .arg("-d")
+        .arg(dir.path())
+        .arg(dir.path().join("Testing.java"))
+        .arg(dir.path().join("Main.java"))
+        .status()
+        .unwrap();
+    assert!(status.success());
+
+    let status = Command::new("java")
+        .arg("-enableassertions")
+        .arg("-cp")
+        .arg(dir.path())
+        .arg("Main")
+        .status()
+        .unwrap();
+    assert!(status.success());
+}
+
+#[test]
+fn test_java_bincode_runtime_on_supported_types() {
+    let registry = test_utils::get_registry().unwrap();
+    let dir = tempdir().unwrap();
+
+    let mut source = File::create(&dir.path().join("Testing.java")).unwrap();
+    java::output(&mut source, &registry, "Testing").unwrap();
+
+    let values = test_utils::get_sample_values();
+    let encodings = values
+        .iter()
+        .map(|v| {
+            let bytes = bincode::serialize(&v).unwrap();
+            format!(
+                "\n{{{}}}",
+                bytes
+                    .iter()
+                    .map(|x| format!("{}", *x as i8))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            )
+        })
+        .collect::<Vec<_>>()
+        .join(", ");
+
+    let mut source = File::create(&dir.path().join("Main.java")).unwrap();
+    writeln!(
+        source,
+        r#"
+import java.util.List;
+import java.util.Arrays;
+import serde.Deserializer;
+import serde.Serializer;
+import serde.Unsigned;
+import serde.Tuple2;
+import bincode.BincodeDeserializer;
+import bincode.BincodeSerializer;
+
+public class Main {{
+    public static void main(String[] args) throws java.lang.Exception {{
+        byte[][] inputs = new byte[][] {{{}}};
+
+        for (int i = 0; i < inputs.length; i++) {{
+            Deserializer deserializer = new BincodeDeserializer(inputs[i]);
+            Testing.SerdeData test = Testing.SerdeData.deserialize(deserializer);
+
+            Serializer serializer = new BincodeSerializer();
+            test.serialize(serializer);
+            byte[] output = serializer.get_bytes();
+
+            assert java.util.Arrays.equals(inputs[i], output);
+        }}
+    }}
+}}
+"#,
+        encodings
+    )
+    .unwrap();
+
+    let paths = std::iter::empty()
+        .chain(std::fs::read_dir("runtime/java/serde").unwrap())
+        .chain(std::fs::read_dir("runtime/java/bincode").unwrap())
+        .map(|e| e.unwrap().path());
+    let status = Command::new("javac")
+        .arg("-Xlint")
+        .arg("-d")
+        .arg(dir.path())
+        .args(paths)
+        .status()
+        .unwrap();
+    assert!(status.success());
+
+    let status = Command::new("javac")
+        .arg("-Xlint")
+        .arg("-cp")
+        .arg(dir.path())
+        .arg("-d")
+        .arg(dir.path())
+        .arg(dir.path().join("Testing.java"))
+        .arg(dir.path().join("Main.java"))
+        .status()
+        .unwrap();
+    assert!(status.success());
+
+    let status = Command::new("java")
+        .arg("-enableassertions")
+        .arg("-cp")
+        .arg(dir.path())
+        .arg("Main")
+        .status()
+        .unwrap();
     assert!(status.success());
 }
