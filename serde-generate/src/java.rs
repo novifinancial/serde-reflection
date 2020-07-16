@@ -775,6 +775,6 @@ impl crate::SourceInstaller for Installer {
     }
 
     fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        panic!("not implemented")
+        self.install_runtime(include_directory!("runtime/java/lcs"), "lcs")
     }
 }
