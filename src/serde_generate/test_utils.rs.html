@@ -327,6 +327,16 @@
 <span id="327">327</span>
 <span id="328">328</span>
 <span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -479,6 +489,16 @@
         <span class="ident">f_map</span>: <span class="ident">BTreeMap</span>::<span class="ident">new</span>(),
     });
 
+    <span class="kw">let</span> <span class="ident">v2ter</span> <span class="op">=</span> <span class="ident">SerdeData</span>::<span class="ident">OtherTypes</span>(<span class="ident">OtherTypes</span> {
+        <span class="ident">f_string</span>: <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;1&quot;</span>; <span class="number">1000</span>].<span class="ident">join</span>(<span class="string">&quot;&quot;</span>),
+        <span class="ident">f_bytes</span>: <span class="ident">ByteBuf</span>::<span class="ident">from</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">1u8</span>; <span class="number">300000</span>]),
+        <span class="ident">f_option</span>: <span class="prelude-val">None</span>,
+        <span class="ident">f_unit</span>: (),
+        <span class="ident">f_seq</span>: <span class="ident">Vec</span>::<span class="ident">new</span>(),
+        <span class="ident">f_tuple</span>: (<span class="number">4</span>, <span class="number">5</span>),
+        <span class="ident">f_map</span>: <span class="ident">BTreeMap</span>::<span class="ident">new</span>(),
+    });
+
     <span class="kw">let</span> <span class="ident">v3</span> <span class="op">=</span> <span class="ident">SerdeData</span>::<span class="ident">UnitVariant</span>;
 
     <span class="kw">let</span> <span class="ident">v4</span> <span class="op">=</span> <span class="ident">SerdeData</span>::<span class="ident">NewTypeVariant</span>(<span class="string">&quot;test&quot;</span>.<span class="ident">to_string</span>());
@@ -534,7 +554,7 @@
 
     <span class="kw">let</span> <span class="ident">v9</span> <span class="op">=</span> <span class="ident">SerdeData</span>::<span class="ident">TupleArray</span>([<span class="number">0</span>, <span class="number">2</span>, <span class="number">3</span>]);
 
-    <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">v0</span>, <span class="ident">v1</span>, <span class="ident">v2</span>, <span class="ident">v2bis</span>, <span class="ident">v3</span>, <span class="ident">v4</span>, <span class="ident">v5</span>, <span class="ident">v6</span>, <span class="ident">v7</span>, <span class="ident">v8</span>, <span class="ident">v9</span>]
+    <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">v0</span>, <span class="ident">v1</span>, <span class="ident">v2</span>, <span class="ident">v2bis</span>, <span class="ident">v2ter</span>, <span class="ident">v3</span>, <span class="ident">v4</span>, <span class="ident">v5</span>, <span class="ident">v6</span>, <span class="ident">v7</span>, <span class="ident">v8</span>, <span class="ident">v9</span>]
 }
 
 <span class="attribute">#[<span class="ident">test</span>]</span>
