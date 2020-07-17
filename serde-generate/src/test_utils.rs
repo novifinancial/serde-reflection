@@ -151,7 +151,7 @@ pub fn get_sample_values() -> Vec<SerdeData> {
 
     let v2ter = SerdeData::OtherTypes(OtherTypes {
         f_string: vec!["1"; 1000].join(""),
-        f_bytes: ByteBuf::from(vec![1u8; 300000]),
+        f_bytes: ByteBuf::from(vec![1u8; 3000]),
         f_option: None,
         f_unit: (),
         f_seq: Vec::new(),

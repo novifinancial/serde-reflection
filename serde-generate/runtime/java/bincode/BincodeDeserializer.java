@@ -38,10 +38,10 @@ public class BincodeDeserializer implements serde.Deserializer {
     public Boolean deserialize_bool() throws Exception {
         byte value = input.get();
         if (value == 0) {
-            return new Boolean(false);
+            return Boolean.valueOf(false);
         }
         if (value == 1) {
-            return new Boolean(true);
+            return Boolean.valueOf(true);
         }
         throw new Exception("Incorrect boolean value");
     }
@@ -63,19 +63,19 @@ public class BincodeDeserializer implements serde.Deserializer {
     }
 
     public @Unsigned Byte deserialize_u8() throws Exception {
-        return new Byte(input.get());
+        return Byte.valueOf(input.get());
     }
 
     public @Unsigned Short deserialize_u16() throws Exception {
-        return new Short(input.getShort());
+        return Short.valueOf(input.getShort());
     }
 
     public @Unsigned Integer deserialize_u32() throws Exception {
-        return new Integer(input.getInt());
+        return Integer.valueOf(input.getInt());
     }
 
     public @Unsigned Long deserialize_u64() throws Exception {
-        return new Long(input.getLong());
+        return Long.valueOf(input.getLong());
     }
 
     public @Unsigned @Int128 BigInteger deserialize_u128() throws Exception {
@@ -88,19 +88,19 @@ public class BincodeDeserializer implements serde.Deserializer {
     }
 
     public Byte deserialize_i8() throws Exception {
-        return new Byte(input.get());
+        return Byte.valueOf(input.get());
     }
 
     public Short deserialize_i16() throws Exception {
-        return new Short(input.getShort());
+        return Short.valueOf(input.getShort());
     }
 
     public Integer deserialize_i32() throws Exception {
-        return new Integer(input.getInt());
+        return Integer.valueOf(input.getInt());
     }
 
     public Long deserialize_i64() throws Exception {
-        return new Long(input.getLong());
+        return Long.valueOf(input.getLong());
     }
 
     public @Int128 BigInteger deserialize_i128() throws Exception {
