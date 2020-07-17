@@ -9,11 +9,9 @@
 //! The following target languages are currently supported:
 //!
 //! * C++ 17
+//! * Java 8
 //! * Python 3
 //! * Rust 2018
-//!
-//! Work in progress:
-//! * Java 8
 //!
 //! ## Supported Encodings
 //!
