@@ -6,6 +6,7 @@ package bincode;
 import java.lang.Exception;
 import java.math.BigInteger;
 import java.io.ByteArrayOutputStream;
+
 import serde.Unsigned;
 import serde.Int128;
 import serde.Bytes;
@@ -30,7 +31,8 @@ public class BincodeSerializer implements serde.Serializer {
         output.write((value.booleanValue() ? 1 : 0));
     }
 
-    public void serialize_unit(Void value) throws Exception {}
+    public void serialize_unit(Void value) throws Exception {
+    }
 
     public void serialize_char(Character value) throws Exception {
         throw new Exception("Not implemented: serialize_char");
@@ -50,28 +52,28 @@ public class BincodeSerializer implements serde.Serializer {
 
     public void serialize_u16(@Unsigned Short value) throws Exception {
         short val = value.shortValue();
-        output.write((byte)(val >>> 0));
-        output.write((byte)(val >>> 8));
+        output.write((byte) (val >>> 0));
+        output.write((byte) (val >>> 8));
     }
 
     public void serialize_u32(@Unsigned Integer value) throws Exception {
         int val = value.intValue();
-        output.write((byte)(val >>> 0));
-        output.write((byte)(val >>> 8));
-        output.write((byte)(val >>> 16));
-        output.write((byte)(val >>> 24));
+        output.write((byte) (val >>> 0));
+        output.write((byte) (val >>> 8));
+        output.write((byte) (val >>> 16));
+        output.write((byte) (val >>> 24));
     }
 
     public void serialize_u64(@Unsigned Long value) throws Exception {
         long val = value.longValue();
-        output.write((byte)(val >>> 0));
-        output.write((byte)(val >>> 8));
-        output.write((byte)(val >>> 16));
-        output.write((byte)(val >>> 24));
-        output.write((byte)(val >>> 32));
-        output.write((byte)(val >>> 40));
-        output.write((byte)(val >>> 48));
-        output.write((byte)(val >>> 56));
+        output.write((byte) (val >>> 0));
+        output.write((byte) (val >>> 8));
+        output.write((byte) (val >>> 16));
+        output.write((byte) (val >>> 24));
+        output.write((byte) (val >>> 32));
+        output.write((byte) (val >>> 40));
+        output.write((byte) (val >>> 48));
+        output.write((byte) (val >>> 56));
     }
 
     public void serialize_u128(@Unsigned @Int128 BigInteger value) throws Exception {
@@ -125,12 +127,16 @@ public class BincodeSerializer implements serde.Serializer {
     }
 
     public void serialize_option_tag(boolean value) throws Exception {
-        output.write((value ? (byte)1 : (byte)0));
+        output.write((value ? (byte) 1 : (byte) 0));
     }
 
-    public boolean enforce_strict_map_ordering() { return false; }
+    public boolean enforce_strict_map_ordering() {
+        return false;
+    }
 
-    public int get_buffer_offset() { return output.size(); }
+    public int get_buffer_offset() {
+        return output.size();
+    }
 
     public void sort_last_entries(int[] offsets) {
         // Only relevant when enforce_strict_map_ordering() == true.

@@ -7,6 +7,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.lang.Exception;
 import java.math.BigInteger;
+
 import serde.Unsigned;
 import serde.Int128;
 import serde.Bytes;
@@ -30,7 +31,7 @@ public class LcsDeserializer implements serde.Deserializer {
         if (len < 0 || len > Integer.MAX_VALUE) {
             throw new Exception("The length of a Java array cannot exceed MAXINT");
         }
-        byte[] content = new byte[(int)len];
+        byte[] content = new byte[(int) len];
         input.get(content);
         return new Bytes(content);
     }
@@ -117,7 +118,7 @@ public class LcsDeserializer implements serde.Deserializer {
         long value = 0;
         for (int shift = 0; shift < 32; shift += 7) {
             byte x = input.get();
-            byte digit = (byte)(x & 0x7F);
+            byte digit = (byte) (x & 0x7F);
             value = value | (digit << shift);
             if (value > Integer.MAX_VALUE) {
                 throw new Exception("Overflow while parsing uleb128-encoded uint32 value");
@@ -126,7 +127,7 @@ public class LcsDeserializer implements serde.Deserializer {
                 if (shift > 0 && digit == 0) {
                     throw new Exception("Invalid uleb128 number (unexpected zero digit)");
                 }
-                return (int)value;
+                return (int) value;
             }
         }
         throw new Exception("Overflow while parsing uleb128-encoded uint32 value");
@@ -144,9 +145,13 @@ public class LcsDeserializer implements serde.Deserializer {
         return deserialize_bool().booleanValue();
     }
 
-    public boolean enforce_strict_map_ordering() { return true; }
+    public boolean enforce_strict_map_ordering() {
+        return true;
+    }
 
-    public int get_buffer_offset() { return input.position(); }
+    public int get_buffer_offset() {
+        return input.position();
+    }
 
     public void check_that_key_slices_are_increasing(Slice key1, Slice key2) throws Exception {
         if (Slice.compare_bytes(input.array(), key1, key2) >= 0) {

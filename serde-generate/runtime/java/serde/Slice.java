@@ -25,10 +25,16 @@ public class Slice {
                 return 1;
             }
             int byte2 = content[start2 + i] & 0xFF;
-            if (byte1 > byte2) { return 1; }
-            if (byte1 < byte2) { return -1; }
+            if (byte1 > byte2) {
+                return 1;
+            }
+            if (byte1 < byte2) {
+                return -1;
+            }
         }
-        if (end2 - start2 > end1 - start1) { return -1; }
+        if (end2 - start2 > end1 - start1) {
+            return -1;
+        }
         return 0;
     }
 }

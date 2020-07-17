@@ -11,7 +11,8 @@ public class Tuple4<T0, T1, T2, T3> {
     public T2 field2;
     public T3 field3;
 
-    public Tuple4() {}
+    public Tuple4() {
+    }
 
     public Tuple4(T0 f0, T1 f1, T2 f2, T3 f3) {
         this.field0 = f0;
@@ -25,10 +26,18 @@ public class Tuple4<T0, T1, T2, T3> {
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
         Tuple4<?,?,?,?> other = (Tuple4) obj;
-        if (!Objects.equals(this.field0, other.field0)) { return false; }
-        if (!Objects.equals(this.field1, other.field1)) { return false; }
-        if (!Objects.equals(this.field2, other.field2)) { return false; }
-        if (!Objects.equals(this.field3, other.field3)) { return false; }
+        if (!Objects.equals(this.field0, other.field0)) {
+            return false;
+        }
+        if (!Objects.equals(this.field1, other.field1)) {
+            return false;
+        }
+        if (!Objects.equals(this.field2, other.field2)) {
+            return false;
+        }
+        if (!Objects.equals(this.field3, other.field3)) {
+            return false;
+        }
         return true;
     }
 
