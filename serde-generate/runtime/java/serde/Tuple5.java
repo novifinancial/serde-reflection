@@ -12,7 +12,8 @@ public class Tuple5<T0, T1, T2, T3, T4> {
     public T3 field3;
     public T4 field4;
 
-    public Tuple5() {}
+    public Tuple5() {
+    }
 
     public Tuple5(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4) {
         this.field0 = f0;
@@ -27,11 +28,21 @@ public class Tuple5<T0, T1, T2, T3, T4> {
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
         Tuple5<?,?,?,?,?> other = (Tuple5) obj;
-        if (!Objects.equals(this.field0, other.field0)) { return false; }
-        if (!Objects.equals(this.field1, other.field1)) { return false; }
-        if (!Objects.equals(this.field2, other.field2)) { return false; }
-        if (!Objects.equals(this.field3, other.field3)) { return false; }
-        if (!Objects.equals(this.field4, other.field4)) { return false; }
+        if (!Objects.equals(this.field0, other.field0)) {
+            return false;
+        }
+        if (!Objects.equals(this.field1, other.field1)) {
+            return false;
+        }
+        if (!Objects.equals(this.field2, other.field2)) {
+            return false;
+        }
+        if (!Objects.equals(this.field3, other.field3)) {
+            return false;
+        }
+        if (!Objects.equals(this.field4, other.field4)) {
+            return false;
+        }
         return true;
     }
 

@@ -7,6 +7,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.lang.Exception;
 import java.math.BigInteger;
+
 import serde.Unsigned;
 import serde.Int128;
 import serde.Bytes;
@@ -30,7 +31,7 @@ public class BincodeDeserializer implements serde.Deserializer {
         if (len < 0 || len > Integer.MAX_VALUE) {
             throw new Exception("The length of a Java array cannot exceed MAXINT");
         }
-        byte[] content = new byte[(int)len];
+        byte[] content = new byte[(int) len];
         input.get(content);
         return new Bytes(content);
     }
@@ -125,9 +126,14 @@ public class BincodeDeserializer implements serde.Deserializer {
         return deserialize_bool().booleanValue();
     }
 
-    public boolean enforce_strict_map_ordering() { return false; }
+    public boolean enforce_strict_map_ordering() {
+        return false;
+    }
 
-    public int get_buffer_offset() { return input.position(); }
+    public int get_buffer_offset() {
+        return input.position();
+    }
 
-    public void check_that_key_slices_are_increasing(Slice key1, Slice key2) throws Exception {}
+    public void check_that_key_slices_are_increasing(Slice key1, Slice key2) throws Exception {
+    }
 }
