@@ -5,14 +5,13 @@ package serde;
 
 import java.util.Objects;
 
-public class Tuple2<T0, T1> {
-    public T0 field0;
-    public T1 field1;
-
-    public Tuple2() {
-    }
+public final class Tuple2<T0, T1> {
+    public final T0 field0;
+    public final T1 field1;
 
     public Tuple2(T0 f0, T1 f1) {
+        assert f0 != null;
+        assert f1 != null;
         this.field0 = f0;
         this.field1 = f1;
     }

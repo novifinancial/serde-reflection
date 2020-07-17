@@ -7,6 +7,8 @@ import java.lang.Exception;
 import java.math.BigInteger;
 
 import serde.Bytes;
+import serde.Unit;
+
 
 public interface Serializer {
     void serialize_str(String value) throws Exception;
@@ -15,7 +17,7 @@ public interface Serializer {
 
     void serialize_bool(Boolean value) throws Exception;
 
-    void serialize_unit(Void value) throws Exception;
+    void serialize_unit(Unit value) throws Exception;
 
     void serialize_char(Character value) throws Exception;
 
@@ -49,11 +51,9 @@ public interface Serializer {
 
     void serialize_option_tag(boolean value) throws Exception;
 
-    boolean enforce_strict_map_ordering();
-
     int get_buffer_offset();
 
-    void sort_last_entries(int[] offsets);
+    void sort_map_entries(int[] offsets);
 
     byte[] get_bytes();
 }

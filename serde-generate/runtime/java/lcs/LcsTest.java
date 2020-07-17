@@ -39,7 +39,7 @@ public class LcsTest {
         assert Arrays.equals(serializer.get_bytes(), new byte[]{-1, /**/ 1, /**/ 0, 0, /**/ 0, 1, 0, /**/ 0, /**/ 0, /**/ 2, 0, 0, 0});
 
         int[] offsets = {1, 2, 4, 7, 8, 9};
-        serializer.sort_last_entries(offsets);
+        serializer.sort_map_entries(offsets);
         assert Arrays.equals(serializer.get_bytes(), new byte[]{-1, /**/ 0, /**/ 0, /**/ 0, 0, /**/ 0, 1, 0,  /**/ 1, /**/ 2, 0, 0, 0});
     }
 

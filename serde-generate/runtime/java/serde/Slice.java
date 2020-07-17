@@ -3,7 +3,7 @@
 
 package serde;
 
-public class Slice {
+public final class Slice {
     public int start;
     public int end;
 

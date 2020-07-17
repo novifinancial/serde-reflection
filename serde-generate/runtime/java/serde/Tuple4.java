@@ -5,16 +5,17 @@ package serde;
 
 import java.util.Objects;
 
-public class Tuple4<T0, T1, T2, T3> {
-    public T0 field0;
-    public T1 field1;
-    public T2 field2;
-    public T3 field3;
-
-    public Tuple4() {
-    }
+public final class Tuple4<T0, T1, T2, T3> {
+    public final T0 field0;
+    public final T1 field1;
+    public final T2 field2;
+    public final T3 field3;
 
     public Tuple4(T0 f0, T1 f1, T2 f2, T3 f3) {
+        assert f0 != null;
+        assert f1 != null;
+        assert f2 != null;
+        assert f3 != null;
         this.field0 = f0;
         this.field1 = f1;
         this.field2 = f2;
