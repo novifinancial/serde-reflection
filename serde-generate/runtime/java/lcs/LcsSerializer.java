@@ -10,6 +10,8 @@ import serde.Unsigned;
 import serde.Int128;
 import serde.Bytes;
 import serde.Slice;
+import serde.Unit;
+
 
 public class LcsSerializer implements serde.Serializer {
     private MyByteArrayOutputStream output;
@@ -23,15 +25,16 @@ public class LcsSerializer implements serde.Serializer {
     }
 
     public void serialize_bytes(Bytes value) throws Exception {
-        serialize_len(value.content.length);
-        output.write(value.content, 0, value.content.length);
+        byte[] content = value.content();
+        serialize_len(content.length);
+        output.write(content, 0, content.length);
     }
 
     public void serialize_bool(Boolean value) throws Exception {
         output.write((value.booleanValue() ? 1 : 0));
     }
 
-    public void serialize_unit(Void value) throws Exception {
+    public void serialize_unit(Unit value) throws Exception {
     }
 
     public void serialize_char(Character value) throws Exception {
@@ -138,15 +141,11 @@ public class LcsSerializer implements serde.Serializer {
         output.write((value ? (byte) 1 : (byte) 0));
     }
 
-    public boolean enforce_strict_map_ordering() {
-        return true;
-    }
-
     public int get_buffer_offset() {
         return output.size();
     }
 
-    public void sort_last_entries(int[] offsets) {
+    public void sort_map_entries(int[] offsets) {
         if (offsets.length <= 1) {
             return;
         }

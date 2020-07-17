@@ -12,6 +12,8 @@ import serde.Unsigned;
 import serde.Int128;
 import serde.Bytes;
 import serde.Slice;
+import serde.Unit;
+
 
 public class BincodeDeserializer implements serde.Deserializer {
     ByteBuffer input;
@@ -23,7 +25,7 @@ public class BincodeDeserializer implements serde.Deserializer {
 
     public String deserialize_str() throws Exception {
         Bytes value = deserialize_bytes();
-        return new String(value.content);
+        return new String(value.content());
     }
 
     public Bytes deserialize_bytes() throws Exception {
@@ -47,8 +49,8 @@ public class BincodeDeserializer implements serde.Deserializer {
         throw new Exception("Incorrect boolean value");
     }
 
-    public Void deserialize_unit() throws Exception {
-        return null;
+    public Unit deserialize_unit() throws Exception {
+        return new Unit();
     }
 
     public Character deserialize_char() throws Exception {
@@ -126,14 +128,11 @@ public class BincodeDeserializer implements serde.Deserializer {
         return deserialize_bool().booleanValue();
     }
 
-    public boolean enforce_strict_map_ordering() {
-        return false;
-    }
-
     public int get_buffer_offset() {
         return input.position();
     }
 
     public void check_that_key_slices_are_increasing(Slice key1, Slice key2) throws Exception {
+        // Not required by the format.
     }
 }

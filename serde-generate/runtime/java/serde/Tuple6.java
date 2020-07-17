@@ -5,18 +5,21 @@ package serde;
 
 import java.util.Objects;
 
-public class Tuple6<T0, T1, T2, T3, T4, T5> {
-    public T0 field0;
-    public T1 field1;
-    public T2 field2;
-    public T3 field3;
-    public T4 field4;
-    public T5 field5;
-
-    public Tuple6() {
-    }
+public final class Tuple6<T0, T1, T2, T3, T4, T5> {
+    public final T0 field0;
+    public final T1 field1;
+    public final T2 field2;
+    public final T3 field3;
+    public final T4 field4;
+    public final T5 field5;
 
     public Tuple6(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5) {
+        assert f0 != null;
+        assert f1 != null;
+        assert f2 != null;
+        assert f3 != null;
+        assert f4 != null;
+        assert f5 != null;
         this.field0 = f0;
         this.field1 = f1;
         this.field2 = f2;

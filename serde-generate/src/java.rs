@@ -10,7 +10,7 @@ use std::path::PathBuf;
 pub fn output(out: &mut dyn Write, registry: &Registry, class_name: &str) -> Result<()> {
     output_preambule(out, None)?;
 
-    writeln!(out, "public class {} {{\n", class_name)?;
+    writeln!(out, "public final class {} {{\n", class_name)?;
     for (name, format) in registry {
         output_container(
             out,
@@ -19,6 +19,7 @@ pub fn output(out: &mut dyn Write, registry: &Registry, class_name: &str) -> Res
             /* nested class */ true,
             &format!("{}.", class_name),
         )?;
+        writeln!(out)?;
     }
     output_trait_helpers(out, registry, /* nested class */ true)?;
     writeln!(out, "}}")
@@ -26,8 +27,9 @@ pub fn output(out: &mut dyn Write, registry: &Registry, class_name: &str) -> Res
 
 fn output_preambule(out: &mut dyn Write, package_name: Option<&str>) -> Result<()> {
     if let Some(name) = package_name {
-        writeln!(out, "package {};", name,)?;
+        writeln!(out, "package {};", name)?;
     }
+    // Java doesn't let us annotate fully-qualified class names.
     writeln!(
         out,
         r#"
@@ -42,7 +44,7 @@ fn quote_type(format: &Format, package_prefix: &str) -> String {
     use Format::*;
     match format {
         TypeName(x) => format!("{}{}", package_prefix, x),
-        Unit => "Void".into(),
+        Unit => "serde.Unit".into(),
         Bool => "Boolean".into(),
         I8 => "Byte".into(),
         I16 => "Short".into(),
@@ -106,7 +108,7 @@ fn output_trait_helpers(
             .unwrap();
     }
     let prefix = if nested_class { "static " } else { "" };
-    writeln!(out, "{}class TraitHelpers {{", prefix)?;
+    writeln!(out, "{}final class TraitHelpers {{", prefix)?;
     for (mangled_name, subtype) in &subtypes {
         output_serialization_helper(out, mangled_name, subtype)?;
         output_deserialization_helper(out, mangled_name, subtype)?;
@@ -265,15 +267,11 @@ fn output_serialization_helper(out: &mut dyn Write, name: &str, format0: &Format
         int[] offsets = new int[value.size()];
         int count = 0;
         for (java.util.Map.Entry<{}, {}> entry : value.entrySet()) {{
-            if (serializer.enforce_strict_map_ordering()) {{
-                offsets[count++] = serializer.get_buffer_offset();
-            }}
+            offsets[count++] = serializer.get_buffer_offset();
             {}
             {}
         }}
-        if (serializer.enforce_strict_map_ordering()) {{
-            serializer.sort_last_entries(offsets);
-        }}
+        serializer.sort_map_entries(offsets);
 "#,
                 quote_type(key, ""),
                 quote_type(value, ""),
@@ -357,29 +355,21 @@ fn output_deserialization_helper(out: &mut dyn Write, name: &str, format0: &Form
                 r#"
         long length = deserializer.deserialize_len();
         java.util.Map<{0}, {1}> obj = new java.util.HashMap<{0}, {1}>();
-        if (deserializer.enforce_strict_map_ordering()) {{
-            int previous_key_start = 0;
-            int previous_key_end = 0;
-            for (long i = 0; i < length; i++) {{
-                int key_start = deserializer.get_buffer_offset();
-                {0} key = {2};
-                int key_end = deserializer.get_buffer_offset();
-                if (i > 0) {{
-                    deserializer.check_that_key_slices_are_increasing(
-			new serde.Slice(previous_key_start, previous_key_end),
-                        new serde.Slice(key_start, key_end));
-                }}
-                previous_key_start = key_start;
-                previous_key_end = key_end;
-                {1} value = {3};
-                obj.put(key, value);
+        int previous_key_start = 0;
+        int previous_key_end = 0;
+        for (long i = 0; i < length; i++) {{
+            int key_start = deserializer.get_buffer_offset();
+            {0} key = {2};
+            int key_end = deserializer.get_buffer_offset();
+            if (i > 0) {{
+                deserializer.check_that_key_slices_are_increasing(
+                    new serde.Slice(previous_key_start, previous_key_end),
+                    new serde.Slice(key_start, key_end));
             }}
-        }} else {{
-            for (long i = 0; i < length; i++) {{
-                {0} key = {2};
-                {1} value = {3};
-                obj.put(key, value);
-            }}
+            previous_key_start = key_start;
+            previous_key_end = key_end;
+            {1} value = {3};
+            obj.put(key, value);
         }}
         return obj;
 "#,
@@ -393,18 +383,13 @@ fn output_deserialization_helper(out: &mut dyn Write, name: &str, format0: &Form
         Tuple(formats) => {
             writeln!(
                 out,
-                "\n        {0} obj = new {0}();",
-                quote_type(format0, "")
+                r#"
+        return new {}({}
+        );
+"#,
+                quote_type(format0, ""),
+                formats.iter().map(|f| format!("\n            {}", quote_deserialize(f, ""))).collect::<Vec<_>>().join(",")
             )?;
-            for (index, format) in formats.iter().enumerate() {
-                writeln!(
-                    out,
-                    "        obj.field{} = {};",
-                    index,
-                    quote_deserialize(format, "")
-                )?;
-            }
-            writeln!(out, "        return obj;")?;
         }
 
         TupleArray { content, size } => {
@@ -501,7 +486,7 @@ fn output_struct_or_variant_container(
     if let Some(base) = variant_base {
         writeln!(
             out,
-            "\n{}public static class {} extends {} {{",
+            "\n{}public static final class {} extends {} {{",
             tab, name, base
         )?;
     } else {
@@ -510,38 +495,40 @@ fn output_struct_or_variant_container(
         } else {
             "public "
         };
-        writeln!(out, "{}{}class {} {{", tab, prefix, name)?;
+        writeln!(out, "{}{}final class {} {{", tab, prefix, name)?;
     }
     // Fields
     for field in fields {
         writeln!(
             out,
-            "{}    public {} {};",
+            "{}    public final {} {};",
             tab,
             quote_type(&field.value, package_prefix),
             field.name
         )?;
     }
-    // Nullary constructor.
-    writeln!(out, "\n{}    public {}() {{}}", tab, name)?;
-    // N-ary constructor if N > 0.
     if !fields.is_empty() {
-        writeln!(
-            out,
-            "\n{}    public {}({}) {{",
-            tab,
-            name,
-            fields
-                .iter()
-                .map(|f| format!("{} {}", quote_type(&f.value, package_prefix), &f.name))
-                .collect::<Vec<_>>()
-                .join(", ")
-        )?;
-        for field in fields {
-            writeln!(out, "{}       this.{} = {};", tab, &field.name, &field.name,)?;
-        }
-        writeln!(out, "{}    }}", tab)?;
+        writeln!(out)?;
     }
+    // Constructor.
+    writeln!(
+        out,
+        "{}    public {}({}) {{",
+        tab,
+        name,
+        fields
+            .iter()
+            .map(|f| format!("{} {}", quote_type(&f.value, package_prefix), &f.name))
+            .collect::<Vec<_>>()
+            .join(", ")
+    )?;
+    for field in fields {
+        writeln!(out, "{}       assert {} != null;", tab, &field.name)?;
+    }
+    for field in fields {
+        writeln!(out, "{}       this.{} = {};", tab, &field.name, &field.name)?;
+    }
+    writeln!(out, "{}    }}", tab)?;
     // Serialize
     writeln!(
         out,
@@ -571,31 +558,24 @@ fn output_struct_or_variant_container(
             "{}    public static {} deserialize(serde.Deserializer deserializer) throws java.lang.Exception {{",
             tab, name,
         )?;
-        writeln!(out, "{}        {} obj = new {}();", tab, name, name)?;
     } else {
         writeln!(
             out,
-            "{}    void load(serde.Deserializer deserializer) throws java.lang.Exception {{",
-            tab,
+            "{}    static {} load(serde.Deserializer deserializer) throws java.lang.Exception {{",
+            tab, name,
         )?;
     }
+    writeln!(out, "{}        Builder builder = new Builder();", tab)?;
     for field in fields {
         writeln!(
             out,
-            "{}        {}.{} = {};",
+            "{}        builder.{} = {};",
             tab,
-            if variant_index.is_none() {
-                "obj"
-            } else {
-                "this"
-            },
             field.name,
             quote_deserialize(&field.value, package_prefix)
         )?;
     }
-    if variant_index.is_none() {
-        writeln!(out, "{}        return obj;", tab)?;
-    }
+    writeln!(out, "{}        return builder.build();", tab)?;
     writeln!(out, "{}    }}\n", tab)?;
     // Equality
     writeln!(
@@ -610,7 +590,7 @@ fn output_struct_or_variant_container(
     for field in fields {
         writeln!(
             out,
-            "{0}            if (!java.util.Objects.equals(this.{1}, other.{1})) {{ return false; }}",
+            "{0}        if (!java.util.Objects.equals(this.{1}, other.{1})) {{ return false; }}",
             tab, &field.name,
         )?;
     }
@@ -631,9 +611,49 @@ fn output_struct_or_variant_container(
     }
     writeln!(out, "{}        return value;", tab)?;
     writeln!(out, "{}    }}", tab)?;
-
+    // Builder
+    output_struct_or_variant_container_builder(out, indentation + 4, name, fields, package_prefix)?;
     // End of class
-    writeln!(out, "{}}}\n", tab)
+    writeln!(out, "{}}}", tab)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn output_struct_or_variant_container_builder(
+    out: &mut dyn Write,
+    indentation: usize,
+    name: &str,
+    fields: &[Named<Format>],
+    package_prefix: &str,
+) -> Result<()> {
+    let tab = " ".repeat(indentation);
+    // Beginning of builder class
+    writeln!(out, "\n{}public static final class Builder {{", tab)?;
+    // Fields
+    for field in fields {
+        writeln!(
+            out,
+            "{}    public {} {};",
+            tab,
+            quote_type(&field.value, package_prefix),
+            field.name
+        )?;
+    }
+    if !fields.is_empty() {
+        writeln!(out)?;
+    }
+    // Finalization
+    writeln!(
+        out,
+        r#"{0}    public {1} build() {{
+{0}        return new {1}({2}
+{0}        );
+{0}    }}"#,
+        tab,
+        name,
+        fields.iter().map(|f| format!("\n{}            {}", tab, f.name)).collect::<Vec<_>>().join(",")
+    )?;
+    // End of class
+    writeln!(out, "{}}}", tab)
 }
 
 fn output_enum_container(
@@ -653,25 +673,22 @@ fn output_enum_container(
         out,
         "    abstract public void serialize(serde.Serializer serializer) throws java.lang.Exception;",
     )?;
-    writeln!(
-        out,
-        "    abstract void load(serde.Deserializer deserializer) throws java.lang.Exception;",
-    )?;
     write!(
         out,
         r#"
-    public static {} deserialize(serde.Deserializer deserializer) throws java.lang.Exception {{
-        {} obj;
+    public static {0} deserialize(serde.Deserializer deserializer) throws java.lang.Exception {{
+        {0} obj;
         int index = deserializer.deserialize_variant_index();
         switch (index) {{
 "#,
-        name, name,
+        name,
     )?;
     for (index, variant) in variants {
         writeln!(
             out,
-            "            case {}: obj = new {}(); break;",
-            index, variant.name,
+            "            case {}: return {}.load(deserializer);",
+            index,
+            variant.name,
         )?;
     }
     writeln!(
@@ -679,11 +696,8 @@ fn output_enum_container(
         "            default: throw new java.lang.Exception(\"Unknown variant index for {}: \" + index);",
         name,
     )?;
-    writeln!(out, "        }}",)?;
-    writeln!(
-        out,
-        "        obj.load(deserializer);\n        return obj;\n    }}",
-    )?;
+    writeln!(out, "        }}")?;
+    writeln!(out, "    }}")?;
     output_variants(out, name, variants, package_prefix)?;
     writeln!(out, "}}\n")
 }

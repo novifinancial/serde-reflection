@@ -4,7 +4,7 @@
 //! # Serde code generator
 //!
 //! '''bash
-//! cargo run -p serde-generate -- --help
+//! cargo run --bin serdegen -- --help
 //! '''
 
 use serde_generate::{cpp, java, python3, rust, SourceInstaller};

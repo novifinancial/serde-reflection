@@ -10,6 +10,8 @@ import java.io.ByteArrayOutputStream;
 import serde.Unsigned;
 import serde.Int128;
 import serde.Bytes;
+import serde.Unit;
+
 
 public class BincodeSerializer implements serde.Serializer {
     private ByteArrayOutputStream output;
@@ -23,15 +25,16 @@ public class BincodeSerializer implements serde.Serializer {
     }
 
     public void serialize_bytes(Bytes value) throws Exception {
-        serialize_len(value.content.length);
-        output.write(value.content, 0, value.content.length);
+        byte[] content = value.content();
+        serialize_len(content.length);
+        output.write(content, 0, content.length);
     }
 
     public void serialize_bool(Boolean value) throws Exception {
         output.write((value.booleanValue() ? 1 : 0));
     }
 
-    public void serialize_unit(Void value) throws Exception {
+    public void serialize_unit(Unit value) throws Exception {
     }
 
     public void serialize_char(Character value) throws Exception {
@@ -130,16 +133,12 @@ public class BincodeSerializer implements serde.Serializer {
         output.write((value ? (byte) 1 : (byte) 0));
     }
 
-    public boolean enforce_strict_map_ordering() {
-        return false;
-    }
-
     public int get_buffer_offset() {
         return output.size();
     }
 
-    public void sort_last_entries(int[] offsets) {
-        // Only relevant when enforce_strict_map_ordering() == true.
+    public void sort_map_entries(int[] offsets) {
+        // Not required by the format.
     }
 
     public byte[] get_bytes() {

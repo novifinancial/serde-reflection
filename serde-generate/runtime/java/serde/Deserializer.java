@@ -8,6 +8,8 @@ import java.math.BigInteger;
 
 import serde.Bytes;
 import serde.Slice;
+import serde.Unit;
+
 
 public interface Deserializer {
     String deserialize_str() throws Exception;
@@ -16,7 +18,7 @@ public interface Deserializer {
 
     Boolean deserialize_bool() throws Exception;
 
-    Void deserialize_unit() throws Exception;
+    Unit deserialize_unit() throws Exception;
 
     Character deserialize_char() throws Exception;
 
@@ -49,8 +51,6 @@ public interface Deserializer {
     int deserialize_variant_index() throws Exception;
 
     boolean deserialize_option_tag() throws Exception;
-
-    boolean enforce_strict_map_ordering();
 
     int get_buffer_offset();
 

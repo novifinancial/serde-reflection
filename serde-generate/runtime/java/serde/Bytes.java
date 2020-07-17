@@ -6,16 +6,20 @@ package serde;
 import java.util.Arrays;
 
 /**
- * Wrapper around byte[] so that `equals` and `hashCode` compose as expected.
+ * Immutable wrapper class around byte[].
+ *
+ * Enforces value-semantice for `equals` and `hashCode`.
  */
-public class Bytes {
-    public byte[] content;
-
-    public Bytes() {
-    }
+public final class Bytes {
+    private final byte[] content;
 
     public Bytes(byte[] content) {
-        this.content = content;
+        assert content != null;
+        this.content = content.clone();
+    }
+
+    public byte[] content() {
+        return this.content.clone();
     }
 
     public boolean equals(Object obj) {
