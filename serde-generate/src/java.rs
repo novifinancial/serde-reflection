@@ -388,7 +388,11 @@ fn output_deserialization_helper(out: &mut dyn Write, name: &str, format0: &Form
         );
 "#,
                 quote_type(format0, ""),
-                formats.iter().map(|f| format!("\n            {}", quote_deserialize(f, ""))).collect::<Vec<_>>().join(",")
+                formats
+                    .iter()
+                    .map(|f| format!("\n            {}", quote_deserialize(f, "")))
+                    .collect::<Vec<_>>()
+                    .join(",")
             )?;
         }
 
@@ -650,7 +654,11 @@ fn output_struct_or_variant_container_builder(
 {0}    }}"#,
         tab,
         name,
-        fields.iter().map(|f| format!("\n{}            {}", tab, f.name)).collect::<Vec<_>>().join(",")
+        fields
+            .iter()
+            .map(|f| format!("\n{}            {}", tab, f.name))
+            .collect::<Vec<_>>()
+            .join(",")
     )?;
     // End of class
     writeln!(out, "{}}}", tab)
@@ -687,8 +695,7 @@ fn output_enum_container(
         writeln!(
             out,
             "            case {}: return {}.load(deserializer);",
-            index,
-            variant.name,
+            index, variant.name,
         )?;
     }
     writeln!(
