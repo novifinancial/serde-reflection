@@ -4,8 +4,8 @@
 package serde;
 
 public final class Slice {
-    public int start;
-    public int end;
+    public final int start;
+    public final int end;
 
     public Slice(int start, int end) {
         this.start = start;

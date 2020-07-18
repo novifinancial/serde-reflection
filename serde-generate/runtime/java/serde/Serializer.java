@@ -5,10 +5,8 @@ package serde;
 
 import java.lang.Exception;
 import java.math.BigInteger;
-
 import serde.Bytes;
 import serde.Unit;
-
 
 public interface Serializer {
     void serialize_str(String value) throws Exception;

@@ -10,7 +10,6 @@ import serde.Bytes;
 import serde.Slice;
 import serde.Unit;
 
-
 public interface Deserializer {
     String deserialize_str() throws Exception;
 
