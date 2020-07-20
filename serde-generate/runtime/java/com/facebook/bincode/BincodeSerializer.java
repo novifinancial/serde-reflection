@@ -1,10 +1,10 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-package bincode;
+package com.facebook.bincode;
 
 import java.lang.Exception;
-import serde.BinarySerializer;
+import com.facebook.serde.BinarySerializer;
 
 public class BincodeSerializer extends BinarySerializer {
     public void serialize_len(long value) throws Exception {

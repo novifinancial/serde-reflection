@@ -247,8 +247,8 @@ fn test_that_java_code_compiles() {
     java::output(&mut source, &registry, "Test").unwrap();
 
     let paths = std::iter::empty()
-        .chain(std::fs::read_dir("runtime/java/serde").unwrap())
-        .chain(std::fs::read_dir("runtime/java/bincode").unwrap())
+        .chain(std::fs::read_dir("runtime/java/com/facebook/serde").unwrap())
+        .chain(std::fs::read_dir("runtime/java/com/facebook/bincode").unwrap())
         .map(|e| e.unwrap().path());
     let status = Command::new("javac")
         .arg("-Xlint")

@@ -1,7 +1,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-package lcs;
+package com.facebook.lcs;
 
 import java.util.Arrays;
 import java.lang.reflect.Method;

@@ -1,7 +1,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-package serde;
+package com.facebook.serde;
 
 public final class Unit {
     public Unit() {}

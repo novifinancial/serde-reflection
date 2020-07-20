@@ -44,23 +44,23 @@ fn quote_type(format: &Format, package_prefix: &str) -> String {
     use Format::*;
     match format {
         TypeName(x) => format!("{}{}", package_prefix, x),
-        Unit => "serde.Unit".into(),
+        Unit => "com.facebook.serde.Unit".into(),
         Bool => "Boolean".into(),
         I8 => "Byte".into(),
         I16 => "Short".into(),
         I32 => "Integer".into(),
         I64 => "Long".into(),
-        I128 => "@serde.Int128 BigInteger".into(),
-        U8 => "@serde.Unsigned Byte".into(),
-        U16 => "@serde.Unsigned Short".into(),
-        U32 => "@serde.Unsigned Integer".into(),
-        U64 => "@serde.Unsigned Long".into(),
-        U128 => "@serde.Unsigned @serde.Int128 BigInteger".into(),
+        I128 => "@com.facebook.serde.Int128 BigInteger".into(),
+        U8 => "@com.facebook.serde.Unsigned Byte".into(),
+        U16 => "@com.facebook.serde.Unsigned Short".into(),
+        U32 => "@com.facebook.serde.Unsigned Integer".into(),
+        U64 => "@com.facebook.serde.Unsigned Long".into(),
+        U128 => "@com.facebook.serde.Unsigned @com.facebook.serde.Int128 BigInteger".into(),
         F32 => "Float".into(),
         F64 => "Double".into(),
         Char => "Character".into(),
         Str => "String".into(),
-        Bytes => "serde.Bytes".into(),
+        Bytes => "com.facebook.serde.Bytes".into(),
 
         Option(format) => format!("java.util.Optional<{}>", quote_type(format, package_prefix)),
         Seq(format) => format!("java.util.List<{}>", quote_type(format, package_prefix)),
@@ -70,12 +70,12 @@ fn quote_type(format: &Format, package_prefix: &str) -> String {
             quote_type(value, package_prefix)
         ),
         Tuple(formats) => format!(
-            "serde.Tuple{}<{}>",
+            "com.facebook.serde.Tuple{}<{}>",
             formats.len(),
             quote_types(formats, package_prefix)
         ),
         TupleArray { content, size } => format!(
-            "{} @serde.ArrayLen(length={}) []",
+            "{} @com.facebook.serde.ArrayLen(length={}) []",
             quote_type(content, package_prefix),
             size
         ),
@@ -225,7 +225,7 @@ fn output_serialization_helper(out: &mut dyn Write, name: &str, format0: &Format
 
     write!(
         out,
-        "    static void serialize_{}({} value, serde.Serializer serializer) throws java.lang.Exception {{",
+        "    static void serialize_{}({} value, com.facebook.serde.Serializer serializer) throws java.lang.Exception {{",
         name,
         quote_type(format0, "")
     )?;
@@ -313,7 +313,7 @@ fn output_deserialization_helper(out: &mut dyn Write, name: &str, format0: &Form
 
     write!(
         out,
-        "    static {} deserialize_{}(serde.Deserializer deserializer) throws java.lang.Exception {{",
+        "    static {} deserialize_{}(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{",
         quote_type(format0, ""),
         name,
     )?;
@@ -363,8 +363,8 @@ fn output_deserialization_helper(out: &mut dyn Write, name: &str, format0: &Form
             int key_end = deserializer.get_buffer_offset();
             if (i > 0) {{
                 deserializer.check_that_key_slices_are_increasing(
-                    new serde.Slice(previous_key_start, previous_key_end),
-                    new serde.Slice(key_start, key_end));
+                    new com.facebook.serde.Slice(previous_key_start, previous_key_end),
+                    new com.facebook.serde.Slice(key_start, key_end));
             }}
             previous_key_start = key_start;
             previous_key_end = key_end;
@@ -536,7 +536,7 @@ fn output_struct_or_variant_container(
     // Serialize
     writeln!(
         out,
-        "\n{}    public void serialize(serde.Serializer serializer) throws java.lang.Exception {{",
+        "\n{}    public void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception {{",
         tab,
     )?;
     if let Some(index) = variant_index {
@@ -559,13 +559,13 @@ fn output_struct_or_variant_container(
     if variant_index.is_none() {
         writeln!(
             out,
-            "{}    public static {} deserialize(serde.Deserializer deserializer) throws java.lang.Exception {{",
+            "{}    public static {} deserialize(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{",
             tab, name,
         )?;
     } else {
         writeln!(
             out,
-            "{}    static {} load(serde.Deserializer deserializer) throws java.lang.Exception {{",
+            "{}    static {} load(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{",
             tab, name,
         )?;
     }
@@ -679,12 +679,12 @@ fn output_enum_container(
     writeln!(out, "{}abstract class {} {{", prefix, name)?;
     writeln!(
         out,
-        "    abstract public void serialize(serde.Serializer serializer) throws java.lang.Exception;",
+        "    abstract public void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception;",
     )?;
     write!(
         out,
         r#"
-    public static {0} deserialize(serde.Deserializer deserializer) throws java.lang.Exception {{
+    public static {0} deserialize(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{
         {0} obj;
         int index = deserializer.deserialize_variant_index();
         switch (index) {{
@@ -760,9 +760,9 @@ impl Installer {
     fn install_runtime(
         &self,
         source_dir: include_dir::Dir,
-        name: &str,
+        path: &str,
     ) -> std::result::Result<(), Box<dyn std::error::Error>> {
-        let dir_path = self.install_dir.join(name);
+        let dir_path = self.install_dir.join(path);
         std::fs::create_dir_all(&dir_path)?;
         for entry in source_dir.files() {
             let mut file = std::fs::File::create(dir_path.join(entry.path()))?;
@@ -805,14 +805,23 @@ impl crate::SourceInstaller for Installer {
     }
 
     fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.install_runtime(include_directory!("runtime/java/serde"), "serde")
+        self.install_runtime(
+            include_directory!("runtime/java/com/facebook/serde"),
+            "com/facebook/serde",
+        )
     }
 
     fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.install_runtime(include_directory!("runtime/java/bincode"), "bincode")
+        self.install_runtime(
+            include_directory!("runtime/java/com/facebook/bincode"),
+            "com/facebook/bincode",
+        )
     }
 
     fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.install_runtime(include_directory!("runtime/java/lcs"), "lcs")
+        self.install_runtime(
+            include_directory!("runtime/java/com/facebook/lcs"),
+            "com/facebook/lcs",
+        )
     }
 }

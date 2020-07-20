@@ -1,14 +1,10 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-package serde;
+package com.facebook.serde;
 
 import java.lang.Exception;
 import java.math.BigInteger;
-
-import serde.Bytes;
-import serde.Slice;
-import serde.Unit;
 
 public interface Deserializer {
     String deserialize_str() throws Exception;

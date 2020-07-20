@@ -1,11 +1,11 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-package lcs;
+package com.facebook.lcs;
 
 import java.lang.Exception;
-import serde.Slice;
-import serde.BinarySerializer;
+import com.facebook.serde.Slice;
+import com.facebook.serde.BinarySerializer;
 
 public class LcsSerializer extends BinarySerializer {
     private void serialize_u32_as_uleb128(int value) {
