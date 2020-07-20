@@ -1,11 +1,11 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-package bincode;
+package com.facebook.bincode;
 
 import java.lang.Exception;
-import serde.Slice;
-import serde.BinaryDeserializer;
+import com.facebook.serde.Slice;
+import com.facebook.serde.BinaryDeserializer;
 
 public class BincodeDeserializer extends BinaryDeserializer {
     public BincodeDeserializer(byte[] input) {

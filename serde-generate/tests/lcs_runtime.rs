@@ -359,12 +359,12 @@ fn test_java_lcs_runtime_on_simple_data() {
         r#"
 import java.util.List;
 import java.util.Arrays;
-import serde.Deserializer;
-import serde.Serializer;
-import serde.Unsigned;
-import serde.Tuple2;
-import lcs.LcsDeserializer;
-import lcs.LcsSerializer;
+import com.facebook.serde.Deserializer;
+import com.facebook.serde.Serializer;
+import com.facebook.serde.Unsigned;
+import com.facebook.serde.Tuple2;
+import com.facebook.lcs.LcsDeserializer;
+import com.facebook.lcs.LcsSerializer;
 
 public class Main {{
     public static void main(String[] args) throws java.lang.Exception {{
@@ -397,8 +397,8 @@ public class Main {{
     .unwrap();
 
     let paths = std::iter::empty()
-        .chain(std::fs::read_dir("runtime/java/serde").unwrap())
-        .chain(std::fs::read_dir("runtime/java/lcs").unwrap())
+        .chain(std::fs::read_dir("runtime/java/com/facebook/serde").unwrap())
+        .chain(std::fs::read_dir("runtime/java/com/facebook/lcs").unwrap())
         .map(|e| e.unwrap().path());
     let status = Command::new("javac")
         .arg("-Xlint")
@@ -462,12 +462,12 @@ fn test_java_lcs_runtime_on_supported_types() {
         r#"
 import java.util.List;
 import java.util.Arrays;
-import serde.Deserializer;
-import serde.Serializer;
-import serde.Unsigned;
-import serde.Tuple2;
-import lcs.LcsDeserializer;
-import lcs.LcsSerializer;
+import com.facebook.serde.Deserializer;
+import com.facebook.serde.Serializer;
+import com.facebook.serde.Unsigned;
+import com.facebook.serde.Tuple2;
+import com.facebook.lcs.LcsDeserializer;
+import com.facebook.lcs.LcsSerializer;
 
 public class Main {{
     public static void main(String[] args) throws java.lang.Exception {{
@@ -491,8 +491,8 @@ public class Main {{
     .unwrap();
 
     let paths = std::iter::empty()
-        .chain(std::fs::read_dir("runtime/java/serde").unwrap())
-        .chain(std::fs::read_dir("runtime/java/lcs").unwrap())
+        .chain(std::fs::read_dir("runtime/java/com/facebook/serde").unwrap())
+        .chain(std::fs::read_dir("runtime/java/com/facebook/lcs").unwrap())
         .map(|e| e.unwrap().path());
     let status = Command::new("javac")
         .arg("-Xlint")
@@ -529,8 +529,8 @@ public class Main {{
 fn test_java_lcs_runtime_autotest() {
     let dir = tempdir().unwrap();
     let paths = std::iter::empty()
-        .chain(std::fs::read_dir("runtime/java/serde").unwrap())
-        .chain(std::fs::read_dir("runtime/java/lcs").unwrap())
+        .chain(std::fs::read_dir("runtime/java/com/facebook/serde").unwrap())
+        .chain(std::fs::read_dir("runtime/java/com/facebook/lcs").unwrap())
         .map(|e| e.unwrap().path());
     let status = Command::new("javac")
         .arg("-Xlint")
@@ -545,7 +545,7 @@ fn test_java_lcs_runtime_autotest() {
         .arg("-enableassertions")
         .arg("-cp")
         .arg(dir.path())
-        .arg("lcs.LcsTest")
+        .arg("com.facebook.lcs.LcsTest")
         .status()
         .unwrap();
     assert!(status.success());

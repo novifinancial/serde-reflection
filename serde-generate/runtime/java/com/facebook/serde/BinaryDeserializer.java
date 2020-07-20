@@ -1,21 +1,14 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-package serde;
+package com.facebook.serde;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.lang.Exception;
 import java.math.BigInteger;
 
-import serde.Unsigned;
-import serde.Int128;
-import serde.Bytes;
-import serde.Slice;
-import serde.Unit;
-
-
-public abstract class BinaryDeserializer implements serde.Deserializer {
+public abstract class BinaryDeserializer implements Deserializer {
     protected ByteBuffer input;
 
     public BinaryDeserializer(byte[] input) {
