@@ -218,9 +218,10 @@ fn output_container(
         UnitStruct => writeln!(out, "{}struct {};\n", prefix, name),
         NewTypeStruct(format) => writeln!(
             out,
-            "{}struct {}({});\n",
+            "{}struct {}({}{});\n",
             prefix,
             name,
+            if track_visibility { "pub " } else { "" },
             quote_type(format, Some(known_sizes))
         ),
         TupleStruct(formats) => writeln!(
