@@ -310,6 +310,7 @@
 <span id="310">310</span>
 <span id="311">311</span>
 <span id="312">312</span>
+<span id="313">313</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -531,9 +532,10 @@ use std::collections::BTreeMap as Map;
         <span class="ident">UnitStruct</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;{}struct {};\n&quot;</span>, <span class="ident">prefix</span>, <span class="ident">name</span>),
         <span class="ident">NewTypeStruct</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">writeln</span><span class="macro">!</span>(
             <span class="ident">out</span>,
-            <span class="string">&quot;{}struct {}({});\n&quot;</span>,
+            <span class="string">&quot;{}struct {}({}{});\n&quot;</span>,
             <span class="ident">prefix</span>,
             <span class="ident">name</span>,
+            <span class="kw">if</span> <span class="ident">track_visibility</span> { <span class="string">&quot;pub &quot;</span> } <span class="kw">else</span> { <span class="string">&quot;&quot;</span> },
             <span class="ident">quote_type</span>(<span class="ident">format</span>, <span class="prelude-val">Some</span>(<span class="ident">known_sizes</span>))
         ),
         <span class="ident">TupleStruct</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">writeln</span><span class="macro">!</span>(
