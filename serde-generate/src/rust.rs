@@ -1,7 +1,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use crate::analyzer;
+use crate::{analyzer, DocComments, ExternalDefinitions};
 use serde_reflection::{ContainerFormat, Format, Named, Registry, VariantFormat};
 use std::collections::{BTreeMap, HashSet};
 use std::io::{Result, Write};
@@ -16,15 +16,39 @@ pub fn output(
     with_derive_macros: bool,
     registry: &Registry,
 ) -> std::result::Result<(), Box<dyn std::error::Error>> {
-    let dependencies = analyzer::get_dependency_map(registry)?;
+    output_with_external_dependencies_and_comments(
+        out,
+        with_derive_macros,
+        registry,
+        &BTreeMap::new(),
+        &BTreeMap::new(),
+    )
+}
+
+/// Same as `output` but allow some type definitions to be provided by external modules, and
+/// doc comments to be attached to named components.
+pub fn output_with_external_dependencies_and_comments(
+    out: &mut dyn Write,
+    with_derive_macros: bool,
+    registry: &Registry,
+    external_definitions: &ExternalDefinitions,
+    comments: &DocComments,
+) -> std::result::Result<(), Box<dyn std::error::Error>> {
+    let external_names = external_definitions.values().cloned().flatten().collect();
+    let dependencies =
+        analyzer::get_dependency_map_with_external_dependencies(registry, &external_names)?;
     let entries = analyzer::best_effort_topological_sort(&dependencies);
 
-    output_preamble(out, with_derive_macros)?;
-    let mut known_sizes = HashSet::new();
+    output_preamble(out, with_derive_macros, external_definitions)?;
+    let mut known_sizes = external_names
+        .iter()
+        .map(<String as std::ops::Deref>::deref)
+        .collect();
     for name in entries {
         let format = &registry[name];
         output_container(
             out,
+            comments,
             with_derive_macros,
             /* track visibility */ true,
             name,
@@ -40,6 +64,35 @@ pub fn output(
 pub fn quote_container_definitions(
     registry: &Registry,
 ) -> std::result::Result<BTreeMap<String, String>, Box<dyn std::error::Error>> {
+    quote_container_definitions_with_comments(registry, &BTreeMap::new())
+}
+
+fn output_comment(
+    out: &mut dyn std::io::Write,
+    comments: &DocComments,
+    indentation: usize,
+    qualified_name: &[&str],
+) -> std::io::Result<()> {
+    if let Some(doc) = comments.get(
+        &qualified_name
+            .to_vec()
+            .into_iter()
+            .map(String::from)
+            .collect::<Vec<_>>(),
+    ) {
+        let prefix = " ".repeat(indentation) + "/// ";
+        let empty_line = "\n".to_string() + &" ".repeat(indentation) + "///\n";
+        let text = textwrap::indent(doc, &prefix).replace("\n\n", &empty_line);
+        write!(out, "\n{}", text)?;
+    }
+    Ok(())
+}
+
+/// Same as quote_container_definitions but including doc comments.
+pub fn quote_container_definitions_with_comments(
+    registry: &Registry,
+    comments: &DocComments,
+) -> std::result::Result<BTreeMap<String, String>, Box<dyn std::error::Error>> {
     let dependencies = analyzer::get_dependency_map(registry)?;
     let entries = analyzer::best_effort_topological_sort(&dependencies);
 
@@ -50,6 +103,7 @@ pub fn quote_container_definitions(
         let mut content = Vec::new();
         output_container(
             &mut content,
+            comments,
             /* with derive macros */ false,
             /* track visibility */ false,
             name,
@@ -65,17 +119,29 @@ pub fn quote_container_definitions(
     Ok(result)
 }
 
-fn output_preamble(out: &mut dyn Write, with_derive_macros: bool) -> Result<()> {
+fn output_preamble(
+    out: &mut dyn Write,
+    with_derive_macros: bool,
+    external_definitions: &ExternalDefinitions,
+) -> Result<()> {
     writeln!(
         out,
         r#"#![allow(unused_imports)]
 use serde_bytes::ByteBuf as Bytes;
-use std::collections::BTreeMap as Map;
-"#
+use std::collections::BTreeMap as Map;"#
     )?;
     if with_derive_macros {
-        writeln!(out, "use serde::{{Serialize, Deserialize}};\n")?;
+        writeln!(out, "use serde::{{Serialize, Deserialize}};")?;
     }
+    for (module, definitions) in external_definitions {
+        writeln!(
+            out,
+            "use {}::{{{}}};",
+            module,
+            definitions.to_vec().join(", "),
+        )?;
+    }
+    writeln!(out)?;
     Ok(())
 }
 
@@ -134,7 +200,9 @@ fn quote_types(formats: &[Format], known_sizes: Option<&HashSet<&str>>) -> Strin
 
 fn output_fields(
     out: &mut dyn Write,
+    comments: &DocComments,
     indentation: usize,
+    base: &[&str],
     fields: &[Named<Format>],
     is_pub: bool,
     known_sizes: &HashSet<&str>,
@@ -144,6 +212,12 @@ fn output_fields(
         tab += " pub ";
     }
     for field in fields {
+        let qualified_name = {
+            let mut name = base.to_vec();
+            name.push(&field.name);
+            name
+        };
+        output_comment(out, comments, 4, &qualified_name)?;
         writeln!(
             out,
             "{}{}: {},",
@@ -157,6 +231,8 @@ fn output_fields(
 
 fn output_variant(
     out: &mut dyn Write,
+    comments: &DocComments,
+    base: &str,
     name: &str,
     variant: &VariantFormat,
     known_sizes: &HashSet<&str>,
@@ -178,7 +254,7 @@ fn output_variant(
         ),
         Struct(fields) => {
             writeln!(out, "    {} {{", name)?;
-            output_fields(out, 8, fields, false, known_sizes)?;
+            output_fields(out, comments, 8, &[base, name], fields, false, known_sizes)?;
             writeln!(out, "    }},")
         }
         Variable(_) => panic!("incorrect value"),
@@ -187,33 +263,46 @@ fn output_variant(
 
 fn output_variants(
     out: &mut dyn Write,
+    comments: &DocComments,
+    base: &str,
     variants: &BTreeMap<u32, Named<VariantFormat>>,
     known_sizes: &HashSet<&str>,
 ) -> Result<()> {
     for (expected_index, (index, variant)) in variants.iter().enumerate() {
         assert_eq!(*index, expected_index as u32);
-        output_variant(out, &variant.name, &variant.value, known_sizes)?;
+        output_comment(out, comments, 4, &[base, &variant.name])?;
+        output_variant(
+            out,
+            comments,
+            base,
+            &variant.name,
+            &variant.value,
+            known_sizes,
+        )?;
     }
     Ok(())
 }
 
 fn output_container(
     out: &mut dyn Write,
+    comments: &DocComments,
     with_derive_macros: bool,
     track_visibility: bool,
     name: &str,
     format: &ContainerFormat,
     known_sizes: &HashSet<&str>,
 ) -> Result<()> {
-    use ContainerFormat::*;
+    output_comment(out, comments, 0, &[name])?;
     let mut prefix = if with_derive_macros {
-        "#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd)]\n".to_string()
+        "#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, PartialOrd)]\n".to_string()
     } else {
         String::new()
     };
     if track_visibility {
         prefix.push_str("pub ");
     }
+
+    use ContainerFormat::*;
     match format {
         UnitStruct => writeln!(out, "{}struct {};\n", prefix, name),
         NewTypeStruct(format) => writeln!(
@@ -233,12 +322,20 @@ fn output_container(
         ),
         Struct(fields) => {
             writeln!(out, "{}struct {} {{", prefix, name)?;
-            output_fields(out, 4, fields, track_visibility, known_sizes)?;
+            output_fields(
+                out,
+                comments,
+                4,
+                &[name],
+                fields,
+                track_visibility,
+                known_sizes,
+            )?;
             writeln!(out, "}}\n")
         }
         Enum(variants) => {
             writeln!(out, "{}enum {} {{", prefix, name)?;
-            output_variants(out, variants, known_sizes)?;
+            output_variants(out, comments, name, variants, known_sizes)?;
             writeln!(out, "}}\n")
         }
     }
