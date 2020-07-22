@@ -4,11 +4,17 @@
 use serde_reflection::{ContainerFormat, Format, FormatHolder, Registry, Result};
 use std::collections::{BTreeMap, BTreeSet, HashSet};
 
-fn get_dependencies(format: &ContainerFormat) -> Result<BTreeSet<&str>> {
+/// Compute dependencies while ignoring external names.
+fn get_dependencies<'a>(
+    format: &'a ContainerFormat,
+    external: &BTreeSet<String>,
+) -> Result<BTreeSet<&'a str>> {
     let mut result = BTreeSet::new();
     format.visit(&mut |format| {
         if let Format::TypeName(x) = format {
-            result.insert(x.as_str());
+            if !external.contains(x) {
+                result.insert(x.as_str());
+            }
         }
         Ok(())
     })?;
@@ -21,9 +27,17 @@ fn get_dependencies(format: &ContainerFormat) -> Result<BTreeSet<&str>> {
 /// * Dependencies can play a role in code generation in some languages (e.g. Rust or C++) where inductive
 /// definitions may require explicit "boxing" (i.e. adding pointer indirections) to ensure finite object sizes.
 pub fn get_dependency_map(registry: &Registry) -> Result<BTreeMap<&str, BTreeSet<&str>>> {
+    get_dependency_map_with_external_dependencies(registry, &BTreeSet::new())
+}
+
+/// Same as get_dependency_map but allow to specify a set of externally-provided names to ignore.
+pub fn get_dependency_map_with_external_dependencies<'a>(
+    registry: &'a Registry,
+    external: &BTreeSet<String>,
+) -> Result<BTreeMap<&'a str, BTreeSet<&'a str>>> {
     let mut children = BTreeMap::new();
     for (name, format) in registry {
-        children.insert(name.as_str(), get_dependencies(format)?);
+        children.insert(name.as_str(), get_dependencies(format, external)?);
     }
     Ok(children)
 }

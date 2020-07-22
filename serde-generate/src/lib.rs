@@ -123,6 +123,14 @@ pub mod rust;
 /// Utility functions to help testing code generators.
 pub mod test_utils;
 
+/// Track types definitions provided by external modules.
+pub type ExternalDefinitions =
+    std::collections::BTreeMap</* module */ String, /* type names */ Vec<String>>;
+
+/// Track documentation to be attached to particular definitions.
+pub type DocComments =
+    std::collections::BTreeMap</* qualified name */ Vec<String>, /* comment */ String>;
+
 /// How to copy generated source code and available runtimes for a given language.
 pub trait SourceInstaller {
     type Error;

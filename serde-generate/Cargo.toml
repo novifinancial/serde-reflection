@@ -22,6 +22,7 @@ serde = { version = "1.0.112", features = ["derive"] }
 serde_bytes = "0.11.3"
 serde_yaml = "0.8"
 structopt = "0.3.12"
+textwrap = "0.12.1"
 
 serde-reflection = { path = "../serde-reflection", version = "0.3.0" }
 
