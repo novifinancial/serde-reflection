@@ -181,12 +181,6 @@ fn test_that_rust_code_compiles() {
     let source_path = dir.path().join("test.rs");
     let mut source = File::create(&source_path).unwrap();
     rust::output(&mut source, /* with_derive_macros */ false, &registry).unwrap();
-    // Placeholder for serde_bytes::ByteBuf.
-    writeln!(
-        &mut source,
-        "pub mod serde_bytes {{ pub type ByteBuf = Vec<u8>; }}\n"
-    )
-    .unwrap();
 
     let output = Command::new("rustc")
         .current_dir(dir.path())
