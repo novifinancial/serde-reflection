@@ -88,7 +88,7 @@ fn test_that_cpp_code_compiles() {
     )
     .unwrap();
 
-    let output = Command::new("clang++")
+    let status = Command::new("clang++")
         .arg("--std=c++17")
         .arg("-c")
         .arg("-o")
@@ -96,10 +96,9 @@ fn test_that_cpp_code_compiles() {
         .arg("-I")
         .arg("runtime/cpp")
         .arg(source_path)
-        .output()
+        .status()
         .unwrap();
-    assert_eq!(String::new(), String::from_utf8_lossy(&output.stderr));
-    assert!(output.status.success());
+    assert!(status.success());
 }
 
 #[test]
@@ -182,17 +181,78 @@ fn test_that_rust_code_compiles() {
     let mut source = File::create(&source_path).unwrap();
     rust::output(&mut source, /* with_derive_macros */ false, &registry).unwrap();
 
-    let output = Command::new("rustc")
+    let status = Command::new("rustc")
         .current_dir(dir.path())
         .arg("--crate-type")
         .arg("lib")
         .arg("--edition")
         .arg("2018")
         .arg(source_path)
+        .status()
+        .unwrap();
+    assert!(status.success());
+}
+
+// Quick test using rustc directly.
+#[test]
+fn test_that_rust_code_with_comments_compiles() {
+    let registry = test_utils::get_registry().unwrap();
+    let dir = tempdir().unwrap();
+    let source_path = dir.path().join("test.rs");
+    let mut source = File::create(&source_path).unwrap();
+    let comments = vec![(vec!["SerdeData".to_string()], "Some\ncomments".to_string())]
+        .into_iter()
+        .collect();
+    let definitions = vec![("foo".to_string(), vec!["Map".to_string(), "Bytes".into()])]
+        .into_iter()
+        .collect();
+    rust::output_with_external_dependencies_and_comments(
+        &mut source,
+        /* with_derive_macros */ false,
+        &registry,
+        &definitions,
+        &comments,
+    )
+    .unwrap();
+
+    // Comment was correctly generated.
+    let content = std::fs::read_to_string(&source_path).unwrap();
+    assert!(content.contains("/// Some\n/// comments\n"));
+
+    let output = Command::new("rustc")
+        .current_dir(dir.path())
+        .arg("--crate-type")
+        .arg("lib")
+        .arg("--edition")
+        .arg("2018")
+        .arg(source_path.clone())
         .output()
         .unwrap();
-    assert_eq!(String::new(), String::from_utf8_lossy(&output.stderr));
-    assert!(output.status.success());
+    assert!(!output.status.success());
+
+    // Externally defined names "Map" and "Bytes" have caused the usual imports to be
+    // replaced by `use foo::{Map, Bytes}`, so we must add the definitions.
+    writeln!(
+        &mut source,
+        r#"
+mod foo {{
+    pub type Map<K, V> = std::collections::BTreeMap<K, V>;
+    pub type Bytes = Vec<u8>;
+}}
+"#
+    )
+    .unwrap();
+
+    let status = Command::new("rustc")
+        .current_dir(dir.path())
+        .arg("--crate-type")
+        .arg("lib")
+        .arg("--edition")
+        .arg("2018")
+        .arg(source_path)
+        .status()
+        .unwrap();
+    assert!(status.success());
 }
 
 // Full test using cargo. This may take a while.
@@ -221,14 +281,14 @@ serde_bytes = "0.11"
     rust::output(&mut source, /* with_derive_macros */ true, &registry).unwrap();
     // Use a stable `target` dir to avoid downloading and recompiling crates everytime.
     let target_dir = std::env::current_dir().unwrap().join("../target");
-    let output = Command::new("cargo")
+    let status = Command::new("cargo")
         .current_dir(dir.path())
         .arg("build")
         .arg("--target-dir")
         .arg(target_dir)
-        .output()
+        .status()
         .unwrap();
-    assert!(output.status.success());
+    assert!(status.success());
 }
 
 #[test]
