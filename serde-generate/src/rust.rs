@@ -124,14 +124,20 @@ fn output_preamble(
     with_derive_macros: bool,
     external_definitions: &ExternalDefinitions,
 ) -> Result<()> {
-    writeln!(
-        out,
-        r#"#![allow(unused_imports)]
-use serde_bytes::ByteBuf as Bytes;
-use std::collections::BTreeMap as Map;"#
-    )?;
+    let external_names = external_definitions
+        .values()
+        .cloned()
+        .flatten()
+        .collect::<HashSet<_>>();
+    writeln!(out, "#![allow(unused_imports)]")?;
+    if !external_names.contains("Map") {
+        writeln!(out, "use std::collections::BTreeMap as Map;")?;
+    }
     if with_derive_macros {
         writeln!(out, "use serde::{{Serialize, Deserialize}};")?;
+    }
+    if with_derive_macros && !external_names.contains("Bytes") {
+        writeln!(out, "use serde_bytes::ByteBuf as Bytes;")?;
     }
     for (module, definitions) in external_definitions {
         writeln!(
@@ -142,6 +148,10 @@ use std::collections::BTreeMap as Map;"#
         )?;
     }
     writeln!(out)?;
+    if !with_derive_macros && !external_names.contains("Bytes") {
+        // If we are not going to use Serde derive macros, use plain vectors.
+        writeln!(out, "type Bytes = Vec<u8>;\n")?;
+    }
     Ok(())
 }
 
