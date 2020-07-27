@@ -8,9 +8,8 @@ use std::io::{Result, Write};
 use std::path::PathBuf;
 
 /// Write container definitions in Rust.
-/// * All definitions will be made public.
-/// * The crate `serde_bytes` may be required.
-/// * If `with_derive_macros` is true, the crate `serde` is required.
+/// * All definitions are made `pub`.
+/// * If `with_derive_macros` is true, the crate `serde` and `serde_bytes` are assumed to be available.
 pub fn output(
     out: &mut dyn Write,
     with_derive_macros: bool,
@@ -27,6 +26,9 @@ pub fn output(
 
 /// Same as `output` but allow some type definitions to be provided by external modules, and
 /// doc comments to be attached to named components.
+/// * A `use` statement will be generated for every external definition provided by a non-empty module name.
+/// * The empty module name is allowed and can be used to signal that custom definitions
+/// (including for Map and Bytes) will be added manually at the end of the generated file.
 pub fn output_with_external_dependencies_and_comments(
     out: &mut dyn Write,
     with_derive_macros: bool,
@@ -140,12 +142,15 @@ fn output_preamble(
         writeln!(out, "use serde_bytes::ByteBuf as Bytes;")?;
     }
     for (module, definitions) in external_definitions {
-        writeln!(
-            out,
-            "use {}::{{{}}};",
-            module,
-            definitions.to_vec().join(", "),
-        )?;
+        // Skip the empty module name.
+        if !module.is_empty() {
+            writeln!(
+                out,
+                "use {}::{{{}}};",
+                module,
+                definitions.to_vec().join(", "),
+            )?;
+        }
     }
     writeln!(out)?;
     if !with_derive_macros && !external_names.contains("Bytes") {

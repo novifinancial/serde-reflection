@@ -203,9 +203,12 @@ fn test_that_rust_code_with_comments_compiles() {
     let comments = vec![(vec!["SerdeData".to_string()], "Some\ncomments".to_string())]
         .into_iter()
         .collect();
-    let definitions = vec![("foo".to_string(), vec!["Map".to_string(), "Bytes".into()])]
-        .into_iter()
-        .collect();
+    let definitions = vec![
+        ("foo".to_string(), vec!["Map".to_string()]),
+        (String::new(), vec!["Bytes".into()]),
+    ]
+    .into_iter()
+    .collect();
     rust::output_with_external_dependencies_and_comments(
         &mut source,
         /* with_derive_macros */ false,
@@ -231,13 +234,14 @@ fn test_that_rust_code_with_comments_compiles() {
     assert!(!output.status.success());
 
     // Externally defined names "Map" and "Bytes" have caused the usual imports to be
-    // replaced by `use foo::{Map, Bytes}`, so we must add the definitions.
+    // replaced by `use foo::Map` (and nothing, respectively), so we must add the definitions.
     writeln!(
         &mut source,
         r#"
+type Bytes = Vec<u8>;
+
 mod foo {{
     pub type Map<K, V> = std::collections::BTreeMap<K, V>;
-    pub type Bytes = Vec<u8>;
 }}
 "#
     )
