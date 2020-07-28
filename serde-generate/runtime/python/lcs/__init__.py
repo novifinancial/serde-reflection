@@ -211,6 +211,7 @@ def serialize(obj: typing.Any, obj_type) -> bytes:
             if not dataclasses.is_dataclass(obj_type):
                 raise ValueError("Unexpected type", obj_type)
 
+        # pyre-ignore
         if not isinstance(obj, obj_type):
             raise ValueError("Wrong Value for the type", obj, obj_type)
 
