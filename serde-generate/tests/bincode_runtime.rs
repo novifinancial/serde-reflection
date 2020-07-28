@@ -380,8 +380,8 @@ public class Main {{
         Testing.Test test = Testing.Test.deserialize(deserializer);
 
         List<@Unsigned Integer> a = Arrays.asList(4, 6);
-        Tuple2<Long, @Unsigned Long> b = new Tuple2<>(new Long(-3), new Long(5));
-        Testing.Choice c = new Testing.Choice.C(new Byte((byte) 7));
+        Tuple2<Long, @Unsigned Long> b = new Tuple2<>(Long.valueOf(-3), Long.valueOf(5));
+        Testing.Choice c = new Testing.Choice.C(Byte.valueOf((byte) 7));
         Testing.Test test2 = new Testing.Test(a, b, c);
 
         assert test.equals(test2);
