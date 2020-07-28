@@ -34,10 +34,10 @@ public abstract class BinaryDeserializer implements Deserializer {
     public Boolean deserialize_bool() throws Exception {
         byte value = input.get();
         if (value == 0) {
-            return new Boolean(false);
+            return Boolean.valueOf(false);
         }
         if (value == 1) {
-            return new Boolean(true);
+            return Boolean.valueOf(true);
         }
         throw new Exception("Incorrect boolean value");
     }
