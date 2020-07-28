@@ -143,6 +143,14 @@
 <span id="143">143</span>
 <span id="144">144</span>
 <span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -268,6 +276,14 @@
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
 <span class="doccomment">/// Utility functions to help testing code generators.</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">test_utils</span>;
+
+<span class="doccomment">/// Track types definitions provided by external modules.</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">ExternalDefinitions</span> <span class="op">=</span>
+    <span class="ident">std</span>::<span class="ident">collections</span>::<span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="comment">/* module */</span> <span class="ident">String</span>, <span class="comment">/* type names */</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+
+<span class="doccomment">/// Track documentation to be attached to particular definitions.</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">DocComments</span> <span class="op">=</span>
+    <span class="ident">std</span>::<span class="ident">collections</span>::<span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="comment">/* qualified name */</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>, <span class="comment">/* comment */</span> <span class="ident">String</span><span class="op">&gt;</span>;
 
 <span class="doccomment">/// How to copy generated source code and available runtimes for a given language.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">SourceInstaller</span> {
