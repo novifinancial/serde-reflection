@@ -119,6 +119,8 @@ pub mod python3;
 /// Support for code-generation in Rust
 pub mod rust;
 
+mod indent;
+
 #[doc(hidden)]
 /// Utility functions to help testing code generators.
 pub mod test_utils;
