@@ -1,11 +1,14 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+use crate::indent::{IndentConfig, IndentedWriter};
 use include_dir::include_dir as include_directory;
 use serde_reflection::{ContainerFormat, Format, FormatHolder, Named, Registry, VariantFormat};
-use std::collections::BTreeMap;
-use std::io::{Result, Write};
-use std::path::PathBuf;
+use std::{
+    collections::BTreeMap,
+    io::{Result, Write},
+    path::PathBuf,
+};
 
 pub fn output(out: &mut dyn Write, registry: &Registry, class_name: &str) -> Result<()> {
     output_preambule(out, None)?;
@@ -485,13 +488,15 @@ fn output_struct_or_variant_container(
     nested_class: bool,
     package_prefix: &str,
 ) -> Result<()> {
-    let tab = " ".repeat(indentation);
+    let mut out = IndentedWriter::new(out, IndentConfig::Space(4));
+    out.set_level(indentation / 4);
     // Beginning of class
     if let Some(base) = variant_base {
+        writeln!(out)?;
         writeln!(
             out,
-            "\n{}public static final class {} extends {} {{",
-            tab, name, base
+            "public static final class {} extends {} {{",
+            name, base
         )?;
     } else {
         let prefix = if nested_class {
@@ -499,14 +504,13 @@ fn output_struct_or_variant_container(
         } else {
             "public "
         };
-        writeln!(out, "{}{}final class {} {{", tab, prefix, name)?;
+        writeln!(out, "{}final class {} {{", prefix, name)?;
     }
     // Fields
     for field in fields {
         writeln!(
             out,
-            "{}    public final {} {};",
-            tab,
+            "    public final {} {};",
             quote_type(&field.value, package_prefix),
             field.name
         )?;
@@ -517,8 +521,7 @@ fn output_struct_or_variant_container(
     // Constructor.
     writeln!(
         out,
-        "{}    public {}({}) {{",
-        tab,
+        "    public {}({}) {{",
         name,
         fields
             .iter()
@@ -527,117 +530,110 @@ fn output_struct_or_variant_container(
             .join(", ")
     )?;
     for field in fields {
-        writeln!(out, "{}       assert {} != null;", tab, &field.name)?;
+        writeln!(out, "       assert {} != null;", &field.name)?;
     }
     for field in fields {
-        writeln!(out, "{}       this.{} = {};", tab, &field.name, &field.name)?;
+        writeln!(out, "       this.{} = {};", &field.name, &field.name)?;
     }
-    writeln!(out, "{}    }}", tab)?;
+    writeln!(out, "    }}")?;
     // Serialize
     writeln!(
         out,
-        "\n{}    public void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception {{",
-        tab,
+        "\n    public void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception {{",
     )?;
     if let Some(index) = variant_index {
         writeln!(
             out,
-            "{}        serializer.serialize_variant_index({});",
-            tab, index
+            "        serializer.serialize_variant_index({});",
+            index
         )?;
     }
     for field in fields {
         writeln!(
             out,
-            "{}        {}",
-            tab,
+            "        {}",
             quote_serialize_value(&field.name, &field.value)
         )?;
     }
-    writeln!(out, "{}    }}\n", tab)?;
+    writeln!(out, "    }}\n")?;
     // Deserialize (struct) or Load (variant)
     if variant_index.is_none() {
         writeln!(
             out,
-            "{}    public static {} deserialize(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{",
-            tab, name,
+            "    public static {} deserialize(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{",
+            name,
         )?;
     } else {
         writeln!(
             out,
-            "{}    static {} load(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{",
-            tab, name,
+            "    static {} load(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{",
+            name,
         )?;
     }
-    writeln!(out, "{}        Builder builder = new Builder();", tab)?;
+    writeln!(out, "        Builder builder = new Builder();")?;
     for field in fields {
         writeln!(
             out,
-            "{}        builder.{} = {};",
-            tab,
+            "        builder.{} = {};",
             field.name,
             quote_deserialize(&field.value, package_prefix)
         )?;
     }
-    writeln!(out, "{}        return builder.build();", tab)?;
-    writeln!(out, "{}    }}\n", tab)?;
+    writeln!(out, "        return builder.build();")?;
+    writeln!(out, "    }}\n")?;
     // Equality
     writeln!(
         out,
-        r#"{0}    public boolean equals(Object obj) {{
-{0}        if (this == obj) return true;
-{0}        if (obj == null) return false;
-{0}        if (getClass() != obj.getClass()) return false;
-{0}        {1} other = ({1}) obj;"#,
-        tab, name,
+        r#"    public boolean equals(Object obj) {{
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        {0} other = ({0}) obj;"#,
+        name,
     )?;
     for field in fields {
         writeln!(
             out,
-            "{0}        if (!java.util.Objects.equals(this.{1}, other.{1})) {{ return false; }}",
-            tab, &field.name,
+            "        if (!java.util.Objects.equals(this.{0}, other.{0})) {{ return false; }}",
+            &field.name,
         )?;
     }
-    writeln!(out, "{}        return true;", tab)?;
-    writeln!(out, "{}    }}\n", tab)?;
+    writeln!(out, "        return true;")?;
+    writeln!(out, "    }}\n")?;
     // Hashing
-    writeln!(
-        out,
-        "{0}    public int hashCode() {{\n{0}        int value = 7;",
-        tab
-    )?;
+    writeln!(out, "    public int hashCode() {{\n        int value = 7;",)?;
     for field in fields {
         writeln!(
             out,
-            "{0}        value = 31 * value + (this.{1} != null ? this.{1}.hashCode() : 0);",
-            tab, &field.name
+            "        value = 31 * value + (this.{0} != null ? this.{0}.hashCode() : 0);",
+            &field.name
         )?;
     }
-    writeln!(out, "{}        return value;", tab)?;
-    writeln!(out, "{}    }}", tab)?;
+    writeln!(out, "        return value;")?;
+    writeln!(out, "    }}")?;
     // Builder
-    output_struct_or_variant_container_builder(out, indentation + 4, name, fields, package_prefix)?;
+    out.inc_level();
+    output_struct_or_variant_container_builder(&mut out, name, fields, package_prefix)?;
+    out.dec_level();
     // End of class
-    writeln!(out, "{}}}", tab)
+    writeln!(out, "}}")
 }
 
 #[allow(clippy::too_many_arguments)]
 fn output_struct_or_variant_container_builder(
-    out: &mut dyn Write,
-    indentation: usize,
+    out: &mut IndentedWriter<&mut dyn Write>,
     name: &str,
     fields: &[Named<Format>],
     package_prefix: &str,
 ) -> Result<()> {
-    let tab = " ".repeat(indentation);
     // Beginning of builder class
-    writeln!(out, "\n{}public static final class Builder {{", tab)?;
+    writeln!(out)?;
+    writeln!(out, "public static final class Builder {{")?;
     // Fields
     for field in fields {
         writeln!(
             out,
-            "{}    public {} {};",
-            tab,
+            "    public {} {};",
             quote_type(&field.value, package_prefix),
             field.name
         )?;
@@ -648,20 +644,19 @@ fn output_struct_or_variant_container_builder(
     // Finalization
     writeln!(
         out,
-        r#"{0}    public {1} build() {{
-{0}        return new {1}({2}
-{0}        );
-{0}    }}"#,
-        tab,
+        r#"    public {0} build() {{
+        return new {0}({1}
+        );
+    }}"#,
         name,
         fields
             .iter()
-            .map(|f| format!("\n{}            {}", tab, f.name))
+            .map(|f| format!("\n            {}", f.name))
             .collect::<Vec<_>>()
             .join(",")
     )?;
     // End of class
-    writeln!(out, "{}}}", tab)
+    writeln!(out, "}}")
 }
 
 fn output_enum_container(
