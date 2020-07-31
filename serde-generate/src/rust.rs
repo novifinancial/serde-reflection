@@ -41,23 +41,25 @@ pub fn output_with_external_dependencies_and_comments(
         analyzer::get_dependency_map_with_external_dependencies(registry, &external_names)?;
     let entries = analyzer::best_effort_topological_sort(&dependencies);
 
-    output_preamble(out, with_derive_macros, external_definitions)?;
-    let mut known_sizes = external_names
+    let known_sizes = external_names
         .iter()
         .map(<String as std::ops::Deref>::deref)
         .collect();
+
+    let mut emitter = RustEmitter {
+        out,
+        indentation: 0,
+        comments,
+        track_visibility: true,
+        with_derive_macros,
+        known_sizes,
+    };
+
+    emitter.output_preamble(external_definitions)?;
     for name in entries {
         let format = &registry[name];
-        output_container(
-            out,
-            comments,
-            with_derive_macros,
-            /* track visibility */ true,
-            name,
-            format,
-            &known_sizes,
-        )?;
-        known_sizes.insert(name);
+        emitter.output_container(name, format)?;
+        emitter.known_sizes.insert(name);
     }
     Ok(())
 }
@@ -69,27 +71,6 @@ pub fn quote_container_definitions(
     quote_container_definitions_with_comments(registry, &BTreeMap::new())
 }
 
-fn output_comment(
-    out: &mut dyn std::io::Write,
-    comments: &DocComments,
-    indentation: usize,
-    qualified_name: &[&str],
-) -> std::io::Result<()> {
-    if let Some(doc) = comments.get(
-        &qualified_name
-            .to_vec()
-            .into_iter()
-            .map(String::from)
-            .collect::<Vec<_>>(),
-    ) {
-        let prefix = " ".repeat(indentation) + "/// ";
-        let empty_line = "\n".to_string() + &" ".repeat(indentation) + "///\n";
-        let text = textwrap::indent(doc, &prefix).replace("\n\n", &empty_line);
-        write!(out, "\n{}", text)?;
-    }
-    Ok(())
-}
-
 /// Same as quote_container_definitions but including doc comments.
 pub fn quote_container_definitions_with_comments(
     registry: &Registry,
@@ -99,259 +80,257 @@ pub fn quote_container_definitions_with_comments(
     let entries = analyzer::best_effort_topological_sort(&dependencies);
 
     let mut result = BTreeMap::new();
-    let mut known_sizes = HashSet::new();
+    let known_sizes = HashSet::new();
+
+    let mut content = Vec::new();
+    let mut emitter = RustEmitter {
+        out: &mut content,
+        indentation: 0,
+        comments,
+        track_visibility: false,
+        with_derive_macros: false,
+        known_sizes,
+    };
+
     for name in entries {
+        emitter.out.clear();
         let format = &registry[name];
-        let mut content = Vec::new();
-        output_container(
-            &mut content,
-            comments,
-            /* with derive macros */ false,
-            /* track visibility */ false,
-            name,
-            format,
-            &known_sizes,
-        )?;
-        known_sizes.insert(name);
+        emitter.output_container(name, format)?;
+        emitter.known_sizes.insert(name);
         result.insert(
             name.to_string(),
-            String::from_utf8_lossy(&content).trim().to_string() + "\n",
+            String::from_utf8_lossy(&emitter.out).trim().to_string() + "\n",
         );
     }
     Ok(result)
 }
 
-fn output_preamble(
-    out: &mut dyn Write,
-    with_derive_macros: bool,
-    external_definitions: &ExternalDefinitions,
-) -> Result<()> {
-    let external_names = external_definitions
-        .values()
-        .cloned()
-        .flatten()
-        .collect::<HashSet<_>>();
-    writeln!(out, "#![allow(unused_imports)]")?;
-    if !external_names.contains("Map") {
-        writeln!(out, "use std::collections::BTreeMap as Map;")?;
-    }
-    if with_derive_macros {
-        writeln!(out, "use serde::{{Serialize, Deserialize}};")?;
-    }
-    if with_derive_macros && !external_names.contains("Bytes") {
-        writeln!(out, "use serde_bytes::ByteBuf as Bytes;")?;
-    }
-    for (module, definitions) in external_definitions {
-        // Skip the empty module name.
-        if !module.is_empty() {
-            writeln!(
-                out,
-                "use {}::{{{}}};",
-                module,
-                definitions.to_vec().join(", "),
-            )?;
-        }
-    }
-    writeln!(out)?;
-    if !with_derive_macros && !external_names.contains("Bytes") {
-        // If we are not going to use Serde derive macros, use plain vectors.
-        writeln!(out, "type Bytes = Vec<u8>;\n")?;
-    }
-    Ok(())
-}
-
-fn quote_type(format: &Format, known_sizes: Option<&HashSet<&str>>) -> String {
-    use Format::*;
-    match format {
-        TypeName(x) => {
-            if let Some(set) = known_sizes {
-                if !set.contains(x.as_str()) {
-                    return format!("Box<{}>", x);
-                }
-            }
-            x.to_string()
-        }
-        Unit => "()".into(),
-        Bool => "bool".into(),
-        I8 => "i8".into(),
-        I16 => "i16".into(),
-        I32 => "i32".into(),
-        I64 => "i64".into(),
-        I128 => "i128".into(),
-        U8 => "u8".into(),
-        U16 => "u16".into(),
-        U32 => "u32".into(),
-        U64 => "u64".into(),
-        U128 => "u128".into(),
-        F32 => "f32".into(),
-        F64 => "f64".into(),
-        Char => "char".into(),
-        Str => "String".into(),
-        Bytes => "Bytes".into(),
-
-        Option(format) => format!("Option<{}>", quote_type(format, known_sizes)),
-        Seq(format) => format!("Vec<{}>", quote_type(format, None)),
-        Map { key, value } => format!(
-            "Map<{}, {}>",
-            quote_type(key, None),
-            quote_type(value, None)
-        ),
-        Tuple(formats) => format!("({})", quote_types(formats, known_sizes)),
-        TupleArray { content, size } => {
-            format!("[{}; {}]", quote_type(content, known_sizes), *size)
-        }
-
-        Variable(_) => panic!("unexpected value"),
-    }
-}
-
-fn quote_types(formats: &[Format], known_sizes: Option<&HashSet<&str>>) -> String {
-    formats
-        .iter()
-        .map(|x| quote_type(x, known_sizes))
-        .collect::<Vec<_>>()
-        .join(", ")
-}
-
-fn output_fields(
-    out: &mut dyn Write,
-    comments: &DocComments,
+struct RustEmitter<'a, T> {
+    out: T,
     indentation: usize,
-    base: &[&str],
-    fields: &[Named<Format>],
-    is_pub: bool,
-    known_sizes: &HashSet<&str>,
-) -> Result<()> {
-    let mut tab = " ".repeat(indentation);
-    if is_pub {
-        tab += " pub ";
-    }
-    for field in fields {
-        let qualified_name = {
-            let mut name = base.to_vec();
-            name.push(&field.name);
-            name
-        };
-        output_comment(out, comments, 4, &qualified_name)?;
-        writeln!(
-            out,
-            "{}{}: {},",
-            tab,
-            field.name,
-            quote_type(&field.value, Some(known_sizes)),
-        )?;
-    }
-    Ok(())
-}
-
-fn output_variant(
-    out: &mut dyn Write,
-    comments: &DocComments,
-    base: &str,
-    name: &str,
-    variant: &VariantFormat,
-    known_sizes: &HashSet<&str>,
-) -> Result<()> {
-    use VariantFormat::*;
-    match variant {
-        Unit => writeln!(out, "    {},", name),
-        NewType(format) => writeln!(
-            out,
-            "    {}({}),",
-            name,
-            quote_type(format, Some(known_sizes))
-        ),
-        Tuple(formats) => writeln!(
-            out,
-            "    {}({}),",
-            name,
-            quote_types(formats, Some(known_sizes))
-        ),
-        Struct(fields) => {
-            writeln!(out, "    {} {{", name)?;
-            output_fields(out, comments, 8, &[base, name], fields, false, known_sizes)?;
-            writeln!(out, "    }},")
-        }
-        Variable(_) => panic!("incorrect value"),
-    }
-}
-
-fn output_variants(
-    out: &mut dyn Write,
-    comments: &DocComments,
-    base: &str,
-    variants: &BTreeMap<u32, Named<VariantFormat>>,
-    known_sizes: &HashSet<&str>,
-) -> Result<()> {
-    for (expected_index, (index, variant)) in variants.iter().enumerate() {
-        assert_eq!(*index, expected_index as u32);
-        output_comment(out, comments, 4, &[base, &variant.name])?;
-        output_variant(
-            out,
-            comments,
-            base,
-            &variant.name,
-            &variant.value,
-            known_sizes,
-        )?;
-    }
-    Ok(())
-}
-
-fn output_container(
-    out: &mut dyn Write,
-    comments: &DocComments,
-    with_derive_macros: bool,
+    comments: &'a DocComments,
     track_visibility: bool,
-    name: &str,
-    format: &ContainerFormat,
-    known_sizes: &HashSet<&str>,
-) -> Result<()> {
-    output_comment(out, comments, 0, &[name])?;
-    let mut prefix = if with_derive_macros {
-        "#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, PartialOrd)]\n".to_string()
-    } else {
-        String::new()
-    };
-    if track_visibility {
-        prefix.push_str("pub ");
+    with_derive_macros: bool,
+    known_sizes: HashSet<&'a str>,
+}
+
+impl<'a, T> RustEmitter<'a, T>
+where
+    T: std::io::Write,
+{
+    fn output_comment(&mut self, qualified_name: &[&str]) -> std::io::Result<()> {
+        if let Some(doc) = self.comments.get(
+            &qualified_name
+                .to_vec()
+                .into_iter()
+                .map(String::from)
+                .collect::<Vec<_>>(),
+        ) {
+            let prefix = "    ".repeat(self.indentation) + "/// ";
+            let empty_line = "\n".to_string() + &"    ".repeat(self.indentation) + "///\n";
+            let text = textwrap::indent(doc, &prefix).replace("\n\n", &empty_line);
+            write!(self.out, "\n{}", text)?;
+        }
+        Ok(())
     }
 
-    use ContainerFormat::*;
-    match format {
-        UnitStruct => writeln!(out, "{}struct {};\n", prefix, name),
-        NewTypeStruct(format) => writeln!(
-            out,
-            "{}struct {}({}{});\n",
-            prefix,
-            name,
-            if track_visibility { "pub " } else { "" },
-            quote_type(format, Some(known_sizes))
-        ),
-        TupleStruct(formats) => writeln!(
-            out,
-            "{}struct {}({});\n",
-            prefix,
-            name,
-            quote_types(formats, Some(known_sizes))
-        ),
-        Struct(fields) => {
-            writeln!(out, "{}struct {} {{", prefix, name)?;
-            output_fields(
-                out,
-                comments,
-                4,
-                &[name],
-                fields,
-                track_visibility,
-                known_sizes,
-            )?;
-            writeln!(out, "}}\n")
+    fn output_preamble(&mut self, external_definitions: &ExternalDefinitions) -> Result<()> {
+        assert_eq!(self.indentation, 0);
+        let external_names = external_definitions
+            .values()
+            .cloned()
+            .flatten()
+            .collect::<HashSet<_>>();
+        writeln!(self.out, "#![allow(unused_imports)]")?;
+        if !external_names.contains("Map") {
+            writeln!(self.out, "use std::collections::BTreeMap as Map;")?;
         }
-        Enum(variants) => {
-            writeln!(out, "{}enum {} {{", prefix, name)?;
-            output_variants(out, comments, name, variants, known_sizes)?;
-            writeln!(out, "}}\n")
+        if self.with_derive_macros {
+            writeln!(self.out, "use serde::{{Serialize, Deserialize}};")?;
+        }
+        if self.with_derive_macros && !external_names.contains("Bytes") {
+            writeln!(self.out, "use serde_bytes::ByteBuf as Bytes;")?;
+        }
+        for (module, definitions) in external_definitions {
+            // Skip the empty module name.
+            if !module.is_empty() {
+                writeln!(
+                    self.out,
+                    "use {}::{{{}}};",
+                    module,
+                    definitions.to_vec().join(", "),
+                )?;
+            }
+        }
+        writeln!(self.out)?;
+        if !self.with_derive_macros && !external_names.contains("Bytes") {
+            // If we are not going to use Serde derive macros, use plain vectors.
+            writeln!(self.out, "type Bytes = Vec<u8>;\n")?;
+        }
+        Ok(())
+    }
+
+    fn quote_type(format: &Format, known_sizes: Option<&HashSet<&str>>) -> String {
+        use Format::*;
+        match format {
+            TypeName(x) => {
+                if let Some(set) = known_sizes {
+                    if !set.contains(x.as_str()) {
+                        return format!("Box<{}>", x);
+                    }
+                }
+                x.to_string()
+            }
+            Unit => "()".into(),
+            Bool => "bool".into(),
+            I8 => "i8".into(),
+            I16 => "i16".into(),
+            I32 => "i32".into(),
+            I64 => "i64".into(),
+            I128 => "i128".into(),
+            U8 => "u8".into(),
+            U16 => "u16".into(),
+            U32 => "u32".into(),
+            U64 => "u64".into(),
+            U128 => "u128".into(),
+            F32 => "f32".into(),
+            F64 => "f64".into(),
+            Char => "char".into(),
+            Str => "String".into(),
+            Bytes => "Bytes".into(),
+
+            Option(format) => format!("Option<{}>", Self::quote_type(format, known_sizes)),
+            Seq(format) => format!("Vec<{}>", Self::quote_type(format, None)),
+            Map { key, value } => format!(
+                "Map<{}, {}>",
+                Self::quote_type(key, None),
+                Self::quote_type(value, None)
+            ),
+            Tuple(formats) => format!("({})", Self::quote_types(formats, known_sizes)),
+            TupleArray { content, size } => {
+                format!("[{}; {}]", Self::quote_type(content, known_sizes), *size)
+            }
+
+            Variable(_) => panic!("unexpected value"),
+        }
+    }
+
+    fn quote_types(formats: &[Format], known_sizes: Option<&HashSet<&str>>) -> String {
+        formats
+            .iter()
+            .map(|x| Self::quote_type(x, known_sizes))
+            .collect::<Vec<_>>()
+            .join(", ")
+    }
+
+    fn output_fields(&mut self, base: &[&str], fields: &[Named<Format>]) -> Result<()> {
+        self.indentation += 1;
+        let mut tab = "    ".repeat(self.indentation);
+        if self.track_visibility {
+            tab += " pub ";
+        }
+        for field in fields {
+            let qualified_name = {
+                let mut name = base.to_vec();
+                name.push(&field.name);
+                name
+            };
+            self.output_comment(&qualified_name)?;
+            writeln!(
+                self.out,
+                "{}{}: {},",
+                tab,
+                field.name,
+                Self::quote_type(&field.value, Some(&self.known_sizes)),
+            )?;
+        }
+        self.indentation -= 1;
+        Ok(())
+    }
+
+    fn output_variant(&mut self, base: &str, name: &str, variant: &VariantFormat) -> Result<()> {
+        assert_eq!(self.indentation, 1);
+        use VariantFormat::*;
+        match variant {
+            Unit => writeln!(self.out, "    {},", name),
+            NewType(format) => writeln!(
+                self.out,
+                "    {}({}),",
+                name,
+                Self::quote_type(format, Some(&self.known_sizes))
+            ),
+            Tuple(formats) => writeln!(
+                self.out,
+                "    {}({}),",
+                name,
+                Self::quote_types(formats, Some(&self.known_sizes))
+            ),
+            Struct(fields) => {
+                writeln!(self.out, "    {} {{", name)?;
+                let tracking = std::mem::replace(&mut self.track_visibility, false);
+                self.output_fields(&[base, name], fields)?;
+                self.track_visibility = tracking;
+                writeln!(self.out, "    }},")
+            }
+            Variable(_) => panic!("incorrect value"),
+        }
+    }
+
+    fn output_variants(
+        &mut self,
+        base: &str,
+        variants: &BTreeMap<u32, Named<VariantFormat>>,
+    ) -> Result<()> {
+        self.indentation += 1;
+        for (expected_index, (index, variant)) in variants.iter().enumerate() {
+            assert_eq!(*index, expected_index as u32);
+            self.output_comment(&[base, &variant.name])?;
+            self.output_variant(base, &variant.name, &variant.value)?;
+        }
+        self.indentation -= 1;
+        Ok(())
+    }
+
+    fn output_container(&mut self, name: &str, format: &ContainerFormat) -> Result<()> {
+        assert_eq!(self.indentation, 0);
+        self.output_comment(&[name])?;
+        let mut prefix = if self.with_derive_macros {
+            "#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, PartialOrd)]\n".to_string()
+        } else {
+            String::new()
+        };
+        if self.track_visibility {
+            prefix.push_str("pub ");
+        }
+
+        use ContainerFormat::*;
+        match format {
+            UnitStruct => writeln!(self.out, "{}struct {};\n", prefix, name),
+            NewTypeStruct(format) => writeln!(
+                self.out,
+                "{}struct {}({}{});\n",
+                prefix,
+                name,
+                if self.track_visibility { "pub " } else { "" },
+                Self::quote_type(format, Some(&self.known_sizes))
+            ),
+            TupleStruct(formats) => writeln!(
+                self.out,
+                "{}struct {}({});\n",
+                prefix,
+                name,
+                Self::quote_types(formats, Some(&self.known_sizes))
+            ),
+            Struct(fields) => {
+                writeln!(self.out, "{}struct {} {{", prefix, name)?;
+                self.output_fields(&[name], fields)?;
+                writeln!(self.out, "}}\n")
+            }
+            Enum(variants) => {
+                writeln!(self.out, "{}enum {} {{", prefix, name)?;
+                self.output_variants(name, variants)?;
+                writeln!(self.out, "}}\n")
+            }
         }
     }
 }
