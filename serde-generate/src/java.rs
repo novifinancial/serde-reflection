@@ -28,6 +28,33 @@ pub fn output(out: &mut dyn Write, registry: &Registry, class_name: &str) -> Res
     writeln!(out, "}}")
 }
 
+fn write_container_class(
+    install_dir: &std::path::Path,
+    package_name: &str,
+    name: &str,
+    format: &ContainerFormat,
+) -> Result<()> {
+    let mut file = std::fs::File::create(install_dir.join(name.to_string() + ".java"))?;
+    output_preambule(&mut file, Some(package_name))?;
+    output_container(
+        &mut file,
+        name,
+        format,
+        /* nested class */ false,
+        &format!("{}.", package_name),
+    )
+}
+
+fn write_helper_class(
+    install_dir: &std::path::Path,
+    package_name: &str,
+    registry: &Registry,
+) -> Result<()> {
+    let mut file = std::fs::File::create(install_dir.join("TraitHelpers.java"))?;
+    output_preambule(&mut file, Some(package_name))?;
+    output_trait_helpers(&mut file, registry, /* nested class */ false)
+}
+
 fn output_preambule(out: &mut dyn Write, package_name: Option<&str>) -> Result<()> {
     if let Some(name) = package_name {
         writeln!(out, "package {};", name)?;
@@ -783,19 +810,9 @@ impl crate::SourceInstaller for Installer {
         std::fs::create_dir_all(&dir_path)?;
 
         for (name, format) in registry {
-            let mut file = std::fs::File::create(dir_path.join(name.to_string() + ".java"))?;
-            output_preambule(&mut file, Some(package_name))?;
-            output_container(
-                &mut file,
-                name,
-                format,
-                /* nested class */ false,
-                &format!("{}.", package_name),
-            )?;
+            write_container_class(&dir_path, package_name, name, format)?;
         }
-        let mut file = std::fs::File::create(dir_path.join("TraitHelpers.java"))?;
-        output_preambule(&mut file, Some(package_name))?;
-        output_trait_helpers(&mut file, registry, /* nested class */ false)?;
+        write_helper_class(&dir_path, package_name, registry)?;
         Ok(())
     }
 
