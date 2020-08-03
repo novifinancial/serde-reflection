@@ -10,6 +10,8 @@ use std::{
     path::PathBuf,
 };
 
+/// Output class definitions for the given registry. All definitions are "public static" definitions
+/// within a single class `class_name`.
 pub fn output(out: &mut dyn Write, registry: &Registry, class_name: &str) -> Result<()> {
     let mut emitter = JavaEmitter {
         out: IndentedWriter::new(out, IndentConfig::Space(4)),
@@ -18,7 +20,7 @@ pub fn output(out: &mut dyn Write, registry: &Registry, class_name: &str) -> Res
         package_prefix: format!("{}.", class_name),
     };
 
-    emitter.output_preambule()?;
+    emitter.output_preamble()?;
     writeln!(emitter.out, "public final class {} {{\n", class_name)?;
     emitter.out.inc_level();
     for (name, format) in registry {
@@ -44,7 +46,7 @@ fn write_container_class(
         package_prefix: format!("{}.", package_name),
     };
 
-    emitter.output_preambule()?;
+    emitter.output_preamble()?;
     emitter.output_container(name, format)
 }
 
@@ -61,14 +63,20 @@ fn write_helper_class(
         package_prefix: format!("{}.", package_name),
     };
 
-    emitter.output_preambule()?;
+    emitter.output_preamble()?;
     emitter.output_trait_helpers(registry)
 }
 
+/// Shared state for the Java code generator.
 struct JavaEmitter<'a, T> {
+    /// Writer.
     out: IndentedWriter<T>,
+    /// Optional name of the package owning the generated definitions (e.g. "com.facebook.my_package")
     package_name: Option<&'a str>,
+    /// Whether the generated definitions belong to an outer class.
     nested_class: bool,
+    /// Prefix used to create fully-qualified names to generated classes (e.g. "com.facebook.my_package.")
+    /// When `nested_class == true`, this should end with a class name (e.g. "com.facebook.my_package.MyClass.")
     package_prefix: String,
 }
 
@@ -76,17 +84,12 @@ impl<'a, T> JavaEmitter<'a, T>
 where
     T: Write,
 {
-    fn output_preambule(&mut self) -> Result<()> {
+    fn output_preamble(&mut self) -> Result<()> {
         if let Some(name) = self.package_name {
-            writeln!(self.out, "package {};", name)?;
+            writeln!(self.out, "package {};\n", name)?;
         }
         // Java doesn't let us annotate fully-qualified class names.
-        writeln!(
-            self.out,
-            r#"
-import java.math.BigInteger;
-"#
-        )?;
+        writeln!(self.out, "import java.math.BigInteger;\n")?;
         Ok(())
     }
 
@@ -224,7 +227,7 @@ import java.math.BigInteger;
         }
     }
 
-    fn quote_serialize_value(value: &str, format: &Format) -> String {
+    fn quote_serialize_value(value: &str, format: &Format, package_prefix: &str) -> String {
         use Format::*;
         match format {
             TypeName(_) => format!("{}.serialize(serializer);", value),
@@ -246,7 +249,8 @@ import java.math.BigInteger;
             Str => format!("serializer.serialize_str({});", value),
             Bytes => format!("serializer.serialize_bytes({});", value),
             _ => format!(
-                "TraitHelpers.serialize_{}({}, serializer);",
+                "{}TraitHelpers.serialize_{}({}, serializer);",
+                package_prefix,
                 Self::mangle_type(format),
                 value
             ),
@@ -275,7 +279,8 @@ import java.math.BigInteger;
             Str => "deserializer.deserialize_str()".to_string(),
             Bytes => "deserializer.deserialize_bytes()".to_string(),
             _ => format!(
-                "TraitHelpers.deserialize_{}(deserializer)",
+                "{}TraitHelpers.deserialize_{}(deserializer)",
+                package_prefix,
                 Self::mangle_type(format),
             ),
         }
@@ -285,11 +290,11 @@ import java.math.BigInteger;
         use Format::*;
 
         write!(
-        self.out,
-        "static void serialize_{}({} value, com.facebook.serde.Serializer serializer) throws java.lang.Exception {{",
-        name,
-        Self::quote_type(format0, "")
-    )?;
+            self.out,
+            "static void serialize_{}({} value, com.facebook.serde.Serializer serializer) throws java.lang.Exception {{",
+            name,
+            Self::quote_type(format0, "")
+        )?;
         self.out.inc_level();
         match format0 {
             Option(format) => {
@@ -303,7 +308,7 @@ if (value.isPresent()) {{
     serializer.serialize_option_tag(false);
 }}
 "#,
-                    Self::quote_serialize_value("value.get()", format)
+                    Self::quote_serialize_value("value.get()", format, &self.package_prefix)
                 )?;
             }
 
@@ -317,7 +322,7 @@ for ({} item : value) {{
 }}
 "#,
                     Self::quote_type(format, ""),
-                    Self::quote_serialize_value("item", format)
+                    Self::quote_serialize_value("item", format, &self.package_prefix)
                 )?;
             }
 
@@ -337,8 +342,8 @@ serializer.sort_map_entries(offsets);
 "#,
                     Self::quote_type(key, ""),
                     Self::quote_type(value, ""),
-                    Self::quote_serialize_value("entry.getKey()", key),
-                    Self::quote_serialize_value("entry.getValue()", value)
+                    Self::quote_serialize_value("entry.getKey()", key, &self.package_prefix),
+                    Self::quote_serialize_value("entry.getValue()", value, &self.package_prefix)
                 )?;
             }
 
@@ -346,7 +351,11 @@ serializer.sort_map_entries(offsets);
                 writeln!(self.out)?;
                 for (index, format) in formats.iter().enumerate() {
                     let expr = format!("value.field{}", index);
-                    writeln!(self.out, "{}", Self::quote_serialize_value(&expr, format))?;
+                    writeln!(
+                        self.out,
+                        "{}",
+                        Self::quote_serialize_value(&expr, format, &self.package_prefix)
+                    )?;
                 }
             }
 
@@ -361,7 +370,7 @@ for ({} item : value) {{
 "#,
                     size,
                     Self::quote_type(content, ""),
-                    Self::quote_serialize_value("item", content),
+                    Self::quote_serialize_value("item", content, &self.package_prefix),
                 )?;
             }
 
@@ -583,9 +592,9 @@ return obj;
         writeln!(self.out, "}}")?;
         // Serialize
         writeln!(
-        self.out,
-        "\npublic void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception {{",
-    )?;
+            self.out,
+            "\npublic void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception {{",
+        )?;
         self.out.inc_level();
         if let Some(index) = variant_index {
             writeln!(self.out, "serializer.serialize_variant_index({});", index)?;
@@ -594,7 +603,7 @@ return obj;
             writeln!(
                 self.out,
                 "{}",
-                Self::quote_serialize_value(&field.name, &field.value)
+                Self::quote_serialize_value(&field.name, &field.value, &self.package_prefix)
             )?;
         }
         self.out.dec_level();
