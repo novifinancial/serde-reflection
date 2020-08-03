@@ -1,7 +1,11 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use crate::{analyzer, DocComments, ExternalDefinitions};
+use crate::{
+    analyzer,
+    indent::{IndentConfig, IndentedWriter},
+    DocComments, ExternalDefinitions,
+};
 use serde_reflection::{ContainerFormat, Format, Named, Registry, VariantFormat};
 use std::collections::{BTreeMap, HashSet};
 use std::io::{Result, Write};
@@ -47,8 +51,7 @@ pub fn output_with_external_dependencies_and_comments(
         .collect();
 
     let mut emitter = RustEmitter {
-        out,
-        indentation: 0,
+        out: IndentedWriter::new(out, IndentConfig::Space(4)),
         comments,
         track_visibility: true,
         with_derive_macros,
@@ -84,8 +87,7 @@ pub fn quote_container_definitions_with_comments(
 
     let mut content = Vec::new();
     let mut emitter = RustEmitter {
-        out: &mut content,
-        indentation: 0,
+        out: IndentedWriter::new(&mut content, IndentConfig::Space(4)),
         comments,
         track_visibility: false,
         with_derive_macros: false,
@@ -93,21 +95,23 @@ pub fn quote_container_definitions_with_comments(
     };
 
     for name in entries {
-        emitter.out.clear();
+        emitter.out.as_mut().clear();
         let format = &registry[name];
         emitter.output_container(name, format)?;
         emitter.known_sizes.insert(name);
         result.insert(
             name.to_string(),
-            String::from_utf8_lossy(&emitter.out).trim().to_string() + "\n",
+            String::from_utf8_lossy(&emitter.out.as_ref())
+                .trim()
+                .to_string()
+                + "\n",
         );
     }
     Ok(result)
 }
 
 struct RustEmitter<'a, T> {
-    out: T,
-    indentation: usize,
+    out: IndentedWriter<T>,
     comments: &'a DocComments,
     track_visibility: bool,
     with_derive_macros: bool,
@@ -126,8 +130,8 @@ where
                 .map(String::from)
                 .collect::<Vec<_>>(),
         ) {
-            let prefix = "    ".repeat(self.indentation) + "/// ";
-            let empty_line = "\n".to_string() + &"    ".repeat(self.indentation) + "///\n";
+            let prefix = "/// ";
+            let empty_line = "\n".to_string() + "///\n";
             let text = textwrap::indent(doc, &prefix).replace("\n\n", &empty_line);
             write!(self.out, "\n{}", text)?;
         }
@@ -135,7 +139,6 @@ where
     }
 
     fn output_preamble(&mut self, external_definitions: &ExternalDefinitions) -> Result<()> {
-        assert_eq!(self.indentation, 0);
         let external_names = external_definitions
             .values()
             .cloned()
@@ -224,11 +227,7 @@ where
     }
 
     fn output_fields(&mut self, base: &[&str], fields: &[Named<Format>]) -> Result<()> {
-        self.indentation += 1;
-        let mut tab = "    ".repeat(self.indentation);
-        if self.track_visibility {
-            tab += " pub ";
-        }
+        let prefix = if self.track_visibility { "pub " } else { "" };
         for field in fields {
             let qualified_name = {
                 let mut name = base.to_vec();
@@ -239,38 +238,38 @@ where
             writeln!(
                 self.out,
                 "{}{}: {},",
-                tab,
+                prefix,
                 field.name,
                 Self::quote_type(&field.value, Some(&self.known_sizes)),
             )?;
         }
-        self.indentation -= 1;
         Ok(())
     }
 
     fn output_variant(&mut self, base: &str, name: &str, variant: &VariantFormat) -> Result<()> {
-        assert_eq!(self.indentation, 1);
         use VariantFormat::*;
         match variant {
-            Unit => writeln!(self.out, "    {},", name),
+            Unit => writeln!(self.out, "{},", name),
             NewType(format) => writeln!(
                 self.out,
-                "    {}({}),",
+                "{}({}),",
                 name,
                 Self::quote_type(format, Some(&self.known_sizes))
             ),
             Tuple(formats) => writeln!(
                 self.out,
-                "    {}({}),",
+                "{}({}),",
                 name,
                 Self::quote_types(formats, Some(&self.known_sizes))
             ),
             Struct(fields) => {
-                writeln!(self.out, "    {} {{", name)?;
+                writeln!(self.out, "{} {{", name)?;
+                self.out.inc_level();
                 let tracking = std::mem::replace(&mut self.track_visibility, false);
                 self.output_fields(&[base, name], fields)?;
                 self.track_visibility = tracking;
-                writeln!(self.out, "    }},")
+                self.out.dec_level();
+                writeln!(self.out, "}},")
             }
             Variable(_) => panic!("incorrect value"),
         }
@@ -281,18 +280,15 @@ where
         base: &str,
         variants: &BTreeMap<u32, Named<VariantFormat>>,
     ) -> Result<()> {
-        self.indentation += 1;
         for (expected_index, (index, variant)) in variants.iter().enumerate() {
             assert_eq!(*index, expected_index as u32);
             self.output_comment(&[base, &variant.name])?;
             self.output_variant(base, &variant.name, &variant.value)?;
         }
-        self.indentation -= 1;
         Ok(())
     }
 
     fn output_container(&mut self, name: &str, format: &ContainerFormat) -> Result<()> {
-        assert_eq!(self.indentation, 0);
         self.output_comment(&[name])?;
         let mut prefix = if self.with_derive_macros {
             "#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, PartialOrd)]\n".to_string()
@@ -323,12 +319,16 @@ where
             ),
             Struct(fields) => {
                 writeln!(self.out, "{}struct {} {{", prefix, name)?;
+                self.out.inc_level();
                 self.output_fields(&[name], fields)?;
+                self.out.dec_level();
                 writeln!(self.out, "}}\n")
             }
             Enum(variants) => {
                 writeln!(self.out, "{}enum {} {{", prefix, name)?;
+                self.out.inc_level();
                 self.output_variants(name, variants)?;
+                self.out.dec_level();
                 writeln!(self.out, "}}\n")
             }
         }
