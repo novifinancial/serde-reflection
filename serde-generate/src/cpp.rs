@@ -1,7 +1,10 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use crate::analyzer;
+use crate::{
+    analyzer,
+    indent::{IndentConfig, IndentedWriter},
+};
 use serde_reflection::{ContainerFormat, Format, Named, Registry, VariantFormat};
 use std::collections::{BTreeMap, HashSet};
 use std::io::{Result, Write};
@@ -17,8 +20,7 @@ pub fn output(
         Some(name) => format!("{}::", name),
     };
     let mut emitter = CppEmitter {
-        out,
-        indentation: 0,
+        out: IndentedWriter::new(out, IndentConfig::Space(4)),
         namespace,
         namespace_prefix,
         known_names: HashSet::new(),
@@ -53,8 +55,7 @@ pub fn output(
 }
 
 struct CppEmitter<'a, T> {
-    out: T,
-    indentation: usize,
+    out: IndentedWriter<T>,
     namespace: Option<&'a str>,
     namespace_prefix: String,
     known_names: HashSet<&'a str>,
@@ -68,26 +69,24 @@ where
     fn output_preamble(&mut self) -> Result<()> {
         writeln!(
             self.out,
-            r#"
-#pragma once
+            r#"#pragma once
 
-#include "serde.hpp"
-"#
+#include "serde.hpp""#
         )
     }
 
     fn output_open_namespace(&mut self) -> Result<()> {
-        assert_eq!(self.indentation, 0);
         if let Some(name) = self.namespace {
-            writeln!(self.out, "\nnamespace {} {{\n", name,)?;
+            writeln!(self.out, "\nnamespace {} {{\n", name)?;
+            self.out.inc_level();
         }
         Ok(())
     }
 
     fn output_close_namespace(&mut self) -> Result<()> {
-        assert_eq!(self.indentation, 0);
         if let Some(name) = self.namespace {
-            writeln!(self.out, "\n}} // end of namespace {}", name,)?;
+            self.out.dec_level();
+            writeln!(self.out, "}} // end of namespace {}", name)?;
         }
         Ok(())
     }
@@ -168,13 +167,10 @@ where
     }
 
     fn output_fields(&mut self, fields: &[Named<Format>]) -> Result<()> {
-        self.indentation += 1;
-        let tab = "    ".repeat(self.indentation);
         for field in fields {
             writeln!(
                 self.out,
-                "{}{} {};",
-                tab,
+                "{} {};",
                 Self::quote_type(
                     &field.value,
                     Some(&self.known_sizes),
@@ -183,51 +179,45 @@ where
                 field.name
             )?;
         }
-        self.indentation -= 1;
         Ok(())
     }
 
     fn output_variant(&mut self, name: &str, variant: &VariantFormat) -> Result<()> {
-        assert_eq!(self.indentation, 1);
         use VariantFormat::*;
         let operator = format!("friend bool operator==(const {}&, const {}&);", name, name);
         match variant {
-            Unit => writeln!(
-                self.out,
-                "    struct {} {{\n        {}\n    }};",
-                name, operator
-            ),
+            Unit => writeln!(self.out, "struct {} {{\n    {}\n}};", name, operator),
             NewType(format) => writeln!(
                 self.out,
-                "    struct {} {{\n        {} value;\n        {}\n    }};",
+                "struct {} {{\n    {} value;\n    {}\n}};",
                 name,
                 Self::quote_type(format, Some(&self.known_sizes), &self.namespace_prefix),
                 operator,
             ),
             Tuple(formats) => writeln!(
                 self.out,
-                "    struct {} {{\n        std::tuple<{}> value;\n        {}\n    }};",
+                "struct {} {{\n    std::tuple<{}> value;\n    {}\n}};",
                 name,
                 Self::quote_types(formats, Some(&self.known_sizes), &self.namespace_prefix),
                 operator
             ),
             Struct(fields) => {
-                writeln!(self.out, "    struct {} {{", name)?;
+                writeln!(self.out, "struct {} {{", name)?;
+                self.out.inc_level();
                 self.output_fields(fields)?;
-                writeln!(self.out, "        {}\n    }};", operator)
+                writeln!(self.out, "{}", operator)?;
+                self.out.dec_level();
+                writeln!(self.out, "}};")
             }
             Variable(_) => panic!("incorrect value"),
         }
     }
 
     fn output_variants(&mut self, variants: &BTreeMap<u32, Named<VariantFormat>>) -> Result<()> {
-        assert_eq!(self.indentation, 0);
-        self.indentation += 1;
         for (expected_index, (index, variant)) in variants.iter().enumerate() {
             assert_eq!(*index, expected_index as u32);
             self.output_variant(&variant.name, &variant.value)?;
         }
-        self.indentation -= 1;
         Ok(())
     }
 
@@ -236,9 +226,8 @@ where
     }
 
     fn output_container(&mut self, name: &str, format: &ContainerFormat) -> Result<()> {
-        assert_eq!(self.indentation, 0);
         use ContainerFormat::*;
-        let operator = format!("friend bool operator==(const {}&, const {}&);", name, name);
+        let operator = format!("friend bool operator==(const {0}&, const {0}&);", name);
         match format {
             UnitStruct => writeln!(self.out, "struct {} {{\n    {}\n}};\n", name, operator),
             NewTypeStruct(format) => writeln!(
@@ -257,86 +246,96 @@ where
             ),
             Struct(fields) => {
                 writeln!(self.out, "struct {} {{", name)?;
+                self.out.inc_level();
                 self.output_fields(fields)?;
-                writeln!(self.out, "    {}\n}};\n", operator)
+                writeln!(self.out, "{}", operator)?;
+                self.out.dec_level();
+                writeln!(self.out, "}};\n")
             }
             Enum(variants) => {
                 writeln!(self.out, "struct {} {{", name)?;
+                self.out.inc_level();
                 self.output_variants(variants)?;
                 writeln!(
                     self.out,
-                    "    std::variant<{}> value;\n    {}\n}};\n",
+                    "std::variant<{}> value;",
                     variants
                         .iter()
                         .map(|(_, v)| v.name.clone())
                         .collect::<Vec<_>>()
                         .join(", "),
-                    operator,
-                )
+                )?;
+                writeln!(self.out, "{}", operator)?;
+                self.out.dec_level();
+                writeln!(self.out, "}};\n")
             }
         }
     }
 
     fn output_struct_equality_test(&mut self, name: &str, fields: &[&str]) -> Result<()> {
-        assert_eq!(self.indentation, 0);
         writeln!(
             self.out,
-            "inline bool operator==(const {} &lhs, const {} &rhs) {{",
-            name, name,
+            "inline bool operator==(const {0} &lhs, const {0} &rhs) {{",
+            name,
         )?;
+        self.out.inc_level();
         for field in fields {
             writeln!(
                 self.out,
-                "    if (!(lhs.{} == rhs.{})) {{ return false; }}",
-                field, field,
+                "if (!(lhs.{0} == rhs.{0})) {{ return false; }}",
+                field,
             )?;
         }
-        writeln!(self.out, "    return true;\n}}")
+        writeln!(self.out, "return true;")?;
+        self.out.dec_level();
+        writeln!(self.out, "}}\n")
     }
 
     fn output_struct_serializable(&mut self, name: &str, fields: &[&str]) -> Result<()> {
-        assert_eq!(self.indentation, 0);
         writeln!(
             self.out,
             r#"
 template <>
 template <typename Serializer>
-void serde::Serializable<{}>::serialize(const {} &obj, Serializer &serializer) {{"#,
-            name, name,
+void serde::Serializable<{0}>::serialize(const {0} &obj, Serializer &serializer) {{"#,
+            name,
         )?;
+        self.out.inc_level();
         for field in fields {
             writeln!(
                 self.out,
-                "    serde::Serializable<decltype(obj.{})>::serialize(obj.{}, serializer);",
-                field, field,
+                "serde::Serializable<decltype(obj.{0})>::serialize(obj.{0}, serializer);",
+                field,
             )?;
         }
+        self.out.dec_level();
         writeln!(self.out, "}}")
     }
 
     fn output_struct_deserializable(&mut self, name: &str, fields: &[&str]) -> Result<()> {
-        assert_eq!(self.indentation, 0);
         writeln!(
             self.out,
             r#"
 template <>
 template <typename Deserializer>
-{} serde::Deserializable<{}>::deserialize(Deserializer &deserializer) {{
-    {} obj;"#,
-            name, name, name,
+{0} serde::Deserializable<{0}>::deserialize(Deserializer &deserializer) {{"#,
+            name,
         )?;
+        self.out.inc_level();
+        writeln!(self.out, "{} obj;", name)?;
         for field in fields {
             writeln!(
                 self.out,
-                "    obj.{} = serde::Deserializable<decltype(obj.{})>::deserialize(deserializer);",
-                field, field,
+                "obj.{0} = serde::Deserializable<decltype(obj.{0})>::deserialize(deserializer);",
+                field,
             )?;
         }
-        writeln!(self.out, "    return obj;\n}}")
+        writeln!(self.out, "return obj;")?;
+        self.out.dec_level();
+        writeln!(self.out, "}}")
     }
 
     fn output_struct_traits(&mut self, name: &str, fields: &[&str]) -> Result<()> {
-        assert_eq!(self.indentation, 0);
         self.output_open_namespace()?;
         self.output_struct_equality_test(name, fields)?;
         self.output_close_namespace()?;
@@ -360,7 +359,6 @@ template <typename Deserializer>
     }
 
     fn output_container_traits(&mut self, name: &str, format: &ContainerFormat) -> Result<()> {
-        assert_eq!(self.indentation, 0);
         use ContainerFormat::*;
         match format {
             UnitStruct => self.output_struct_traits(name, &[]),
