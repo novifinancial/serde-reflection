@@ -1,6 +1,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+use crate::indent::{IndentConfig, IndentedWriter};
 use serde_reflection::{ContainerFormat, Format, Named, Registry, VariantFormat};
 use std::collections::BTreeMap;
 use std::io::{Result, Write};
@@ -19,8 +20,7 @@ fn output_with_optional_serde_package(
     serde_package_name: Option<String>,
 ) -> Result<()> {
     let mut emitter = PythonEmitter {
-        out,
-        indentation: 0,
+        out: IndentedWriter::new(out, IndentConfig::Space(4)),
         serde_package_name,
     };
     emitter.output_preamble()?;
@@ -31,8 +31,7 @@ fn output_with_optional_serde_package(
 }
 
 struct PythonEmitter<T> {
-    out: T,
-    indentation: usize,
+    out: IndentedWriter<T>,
     serde_package_name: Option<String>,
 }
 
@@ -41,7 +40,6 @@ where
     T: Write,
 {
     fn output_preamble(&mut self) -> Result<()> {
-        assert_eq!(self.indentation, 0);
         writeln!(
             self.out,
             r#"from dataclasses import dataclass
@@ -102,18 +100,14 @@ import typing
     }
 
     fn output_fields(&mut self, fields: &[Named<Format>]) -> Result<()> {
-        self.indentation += 1;
-        let tab = "    ".repeat(self.indentation);
         for field in fields {
             writeln!(
                 self.out,
-                "{}{}: {}",
-                tab,
+                "{}: {}",
                 field.name,
                 Self::quote_type(&field.value)
             )?;
         }
-        self.indentation -= 1;
         Ok(())
     }
 
@@ -124,7 +118,6 @@ import typing
         index: u32,
         variant: &VariantFormat,
     ) -> Result<()> {
-        assert_eq!(self.indentation, 0);
         use VariantFormat::*;
         match variant {
             Unit => writeln!(
@@ -156,7 +149,9 @@ import typing
                     "\n@dataclass\nclass {}__{}({}):\n    INDEX = {}",
                     base, name, base, index
                 )?;
+                self.out.inc_level();
                 self.output_fields(fields)?;
+                self.out.dec_level();
                 writeln!(self.out)
             }
             Variable(_) => panic!("incorrect value"),
@@ -168,7 +163,6 @@ import typing
         base: &str,
         variants: &BTreeMap<u32, Named<VariantFormat>>,
     ) -> Result<()> {
-        assert_eq!(self.indentation, 0);
         for (index, variant) in variants {
             self.output_variant(base, &variant.name, *index, &variant.value)?;
         }
@@ -176,7 +170,6 @@ import typing
     }
 
     fn output_container(&mut self, name: &str, format: &ContainerFormat) -> Result<()> {
-        assert_eq!(self.indentation, 0);
         use ContainerFormat::*;
         match format {
             UnitStruct => writeln!(self.out, "\n@dataclass\nclass {}:\n    pass\n", name),
@@ -194,7 +187,9 @@ import typing
             ),
             Struct(fields) => {
                 writeln!(self.out, "\n@dataclass\nclass {}:", name)?;
+                self.out.inc_level();
                 self.output_fields(fields)?;
+                self.out.dec_level();
                 writeln!(self.out)
             }
             Enum(variants) => {
