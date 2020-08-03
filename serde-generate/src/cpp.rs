@@ -12,385 +12,377 @@ pub fn output(
     registry: &Registry,
     namespace: Option<&str>,
 ) -> std::result::Result<(), Box<dyn std::error::Error>> {
-    output_preamble(out)?;
-    output_open_namespace(out, namespace)?;
+    let namespace_prefix = match namespace {
+        None => "::".to_string(),
+        Some(name) => format!("{}::", name),
+    };
+    let mut emitter = CppEmitter {
+        out,
+        indentation: 0,
+        namespace,
+        namespace_prefix,
+        known_names: HashSet::new(),
+        known_sizes: HashSet::new(),
+    };
+
+    emitter.output_preamble()?;
+    emitter.output_open_namespace()?;
 
     let dependencies = analyzer::get_dependency_map(registry)?;
     let entries = analyzer::best_effort_topological_sort(&dependencies);
-    let mut known_names = HashSet::new();
-    let mut known_sizes = HashSet::new();
+
     for name in entries {
         for dependency in &dependencies[name] {
-            if !known_names.contains(dependency) {
-                output_container_forward_definition(out, *dependency)?;
-                known_names.insert(*dependency);
+            if !emitter.known_names.contains(dependency) {
+                emitter.output_container_forward_definition(*dependency)?;
+                emitter.known_names.insert(*dependency);
             }
         }
         let format = &registry[name];
-        output_container(out, name, format, &known_sizes, namespace)?;
-        known_sizes.insert(name);
-        known_names.insert(name);
+        emitter.output_container(name, format)?;
+        emitter.known_sizes.insert(name);
+        emitter.known_names.insert(name);
     }
 
-    output_close_namespace(out, namespace)?;
-    writeln!(out)?;
+    emitter.output_close_namespace()?;
+    writeln!(emitter.out)?;
     for (name, format) in registry {
-        output_container_traits(out, &name, format, namespace)?;
+        emitter.output_container_traits(&name, format)?;
     }
     Ok(())
 }
 
-fn output_preamble(out: &mut dyn std::io::Write) -> Result<()> {
-    writeln!(
-        out,
-        r#"
+struct CppEmitter<'a, T> {
+    out: T,
+    indentation: usize,
+    namespace: Option<&'a str>,
+    namespace_prefix: String,
+    known_names: HashSet<&'a str>,
+    known_sizes: HashSet<&'a str>,
+}
+
+impl<'a, T> CppEmitter<'a, T>
+where
+    T: std::io::Write,
+{
+    fn output_preamble(&mut self) -> Result<()> {
+        writeln!(
+            self.out,
+            r#"
 #pragma once
 
 #include "serde.hpp"
 "#
-    )
-}
-
-fn output_open_namespace(out: &mut dyn std::io::Write, namespace: Option<&str>) -> Result<()> {
-    if let Some(name) = namespace {
-        writeln!(out, "\nnamespace {} {{", name,)?;
+        )
     }
-    Ok(())
-}
 
-fn output_close_namespace(out: &mut dyn std::io::Write, namespace: Option<&str>) -> Result<()> {
-    if let Some(name) = namespace {
-        writeln!(out, "}} // end of namespace {}", name,)?;
+    fn output_open_namespace(&mut self) -> Result<()> {
+        assert_eq!(self.indentation, 0);
+        if let Some(name) = self.namespace {
+            writeln!(self.out, "\nnamespace {} {{\n", name,)?;
+        }
+        Ok(())
     }
-    Ok(())
-}
 
-/// If known_sizes is present, we must try to return a type with a known size as well.
-/// A non-empty `namespace_prefix` is required when the type is quoted from a nested struct.
-fn quote_type(
-    format: &Format,
-    known_sizes: Option<&HashSet<&str>>,
-    namespace_prefix: &str,
-) -> String {
-    use Format::*;
-    match format {
-        TypeName(x) => {
-            if let Some(set) = known_sizes {
-                if !set.contains(x.as_str()) {
-                    // Cannot use unique_ptr because we need a copy constructor (e.g. for vectors).
-                    return format!("std::shared_ptr<{}{}>", namespace_prefix, x);
+    fn output_close_namespace(&mut self) -> Result<()> {
+        assert_eq!(self.indentation, 0);
+        if let Some(name) = self.namespace {
+            writeln!(self.out, "\n}} // end of namespace {}", name,)?;
+        }
+        Ok(())
+    }
+
+    /// If known_sizes is present, we must try to return a type with a known size as well.
+    /// A non-empty `namespace_prefix` is required when the type is quoted from a nested struct.
+    fn quote_type(
+        format: &Format,
+        known_sizes: Option<&HashSet<&str>>,
+        namespace_prefix: &str,
+    ) -> String {
+        use Format::*;
+        match format {
+            TypeName(x) => {
+                if let Some(set) = known_sizes {
+                    if !set.contains(x.as_str()) {
+                        // Cannot use unique_ptr because we need a copy constructor (e.g. for vectors).
+                        return format!("std::shared_ptr<{}{}>", namespace_prefix, x);
+                    }
                 }
+                format!("{}{}", namespace_prefix, x)
             }
-            format!("{}{}", namespace_prefix, x)
+            Unit => "std::monostate".into(),
+            Bool => "bool".into(),
+            I8 => "int8_t".into(),
+            I16 => "int16_t".into(),
+            I32 => "int32_t".into(),
+            I64 => "int64_t".into(),
+            I128 => "serde::int128_t".into(),
+            U8 => "uint8_t".into(),
+            U16 => "uint16_t".into(),
+            U32 => "uint32_t".into(),
+            U64 => "uint64_t".into(),
+            U128 => "serde::uint128_t".into(),
+            F32 => "float".into(),
+            F64 => "double".into(),
+            Char => "char32_t".into(),
+            Str => "std::string".into(),
+            Bytes => "std::vector<uint8_t>".into(),
+
+            Option(format) => format!(
+                "std::optional<{}>",
+                Self::quote_type(format, known_sizes, namespace_prefix)
+            ),
+            Seq(format) => format!(
+                "std::vector<{}>",
+                Self::quote_type(format, None, namespace_prefix)
+            ),
+            Map { key, value } => format!(
+                "std::map<{}, {}>",
+                Self::quote_type(key, None, namespace_prefix),
+                Self::quote_type(value, None, namespace_prefix)
+            ),
+            Tuple(formats) => format!(
+                "std::tuple<{}>",
+                Self::quote_types(formats, known_sizes, namespace_prefix)
+            ),
+            TupleArray { content, size } => format!(
+                "std::array<{}, {}>",
+                Self::quote_type(content, known_sizes, namespace_prefix),
+                *size
+            ),
+
+            Variable(_) => panic!("unexpected value"),
         }
-        Unit => "std::monostate".into(),
-        Bool => "bool".into(),
-        I8 => "int8_t".into(),
-        I16 => "int16_t".into(),
-        I32 => "int32_t".into(),
-        I64 => "int64_t".into(),
-        I128 => "serde::int128_t".into(),
-        U8 => "uint8_t".into(),
-        U16 => "uint16_t".into(),
-        U32 => "uint32_t".into(),
-        U64 => "uint64_t".into(),
-        U128 => "serde::uint128_t".into(),
-        F32 => "float".into(),
-        F64 => "double".into(),
-        Char => "char32_t".into(),
-        Str => "std::string".into(),
-        Bytes => "std::vector<uint8_t>".into(),
-
-        Option(format) => format!(
-            "std::optional<{}>",
-            quote_type(format, known_sizes, namespace_prefix)
-        ),
-        Seq(format) => format!(
-            "std::vector<{}>",
-            quote_type(format, None, namespace_prefix)
-        ),
-        Map { key, value } => format!(
-            "std::map<{}, {}>",
-            quote_type(key, None, namespace_prefix),
-            quote_type(value, None, namespace_prefix)
-        ),
-        Tuple(formats) => format!(
-            "std::tuple<{}>",
-            quote_types(formats, known_sizes, namespace_prefix)
-        ),
-        TupleArray { content, size } => format!(
-            "std::array<{}, {}>",
-            quote_type(content, known_sizes, namespace_prefix),
-            *size
-        ),
-
-        Variable(_) => panic!("unexpected value"),
     }
-}
 
-fn quote_types(
-    formats: &[Format],
-    known_sizes: Option<&HashSet<&str>>,
-    namespace_prefix: &str,
-) -> String {
-    formats
-        .iter()
-        .map(|x| quote_type(x, known_sizes, namespace_prefix))
-        .collect::<Vec<_>>()
-        .join(", ")
-}
-
-fn output_fields(
-    out: &mut dyn std::io::Write,
-    indentation: usize,
-    fields: &[Named<Format>],
-    known_sizes: &HashSet<&str>,
-    namespace_prefix: &str,
-) -> Result<()> {
-    let tab = " ".repeat(indentation);
-    for field in fields {
-        writeln!(
-            out,
-            "{}{} {};",
-            tab,
-            quote_type(&field.value, Some(known_sizes), namespace_prefix),
-            field.name
-        )?;
+    fn quote_types(
+        formats: &[Format],
+        known_sizes: Option<&HashSet<&str>>,
+        namespace_prefix: &str,
+    ) -> String {
+        formats
+            .iter()
+            .map(|x| Self::quote_type(x, known_sizes, namespace_prefix))
+            .collect::<Vec<_>>()
+            .join(", ")
     }
-    Ok(())
-}
 
-fn output_variant(
-    out: &mut dyn std::io::Write,
-    name: &str,
-    variant: &VariantFormat,
-    known_sizes: &HashSet<&str>,
-    namespace: Option<&str>,
-) -> Result<()> {
-    use VariantFormat::*;
-    let operator = format!("friend bool operator==(const {}&, const {}&);", name, name);
-    let namespace_prefix = match namespace {
-        None => "::".into(),
-        Some(name) => format!("{}::", name),
-    };
-    match variant {
-        Unit => writeln!(out, "    struct {} {{\n        {}\n    }};", name, operator),
-        NewType(format) => writeln!(
-            out,
-            "    struct {} {{\n        {} value;\n        {}\n    }};",
-            name,
-            quote_type(format, Some(known_sizes), &namespace_prefix),
-            operator,
-        ),
-        Tuple(formats) => writeln!(
-            out,
-            "    struct {} {{\n        std::tuple<{}> value;\n        {}\n    }};",
-            name,
-            quote_types(formats, Some(known_sizes), &namespace_prefix),
-            operator
-        ),
-        Struct(fields) => {
-            writeln!(out, "    struct {} {{", name)?;
-            output_fields(out, 8, fields, known_sizes, &namespace_prefix)?;
-            writeln!(out, "        {}\n    }};", operator)
-        }
-        Variable(_) => panic!("incorrect value"),
-    }
-}
-
-fn output_variants(
-    out: &mut dyn std::io::Write,
-    variants: &BTreeMap<u32, Named<VariantFormat>>,
-    known_sizes: &HashSet<&str>,
-    namespace: Option<&str>,
-) -> Result<()> {
-    for (expected_index, (index, variant)) in variants.iter().enumerate() {
-        assert_eq!(*index, expected_index as u32);
-        output_variant(out, &variant.name, &variant.value, known_sizes, namespace)?;
-    }
-    Ok(())
-}
-
-fn output_container_forward_definition(out: &mut dyn std::io::Write, name: &str) -> Result<()> {
-    writeln!(out, "struct {};\n", name)
-}
-
-fn output_container(
-    out: &mut dyn std::io::Write,
-    name: &str,
-    format: &ContainerFormat,
-    known_sizes: &HashSet<&str>,
-    namespace: Option<&str>,
-) -> Result<()> {
-    use ContainerFormat::*;
-    let operator = format!("friend bool operator==(const {}&, const {}&);", name, name);
-    match format {
-        UnitStruct => writeln!(out, "struct {} {{\n    {}\n}};\n", name, operator),
-        NewTypeStruct(format) => writeln!(
-            out,
-            "struct {} {{\n    {} value;\n    {}\n}};\n",
-            name,
-            quote_type(format, Some(known_sizes), ""),
-            operator,
-        ),
-        TupleStruct(formats) => writeln!(
-            out,
-            "struct {} {{\n    std::tuple<{}> value;\n    {}\n}};\n",
-            name,
-            quote_types(formats, Some(known_sizes), ""),
-            operator,
-        ),
-        Struct(fields) => {
-            writeln!(out, "struct {} {{", name)?;
-            output_fields(out, 4, fields, known_sizes, "")?;
-            writeln!(out, "    {}\n}};\n", operator)
-        }
-        Enum(variants) => {
-            writeln!(out, "struct {} {{", name)?;
-            output_variants(out, variants, known_sizes, namespace)?;
+    fn output_fields(&mut self, fields: &[Named<Format>]) -> Result<()> {
+        self.indentation += 1;
+        let tab = "    ".repeat(self.indentation);
+        for field in fields {
             writeln!(
-                out,
-                "    std::variant<{}> value;\n    {}\n}};\n",
-                variants
-                    .iter()
-                    .map(|(_, v)| v.name.clone())
-                    .collect::<Vec<_>>()
-                    .join(", "),
+                self.out,
+                "{}{} {};",
+                tab,
+                Self::quote_type(
+                    &field.value,
+                    Some(&self.known_sizes),
+                    &self.namespace_prefix
+                ),
+                field.name
+            )?;
+        }
+        self.indentation -= 1;
+        Ok(())
+    }
+
+    fn output_variant(&mut self, name: &str, variant: &VariantFormat) -> Result<()> {
+        assert_eq!(self.indentation, 1);
+        use VariantFormat::*;
+        let operator = format!("friend bool operator==(const {}&, const {}&);", name, name);
+        match variant {
+            Unit => writeln!(
+                self.out,
+                "    struct {} {{\n        {}\n    }};",
+                name, operator
+            ),
+            NewType(format) => writeln!(
+                self.out,
+                "    struct {} {{\n        {} value;\n        {}\n    }};",
+                name,
+                Self::quote_type(format, Some(&self.known_sizes), &self.namespace_prefix),
                 operator,
-            )
+            ),
+            Tuple(formats) => writeln!(
+                self.out,
+                "    struct {} {{\n        std::tuple<{}> value;\n        {}\n    }};",
+                name,
+                Self::quote_types(formats, Some(&self.known_sizes), &self.namespace_prefix),
+                operator
+            ),
+            Struct(fields) => {
+                writeln!(self.out, "    struct {} {{", name)?;
+                self.output_fields(fields)?;
+                writeln!(self.out, "        {}\n    }};", operator)
+            }
+            Variable(_) => panic!("incorrect value"),
         }
     }
-}
 
-fn output_struct_equality_test(
-    out: &mut dyn std::io::Write,
-    name: &str,
-    fields: &[&str],
-) -> Result<()> {
-    writeln!(
-        out,
-        "inline bool operator==(const {} &lhs, const {} &rhs) {{",
-        name, name,
-    )?;
-    for field in fields {
-        writeln!(
-            out,
-            "    if (!(lhs.{} == rhs.{})) {{ return false; }}",
-            field, field,
-        )?;
+    fn output_variants(&mut self, variants: &BTreeMap<u32, Named<VariantFormat>>) -> Result<()> {
+        assert_eq!(self.indentation, 0);
+        self.indentation += 1;
+        for (expected_index, (index, variant)) in variants.iter().enumerate() {
+            assert_eq!(*index, expected_index as u32);
+            self.output_variant(&variant.name, &variant.value)?;
+        }
+        self.indentation -= 1;
+        Ok(())
     }
-    writeln!(out, "    return true;\n}}")
-}
 
-fn output_struct_serializable(
-    out: &mut dyn std::io::Write,
-    name: &str,
-    fields: &[&str],
-) -> Result<()> {
-    writeln!(
-        out,
-        r#"
+    fn output_container_forward_definition(&mut self, name: &str) -> Result<()> {
+        writeln!(self.out, "struct {};\n", name)
+    }
+
+    fn output_container(&mut self, name: &str, format: &ContainerFormat) -> Result<()> {
+        assert_eq!(self.indentation, 0);
+        use ContainerFormat::*;
+        let operator = format!("friend bool operator==(const {}&, const {}&);", name, name);
+        match format {
+            UnitStruct => writeln!(self.out, "struct {} {{\n    {}\n}};\n", name, operator),
+            NewTypeStruct(format) => writeln!(
+                self.out,
+                "struct {} {{\n    {} value;\n    {}\n}};\n",
+                name,
+                Self::quote_type(format, Some(&self.known_sizes), ""),
+                operator,
+            ),
+            TupleStruct(formats) => writeln!(
+                self.out,
+                "struct {} {{\n    std::tuple<{}> value;\n    {}\n}};\n",
+                name,
+                Self::quote_types(formats, Some(&self.known_sizes), ""),
+                operator,
+            ),
+            Struct(fields) => {
+                writeln!(self.out, "struct {} {{", name)?;
+                self.output_fields(fields)?;
+                writeln!(self.out, "    {}\n}};\n", operator)
+            }
+            Enum(variants) => {
+                writeln!(self.out, "struct {} {{", name)?;
+                self.output_variants(variants)?;
+                writeln!(
+                    self.out,
+                    "    std::variant<{}> value;\n    {}\n}};\n",
+                    variants
+                        .iter()
+                        .map(|(_, v)| v.name.clone())
+                        .collect::<Vec<_>>()
+                        .join(", "),
+                    operator,
+                )
+            }
+        }
+    }
+
+    fn output_struct_equality_test(&mut self, name: &str, fields: &[&str]) -> Result<()> {
+        assert_eq!(self.indentation, 0);
+        writeln!(
+            self.out,
+            "inline bool operator==(const {} &lhs, const {} &rhs) {{",
+            name, name,
+        )?;
+        for field in fields {
+            writeln!(
+                self.out,
+                "    if (!(lhs.{} == rhs.{})) {{ return false; }}",
+                field, field,
+            )?;
+        }
+        writeln!(self.out, "    return true;\n}}")
+    }
+
+    fn output_struct_serializable(&mut self, name: &str, fields: &[&str]) -> Result<()> {
+        assert_eq!(self.indentation, 0);
+        writeln!(
+            self.out,
+            r#"
 template <>
 template <typename Serializer>
 void serde::Serializable<{}>::serialize(const {} &obj, Serializer &serializer) {{"#,
-        name, name,
-    )?;
-    for field in fields {
-        writeln!(
-            out,
-            "    serde::Serializable<decltype(obj.{})>::serialize(obj.{}, serializer);",
-            field, field,
+            name, name,
         )?;
+        for field in fields {
+            writeln!(
+                self.out,
+                "    serde::Serializable<decltype(obj.{})>::serialize(obj.{}, serializer);",
+                field, field,
+            )?;
+        }
+        writeln!(self.out, "}}")
     }
-    writeln!(out, "}}")
-}
 
-fn output_struct_deserializable(
-    out: &mut dyn std::io::Write,
-    name: &str,
-    fields: &[&str],
-) -> Result<()> {
-    writeln!(
-        out,
-        r#"
+    fn output_struct_deserializable(&mut self, name: &str, fields: &[&str]) -> Result<()> {
+        assert_eq!(self.indentation, 0);
+        writeln!(
+            self.out,
+            r#"
 template <>
 template <typename Deserializer>
 {} serde::Deserializable<{}>::deserialize(Deserializer &deserializer) {{
     {} obj;"#,
-        name, name, name,
-    )?;
-    for field in fields {
-        writeln!(
-            out,
-            "    obj.{} = serde::Deserializable<decltype(obj.{})>::deserialize(deserializer);",
-            field, field,
+            name, name, name,
         )?;
+        for field in fields {
+            writeln!(
+                self.out,
+                "    obj.{} = serde::Deserializable<decltype(obj.{})>::deserialize(deserializer);",
+                field, field,
+            )?;
+        }
+        writeln!(self.out, "    return obj;\n}}")
     }
-    writeln!(out, "    return obj;\n}}")
-}
 
-fn output_struct_traits(
-    out: &mut dyn std::io::Write,
-    name: &str,
-    fields: &[&str],
-    namespace: Option<&str>,
-) -> Result<()> {
-    output_open_namespace(out, namespace)?;
-    output_struct_equality_test(out, name, fields)?;
-    output_close_namespace(out, namespace)?;
-    let namespaced_name = match namespace {
-        None => name.into(),
-        Some(prefix) => format!("{}::{}", prefix, name),
-    };
-    output_struct_serializable(out, &namespaced_name, fields)?;
-    output_struct_deserializable(out, &namespaced_name, fields)
-}
-
-fn get_variant_fields(format: &VariantFormat) -> Vec<&str> {
-    use VariantFormat::*;
-    match format {
-        Unit => Vec::new(),
-        NewType(_format) => vec!["value"],
-        Tuple(_formats) => vec!["value"],
-        Struct(fields) => fields
-            .iter()
-            .map(|field| field.name.as_str())
-            .collect::<Vec<_>>(),
-        Variable(_) => panic!("incorrect value"),
+    fn output_struct_traits(&mut self, name: &str, fields: &[&str]) -> Result<()> {
+        assert_eq!(self.indentation, 0);
+        self.output_open_namespace()?;
+        self.output_struct_equality_test(name, fields)?;
+        self.output_close_namespace()?;
+        let namespaced_name = format!("{}{}", self.namespace_prefix, name);
+        self.output_struct_serializable(&namespaced_name, fields)?;
+        self.output_struct_deserializable(&namespaced_name, fields)
     }
-}
 
-fn output_container_traits(
-    out: &mut dyn std::io::Write,
-    name: &str,
-    format: &ContainerFormat,
-    namespace: Option<&str>,
-) -> Result<()> {
-    use ContainerFormat::*;
-    match format {
-        UnitStruct => output_struct_traits(out, name, &[], namespace),
-        NewTypeStruct(_format) => output_struct_traits(out, name, &["value"], namespace),
-        TupleStruct(_formats) => output_struct_traits(out, name, &["value"], namespace),
-        Struct(fields) => output_struct_traits(
-            out,
-            name,
-            &fields
+    fn get_variant_fields(format: &VariantFormat) -> Vec<&str> {
+        use VariantFormat::*;
+        match format {
+            Unit => Vec::new(),
+            NewType(_format) => vec!["value"],
+            Tuple(_formats) => vec!["value"],
+            Struct(fields) => fields
                 .iter()
                 .map(|field| field.name.as_str())
                 .collect::<Vec<_>>(),
-            namespace,
-        ),
-        Enum(variants) => {
-            output_struct_traits(out, name, &["value"], namespace)?;
-            for variant in variants.values() {
-                output_struct_traits(
-                    out,
-                    &format!("{}::{}", name, variant.name),
-                    &get_variant_fields(&variant.value),
-                    namespace,
-                )?;
+            Variable(_) => panic!("incorrect value"),
+        }
+    }
+
+    fn output_container_traits(&mut self, name: &str, format: &ContainerFormat) -> Result<()> {
+        assert_eq!(self.indentation, 0);
+        use ContainerFormat::*;
+        match format {
+            UnitStruct => self.output_struct_traits(name, &[]),
+            NewTypeStruct(_format) => self.output_struct_traits(name, &["value"]),
+            TupleStruct(_formats) => self.output_struct_traits(name, &["value"]),
+            Struct(fields) => self.output_struct_traits(
+                name,
+                &fields
+                    .iter()
+                    .map(|field| field.name.as_str())
+                    .collect::<Vec<_>>(),
+            ),
+            Enum(variants) => {
+                self.output_struct_traits(name, &["value"])?;
+                for variant in variants.values() {
+                    self.output_struct_traits(
+                        &format!("{}::{}", name, variant.name),
+                        &Self::get_variant_fields(&variant.value),
+                    )?;
+                }
+                Ok(())
             }
-            Ok(())
         }
     }
 }
