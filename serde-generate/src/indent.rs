@@ -24,14 +24,6 @@ impl<T> IndentedWriter<T> {
         }
     }
 
-    pub fn level(&self) -> usize {
-        self.indent_level
-    }
-
-    pub fn set_level(&mut self, level: usize) {
-        self.indent_level = level
-    }
-
     pub fn inc_level(&mut self) {
         self.inc_level_by(1);
     }
@@ -62,7 +54,7 @@ impl<T: Write> Write for IndentedWriter<T> {
                 };
 
             if self.at_begining_of_line && !before_newline.is_empty() {
-                for _ in 0..self.level() {
+                for _ in 0..self.indent_level {
                     match self.indent {
                         IndentConfig::Tab => self.w.write_all(b"\t")?,
                         IndentConfig::Space(n) => {
