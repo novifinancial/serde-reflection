@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use crate::indent::{IndentConfig, IndentedWriter};
+use crate::{DocComments, ExternalDefinitions};
 use include_dir::include_dir as include_directory;
 use serde_reflection::{ContainerFormat, Format, FormatHolder, Named, Registry, VariantFormat};
 use std::{
-    collections::BTreeMap,
+    collections::{BTreeMap, HashMap},
     io::{Result, Write},
     path::PathBuf,
 };
@@ -13,37 +14,146 @@ use std::{
 /// Output class definitions for the given registry. All definitions are "public static" definitions
 /// within a single class `class_name`.
 pub fn output(out: &mut dyn Write, registry: &Registry, class_name: &str) -> Result<()> {
+    output_with_external_dependencies_and_comments(
+        out,
+        registry,
+        class_name,
+        &BTreeMap::new(),
+        &BTreeMap::new(),
+    )
+}
+
+/// Same as `output` but accepts an optional package name, external definitions, and comments.
+pub fn output_with_external_dependencies_and_comments(
+    out: &mut dyn Write,
+    registry: &Registry,
+    class_name: &str,
+    external_definitions: &ExternalDefinitions,
+    comments: &DocComments,
+) -> Result<()> {
+    let qualified_names =
+        get_qualified_names(&[class_name.to_string()], registry, external_definitions);
     let mut emitter = JavaEmitter {
         out: IndentedWriter::new(out, IndentConfig::Space(4)),
         package_name: None,
         nested_class: true,
-        package_prefix: format!("{}.", class_name),
+        with_serialization: true,
+        qualified_names: &qualified_names,
+        comments,
+        current_namespace: Vec::new(),
+        current_reserved_names: HashMap::new(),
     };
 
     emitter.output_preamble()?;
     writeln!(emitter.out, "public final class {} {{\n", class_name)?;
-    emitter.out.indent();
+    let reserved_names = &[];
+    emitter.enter_class(class_name, reserved_names);
     for (name, format) in registry {
         emitter.output_container(name, format)?;
         writeln!(emitter.out)?;
     }
     emitter.output_trait_helpers(registry)?;
-    emitter.out.unindent();
+    emitter.leave_class(reserved_names);
     writeln!(emitter.out, "}}")
 }
 
+/// Same as `output_with_comments_and_external_definitions` but generates one separate source file per class.
+/// Source files will be located in a subdirectory of `install_dir` corresponding to the given
+/// package name (if any, otherwise `install_dir` it self).
+pub fn write_source_files(
+    install_dir: std::path::PathBuf,
+    package_name: Option<&str>,
+    with_serialization: bool,
+    registry: &Registry,
+    external_definitions: &ExternalDefinitions,
+    comments: &DocComments,
+) -> Result<()> {
+    let mut dir_path = install_dir;
+    if let Some(package) = package_name {
+        let parts = package.split('.').collect::<Vec<_>>();
+        for part in &parts {
+            dir_path = dir_path.join(part);
+        }
+    }
+    std::fs::create_dir_all(&dir_path)?;
+
+    let current_namespace = match package_name {
+        Some(name) => name.split('.').map(String::from).collect(),
+        None => Vec::new(),
+    };
+
+    let qualified_names = get_qualified_names(&current_namespace, registry, external_definitions);
+    for (name, format) in registry {
+        write_container_class(
+            &dir_path,
+            package_name,
+            with_serialization,
+            current_namespace.clone(),
+            &qualified_names,
+            &comments,
+            name,
+            format,
+        )?;
+    }
+    if with_serialization {
+        write_helper_class(
+            &dir_path,
+            package_name,
+            current_namespace,
+            &qualified_names,
+            registry,
+        )?;
+    }
+    Ok(())
+}
+
+/// Maps containers names in `registry` to their qualified names in the targe namespace.
+/// Also map external definitions mentioned in `registry` to their external namespaces.
+fn get_qualified_names(
+    target_namespace: &[String],
+    registry: &Registry,
+    external_definitions: &ExternalDefinitions,
+) -> HashMap<String, String> {
+    let mut qualified_names = HashMap::new();
+    if !target_namespace.is_empty() {
+        let namespace = target_namespace.join(".");
+        for name in registry.keys() {
+            qualified_names.insert(name.to_string(), format!("{}.{}", namespace, name));
+        }
+        qualified_names.insert(
+            "TraitHelpers".to_string(),
+            format!("{}.TraitHelpers", namespace),
+        );
+    }
+    for (namespace, names) in external_definitions {
+        for name in names {
+            qualified_names.insert(name.to_string(), format!("{}.{}", namespace, name));
+        }
+    }
+    qualified_names
+}
+
+#[allow(clippy::too_many_arguments)]
 fn write_container_class(
-    install_dir: &std::path::Path,
-    package_name: &str,
+    dir_path: &std::path::Path,
+    package_name: Option<&str>,
+    with_serialization: bool,
+    current_namespace: Vec<String>,
+    qualified_names: &HashMap<String, String>,
+    comments: &DocComments,
     name: &str,
     format: &ContainerFormat,
 ) -> Result<()> {
-    let mut file = std::fs::File::create(install_dir.join(name.to_string() + ".java"))?;
+    let mut file = std::fs::File::create(dir_path.join(name.to_string() + ".java"))?;
     let mut emitter = JavaEmitter {
         out: IndentedWriter::new(&mut file, IndentConfig::Space(4)),
-        package_name: Some(package_name),
+        package_name,
+        with_serialization,
         nested_class: false,
-        package_prefix: format!("{}.", package_name),
+        qualified_names,
+        comments,
+        current_namespace,
+        current_reserved_names: HashMap::new(),
     };
 
     emitter.output_preamble()?;
@@ -51,16 +161,23 @@ fn write_container_class(
 }
 
 fn write_helper_class(
-    install_dir: &std::path::Path,
-    package_name: &str,
+    dir_path: &std::path::Path,
+    package_name: Option<&str>,
+    current_namespace: Vec<String>,
+    qualified_names: &HashMap<String, String>,
     registry: &Registry,
 ) -> Result<()> {
-    let mut file = std::fs::File::create(install_dir.join("TraitHelpers.java"))?;
+    let mut file = std::fs::File::create(dir_path.join("TraitHelpers.java"))?;
+    let comments = BTreeMap::new();
     let mut emitter = JavaEmitter {
         out: IndentedWriter::new(&mut file, IndentConfig::Space(4)),
-        package_name: Some(package_name),
-        nested_class: false,
-        package_prefix: format!("{}.", package_name),
+        package_name,
+        with_serialization: false, // unused
+        nested_class: false,       // unused
+        qualified_names,
+        comments: &comments,
+        current_namespace,
+        current_reserved_names: HashMap::new(),
     };
 
     emitter.output_preamble()?;
@@ -75,9 +192,19 @@ struct JavaEmitter<'a, T> {
     package_name: Option<&'a str>,
     /// Whether the generated definitions belong to an outer class.
     nested_class: bool,
-    /// Prefix used to create fully-qualified names to generated classes (e.g. "com.facebook.my_package.")
-    /// When `nested_class == true`, this should end with a class name (e.g. "com.facebook.my_package.MyClass.")
-    package_prefix: String,
+    /// Whether (de)serializers should be generated.
+    with_serialization: bool,
+    /// Mapping from type names to fully-qualified class names (e.g. "MyClass" -> "com.facebook.my_package.MyClass")
+    qualified_names: &'a HashMap<String, String>,
+    /// Comments
+    comments: &'a DocComments,
+    /// Current namespace (e.g. vec!["com", "facebook", "my_package", "MyClass"])
+    current_namespace: Vec<String>,
+    /// Current (non-qualified) generated class names that could clash with names in the registry
+    /// (e.g. "Builder" or variant classes).
+    /// * We cound multiplicities to allow inplace backtracking.
+    /// * Names in the registry (and a few base types such as "BigInteger") are assumed to never clash.
+    current_reserved_names: HashMap<String, usize>,
 }
 
 impl<'a, T> JavaEmitter<'a, T>
@@ -93,11 +220,49 @@ where
         Ok(())
     }
 
-    /// A non-empty `package_prefix` is required when the type is quoted from a nested struct.
-    fn quote_type(format: &Format, package_prefix: &str) -> String {
+    /// Compute a safe reference to the registry type `name` in the given context.
+    /// If `name` is not marked as "reserved" (e.g. "Builder"), we compare the global
+    /// name `self.qualified_names[name]` with the current namespace and try to use the
+    /// short string `name` if possible.
+    fn quote_qualified_name(&self, name: &str) -> String {
+        let qname = self
+            .qualified_names
+            .get(name)
+            .cloned()
+            .unwrap_or_else(|| name.to_string());
+        let mut path = qname.split('.').collect::<Vec<_>>();
+        if path.len() <= 1 {
+            return qname;
+        }
+        let name = path.pop().unwrap();
+        if self.current_reserved_names.contains_key(name) {
+            return qname;
+        }
+        for (index, element) in path.iter().enumerate() {
+            match self.current_namespace.get(index) {
+                Some(e) if e == element => (),
+                _ => {
+                    return qname;
+                }
+            }
+        }
+        name.to_string()
+    }
+
+    fn output_comment(&mut self, name: &str) -> std::io::Result<()> {
+        let mut path = self.current_namespace.clone();
+        path.push(name.to_string());
+        if let Some(doc) = self.comments.get(&path) {
+            let text = textwrap::indent(doc, " * ").replace("\n\n", "\n *\n");
+            writeln!(self.out, "/**\n{} */", text)?;
+        }
+        Ok(())
+    }
+
+    fn quote_type(&self, format: &Format) -> String {
         use Format::*;
         match format {
-            TypeName(x) => format!("{}{}", package_prefix, x),
+            TypeName(x) => self.quote_qualified_name(x),
             Unit => "com.facebook.serde.Unit".into(),
             Bool => "Boolean".into(),
             I8 => "Byte".into(),
@@ -116,37 +281,55 @@ where
             Str => "String".into(),
             Bytes => "com.facebook.serde.Bytes".into(),
 
-            Option(format) => format!(
-                "java.util.Optional<{}>",
-                Self::quote_type(format, package_prefix)
-            ),
-            Seq(format) => format!(
-                "java.util.List<{}>",
-                Self::quote_type(format, package_prefix)
-            ),
+            Option(format) => format!("java.util.Optional<{}>", self.quote_type(format)),
+            Seq(format) => format!("java.util.List<{}>", self.quote_type(format)),
             Map { key, value } => format!(
                 "java.util.Map<{}, {}>",
-                Self::quote_type(key, package_prefix),
-                Self::quote_type(value, package_prefix)
+                self.quote_type(key),
+                self.quote_type(value)
             ),
             Tuple(formats) => format!(
                 "com.facebook.serde.Tuple{}<{}>",
                 formats.len(),
-                Self::quote_types(formats, package_prefix)
+                self.quote_types(formats)
             ),
             TupleArray { content, size } => format!(
                 "{} @com.facebook.serde.ArrayLen(length={}) []",
-                Self::quote_type(content, package_prefix),
+                self.quote_type(content),
                 size
             ),
             Variable(_) => panic!("unexpected value"),
         }
     }
 
-    fn quote_types(formats: &[Format], package_prefix: &str) -> String {
+    fn enter_class(&mut self, name: &str, reserved_subclass_names: &[&str]) {
+        self.out.indent();
+        self.current_namespace.push(name.to_string());
+        for name in reserved_subclass_names {
+            let entry = self
+                .current_reserved_names
+                .entry(name.to_string())
+                .or_insert(0);
+            *entry += 1;
+        }
+    }
+
+    fn leave_class(&mut self, reserved_subclass_names: &[&str]) {
+        self.out.unindent();
+        self.current_namespace.pop();
+        for name in reserved_subclass_names {
+            let entry = self.current_reserved_names.get_mut(*name).unwrap();
+            *entry -= 1;
+            if *entry == 0 {
+                self.current_reserved_names.remove(*name);
+            }
+        }
+    }
+
+    fn quote_types(&self, formats: &[Format]) -> String {
         formats
             .iter()
-            .map(|f| Self::quote_type(f, package_prefix))
+            .map(|f| self.quote_type(f))
             .collect::<Vec<_>>()
             .join(", ")
     }
@@ -165,12 +348,13 @@ where
         }
         let prefix = if self.nested_class { "static " } else { "" };
         writeln!(self.out, "{}final class TraitHelpers {{", prefix)?;
-        self.out.indent();
+        let reserved_names = &[];
+        self.enter_class("TraitHelpers", reserved_names);
         for (mangled_name, subtype) in &subtypes {
             self.output_serialization_helper(mangled_name, subtype)?;
             self.output_deserialization_helper(mangled_name, subtype)?;
         }
-        self.out.unindent();
+        self.leave_class(reserved_names);
         writeln!(self.out, "}}\n")
     }
 
@@ -227,7 +411,7 @@ where
         }
     }
 
-    fn quote_serialize_value(value: &str, format: &Format, package_prefix: &str) -> String {
+    fn quote_serialize_value(&self, value: &str, format: &Format) -> String {
         use Format::*;
         match format {
             TypeName(_) => format!("{}.serialize(serializer);", value),
@@ -249,18 +433,21 @@ where
             Str => format!("serializer.serialize_str({});", value),
             Bytes => format!("serializer.serialize_bytes({});", value),
             _ => format!(
-                "{}TraitHelpers.serialize_{}({}, serializer);",
-                package_prefix,
+                "{}.serialize_{}({}, serializer);",
+                self.quote_qualified_name("TraitHelpers"),
                 Self::mangle_type(format),
                 value
             ),
         }
     }
 
-    fn quote_deserialize(format: &Format, package_prefix: &str) -> String {
+    fn quote_deserialize(&self, format: &Format) -> String {
         use Format::*;
         match format {
-            TypeName(name) => format!("{}{}.deserialize(deserializer)", package_prefix, name),
+            TypeName(name) => format!(
+                "{}.deserialize(deserializer)",
+                self.quote_qualified_name(name)
+            ),
             Unit => "deserializer.deserialize_unit()".to_string(),
             Bool => "deserializer.deserialize_bool()".to_string(),
             I8 => "deserializer.deserialize_i8()".to_string(),
@@ -279,8 +466,8 @@ where
             Str => "deserializer.deserialize_str()".to_string(),
             Bytes => "deserializer.deserialize_bytes()".to_string(),
             _ => format!(
-                "{}TraitHelpers.deserialize_{}(deserializer)",
-                package_prefix,
+                "{}.deserialize_{}(deserializer)",
+                self.quote_qualified_name("TraitHelpers"),
                 Self::mangle_type(format),
             ),
         }
@@ -293,7 +480,7 @@ where
             self.out,
             "static void serialize_{}({} value, com.facebook.serde.Serializer serializer) throws java.lang.Exception {{",
             name,
-            Self::quote_type(format0, "")
+            self.quote_type(format0)
         )?;
         self.out.indent();
         match format0 {
@@ -308,7 +495,7 @@ if (value.isPresent()) {{
     serializer.serialize_option_tag(false);
 }}
 "#,
-                    Self::quote_serialize_value("value.get()", format, &self.package_prefix)
+                    self.quote_serialize_value("value.get()", format)
                 )?;
             }
 
@@ -321,8 +508,8 @@ for ({} item : value) {{
     {}
 }}
 "#,
-                    Self::quote_type(format, ""),
-                    Self::quote_serialize_value("item", format, &self.package_prefix)
+                    self.quote_type(format),
+                    self.quote_serialize_value("item", format)
                 )?;
             }
 
@@ -340,10 +527,10 @@ for (java.util.Map.Entry<{}, {}> entry : value.entrySet()) {{
 }}
 serializer.sort_map_entries(offsets);
 "#,
-                    Self::quote_type(key, ""),
-                    Self::quote_type(value, ""),
-                    Self::quote_serialize_value("entry.getKey()", key, &self.package_prefix),
-                    Self::quote_serialize_value("entry.getValue()", value, &self.package_prefix)
+                    self.quote_type(key),
+                    self.quote_type(value),
+                    self.quote_serialize_value("entry.getKey()", key),
+                    self.quote_serialize_value("entry.getValue()", value)
                 )?;
             }
 
@@ -351,11 +538,7 @@ serializer.sort_map_entries(offsets);
                 writeln!(self.out)?;
                 for (index, format) in formats.iter().enumerate() {
                     let expr = format!("value.field{}", index);
-                    writeln!(
-                        self.out,
-                        "{}",
-                        Self::quote_serialize_value(&expr, format, &self.package_prefix)
-                    )?;
+                    writeln!(self.out, "{}", self.quote_serialize_value(&expr, format))?;
                 }
             }
 
@@ -369,8 +552,8 @@ for ({} item : value) {{
 }}
 "#,
                     size,
-                    Self::quote_type(content, ""),
-                    Self::quote_serialize_value("item", content, &self.package_prefix),
+                    self.quote_type(content),
+                    self.quote_serialize_value("item", content),
                 )?;
             }
 
@@ -386,7 +569,7 @@ for ({} item : value) {{
         write!(
         self.out,
         "static {} deserialize_{}(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{",
-        Self::quote_type(format0, ""),
+        self.quote_type(format0),
         name,
     )?;
         self.out.indent();
@@ -402,7 +585,7 @@ if (!tag) {{
     return java.util.Optional.of({});
 }}
 "#,
-                    Self::quote_deserialize(format, "")
+                    self.quote_deserialize(format),
                 )?;
             }
 
@@ -417,8 +600,8 @@ for (long i = 0; i < length; i++) {{
 }}
 return obj;
 "#,
-                    Self::quote_type(format, ""),
-                    Self::quote_deserialize(format, "")
+                    self.quote_type(format),
+                    self.quote_deserialize(format)
                 )?;
             }
 
@@ -446,10 +629,10 @@ for (long i = 0; i < length; i++) {{
 }}
 return obj;
 "#,
-                    Self::quote_type(key, ""),
-                    Self::quote_type(value, ""),
-                    Self::quote_deserialize(key, ""),
-                    Self::quote_deserialize(value, ""),
+                    self.quote_type(key),
+                    self.quote_type(value),
+                    self.quote_deserialize(key),
+                    self.quote_deserialize(value),
                 )?;
             }
 
@@ -460,10 +643,10 @@ return obj;
 return new {}({}
 );
 "#,
-                    Self::quote_type(format0, ""),
+                    self.quote_type(format0),
                     formats
                         .iter()
-                        .map(|f| format!("\n    {}", Self::quote_deserialize(f, "")))
+                        .map(|f| format!("\n    {}", self.quote_deserialize(f)))
                         .collect::<Vec<_>>()
                         .join(",")
                 )?;
@@ -479,9 +662,9 @@ for (int i = 0; i < {1}; i++) {{
 }}
 return obj;
 "#,
-                    Self::quote_type(content, ""),
+                    self.quote_type(content),
                     size,
-                    Self::quote_deserialize(content, "")
+                    self.quote_deserialize(content)
                 )?;
             }
 
@@ -540,6 +723,7 @@ return obj;
         // Beginning of class
         if let Some(base) = variant_base {
             writeln!(self.out)?;
+            self.output_comment(name)?;
             writeln!(
                 self.out,
                 "public static final class {} extends {} {{",
@@ -551,15 +735,17 @@ return obj;
             } else {
                 "public "
             };
+            self.output_comment(name)?;
             writeln!(self.out, "{}final class {} {{", prefix, name)?;
         }
-        self.out.indent();
+        let reserved_names = &["Builder"];
+        self.enter_class(name, reserved_names);
         // Fields
         for field in fields {
             writeln!(
                 self.out,
                 "public final {} {};",
-                Self::quote_type(&field.value, &self.package_prefix),
+                self.quote_type(&field.value),
                 field.name
             )?;
         }
@@ -573,11 +759,7 @@ return obj;
             name,
             fields
                 .iter()
-                .map(|f| format!(
-                    "{} {}",
-                    Self::quote_type(&f.value, &self.package_prefix),
-                    &f.name
-                ))
+                .map(|f| format!("{} {}", self.quote_type(&f.value), &f.name))
                 .collect::<Vec<_>>()
                 .join(", ")
         )?;
@@ -589,52 +771,56 @@ return obj;
             writeln!(self.out, "this.{} = {};", &field.name, &field.name)?;
         }
         self.out.unindent();
-        writeln!(self.out, "}}")?;
+        writeln!(self.out, "}}\n")?;
         // Serialize
-        writeln!(
-            self.out,
-            "\npublic void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception {{",
-        )?;
-        self.out.indent();
-        if let Some(index) = variant_index {
-            writeln!(self.out, "serializer.serialize_variant_index({});", index)?;
-        }
-        for field in fields {
+        if self.with_serialization {
             writeln!(
                 self.out,
-                "{}",
-                Self::quote_serialize_value(&field.name, &field.value, &self.package_prefix)
+                "public void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception {{",
             )?;
+            self.out.indent();
+            if let Some(index) = variant_index {
+                writeln!(self.out, "serializer.serialize_variant_index({});", index)?;
+            }
+            for field in fields {
+                writeln!(
+                    self.out,
+                    "{}",
+                    self.quote_serialize_value(&field.name, &field.value)
+                )?;
+            }
+            self.out.unindent();
+            writeln!(self.out, "}}\n")?;
         }
-        self.out.unindent();
-        writeln!(self.out, "}}\n")?;
         // Deserialize (struct) or Load (variant)
-        if variant_index.is_none() {
-            writeln!(
-            self.out,
-            "public static {} deserialize(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{",
-            name,
-        )?;
-        } else {
-            writeln!(
-            self.out,
-            "static {} load(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{",
-            name,
-        )?;
+        if self.with_serialization {
+            if variant_index.is_none() {
+                writeln!(
+                    self.out,
+                    "public static {} deserialize(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{",
+                    name,
+                )?;
+            } else {
+                writeln!(
+                    self.out,
+                    "static {} load(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{",
+                    name,
+                )?;
+            }
+            self.out.indent();
+            writeln!(self.out, "Builder builder = new Builder();")?;
+            for field in fields {
+                writeln!(
+                    self.out,
+                    "builder.{} = {};",
+                    field.name,
+                    self.quote_deserialize(&field.value)
+                )?;
+            }
+            writeln!(self.out, "return builder.build();")?;
+            self.out.unindent();
+            writeln!(self.out, "}}\n")?;
         }
-        self.out.indent();
-        writeln!(self.out, "Builder builder = new Builder();")?;
-        for field in fields {
-            writeln!(
-                self.out,
-                "builder.{} = {};",
-                field.name,
-                Self::quote_deserialize(&field.value, &self.package_prefix)
-            )?;
-        }
-        writeln!(self.out, "return builder.build();")?;
-        self.out.unindent();
-        writeln!(self.out, "}}\n")?;
         // Equality
         write!(self.out, "public boolean equals(Object obj) {{")?;
         self.out.indent();
@@ -674,7 +860,7 @@ if (getClass() != obj.getClass()) return false;
         // Builder
         self.output_struct_or_variant_container_builder(name, fields)?;
         // End of class
-        self.out.unindent();
+        self.leave_class(reserved_names);
         writeln!(self.out, "}}")
     }
 
@@ -686,13 +872,14 @@ if (getClass() != obj.getClass()) return false;
         // Beginning of builder class
         writeln!(self.out)?;
         writeln!(self.out, "public static final class Builder {{")?;
-        self.out.indent();
+        let reserved_names = &[];
+        self.enter_class("Builder", reserved_names);
         // Fields
         for field in fields {
             writeln!(
                 self.out,
                 "public {} {};",
-                Self::quote_type(&field.value, &self.package_prefix),
+                self.quote_type(&field.value),
                 field.name
             )?;
         }
@@ -714,7 +901,7 @@ if (getClass() != obj.getClass()) return false;
                 .join(",")
         )?;
         // End of class
-        self.out.unindent();
+        self.leave_class(reserved_names);
         writeln!(self.out, "}}")
     }
 
@@ -723,48 +910,57 @@ if (getClass() != obj.getClass()) return false;
         name: &str,
         variants: &BTreeMap<u32, Named<VariantFormat>>,
     ) -> Result<()> {
+        self.output_comment(name)?;
         let prefix = if self.nested_class {
             "public static "
         } else {
             "public "
         };
         writeln!(self.out, "{}abstract class {} {{", prefix, name)?;
-        self.out.indent();
-        writeln!(
-        self.out,
-        "abstract public void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception;\n",
-    )?;
-        write!(
-        self.out,
-        "public static {} deserialize(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{", name)?;
-        self.out.indent();
-        writeln!(
-            self.out,
-            r#"
+        let reserved_names = variants
+            .values()
+            .map(|v| v.name.as_str())
+            .collect::<Vec<_>>();
+        self.enter_class(name, &reserved_names);
+        if self.with_serialization {
+            writeln!(
+                self.out,
+                "abstract public void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception;\n"
+            )?;
+            write!(
+                self.out,
+                "public static {} deserialize(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{",
+                name
+            )?;
+            self.out.indent();
+            writeln!(
+                self.out,
+                r#"
 {} obj;
 int index = deserializer.deserialize_variant_index();
 switch (index) {{"#,
-            name,
-        )?;
-        self.out.indent();
-        for (index, variant) in variants {
+                name,
+            )?;
+            self.out.indent();
+            for (index, variant) in variants {
+                writeln!(
+                    self.out,
+                    "case {}: return {}.load(deserializer);",
+                    index, variant.name,
+                )?;
+            }
             writeln!(
                 self.out,
-                "case {}: return {}.load(deserializer);",
-                index, variant.name,
+                "default: throw new java.lang.Exception(\"Unknown variant index for {}: \" + index);",
+                name,
             )?;
+            self.out.unindent();
+            writeln!(self.out, "}}")?;
+            self.out.unindent();
+            writeln!(self.out, "}}")?;
         }
-        writeln!(
-            self.out,
-            "default: throw new java.lang.Exception(\"Unknown variant index for {}: \" + index);",
-            name,
-        )?;
-        self.out.unindent();
-        writeln!(self.out, "}}")?;
-        self.out.unindent();
-        writeln!(self.out, "}}")?;
         self.output_variants(name, variants)?;
-        self.out.unindent();
+        self.leave_class(&reserved_names);
         writeln!(self.out, "}}\n")
     }
 
@@ -826,17 +1022,14 @@ impl crate::SourceInstaller for Installer {
         package_name: &str,
         registry: &Registry,
     ) -> std::result::Result<(), Self::Error> {
-        let parts = package_name.split('.').collect::<Vec<_>>();
-        let mut dir_path = self.install_dir.clone();
-        for part in &parts {
-            dir_path = dir_path.join(part);
-        }
-        std::fs::create_dir_all(&dir_path)?;
-
-        for (name, format) in registry {
-            write_container_class(&dir_path, package_name, name, format)?;
-        }
-        write_helper_class(&dir_path, package_name, registry)?;
+        write_source_files(
+            self.install_dir.clone(),
+            Some(package_name),
+            /* with serialization */ true,
+            registry,
+            &BTreeMap::new(),
+            &BTreeMap::new(),
+        )?;
         Ok(())
     }
 
