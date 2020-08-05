@@ -820,6 +820,47 @@
 <span id="820">820</span>
 <span id="821">821</span>
 <span id="822">822</span>
+<span id="823">823</span>
+<span id="824">824</span>
+<span id="825">825</span>
+<span id="826">826</span>
+<span id="827">827</span>
+<span id="828">828</span>
+<span id="829">829</span>
+<span id="830">830</span>
+<span id="831">831</span>
+<span id="832">832</span>
+<span id="833">833</span>
+<span id="834">834</span>
+<span id="835">835</span>
+<span id="836">836</span>
+<span id="837">837</span>
+<span id="838">838</span>
+<span id="839">839</span>
+<span id="840">840</span>
+<span id="841">841</span>
+<span id="842">842</span>
+<span id="843">843</span>
+<span id="844">844</span>
+<span id="845">845</span>
+<span id="846">846</span>
+<span id="847">847</span>
+<span id="848">848</span>
+<span id="849">849</span>
+<span id="850">850</span>
+<span id="851">851</span>
+<span id="852">852</span>
+<span id="853">853</span>
+<span id="854">854</span>
+<span id="855">855</span>
+<span id="856">856</span>
+<span id="857">857</span>
+<span id="858">858</span>
+<span id="859">859</span>
+<span id="860">860</span>
+<span id="861">861</span>
+<span id="862">862</span>
+<span id="863">863</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -833,737 +874,788 @@
     <span class="ident">path</span>::<span class="ident">PathBuf</span>,
 };
 
+<span class="doccomment">/// Output class definitions for the given registry. All definitions are &quot;public static&quot; definitions</span>
+<span class="doccomment">/// within a single class `class_name`.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">output</span>(<span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>, <span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">Registry</span>, <span class="ident">class_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="ident">output_preambule</span>(<span class="ident">out</span>, <span class="prelude-val">None</span>)<span class="question-mark">?</span>;
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">emitter</span> <span class="op">=</span> <span class="ident">JavaEmitter</span> {
+        <span class="ident">out</span>: <span class="ident">IndentedWriter</span>::<span class="ident">new</span>(<span class="ident">out</span>, <span class="ident">IndentConfig</span>::<span class="ident">Space</span>(<span class="number">4</span>)),
+        <span class="ident">package_name</span>: <span class="prelude-val">None</span>,
+        <span class="ident">nested_class</span>: <span class="bool-val">true</span>,
+        <span class="ident">package_prefix</span>: <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}.&quot;</span>, <span class="ident">class_name</span>),
+    };
 
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;public final class {} {{\n&quot;</span>, <span class="ident">class_name</span>)<span class="question-mark">?</span>;
+    <span class="ident">emitter</span>.<span class="ident">output_preamble</span>()<span class="question-mark">?</span>;
+    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">emitter</span>.<span class="ident">out</span>, <span class="string">&quot;public final class {} {{\n&quot;</span>, <span class="ident">class_name</span>)<span class="question-mark">?</span>;
+    <span class="ident">emitter</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
     <span class="kw">for</span> (<span class="ident">name</span>, <span class="ident">format</span>) <span class="kw">in</span> <span class="ident">registry</span> {
-        <span class="ident">output_container</span>(
-            <span class="ident">out</span>,
-            <span class="ident">name</span>,
-            <span class="ident">format</span>,
-            <span class="comment">/* nested class */</span> <span class="bool-val">true</span>,
-            <span class="kw-2">&amp;</span><span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}.&quot;</span>, <span class="ident">class_name</span>),
-        )<span class="question-mark">?</span>;
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>)<span class="question-mark">?</span>;
+        <span class="ident">emitter</span>.<span class="ident">output_container</span>(<span class="ident">name</span>, <span class="ident">format</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">emitter</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
     }
-    <span class="ident">output_trait_helpers</span>(<span class="ident">out</span>, <span class="ident">registry</span>, <span class="comment">/* nested class */</span> <span class="bool-val">true</span>)<span class="question-mark">?</span>;
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)
+    <span class="ident">emitter</span>.<span class="ident">output_trait_helpers</span>(<span class="ident">registry</span>)<span class="question-mark">?</span>;
+    <span class="ident">emitter</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">emitter</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)
 }
 
-<span class="kw">fn</span> <span class="ident">output_preambule</span>(<span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>, <span class="ident">package_name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="op">=</span> <span class="ident">package_name</span> {
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;package {};&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
-    }
-    <span class="comment">// Java doesn&#39;t let us annotate fully-qualified class names.</span>
-    <span class="macro">writeln</span><span class="macro">!</span>(
-        <span class="ident">out</span>,
-        <span class="string">r#&quot;
-import java.math.BigInteger;
-&quot;#</span>
-    )<span class="question-mark">?</span>;
-    <span class="prelude-val">Ok</span>(())
-}
-
-<span class="doccomment">/// A non-empty `package_prefix` is required when the type is quoted from a nested struct.</span>
-<span class="kw">fn</span> <span class="ident">quote_type</span>(<span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>, <span class="ident">package_prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
-    <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
-    <span class="kw">match</span> <span class="ident">format</span> {
-        <span class="ident">TypeName</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}{}&quot;</span>, <span class="ident">package_prefix</span>, <span class="ident">x</span>),
-        <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;com.facebook.serde.Unit&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">Bool</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Boolean&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">I8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Byte&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">I16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Short&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">I32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Integer&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">I64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Long&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">I128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@com.facebook.serde.Int128 BigInteger&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">U8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@com.facebook.serde.Unsigned Byte&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">U16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@com.facebook.serde.Unsigned Short&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">U32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@com.facebook.serde.Unsigned Integer&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">U64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@com.facebook.serde.Unsigned Long&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">U128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@com.facebook.serde.Unsigned @com.facebook.serde.Int128 BigInteger&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">F32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Float&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">F64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Double&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">Char</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Character&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">Str</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;String&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">Bytes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;com.facebook.serde.Bytes&quot;</span>.<span class="ident">into</span>(),
-
-        <span class="prelude-ty">Option</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;java.util.Optional&lt;{}&gt;&quot;</span>, <span class="ident">quote_type</span>(<span class="ident">format</span>, <span class="ident">package_prefix</span>)),
-        <span class="ident">Seq</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;java.util.List&lt;{}&gt;&quot;</span>, <span class="ident">quote_type</span>(<span class="ident">format</span>, <span class="ident">package_prefix</span>)),
-        <span class="ident">Map</span> { <span class="ident">key</span>, <span class="ident">value</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
-            <span class="string">&quot;java.util.Map&lt;{}, {}&gt;&quot;</span>,
-            <span class="ident">quote_type</span>(<span class="ident">key</span>, <span class="ident">package_prefix</span>),
-            <span class="ident">quote_type</span>(<span class="ident">value</span>, <span class="ident">package_prefix</span>)
-        ),
-        <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
-            <span class="string">&quot;com.facebook.serde.Tuple{}&lt;{}&gt;&quot;</span>,
-            <span class="ident">formats</span>.<span class="ident">len</span>(),
-            <span class="ident">quote_types</span>(<span class="ident">formats</span>, <span class="ident">package_prefix</span>)
-        ),
-        <span class="ident">TupleArray</span> { <span class="ident">content</span>, <span class="ident">size</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
-            <span class="string">&quot;{} @com.facebook.serde.ArrayLen(length={}) []&quot;</span>,
-            <span class="ident">quote_type</span>(<span class="ident">content</span>, <span class="ident">package_prefix</span>),
-            <span class="ident">size</span>
-        ),
-        <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;unexpected value&quot;</span>),
-    }
-}
-
-<span class="kw">fn</span> <span class="ident">quote_types</span>(<span class="ident">formats</span>: <span class="kw-2">&amp;</span>[<span class="ident">Format</span>], <span class="ident">package_prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
-    <span class="ident">formats</span>
-        .<span class="ident">iter</span>()
-        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="ident">quote_type</span>(<span class="ident">f</span>, <span class="ident">package_prefix</span>))
-        .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
-        .<span class="ident">join</span>(<span class="string">&quot;, &quot;</span>)
-}
-
-<span class="kw">fn</span> <span class="ident">output_trait_helpers</span>(
-    <span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>,
-    <span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">Registry</span>,
-    <span class="ident">nested_class</span>: <span class="ident">bool</span>,
+<span class="kw">fn</span> <span class="ident">write_container_class</span>(
+    <span class="ident">install_dir</span>: <span class="kw-2">&amp;</span><span class="ident">std</span>::<span class="ident">path</span>::<span class="ident">Path</span>,
+    <span class="ident">package_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+    <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+    <span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">ContainerFormat</span>,
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">subtypes</span> <span class="op">=</span> <span class="ident">BTreeMap</span>::<span class="ident">new</span>();
-    <span class="kw">for</span> <span class="ident">format</span> <span class="kw">in</span> <span class="ident">registry</span>.<span class="ident">values</span>() {
-        <span class="ident">format</span>
-            .<span class="ident">visit</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="op">|</span><span class="ident">f</span><span class="op">|</span> {
-                <span class="kw">if</span> <span class="ident">needs_helper</span>(<span class="ident">f</span>) {
-                    <span class="ident">subtypes</span>.<span class="ident">insert</span>(<span class="ident">mangle_type</span>(<span class="ident">f</span>), <span class="ident">f</span>.<span class="ident">clone</span>());
-                }
-                <span class="prelude-val">Ok</span>(())
-            })
-            .<span class="ident">unwrap</span>();
-    }
-    <span class="kw">let</span> <span class="ident">prefix</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">nested_class</span> { <span class="string">&quot;static &quot;</span> } <span class="kw">else</span> { <span class="string">&quot;&quot;</span> };
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;{}final class TraitHelpers {{&quot;</span>, <span class="ident">prefix</span>)<span class="question-mark">?</span>;
-    <span class="kw">for</span> (<span class="ident">mangled_name</span>, <span class="ident">subtype</span>) <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">subtypes</span> {
-        <span class="ident">output_serialization_helper</span>(<span class="ident">out</span>, <span class="ident">mangled_name</span>, <span class="ident">subtype</span>)<span class="question-mark">?</span>;
-        <span class="ident">output_deserialization_helper</span>(<span class="ident">out</span>, <span class="ident">mangled_name</span>, <span class="ident">subtype</span>)<span class="question-mark">?</span>;
-    }
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">File</span>::<span class="ident">create</span>(<span class="ident">install_dir</span>.<span class="ident">join</span>(<span class="ident">name</span>.<span class="ident">to_string</span>() <span class="op">+</span> <span class="string">&quot;.java&quot;</span>))<span class="question-mark">?</span>;
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">emitter</span> <span class="op">=</span> <span class="ident">JavaEmitter</span> {
+        <span class="ident">out</span>: <span class="ident">IndentedWriter</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">file</span>, <span class="ident">IndentConfig</span>::<span class="ident">Space</span>(<span class="number">4</span>)),
+        <span class="ident">package_name</span>: <span class="prelude-val">Some</span>(<span class="ident">package_name</span>),
+        <span class="ident">nested_class</span>: <span class="bool-val">false</span>,
+        <span class="ident">package_prefix</span>: <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}.&quot;</span>, <span class="ident">package_name</span>),
+    };
+
+    <span class="ident">emitter</span>.<span class="ident">output_preamble</span>()<span class="question-mark">?</span>;
+    <span class="ident">emitter</span>.<span class="ident">output_container</span>(<span class="ident">name</span>, <span class="ident">format</span>)
 }
 
-<span class="kw">fn</span> <span class="ident">mangle_type</span>(<span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
-    <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
-    <span class="kw">match</span> <span class="ident">format</span> {
-        <span class="ident">TypeName</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">x</span>.<span class="ident">to_string</span>(),
-        <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;unit&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">Bool</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;bool&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">I8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;i8&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">I16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;i16&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">I32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;i32&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">I64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;i64&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">I128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;i128&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">U8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;u8&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">U16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;u16&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">U32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;u32&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">U64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;u64&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">U128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;u128&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">F32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;f32&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">F64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;f64&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">Char</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;char&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">Str</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;str&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">Bytes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;bytes&quot;</span>.<span class="ident">into</span>(),
+<span class="kw">fn</span> <span class="ident">write_helper_class</span>(
+    <span class="ident">install_dir</span>: <span class="kw-2">&amp;</span><span class="ident">std</span>::<span class="ident">path</span>::<span class="ident">Path</span>,
+    <span class="ident">package_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+    <span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">Registry</span>,
+) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">File</span>::<span class="ident">create</span>(<span class="ident">install_dir</span>.<span class="ident">join</span>(<span class="string">&quot;TraitHelpers.java&quot;</span>))<span class="question-mark">?</span>;
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">emitter</span> <span class="op">=</span> <span class="ident">JavaEmitter</span> {
+        <span class="ident">out</span>: <span class="ident">IndentedWriter</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">file</span>, <span class="ident">IndentConfig</span>::<span class="ident">Space</span>(<span class="number">4</span>)),
+        <span class="ident">package_name</span>: <span class="prelude-val">Some</span>(<span class="ident">package_name</span>),
+        <span class="ident">nested_class</span>: <span class="bool-val">false</span>,
+        <span class="ident">package_prefix</span>: <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}.&quot;</span>, <span class="ident">package_name</span>),
+    };
 
-        <span class="prelude-ty">Option</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;option_{}&quot;</span>, <span class="ident">mangle_type</span>(<span class="ident">format</span>)),
-        <span class="ident">Seq</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;vector_{}&quot;</span>, <span class="ident">mangle_type</span>(<span class="ident">format</span>)),
-        <span class="ident">Map</span> { <span class="ident">key</span>, <span class="ident">value</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;map_{}_to_{}&quot;</span>, <span class="ident">mangle_type</span>(<span class="ident">key</span>), <span class="ident">mangle_type</span>(<span class="ident">value</span>)),
-        <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
-            <span class="string">&quot;tuple{}_{}&quot;</span>,
-            <span class="ident">formats</span>.<span class="ident">len</span>(),
-            <span class="ident">formats</span>
-                .<span class="ident">iter</span>()
-                .<span class="ident">map</span>(<span class="ident">mangle_type</span>)
-                .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
-                .<span class="ident">join</span>(<span class="string">&quot;_&quot;</span>)
-        ),
-        <span class="ident">TupleArray</span> { <span class="ident">content</span>, <span class="ident">size</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;array{}_{}_array&quot;</span>, <span class="ident">size</span>, <span class="ident">mangle_type</span>(<span class="ident">content</span>)),
-        <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;unexpected value&quot;</span>),
-    }
+    <span class="ident">emitter</span>.<span class="ident">output_preamble</span>()<span class="question-mark">?</span>;
+    <span class="ident">emitter</span>.<span class="ident">output_trait_helpers</span>(<span class="ident">registry</span>)
 }
 
-<span class="kw">fn</span> <span class="ident">needs_helper</span>(<span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-    <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
-    <span class="kw">match</span> <span class="ident">format</span> {
-        <span class="prelude-ty">Option</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">Seq</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">Map</span> { .. } <span class="op">|</span> <span class="ident">Tuple</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">TupleArray</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-    }
+<span class="doccomment">/// Shared state for the Java code generator.</span>
+<span class="kw">struct</span> <span class="ident">JavaEmitter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Writer.</span>
+    <span class="ident">out</span>: <span class="ident">IndentedWriter</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Optional name of the package owning the generated definitions (e.g. &quot;com.facebook.my_package&quot;)</span>
+    <span class="ident">package_name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Whether the generated definitions belong to an outer class.</span>
+    <span class="ident">nested_class</span>: <span class="ident">bool</span>,
+    <span class="doccomment">/// Prefix used to create fully-qualified names to generated classes (e.g. &quot;com.facebook.my_package.&quot;)</span>
+    <span class="doccomment">/// When `nested_class == true`, this should end with a class name (e.g. &quot;com.facebook.my_package.MyClass.&quot;)</span>
+    <span class="ident">package_prefix</span>: <span class="ident">String</span>,
 }
 
-<span class="kw">fn</span> <span class="ident">quote_serialize_value</span>(<span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
-    <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
-    <span class="kw">match</span> <span class="ident">format</span> {
-        <span class="ident">TypeName</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}.serialize(serializer);&quot;</span>, <span class="ident">value</span>),
-        <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_unit({});&quot;</span>, <span class="ident">value</span>),
-        <span class="ident">Bool</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_bool({});&quot;</span>, <span class="ident">value</span>),
-        <span class="ident">I8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_i8({});&quot;</span>, <span class="ident">value</span>),
-        <span class="ident">I16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_i16({});&quot;</span>, <span class="ident">value</span>),
-        <span class="ident">I32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_i32({});&quot;</span>, <span class="ident">value</span>),
-        <span class="ident">I64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_i64({});&quot;</span>, <span class="ident">value</span>),
-        <span class="ident">I128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_i128({});&quot;</span>, <span class="ident">value</span>),
-        <span class="ident">U8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_u8({});&quot;</span>, <span class="ident">value</span>),
-        <span class="ident">U16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_u16({});&quot;</span>, <span class="ident">value</span>),
-        <span class="ident">U32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_u32({});&quot;</span>, <span class="ident">value</span>),
-        <span class="ident">U64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_u64({});&quot;</span>, <span class="ident">value</span>),
-        <span class="ident">U128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_u128({});&quot;</span>, <span class="ident">value</span>),
-        <span class="ident">F32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_f32({});&quot;</span>, <span class="ident">value</span>),
-        <span class="ident">F64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_f64({});&quot;</span>, <span class="ident">value</span>),
-        <span class="ident">Char</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_char({});&quot;</span>, <span class="ident">value</span>),
-        <span class="ident">Str</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_str({});&quot;</span>, <span class="ident">value</span>),
-        <span class="ident">Bytes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_bytes({});&quot;</span>, <span class="ident">value</span>),
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
-            <span class="string">&quot;TraitHelpers.serialize_{}({}, serializer);&quot;</span>,
-            <span class="ident">mangle_type</span>(<span class="ident">format</span>),
-            <span class="ident">value</span>
-        ),
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">JavaEmitter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">Write</span>,
+{
+    <span class="kw">fn</span> <span class="ident">output_preamble</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">package_name</span> {
+            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;package {};\n&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
+        }
+        <span class="comment">// Java doesn&#39;t let us annotate fully-qualified class names.</span>
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;import java.math.BigInteger;\n&quot;</span>)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(())
     }
-}
 
-<span class="kw">fn</span> <span class="ident">quote_deserialize</span>(<span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>, <span class="ident">package_prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
-    <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
-    <span class="kw">match</span> <span class="ident">format</span> {
-        <span class="ident">TypeName</span>(<span class="ident">name</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}{}.deserialize(deserializer)&quot;</span>, <span class="ident">package_prefix</span>, <span class="ident">name</span>),
-        <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_unit()&quot;</span>.<span class="ident">to_string</span>(),
-        <span class="ident">Bool</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_bool()&quot;</span>.<span class="ident">to_string</span>(),
-        <span class="ident">I8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_i8()&quot;</span>.<span class="ident">to_string</span>(),
-        <span class="ident">I16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_i16()&quot;</span>.<span class="ident">to_string</span>(),
-        <span class="ident">I32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_i32()&quot;</span>.<span class="ident">to_string</span>(),
-        <span class="ident">I64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_i64()&quot;</span>.<span class="ident">to_string</span>(),
-        <span class="ident">I128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_i128()&quot;</span>.<span class="ident">to_string</span>(),
-        <span class="ident">U8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_u8()&quot;</span>.<span class="ident">to_string</span>(),
-        <span class="ident">U16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_u16()&quot;</span>.<span class="ident">to_string</span>(),
-        <span class="ident">U32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_u32()&quot;</span>.<span class="ident">to_string</span>(),
-        <span class="ident">U64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_u64()&quot;</span>.<span class="ident">to_string</span>(),
-        <span class="ident">U128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_u128()&quot;</span>.<span class="ident">to_string</span>(),
-        <span class="ident">F32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_f32()&quot;</span>.<span class="ident">to_string</span>(),
-        <span class="ident">F64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_f64()&quot;</span>.<span class="ident">to_string</span>(),
-        <span class="ident">Char</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_char()&quot;</span>.<span class="ident">to_string</span>(),
-        <span class="ident">Str</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_str()&quot;</span>.<span class="ident">to_string</span>(),
-        <span class="ident">Bytes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_bytes()&quot;</span>.<span class="ident">to_string</span>(),
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
-            <span class="string">&quot;TraitHelpers.deserialize_{}(deserializer)&quot;</span>,
-            <span class="ident">mangle_type</span>(<span class="ident">format</span>),
-        ),
+    <span class="doccomment">/// A non-empty `package_prefix` is required when the type is quoted from a nested struct.</span>
+    <span class="kw">fn</span> <span class="ident">quote_type</span>(<span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>, <span class="ident">package_prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+        <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
+        <span class="kw">match</span> <span class="ident">format</span> {
+            <span class="ident">TypeName</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}{}&quot;</span>, <span class="ident">package_prefix</span>, <span class="ident">x</span>),
+            <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;com.facebook.serde.Unit&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">Bool</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Boolean&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">I8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Byte&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">I16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Short&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">I32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Integer&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">I64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Long&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">I128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@com.facebook.serde.Int128 BigInteger&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">U8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@com.facebook.serde.Unsigned Byte&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">U16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@com.facebook.serde.Unsigned Short&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">U32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@com.facebook.serde.Unsigned Integer&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">U64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@com.facebook.serde.Unsigned Long&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">U128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@com.facebook.serde.Unsigned @com.facebook.serde.Int128 BigInteger&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">F32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Float&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">F64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Double&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">Char</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Character&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">Str</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;String&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">Bytes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;com.facebook.serde.Bytes&quot;</span>.<span class="ident">into</span>(),
+
+            <span class="prelude-ty">Option</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
+                <span class="string">&quot;java.util.Optional&lt;{}&gt;&quot;</span>,
+                <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">format</span>, <span class="ident">package_prefix</span>)
+            ),
+            <span class="ident">Seq</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
+                <span class="string">&quot;java.util.List&lt;{}&gt;&quot;</span>,
+                <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">format</span>, <span class="ident">package_prefix</span>)
+            ),
+            <span class="ident">Map</span> { <span class="ident">key</span>, <span class="ident">value</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
+                <span class="string">&quot;java.util.Map&lt;{}, {}&gt;&quot;</span>,
+                <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">key</span>, <span class="ident">package_prefix</span>),
+                <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">value</span>, <span class="ident">package_prefix</span>)
+            ),
+            <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
+                <span class="string">&quot;com.facebook.serde.Tuple{}&lt;{}&gt;&quot;</span>,
+                <span class="ident">formats</span>.<span class="ident">len</span>(),
+                <span class="self">Self</span>::<span class="ident">quote_types</span>(<span class="ident">formats</span>, <span class="ident">package_prefix</span>)
+            ),
+            <span class="ident">TupleArray</span> { <span class="ident">content</span>, <span class="ident">size</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
+                <span class="string">&quot;{} @com.facebook.serde.ArrayLen(length={}) []&quot;</span>,
+                <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">content</span>, <span class="ident">package_prefix</span>),
+                <span class="ident">size</span>
+            ),
+            <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;unexpected value&quot;</span>),
+        }
     }
-}
 
-<span class="kw">fn</span> <span class="ident">output_serialization_helper</span>(<span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">format0</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
-
-    <span class="macro">write</span><span class="macro">!</span>(
-        <span class="ident">out</span>,
-        <span class="string">&quot;    static void serialize_{}({} value, com.facebook.serde.Serializer serializer) throws java.lang.Exception {{&quot;</span>,
-        <span class="ident">name</span>,
-        <span class="ident">quote_type</span>(<span class="ident">format0</span>, <span class="string">&quot;&quot;</span>)
-    )<span class="question-mark">?</span>;
-    <span class="kw">match</span> <span class="ident">format0</span> {
-        <span class="prelude-ty">Option</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="macro">write</span><span class="macro">!</span>(
-                <span class="ident">out</span>,
-                <span class="string">r#&quot;
-        if (value.isPresent()) {{
-            serializer.serialize_option_tag(true);
-            {}
-        }} else {{
-            serializer.serialize_option_tag(false);
-        }}
-&quot;#</span>,
-                <span class="ident">quote_serialize_value</span>(<span class="string">&quot;value.get()&quot;</span>, <span class="ident">format</span>)
-            )<span class="question-mark">?</span>;
-        }
-
-        <span class="ident">Seq</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="macro">write</span><span class="macro">!</span>(
-                <span class="ident">out</span>,
-                <span class="string">r#&quot;
-        serializer.serialize_len(value.size());
-        for ({} item : value) {{
-            {}
-        }}
-&quot;#</span>,
-                <span class="ident">quote_type</span>(<span class="ident">format</span>, <span class="string">&quot;&quot;</span>),
-                <span class="ident">quote_serialize_value</span>(<span class="string">&quot;item&quot;</span>, <span class="ident">format</span>)
-            )<span class="question-mark">?</span>;
-        }
-
-        <span class="ident">Map</span> { <span class="ident">key</span>, <span class="ident">value</span> } <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="macro">write</span><span class="macro">!</span>(
-                <span class="ident">out</span>,
-                <span class="string">r#&quot;
-        serializer.serialize_len(value.size());
-        int[] offsets = new int[value.size()];
-        int count = 0;
-        for (java.util.Map.Entry&lt;{}, {}&gt; entry : value.entrySet()) {{
-            offsets[count++] = serializer.get_buffer_offset();
-            {}
-            {}
-        }}
-        serializer.sort_map_entries(offsets);
-&quot;#</span>,
-                <span class="ident">quote_type</span>(<span class="ident">key</span>, <span class="string">&quot;&quot;</span>),
-                <span class="ident">quote_type</span>(<span class="ident">value</span>, <span class="string">&quot;&quot;</span>),
-                <span class="ident">quote_serialize_value</span>(<span class="string">&quot;entry.getKey()&quot;</span>, <span class="ident">key</span>),
-                <span class="ident">quote_serialize_value</span>(<span class="string">&quot;entry.getValue()&quot;</span>, <span class="ident">value</span>)
-            )<span class="question-mark">?</span>;
-        }
-
-        <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>)<span class="question-mark">?</span>;
-            <span class="kw">for</span> (<span class="ident">index</span>, <span class="ident">format</span>) <span class="kw">in</span> <span class="ident">formats</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
-                <span class="kw">let</span> <span class="ident">expr</span> <span class="op">=</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;value.field{}&quot;</span>, <span class="ident">index</span>);
-                <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;        {}&quot;</span>, <span class="ident">quote_serialize_value</span>(<span class="kw-2">&amp;</span><span class="ident">expr</span>, <span class="ident">format</span>))<span class="question-mark">?</span>;
-            }
-        }
-
-        <span class="ident">TupleArray</span> { <span class="ident">content</span>, <span class="ident">size</span> } <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="macro">write</span><span class="macro">!</span>(
-                <span class="ident">out</span>,
-                <span class="string">r#&quot;
-        assert value.length == {};
-        for ({} item : value) {{
-            {}
-        }}
-&quot;#</span>,
-                <span class="ident">size</span>,
-                <span class="ident">quote_type</span>(<span class="ident">content</span>, <span class="string">&quot;&quot;</span>),
-                <span class="ident">quote_serialize_value</span>(<span class="string">&quot;item&quot;</span>, <span class="ident">content</span>),
-            )<span class="question-mark">?</span>;
-        }
-
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;unexpected case&quot;</span>),
+    <span class="kw">fn</span> <span class="ident">quote_types</span>(<span class="ident">formats</span>: <span class="kw-2">&amp;</span>[<span class="ident">Format</span>], <span class="ident">package_prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+        <span class="ident">formats</span>
+            .<span class="ident">iter</span>()
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">f</span>, <span class="ident">package_prefix</span>))
+            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
+            .<span class="ident">join</span>(<span class="string">&quot;, &quot;</span>)
     }
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;    }}\n&quot;</span>)
-}
 
-<span class="kw">fn</span> <span class="ident">output_deserialization_helper</span>(<span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">format0</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
-
-    <span class="macro">write</span><span class="macro">!</span>(
-        <span class="ident">out</span>,
-        <span class="string">&quot;    static {} deserialize_{}(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{&quot;</span>,
-        <span class="ident">quote_type</span>(<span class="ident">format0</span>, <span class="string">&quot;&quot;</span>),
-        <span class="ident">name</span>,
-    )<span class="question-mark">?</span>;
-    <span class="kw">match</span> <span class="ident">format0</span> {
-        <span class="prelude-ty">Option</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="macro">write</span><span class="macro">!</span>(
-                <span class="ident">out</span>,
-                <span class="string">r#&quot;
-        boolean tag = deserializer.deserialize_option_tag();
-        if (!tag) {{
-            return java.util.Optional.empty();
-        }} else {{
-            return java.util.Optional.of({});
-        }}
-&quot;#</span>,
-                <span class="ident">quote_deserialize</span>(<span class="ident">format</span>, <span class="string">&quot;&quot;</span>)
-            )<span class="question-mark">?</span>;
+    <span class="kw">fn</span> <span class="ident">output_trait_helpers</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">Registry</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">subtypes</span> <span class="op">=</span> <span class="ident">BTreeMap</span>::<span class="ident">new</span>();
+        <span class="kw">for</span> <span class="ident">format</span> <span class="kw">in</span> <span class="ident">registry</span>.<span class="ident">values</span>() {
+            <span class="ident">format</span>
+                .<span class="ident">visit</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="op">|</span><span class="ident">f</span><span class="op">|</span> {
+                    <span class="kw">if</span> <span class="self">Self</span>::<span class="ident">needs_helper</span>(<span class="ident">f</span>) {
+                        <span class="ident">subtypes</span>.<span class="ident">insert</span>(<span class="self">Self</span>::<span class="ident">mangle_type</span>(<span class="ident">f</span>), <span class="ident">f</span>.<span class="ident">clone</span>());
+                    }
+                    <span class="prelude-val">Ok</span>(())
+                })
+                .<span class="ident">unwrap</span>();
         }
-
-        <span class="ident">Seq</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="macro">write</span><span class="macro">!</span>(
-                <span class="ident">out</span>,
-                <span class="string">r#&quot;
-        long length = deserializer.deserialize_len();
-        java.util.List&lt;{0}&gt; obj = new java.util.ArrayList&lt;{0}&gt;((int) length);
-        for (long i = 0; i &lt; length; i++) {{
-            obj.add({1});
-        }}
-        return obj;
-&quot;#</span>,
-                <span class="ident">quote_type</span>(<span class="ident">format</span>, <span class="string">&quot;&quot;</span>),
-                <span class="ident">quote_deserialize</span>(<span class="ident">format</span>, <span class="string">&quot;&quot;</span>)
-            )<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">prefix</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">nested_class</span> { <span class="string">&quot;static &quot;</span> } <span class="kw">else</span> { <span class="string">&quot;&quot;</span> };
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;{}final class TraitHelpers {{&quot;</span>, <span class="ident">prefix</span>)<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
+        <span class="kw">for</span> (<span class="ident">mangled_name</span>, <span class="ident">subtype</span>) <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">subtypes</span> {
+            <span class="self">self</span>.<span class="ident">output_serialization_helper</span>(<span class="ident">mangled_name</span>, <span class="ident">subtype</span>)<span class="question-mark">?</span>;
+            <span class="self">self</span>.<span class="ident">output_deserialization_helper</span>(<span class="ident">mangled_name</span>, <span class="ident">subtype</span>)<span class="question-mark">?</span>;
         }
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)
+    }
 
-        <span class="ident">Map</span> { <span class="ident">key</span>, <span class="ident">value</span> } <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="macro">write</span><span class="macro">!</span>(
-                <span class="ident">out</span>,
-                <span class="string">r#&quot;
-        long length = deserializer.deserialize_len();
-        java.util.Map&lt;{0}, {1}&gt; obj = new java.util.HashMap&lt;{0}, {1}&gt;();
-        int previous_key_start = 0;
-        int previous_key_end = 0;
-        for (long i = 0; i &lt; length; i++) {{
-            int key_start = deserializer.get_buffer_offset();
-            {0} key = {2};
-            int key_end = deserializer.get_buffer_offset();
-            if (i &gt; 0) {{
-                deserializer.check_that_key_slices_are_increasing(
-                    new com.facebook.serde.Slice(previous_key_start, previous_key_end),
-                    new com.facebook.serde.Slice(key_start, key_end));
-            }}
-            previous_key_start = key_start;
-            previous_key_end = key_end;
-            {1} value = {3};
-            obj.put(key, value);
-        }}
-        return obj;
-&quot;#</span>,
-                <span class="ident">quote_type</span>(<span class="ident">key</span>, <span class="string">&quot;&quot;</span>),
-                <span class="ident">quote_type</span>(<span class="ident">value</span>, <span class="string">&quot;&quot;</span>),
-                <span class="ident">quote_deserialize</span>(<span class="ident">key</span>, <span class="string">&quot;&quot;</span>),
-                <span class="ident">quote_deserialize</span>(<span class="ident">value</span>, <span class="string">&quot;&quot;</span>),
-            )<span class="question-mark">?</span>;
-        }
+    <span class="kw">fn</span> <span class="ident">mangle_type</span>(<span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+        <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
+        <span class="kw">match</span> <span class="ident">format</span> {
+            <span class="ident">TypeName</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">x</span>.<span class="ident">to_string</span>(),
+            <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;unit&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">Bool</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;bool&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">I8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;i8&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">I16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;i16&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">I32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;i32&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">I64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;i64&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">I128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;i128&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">U8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;u8&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">U16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;u16&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">U32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;u32&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">U64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;u64&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">U128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;u128&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">F32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;f32&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">F64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;f64&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">Char</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;char&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">Str</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;str&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">Bytes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;bytes&quot;</span>.<span class="ident">into</span>(),
 
-        <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="macro">writeln</span><span class="macro">!</span>(
-                <span class="ident">out</span>,
-                <span class="string">r#&quot;
-        return new {}({}
-        );
-&quot;#</span>,
-                <span class="ident">quote_type</span>(<span class="ident">format0</span>, <span class="string">&quot;&quot;</span>),
+            <span class="prelude-ty">Option</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;option_{}&quot;</span>, <span class="self">Self</span>::<span class="ident">mangle_type</span>(<span class="ident">format</span>)),
+            <span class="ident">Seq</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;vector_{}&quot;</span>, <span class="self">Self</span>::<span class="ident">mangle_type</span>(<span class="ident">format</span>)),
+            <span class="ident">Map</span> { <span class="ident">key</span>, <span class="ident">value</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
+                <span class="string">&quot;map_{}_to_{}&quot;</span>,
+                <span class="self">Self</span>::<span class="ident">mangle_type</span>(<span class="ident">key</span>),
+                <span class="self">Self</span>::<span class="ident">mangle_type</span>(<span class="ident">value</span>)
+            ),
+            <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
+                <span class="string">&quot;tuple{}_{}&quot;</span>,
+                <span class="ident">formats</span>.<span class="ident">len</span>(),
                 <span class="ident">formats</span>
                     .<span class="ident">iter</span>()
-                    .<span class="ident">map</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;\n            {}&quot;</span>, <span class="ident">quote_deserialize</span>(<span class="ident">f</span>, <span class="string">&quot;&quot;</span>)))
+                    .<span class="ident">map</span>(<span class="self">Self</span>::<span class="ident">mangle_type</span>)
                     .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
-                    .<span class="ident">join</span>(<span class="string">&quot;,&quot;</span>)
-            )<span class="question-mark">?</span>;
+                    .<span class="ident">join</span>(<span class="string">&quot;_&quot;</span>)
+            ),
+            <span class="ident">TupleArray</span> { <span class="ident">content</span>, <span class="ident">size</span> } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;array{}_{}_array&quot;</span>, <span class="ident">size</span>, <span class="self">Self</span>::<span class="ident">mangle_type</span>(<span class="ident">content</span>))
+            }
+            <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;unexpected value&quot;</span>),
         }
+    }
 
-        <span class="ident">TupleArray</span> { <span class="ident">content</span>, <span class="ident">size</span> } <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="macro">write</span><span class="macro">!</span>(
-                <span class="ident">out</span>,
-                <span class="string">r#&quot;
-        {0}[] obj = new {0}[{1}];
-        for (int i = 0; i &lt; {1}; i++) {{
-            obj[i] = {2};
-        }}
-        return obj;
+    <span class="kw">fn</span> <span class="ident">needs_helper</span>(<span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
+        <span class="kw">match</span> <span class="ident">format</span> {
+            <span class="prelude-ty">Option</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">Seq</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">Map</span> { .. } <span class="op">|</span> <span class="ident">Tuple</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">TupleArray</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+        }
+    }
+
+    <span class="kw">fn</span> <span class="ident">quote_serialize_value</span>(<span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>, <span class="ident">package_prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+        <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
+        <span class="kw">match</span> <span class="ident">format</span> {
+            <span class="ident">TypeName</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}.serialize(serializer);&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_unit({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">Bool</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_bool({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">I8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_i8({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">I16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_i16({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">I32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_i32({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">I64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_i64({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">I128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_i128({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">U8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_u8({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">U16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_u16({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">U32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_u32({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">U64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_u64({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">U128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_u128({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">F32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_f32({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">F64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_f64({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">Char</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_char({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">Str</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_str({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">Bytes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_bytes({});&quot;</span>, <span class="ident">value</span>),
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
+                <span class="string">&quot;{}TraitHelpers.serialize_{}({}, serializer);&quot;</span>,
+                <span class="ident">package_prefix</span>,
+                <span class="self">Self</span>::<span class="ident">mangle_type</span>(<span class="ident">format</span>),
+                <span class="ident">value</span>
+            ),
+        }
+    }
+
+    <span class="kw">fn</span> <span class="ident">quote_deserialize</span>(<span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>, <span class="ident">package_prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+        <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
+        <span class="kw">match</span> <span class="ident">format</span> {
+            <span class="ident">TypeName</span>(<span class="ident">name</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}{}.deserialize(deserializer)&quot;</span>, <span class="ident">package_prefix</span>, <span class="ident">name</span>),
+            <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_unit()&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="ident">Bool</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_bool()&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="ident">I8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_i8()&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="ident">I16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_i16()&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="ident">I32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_i32()&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="ident">I64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_i64()&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="ident">I128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_i128()&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="ident">U8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_u8()&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="ident">U16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_u16()&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="ident">U32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_u32()&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="ident">U64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_u64()&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="ident">U128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_u128()&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="ident">F32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_f32()&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="ident">F64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_f64()&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="ident">Char</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_char()&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="ident">Str</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_str()&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="ident">Bytes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_bytes()&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
+                <span class="string">&quot;{}TraitHelpers.deserialize_{}(deserializer)&quot;</span>,
+                <span class="ident">package_prefix</span>,
+                <span class="self">Self</span>::<span class="ident">mangle_type</span>(<span class="ident">format</span>),
+            ),
+        }
+    }
+
+    <span class="kw">fn</span> <span class="ident">output_serialization_helper</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">format0</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
+
+        <span class="macro">write</span><span class="macro">!</span>(
+            <span class="self">self</span>.<span class="ident">out</span>,
+            <span class="string">&quot;static void serialize_{}({} value, com.facebook.serde.Serializer serializer) throws java.lang.Exception {{&quot;</span>,
+            <span class="ident">name</span>,
+            <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">format0</span>, <span class="string">&quot;&quot;</span>)
+        )<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
+        <span class="kw">match</span> <span class="ident">format0</span> {
+            <span class="prelude-ty">Option</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="macro">write</span><span class="macro">!</span>(
+                    <span class="self">self</span>.<span class="ident">out</span>,
+                    <span class="string">r#&quot;
+if (value.isPresent()) {{
+    serializer.serialize_option_tag(true);
+    {}
+}} else {{
+    serializer.serialize_option_tag(false);
+}}
 &quot;#</span>,
-                <span class="ident">quote_type</span>(<span class="ident">content</span>, <span class="string">&quot;&quot;</span>),
-                <span class="ident">size</span>,
-                <span class="ident">quote_deserialize</span>(<span class="ident">content</span>, <span class="string">&quot;&quot;</span>)
+                    <span class="self">Self</span>::<span class="ident">quote_serialize_value</span>(<span class="string">&quot;value.get()&quot;</span>, <span class="ident">format</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">package_prefix</span>)
+                )<span class="question-mark">?</span>;
+            }
+
+            <span class="ident">Seq</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="macro">write</span><span class="macro">!</span>(
+                    <span class="self">self</span>.<span class="ident">out</span>,
+                    <span class="string">r#&quot;
+serializer.serialize_len(value.size());
+for ({} item : value) {{
+    {}
+}}
+&quot;#</span>,
+                    <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">format</span>, <span class="string">&quot;&quot;</span>),
+                    <span class="self">Self</span>::<span class="ident">quote_serialize_value</span>(<span class="string">&quot;item&quot;</span>, <span class="ident">format</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">package_prefix</span>)
+                )<span class="question-mark">?</span>;
+            }
+
+            <span class="ident">Map</span> { <span class="ident">key</span>, <span class="ident">value</span> } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="macro">write</span><span class="macro">!</span>(
+                    <span class="self">self</span>.<span class="ident">out</span>,
+                    <span class="string">r#&quot;
+serializer.serialize_len(value.size());
+int[] offsets = new int[value.size()];
+int count = 0;
+for (java.util.Map.Entry&lt;{}, {}&gt; entry : value.entrySet()) {{
+    offsets[count++] = serializer.get_buffer_offset();
+    {}
+    {}
+}}
+serializer.sort_map_entries(offsets);
+&quot;#</span>,
+                    <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">key</span>, <span class="string">&quot;&quot;</span>),
+                    <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">value</span>, <span class="string">&quot;&quot;</span>),
+                    <span class="self">Self</span>::<span class="ident">quote_serialize_value</span>(<span class="string">&quot;entry.getKey()&quot;</span>, <span class="ident">key</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">package_prefix</span>),
+                    <span class="self">Self</span>::<span class="ident">quote_serialize_value</span>(<span class="string">&quot;entry.getValue()&quot;</span>, <span class="ident">value</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">package_prefix</span>)
+                )<span class="question-mark">?</span>;
+            }
+
+            <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
+                <span class="kw">for</span> (<span class="ident">index</span>, <span class="ident">format</span>) <span class="kw">in</span> <span class="ident">formats</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
+                    <span class="kw">let</span> <span class="ident">expr</span> <span class="op">=</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;value.field{}&quot;</span>, <span class="ident">index</span>);
+                    <span class="macro">writeln</span><span class="macro">!</span>(
+                        <span class="self">self</span>.<span class="ident">out</span>,
+                        <span class="string">&quot;{}&quot;</span>,
+                        <span class="self">Self</span>::<span class="ident">quote_serialize_value</span>(<span class="kw-2">&amp;</span><span class="ident">expr</span>, <span class="ident">format</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">package_prefix</span>)
+                    )<span class="question-mark">?</span>;
+                }
+            }
+
+            <span class="ident">TupleArray</span> { <span class="ident">content</span>, <span class="ident">size</span> } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="macro">write</span><span class="macro">!</span>(
+                    <span class="self">self</span>.<span class="ident">out</span>,
+                    <span class="string">r#&quot;
+assert value.length == {};
+for ({} item : value) {{
+    {}
+}}
+&quot;#</span>,
+                    <span class="ident">size</span>,
+                    <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">content</span>, <span class="string">&quot;&quot;</span>),
+                    <span class="self">Self</span>::<span class="ident">quote_serialize_value</span>(<span class="string">&quot;item&quot;</span>, <span class="ident">content</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">package_prefix</span>),
+                )<span class="question-mark">?</span>;
+            }
+
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;unexpected case&quot;</span>),
+        }
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">output_deserialization_helper</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">format0</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
+
+        <span class="macro">write</span><span class="macro">!</span>(
+        <span class="self">self</span>.<span class="ident">out</span>,
+        <span class="string">&quot;static {} deserialize_{}(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{&quot;</span>,
+        <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">format0</span>, <span class="string">&quot;&quot;</span>),
+        <span class="ident">name</span>,
+    )<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
+        <span class="kw">match</span> <span class="ident">format0</span> {
+            <span class="prelude-ty">Option</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="macro">write</span><span class="macro">!</span>(
+                    <span class="self">self</span>.<span class="ident">out</span>,
+                    <span class="string">r#&quot;
+boolean tag = deserializer.deserialize_option_tag();
+if (!tag) {{
+    return java.util.Optional.empty();
+}} else {{
+    return java.util.Optional.of({});
+}}
+&quot;#</span>,
+                    <span class="self">Self</span>::<span class="ident">quote_deserialize</span>(<span class="ident">format</span>, <span class="string">&quot;&quot;</span>)
+                )<span class="question-mark">?</span>;
+            }
+
+            <span class="ident">Seq</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="macro">write</span><span class="macro">!</span>(
+                    <span class="self">self</span>.<span class="ident">out</span>,
+                    <span class="string">r#&quot;
+long length = deserializer.deserialize_len();
+java.util.List&lt;{0}&gt; obj = new java.util.ArrayList&lt;{0}&gt;((int) length);
+for (long i = 0; i &lt; length; i++) {{
+    obj.add({1});
+}}
+return obj;
+&quot;#</span>,
+                    <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">format</span>, <span class="string">&quot;&quot;</span>),
+                    <span class="self">Self</span>::<span class="ident">quote_deserialize</span>(<span class="ident">format</span>, <span class="string">&quot;&quot;</span>)
+                )<span class="question-mark">?</span>;
+            }
+
+            <span class="ident">Map</span> { <span class="ident">key</span>, <span class="ident">value</span> } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="macro">write</span><span class="macro">!</span>(
+                    <span class="self">self</span>.<span class="ident">out</span>,
+                    <span class="string">r#&quot;
+long length = deserializer.deserialize_len();
+java.util.Map&lt;{0}, {1}&gt; obj = new java.util.HashMap&lt;{0}, {1}&gt;();
+int previous_key_start = 0;
+int previous_key_end = 0;
+for (long i = 0; i &lt; length; i++) {{
+    int key_start = deserializer.get_buffer_offset();
+    {0} key = {2};
+    int key_end = deserializer.get_buffer_offset();
+    if (i &gt; 0) {{
+        deserializer.check_that_key_slices_are_increasing(
+            new com.facebook.serde.Slice(previous_key_start, previous_key_end),
+            new com.facebook.serde.Slice(key_start, key_end));
+    }}
+    previous_key_start = key_start;
+    previous_key_end = key_end;
+    {1} value = {3};
+    obj.put(key, value);
+}}
+return obj;
+&quot;#</span>,
+                    <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">key</span>, <span class="string">&quot;&quot;</span>),
+                    <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">value</span>, <span class="string">&quot;&quot;</span>),
+                    <span class="self">Self</span>::<span class="ident">quote_deserialize</span>(<span class="ident">key</span>, <span class="string">&quot;&quot;</span>),
+                    <span class="self">Self</span>::<span class="ident">quote_deserialize</span>(<span class="ident">value</span>, <span class="string">&quot;&quot;</span>),
+                )<span class="question-mark">?</span>;
+            }
+
+            <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="macro">write</span><span class="macro">!</span>(
+                    <span class="self">self</span>.<span class="ident">out</span>,
+                    <span class="string">r#&quot;
+return new {}({}
+);
+&quot;#</span>,
+                    <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">format0</span>, <span class="string">&quot;&quot;</span>),
+                    <span class="ident">formats</span>
+                        .<span class="ident">iter</span>()
+                        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;\n    {}&quot;</span>, <span class="self">Self</span>::<span class="ident">quote_deserialize</span>(<span class="ident">f</span>, <span class="string">&quot;&quot;</span>)))
+                        .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
+                        .<span class="ident">join</span>(<span class="string">&quot;,&quot;</span>)
+                )<span class="question-mark">?</span>;
+            }
+
+            <span class="ident">TupleArray</span> { <span class="ident">content</span>, <span class="ident">size</span> } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="macro">write</span><span class="macro">!</span>(
+                    <span class="self">self</span>.<span class="ident">out</span>,
+                    <span class="string">r#&quot;
+{0}[] obj = new {0}[{1}];
+for (int i = 0; i &lt; {1}; i++) {{
+    obj[i] = {2};
+}}
+return obj;
+&quot;#</span>,
+                    <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">content</span>, <span class="string">&quot;&quot;</span>),
+                    <span class="ident">size</span>,
+                    <span class="self">Self</span>::<span class="ident">quote_deserialize</span>(<span class="ident">content</span>, <span class="string">&quot;&quot;</span>)
+                )<span class="question-mark">?</span>;
+            }
+
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;unexpected case&quot;</span>),
+        }
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">output_variant</span>(
+        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="ident">base</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+        <span class="ident">index</span>: <span class="ident">u32</span>,
+        <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+        <span class="ident">variant</span>: <span class="kw-2">&amp;</span><span class="ident">VariantFormat</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">use</span> <span class="ident">VariantFormat</span>::<span class="kw-2">*</span>;
+        <span class="kw">let</span> <span class="ident">fields</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">variant</span> {
+            <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Vec</span>::<span class="ident">new</span>(),
+            <span class="ident">NewType</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Named</span> {
+                <span class="ident">name</span>: <span class="string">&quot;value&quot;</span>.<span class="ident">to_string</span>(),
+                <span class="ident">value</span>: <span class="ident">format</span>.<span class="ident">as_ref</span>().<span class="ident">clone</span>(),
+            }],
+            <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">formats</span>
+                .<span class="ident">iter</span>()
+                .<span class="ident">enumerate</span>()
+                .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">f</span>)<span class="op">|</span> <span class="ident">Named</span> {
+                    <span class="ident">name</span>: <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;field{}&quot;</span>, <span class="ident">i</span>),
+                    <span class="ident">value</span>: <span class="ident">f</span>.<span class="ident">clone</span>(),
+                })
+                .<span class="ident">collect</span>(),
+            <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">fields</span>.<span class="ident">clone</span>(),
+            <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;incorrect value&quot;</span>),
+        };
+        <span class="self">self</span>.<span class="ident">output_struct_or_variant_container</span>(<span class="prelude-val">Some</span>(<span class="ident">base</span>), <span class="prelude-val">Some</span>(<span class="ident">index</span>), <span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">fields</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">output_variants</span>(
+        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="ident">base</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+        <span class="ident">variants</span>: <span class="kw-2">&amp;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Named</span><span class="op">&lt;</span><span class="ident">VariantFormat</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">for</span> (<span class="ident">index</span>, <span class="ident">variant</span>) <span class="kw">in</span> <span class="ident">variants</span> {
+            <span class="self">self</span>.<span class="ident">output_variant</span>(<span class="ident">base</span>, <span class="kw-2">*</span><span class="ident">index</span>, <span class="kw-2">&amp;</span><span class="ident">variant</span>.<span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">variant</span>.<span class="ident">value</span>)<span class="question-mark">?</span>;
+        }
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">fn</span> <span class="ident">output_struct_or_variant_container</span>(
+        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="ident">variant_base</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>,
+        <span class="ident">variant_index</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+        <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+        <span class="ident">fields</span>: <span class="kw-2">&amp;</span>[<span class="ident">Named</span><span class="op">&lt;</span><span class="ident">Format</span><span class="op">&gt;</span>],
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="comment">// Beginning of class</span>
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">base</span>) <span class="op">=</span> <span class="ident">variant_base</span> {
+            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln</span><span class="macro">!</span>(
+                <span class="self">self</span>.<span class="ident">out</span>,
+                <span class="string">&quot;public static final class {} extends {} {{&quot;</span>,
+                <span class="ident">name</span>, <span class="ident">base</span>
+            )<span class="question-mark">?</span>;
+        } <span class="kw">else</span> {
+            <span class="kw">let</span> <span class="ident">prefix</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">nested_class</span> {
+                <span class="string">&quot;public static &quot;</span>
+            } <span class="kw">else</span> {
+                <span class="string">&quot;public &quot;</span>
+            };
+            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;{}final class {} {{&quot;</span>, <span class="ident">prefix</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
+        }
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
+        <span class="comment">// Fields</span>
+        <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
+            <span class="macro">writeln</span><span class="macro">!</span>(
+                <span class="self">self</span>.<span class="ident">out</span>,
+                <span class="string">&quot;public final {} {};&quot;</span>,
+                <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">package_prefix</span>),
+                <span class="ident">field</span>.<span class="ident">name</span>
             )<span class="question-mark">?</span>;
         }
-
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;unexpected case&quot;</span>),
-    }
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;    }}\n&quot;</span>)
-}
-
-<span class="kw">fn</span> <span class="ident">output_variant</span>(
-    <span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>,
-    <span class="ident">base</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-    <span class="ident">index</span>: <span class="ident">u32</span>,
-    <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-    <span class="ident">variant</span>: <span class="kw-2">&amp;</span><span class="ident">VariantFormat</span>,
-    <span class="ident">package_prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="kw">use</span> <span class="ident">VariantFormat</span>::<span class="kw-2">*</span>;
-    <span class="kw">let</span> <span class="ident">fields</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">variant</span> {
-        <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Vec</span>::<span class="ident">new</span>(),
-        <span class="ident">NewType</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Named</span> {
-            <span class="ident">name</span>: <span class="string">&quot;value&quot;</span>.<span class="ident">to_string</span>(),
-            <span class="ident">value</span>: <span class="ident">format</span>.<span class="ident">as_ref</span>().<span class="ident">clone</span>(),
-        }],
-        <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">formats</span>
-            .<span class="ident">iter</span>()
-            .<span class="ident">enumerate</span>()
-            .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">f</span>)<span class="op">|</span> <span class="ident">Named</span> {
-                <span class="ident">name</span>: <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;field{}&quot;</span>, <span class="ident">i</span>),
-                <span class="ident">value</span>: <span class="ident">f</span>.<span class="ident">clone</span>(),
-            })
-            .<span class="ident">collect</span>(),
-        <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">fields</span>.<span class="ident">clone</span>(),
-        <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;incorrect value&quot;</span>),
-    };
-    <span class="ident">output_struct_or_variant_container</span>(
-        <span class="ident">out</span>,
-        <span class="number">4</span>,
-        <span class="prelude-val">Some</span>(<span class="ident">base</span>),
-        <span class="prelude-val">Some</span>(<span class="ident">index</span>),
-        <span class="ident">name</span>,
-        <span class="kw-2">&amp;</span><span class="ident">fields</span>,
-        <span class="bool-val">false</span>,
-        <span class="ident">package_prefix</span>,
-    )
-}
-
-<span class="kw">fn</span> <span class="ident">output_variants</span>(
-    <span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>,
-    <span class="ident">base</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-    <span class="ident">variants</span>: <span class="kw-2">&amp;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Named</span><span class="op">&lt;</span><span class="ident">VariantFormat</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">package_prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="kw">for</span> (<span class="ident">index</span>, <span class="ident">variant</span>) <span class="kw">in</span> <span class="ident">variants</span> {
-        <span class="ident">output_variant</span>(
-            <span class="ident">out</span>,
-            <span class="ident">base</span>,
-            <span class="kw-2">*</span><span class="ident">index</span>,
-            <span class="kw-2">&amp;</span><span class="ident">variant</span>.<span class="ident">name</span>,
-            <span class="kw-2">&amp;</span><span class="ident">variant</span>.<span class="ident">value</span>,
-            <span class="ident">package_prefix</span>,
-        )<span class="question-mark">?</span>;
-    }
-    <span class="prelude-val">Ok</span>(())
-}
-
-<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy</span>::<span class="ident">too_many_arguments</span>)]</span>
-<span class="kw">fn</span> <span class="ident">output_struct_or_variant_container</span>(
-    <span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>,
-    <span class="ident">indentation</span>: <span class="ident">usize</span>,
-    <span class="ident">variant_base</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>,
-    <span class="ident">variant_index</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
-    <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-    <span class="ident">fields</span>: <span class="kw-2">&amp;</span>[<span class="ident">Named</span><span class="op">&lt;</span><span class="ident">Format</span><span class="op">&gt;</span>],
-    <span class="ident">nested_class</span>: <span class="ident">bool</span>,
-    <span class="ident">package_prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">out</span> <span class="op">=</span> <span class="ident">IndentedWriter</span>::<span class="ident">new</span>(<span class="ident">out</span>, <span class="ident">IndentConfig</span>::<span class="ident">Space</span>(<span class="number">4</span>));
-    <span class="ident">out</span>.<span class="ident">set_level</span>(<span class="ident">indentation</span> <span class="op">/</span> <span class="number">4</span>);
-    <span class="comment">// Beginning of class</span>
-    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">base</span>) <span class="op">=</span> <span class="ident">variant_base</span> {
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>)<span class="question-mark">?</span>;
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">fields</span>.<span class="ident">is_empty</span>() {
+            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
+        }
+        <span class="comment">// Constructor.</span>
         <span class="macro">writeln</span><span class="macro">!</span>(
-            <span class="ident">out</span>,
-            <span class="string">&quot;public static final class {} extends {} {{&quot;</span>,
-            <span class="ident">name</span>, <span class="ident">base</span>
+            <span class="self">self</span>.<span class="ident">out</span>,
+            <span class="string">&quot;public {}({}) {{&quot;</span>,
+            <span class="ident">name</span>,
+            <span class="ident">fields</span>
+                .<span class="ident">iter</span>()
+                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="macro">format</span><span class="macro">!</span>(
+                    <span class="string">&quot;{} {}&quot;</span>,
+                    <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">value</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">package_prefix</span>),
+                    <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">name</span>
+                ))
+                .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
+                .<span class="ident">join</span>(<span class="string">&quot;, &quot;</span>)
         )<span class="question-mark">?</span>;
-    } <span class="kw">else</span> {
-        <span class="kw">let</span> <span class="ident">prefix</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">nested_class</span> {
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
+        <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
+            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;assert {} != null;&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>)<span class="question-mark">?</span>;
+        }
+        <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
+            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;this.{} = {};&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>)<span class="question-mark">?</span>;
+        }
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
+        <span class="comment">// Serialize</span>
+        <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="self">self</span>.<span class="ident">out</span>,
+            <span class="string">&quot;\npublic void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception {{&quot;</span>,
+        )<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">index</span>) <span class="op">=</span> <span class="ident">variant_index</span> {
+            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;serializer.serialize_variant_index({});&quot;</span>, <span class="ident">index</span>)<span class="question-mark">?</span>;
+        }
+        <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
+            <span class="macro">writeln</span><span class="macro">!</span>(
+                <span class="self">self</span>.<span class="ident">out</span>,
+                <span class="string">&quot;{}&quot;</span>,
+                <span class="self">Self</span>::<span class="ident">quote_serialize_value</span>(<span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">package_prefix</span>)
+            )<span class="question-mark">?</span>;
+        }
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)<span class="question-mark">?</span>;
+        <span class="comment">// Deserialize (struct) or Load (variant)</span>
+        <span class="kw">if</span> <span class="ident">variant_index</span>.<span class="ident">is_none</span>() {
+            <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="self">self</span>.<span class="ident">out</span>,
+            <span class="string">&quot;public static {} deserialize(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{&quot;</span>,
+            <span class="ident">name</span>,
+        )<span class="question-mark">?</span>;
+        } <span class="kw">else</span> {
+            <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="self">self</span>.<span class="ident">out</span>,
+            <span class="string">&quot;static {} load(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{&quot;</span>,
+            <span class="ident">name</span>,
+        )<span class="question-mark">?</span>;
+        }
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;Builder builder = new Builder();&quot;</span>)<span class="question-mark">?</span>;
+        <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
+            <span class="macro">writeln</span><span class="macro">!</span>(
+                <span class="self">self</span>.<span class="ident">out</span>,
+                <span class="string">&quot;builder.{} = {};&quot;</span>,
+                <span class="ident">field</span>.<span class="ident">name</span>,
+                <span class="self">Self</span>::<span class="ident">quote_deserialize</span>(<span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">package_prefix</span>)
+            )<span class="question-mark">?</span>;
+        }
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;return builder.build();&quot;</span>)<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)<span class="question-mark">?</span>;
+        <span class="comment">// Equality</span>
+        <span class="macro">write</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;public boolean equals(Object obj) {{&quot;</span>)<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
+        <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="self">self</span>.<span class="ident">out</span>,
+            <span class="string">r#&quot;
+if (this == obj) return true;
+if (obj == null) return false;
+if (getClass() != obj.getClass()) return false;
+{0} other = ({0}) obj;&quot;#</span>,
+            <span class="ident">name</span>,
+        )<span class="question-mark">?</span>;
+        <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
+            <span class="macro">writeln</span><span class="macro">!</span>(
+                <span class="self">self</span>.<span class="ident">out</span>,
+                <span class="string">&quot;if (!java.util.Objects.equals(this.{0}, other.{0})) {{ return false; }}&quot;</span>,
+                <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>,
+            )<span class="question-mark">?</span>;
+        }
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;return true;&quot;</span>)<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)<span class="question-mark">?</span>;
+        <span class="comment">// Hashing</span>
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;public int hashCode() {{&quot;</span>)<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;int value = 7;&quot;</span>,)<span class="question-mark">?</span>;
+        <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
+            <span class="macro">writeln</span><span class="macro">!</span>(
+                <span class="self">self</span>.<span class="ident">out</span>,
+                <span class="string">&quot;value = 31 * value + (this.{0} != null ? this.{0}.hashCode() : 0);&quot;</span>,
+                <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>
+            )<span class="question-mark">?</span>;
+        }
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;return value;&quot;</span>)<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
+        <span class="comment">// Builder</span>
+        <span class="self">self</span>.<span class="ident">output_struct_or_variant_container_builder</span>(<span class="ident">name</span>, <span class="ident">fields</span>)<span class="question-mark">?</span>;
+        <span class="comment">// End of class</span>
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">output_struct_or_variant_container_builder</span>(
+        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+        <span class="ident">fields</span>: <span class="kw-2">&amp;</span>[<span class="ident">Named</span><span class="op">&lt;</span><span class="ident">Format</span><span class="op">&gt;</span>],
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="comment">// Beginning of builder class</span>
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;public static final class Builder {{&quot;</span>)<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
+        <span class="comment">// Fields</span>
+        <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
+            <span class="macro">writeln</span><span class="macro">!</span>(
+                <span class="self">self</span>.<span class="ident">out</span>,
+                <span class="string">&quot;public {} {};&quot;</span>,
+                <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">package_prefix</span>),
+                <span class="ident">field</span>.<span class="ident">name</span>
+            )<span class="question-mark">?</span>;
+        }
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">fields</span>.<span class="ident">is_empty</span>() {
+            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
+        }
+        <span class="comment">// Finalization</span>
+        <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="self">self</span>.<span class="ident">out</span>,
+            <span class="string">r#&quot;public {0} build() {{
+    return new {0}({1}
+    );
+}}&quot;#</span>,
+            <span class="ident">name</span>,
+            <span class="ident">fields</span>
+                .<span class="ident">iter</span>()
+                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;\n        {}&quot;</span>, <span class="ident">f</span>.<span class="ident">name</span>))
+                .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
+                .<span class="ident">join</span>(<span class="string">&quot;,&quot;</span>)
+        )<span class="question-mark">?</span>;
+        <span class="comment">// End of class</span>
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">output_enum_container</span>(
+        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+        <span class="ident">variants</span>: <span class="kw-2">&amp;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Named</span><span class="op">&lt;</span><span class="ident">VariantFormat</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">prefix</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">nested_class</span> {
             <span class="string">&quot;public static &quot;</span>
         } <span class="kw">else</span> {
             <span class="string">&quot;public &quot;</span>
         };
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;{}final class {} {{&quot;</span>, <span class="ident">prefix</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
-    }
-    <span class="comment">// Fields</span>
-    <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;{}abstract class {} {{&quot;</span>, <span class="ident">prefix</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
         <span class="macro">writeln</span><span class="macro">!</span>(
-            <span class="ident">out</span>,
-            <span class="string">&quot;    public final {} {};&quot;</span>,
-            <span class="ident">quote_type</span>(<span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>, <span class="ident">package_prefix</span>),
-            <span class="ident">field</span>.<span class="ident">name</span>
-        )<span class="question-mark">?</span>;
-    }
-    <span class="kw">if</span> <span class="op">!</span><span class="ident">fields</span>.<span class="ident">is_empty</span>() {
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>)<span class="question-mark">?</span>;
-    }
-    <span class="comment">// Constructor.</span>
-    <span class="macro">writeln</span><span class="macro">!</span>(
-        <span class="ident">out</span>,
-        <span class="string">&quot;    public {}({}) {{&quot;</span>,
-        <span class="ident">name</span>,
-        <span class="ident">fields</span>
-            .<span class="ident">iter</span>()
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{} {}&quot;</span>, <span class="ident">quote_type</span>(<span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">value</span>, <span class="ident">package_prefix</span>), <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">name</span>))
-            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
-            .<span class="ident">join</span>(<span class="string">&quot;, &quot;</span>)
+        <span class="self">self</span>.<span class="ident">out</span>,
+        <span class="string">&quot;abstract public void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception;\n&quot;</span>,
     )<span class="question-mark">?</span>;
-    <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;       assert {} != null;&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>)<span class="question-mark">?</span>;
-    }
-    <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;       this.{} = {};&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>)<span class="question-mark">?</span>;
-    }
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;    }}&quot;</span>)<span class="question-mark">?</span>;
-    <span class="comment">// Serialize</span>
-    <span class="macro">writeln</span><span class="macro">!</span>(
-        <span class="ident">out</span>,
-        <span class="string">&quot;\n    public void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception {{&quot;</span>,
-    )<span class="question-mark">?</span>;
-    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">index</span>) <span class="op">=</span> <span class="ident">variant_index</span> {
+        <span class="macro">write</span><span class="macro">!</span>(
+        <span class="self">self</span>.<span class="ident">out</span>,
+        <span class="string">&quot;public static {} deserialize(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
         <span class="macro">writeln</span><span class="macro">!</span>(
-            <span class="ident">out</span>,
-            <span class="string">&quot;        serializer.serialize_variant_index({});&quot;</span>,
-            <span class="ident">index</span>
-        )<span class="question-mark">?</span>;
-    }
-    <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
-        <span class="macro">writeln</span><span class="macro">!</span>(
-            <span class="ident">out</span>,
-            <span class="string">&quot;        {}&quot;</span>,
-            <span class="ident">quote_serialize_value</span>(<span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>)
-        )<span class="question-mark">?</span>;
-    }
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;    }}\n&quot;</span>)<span class="question-mark">?</span>;
-    <span class="comment">// Deserialize (struct) or Load (variant)</span>
-    <span class="kw">if</span> <span class="ident">variant_index</span>.<span class="ident">is_none</span>() {
-        <span class="macro">writeln</span><span class="macro">!</span>(
-            <span class="ident">out</span>,
-            <span class="string">&quot;    public static {} deserialize(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{&quot;</span>,
+            <span class="self">self</span>.<span class="ident">out</span>,
+            <span class="string">r#&quot;
+{} obj;
+int index = deserializer.deserialize_variant_index();
+switch (index) {{&quot;#</span>,
             <span class="ident">name</span>,
         )<span class="question-mark">?</span>;
-    } <span class="kw">else</span> {
-        <span class="macro">writeln</span><span class="macro">!</span>(
-            <span class="ident">out</span>,
-            <span class="string">&quot;    static {} load(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{&quot;</span>,
-            <span class="ident">name</span>,
-        )<span class="question-mark">?</span>;
-    }
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;        Builder builder = new Builder();&quot;</span>)<span class="question-mark">?</span>;
-    <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
-        <span class="macro">writeln</span><span class="macro">!</span>(
-            <span class="ident">out</span>,
-            <span class="string">&quot;        builder.{} = {};&quot;</span>,
-            <span class="ident">field</span>.<span class="ident">name</span>,
-            <span class="ident">quote_deserialize</span>(<span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>, <span class="ident">package_prefix</span>)
-        )<span class="question-mark">?</span>;
-    }
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;        return builder.build();&quot;</span>)<span class="question-mark">?</span>;
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;    }}\n&quot;</span>)<span class="question-mark">?</span>;
-    <span class="comment">// Equality</span>
-    <span class="macro">writeln</span><span class="macro">!</span>(
-        <span class="ident">out</span>,
-        <span class="string">r#&quot;    public boolean equals(Object obj) {{
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-        {0} other = ({0}) obj;&quot;#</span>,
-        <span class="ident">name</span>,
-    )<span class="question-mark">?</span>;
-    <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
-        <span class="macro">writeln</span><span class="macro">!</span>(
-            <span class="ident">out</span>,
-            <span class="string">&quot;        if (!java.util.Objects.equals(this.{0}, other.{0})) {{ return false; }}&quot;</span>,
-            <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>,
-        )<span class="question-mark">?</span>;
-    }
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;        return true;&quot;</span>)<span class="question-mark">?</span>;
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;    }}\n&quot;</span>)<span class="question-mark">?</span>;
-    <span class="comment">// Hashing</span>
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;    public int hashCode() {{\n        int value = 7;&quot;</span>,)<span class="question-mark">?</span>;
-    <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
-        <span class="macro">writeln</span><span class="macro">!</span>(
-            <span class="ident">out</span>,
-            <span class="string">&quot;        value = 31 * value + (this.{0} != null ? this.{0}.hashCode() : 0);&quot;</span>,
-            <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>
-        )<span class="question-mark">?</span>;
-    }
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;        return value;&quot;</span>)<span class="question-mark">?</span>;
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;    }}&quot;</span>)<span class="question-mark">?</span>;
-    <span class="comment">// Builder</span>
-    <span class="ident">out</span>.<span class="ident">inc_level</span>();
-    <span class="ident">output_struct_or_variant_container_builder</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">out</span>, <span class="ident">name</span>, <span class="ident">fields</span>, <span class="ident">package_prefix</span>)<span class="question-mark">?</span>;
-    <span class="ident">out</span>.<span class="ident">dec_level</span>();
-    <span class="comment">// End of class</span>
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)
-}
-
-<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy</span>::<span class="ident">too_many_arguments</span>)]</span>
-<span class="kw">fn</span> <span class="ident">output_struct_or_variant_container_builder</span>(
-    <span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">IndentedWriter</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span><span class="op">&gt;</span>,
-    <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-    <span class="ident">fields</span>: <span class="kw-2">&amp;</span>[<span class="ident">Named</span><span class="op">&lt;</span><span class="ident">Format</span><span class="op">&gt;</span>],
-    <span class="ident">package_prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="comment">// Beginning of builder class</span>
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>)<span class="question-mark">?</span>;
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;public static final class Builder {{&quot;</span>)<span class="question-mark">?</span>;
-    <span class="comment">// Fields</span>
-    <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
-        <span class="macro">writeln</span><span class="macro">!</span>(
-            <span class="ident">out</span>,
-            <span class="string">&quot;    public {} {};&quot;</span>,
-            <span class="ident">quote_type</span>(<span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>, <span class="ident">package_prefix</span>),
-            <span class="ident">field</span>.<span class="ident">name</span>
-        )<span class="question-mark">?</span>;
-    }
-    <span class="kw">if</span> <span class="op">!</span><span class="ident">fields</span>.<span class="ident">is_empty</span>() {
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>)<span class="question-mark">?</span>;
-    }
-    <span class="comment">// Finalization</span>
-    <span class="macro">writeln</span><span class="macro">!</span>(
-        <span class="ident">out</span>,
-        <span class="string">r#&quot;    public {0} build() {{
-        return new {0}({1}
-        );
-    }}&quot;#</span>,
-        <span class="ident">name</span>,
-        <span class="ident">fields</span>
-            .<span class="ident">iter</span>()
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;\n            {}&quot;</span>, <span class="ident">f</span>.<span class="ident">name</span>))
-            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
-            .<span class="ident">join</span>(<span class="string">&quot;,&quot;</span>)
-    )<span class="question-mark">?</span>;
-    <span class="comment">// End of class</span>
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)
-}
-
-<span class="kw">fn</span> <span class="ident">output_enum_container</span>(
-    <span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>,
-    <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-    <span class="ident">variants</span>: <span class="kw-2">&amp;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Named</span><span class="op">&lt;</span><span class="ident">VariantFormat</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">nested_class</span>: <span class="ident">bool</span>,
-    <span class="ident">package_prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">prefix</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">nested_class</span> {
-        <span class="string">&quot;public static &quot;</span>
-    } <span class="kw">else</span> {
-        <span class="string">&quot;public &quot;</span>
-    };
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;{}abstract class {} {{&quot;</span>, <span class="ident">prefix</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
-    <span class="macro">writeln</span><span class="macro">!</span>(
-        <span class="ident">out</span>,
-        <span class="string">&quot;    abstract public void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception;&quot;</span>,
-    )<span class="question-mark">?</span>;
-    <span class="macro">write</span><span class="macro">!</span>(
-        <span class="ident">out</span>,
-        <span class="string">r#&quot;
-    public static {0} deserialize(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{
-        {0} obj;
-        int index = deserializer.deserialize_variant_index();
-        switch (index) {{
-&quot;#</span>,
-        <span class="ident">name</span>,
-    )<span class="question-mark">?</span>;
-    <span class="kw">for</span> (<span class="ident">index</span>, <span class="ident">variant</span>) <span class="kw">in</span> <span class="ident">variants</span> {
-        <span class="macro">writeln</span><span class="macro">!</span>(
-            <span class="ident">out</span>,
-            <span class="string">&quot;            case {}: return {}.load(deserializer);&quot;</span>,
-            <span class="ident">index</span>, <span class="ident">variant</span>.<span class="ident">name</span>,
-        )<span class="question-mark">?</span>;
-    }
-    <span class="macro">writeln</span><span class="macro">!</span>(
-        <span class="ident">out</span>,
-        <span class="string">&quot;            default: throw new java.lang.Exception(\&quot;Unknown variant index for {}: \&quot; + index);&quot;</span>,
-        <span class="ident">name</span>,
-    )<span class="question-mark">?</span>;
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;        }}&quot;</span>)<span class="question-mark">?</span>;
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;    }}&quot;</span>)<span class="question-mark">?</span>;
-    <span class="ident">output_variants</span>(<span class="ident">out</span>, <span class="ident">name</span>, <span class="ident">variants</span>, <span class="ident">package_prefix</span>)<span class="question-mark">?</span>;
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)
-}
-
-<span class="kw">fn</span> <span class="ident">output_container</span>(
-    <span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>,
-    <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-    <span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">ContainerFormat</span>,
-    <span class="ident">nested_class</span>: <span class="ident">bool</span>,
-    <span class="ident">package_prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="kw">use</span> <span class="ident">ContainerFormat</span>::<span class="kw-2">*</span>;
-    <span class="kw">let</span> <span class="ident">fields</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">format</span> {
-        <span class="ident">UnitStruct</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Vec</span>::<span class="ident">new</span>(),
-        <span class="ident">NewTypeStruct</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Named</span> {
-            <span class="ident">name</span>: <span class="string">&quot;value&quot;</span>.<span class="ident">to_string</span>(),
-            <span class="ident">value</span>: <span class="ident">format</span>.<span class="ident">as_ref</span>().<span class="ident">clone</span>(),
-        }],
-        <span class="ident">TupleStruct</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">formats</span>
-            .<span class="ident">iter</span>()
-            .<span class="ident">enumerate</span>()
-            .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">f</span>)<span class="op">|</span> <span class="ident">Named</span> {
-                <span class="ident">name</span>: <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;field{}&quot;</span>, <span class="ident">i</span>),
-                <span class="ident">value</span>: <span class="ident">f</span>.<span class="ident">clone</span>(),
-            })
-            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>(),
-        <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">fields</span>.<span class="ident">clone</span>(),
-        <span class="ident">Enum</span>(<span class="ident">variants</span>) <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="kw">return</span> <span class="ident">output_enum_container</span>(<span class="ident">out</span>, <span class="ident">name</span>, <span class="ident">variants</span>, <span class="ident">nested_class</span>, <span class="ident">package_prefix</span>);
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
+        <span class="kw">for</span> (<span class="ident">index</span>, <span class="ident">variant</span>) <span class="kw">in</span> <span class="ident">variants</span> {
+            <span class="macro">writeln</span><span class="macro">!</span>(
+                <span class="self">self</span>.<span class="ident">out</span>,
+                <span class="string">&quot;case {}: return {}.load(deserializer);&quot;</span>,
+                <span class="ident">index</span>, <span class="ident">variant</span>.<span class="ident">name</span>,
+            )<span class="question-mark">?</span>;
         }
-    };
-    <span class="ident">output_struct_or_variant_container</span>(
-        <span class="ident">out</span>,
-        <span class="number">0</span>,
-        <span class="prelude-val">None</span>,
-        <span class="prelude-val">None</span>,
-        <span class="ident">name</span>,
-        <span class="kw-2">&amp;</span><span class="ident">fields</span>,
-        <span class="ident">nested_class</span>,
-        <span class="ident">package_prefix</span>,
-    )
+        <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="self">self</span>.<span class="ident">out</span>,
+            <span class="string">&quot;default: throw new java.lang.Exception(\&quot;Unknown variant index for {}: \&quot; + index);&quot;</span>,
+            <span class="ident">name</span>,
+        )<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">output_variants</span>(<span class="ident">name</span>, <span class="ident">variants</span>)<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">output_container</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">ContainerFormat</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">use</span> <span class="ident">ContainerFormat</span>::<span class="kw-2">*</span>;
+        <span class="kw">let</span> <span class="ident">fields</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">format</span> {
+            <span class="ident">UnitStruct</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Vec</span>::<span class="ident">new</span>(),
+            <span class="ident">NewTypeStruct</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Named</span> {
+                <span class="ident">name</span>: <span class="string">&quot;value&quot;</span>.<span class="ident">to_string</span>(),
+                <span class="ident">value</span>: <span class="ident">format</span>.<span class="ident">as_ref</span>().<span class="ident">clone</span>(),
+            }],
+            <span class="ident">TupleStruct</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">formats</span>
+                .<span class="ident">iter</span>()
+                .<span class="ident">enumerate</span>()
+                .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">f</span>)<span class="op">|</span> <span class="ident">Named</span> {
+                    <span class="ident">name</span>: <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;field{}&quot;</span>, <span class="ident">i</span>),
+                    <span class="ident">value</span>: <span class="ident">f</span>.<span class="ident">clone</span>(),
+                })
+                .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>(),
+            <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">fields</span>.<span class="ident">clone</span>(),
+            <span class="ident">Enum</span>(<span class="ident">variants</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="self">self</span>.<span class="ident">output_enum_container</span>(<span class="ident">name</span>, <span class="ident">variants</span>)<span class="question-mark">?</span>;
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
+            }
+        };
+        <span class="self">self</span>.<span class="ident">output_struct_or_variant_container</span>(<span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">fields</span>)
+    }
 }
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Installer</span> {
@@ -1606,19 +1698,9 @@ import java.math.BigInteger;
         <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">create_dir_all</span>(<span class="kw-2">&amp;</span><span class="ident">dir_path</span>)<span class="question-mark">?</span>;
 
         <span class="kw">for</span> (<span class="ident">name</span>, <span class="ident">format</span>) <span class="kw">in</span> <span class="ident">registry</span> {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">File</span>::<span class="ident">create</span>(<span class="ident">dir_path</span>.<span class="ident">join</span>(<span class="ident">name</span>.<span class="ident">to_string</span>() <span class="op">+</span> <span class="string">&quot;.java&quot;</span>))<span class="question-mark">?</span>;
-            <span class="ident">output_preambule</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">file</span>, <span class="prelude-val">Some</span>(<span class="ident">package_name</span>))<span class="question-mark">?</span>;
-            <span class="ident">output_container</span>(
-                <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">file</span>,
-                <span class="ident">name</span>,
-                <span class="ident">format</span>,
-                <span class="comment">/* nested class */</span> <span class="bool-val">false</span>,
-                <span class="kw-2">&amp;</span><span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}.&quot;</span>, <span class="ident">package_name</span>),
-            )<span class="question-mark">?</span>;
+            <span class="ident">write_container_class</span>(<span class="kw-2">&amp;</span><span class="ident">dir_path</span>, <span class="ident">package_name</span>, <span class="ident">name</span>, <span class="ident">format</span>)<span class="question-mark">?</span>;
         }
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">File</span>::<span class="ident">create</span>(<span class="ident">dir_path</span>.<span class="ident">join</span>(<span class="string">&quot;TraitHelpers.java&quot;</span>))<span class="question-mark">?</span>;
-        <span class="ident">output_preambule</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">file</span>, <span class="prelude-val">Some</span>(<span class="ident">package_name</span>))<span class="question-mark">?</span>;
-        <span class="ident">output_trait_helpers</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">file</span>, <span class="ident">registry</span>, <span class="comment">/* nested class */</span> <span class="bool-val">false</span>)<span class="question-mark">?</span>;
+        <span class="ident">write_helper_class</span>(<span class="kw-2">&amp;</span><span class="ident">dir_path</span>, <span class="ident">package_name</span>, <span class="ident">registry</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 

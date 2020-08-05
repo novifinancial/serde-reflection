@@ -261,10 +261,34 @@
 <span id="261">261</span>
 <span id="262">262</span>
 <span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
 
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">indent</span>::{<span class="ident">IndentConfig</span>, <span class="ident">IndentedWriter</span>};
 <span class="kw">use</span> <span class="ident">serde_reflection</span>::{<span class="ident">ContainerFormat</span>, <span class="ident">Format</span>, <span class="ident">Named</span>, <span class="ident">Registry</span>, <span class="ident">VariantFormat</span>};
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">collections</span>::<span class="ident">BTreeMap</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::{<span class="prelude-ty">Result</span>, <span class="ident">Write</span>};
@@ -274,11 +298,7 @@
 <span class="doccomment">/// * The packages `dataclasses` and `typing` are assumed to be available.</span>
 <span class="doccomment">/// * The module `serde_types` is assumed to be available.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">output</span>(<span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>, <span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">Registry</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="ident">output_preamble</span>(<span class="ident">out</span>, <span class="prelude-val">None</span>)<span class="question-mark">?</span>;
-    <span class="kw">for</span> (<span class="ident">name</span>, <span class="ident">format</span>) <span class="kw">in</span> <span class="ident">registry</span> {
-        <span class="ident">output_container</span>(<span class="ident">out</span>, <span class="ident">name</span>, <span class="ident">format</span>)<span class="question-mark">?</span>;
-    }
-    <span class="prelude-val">Ok</span>(())
+    <span class="ident">output_with_optional_serde_package</span>(<span class="ident">out</span>, <span class="ident">registry</span>, <span class="prelude-val">None</span>)
 }
 
 <span class="kw">fn</span> <span class="ident">output_with_optional_serde_package</span>(
@@ -286,168 +306,194 @@
     <span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">Registry</span>,
     <span class="ident">serde_package_name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="ident">output_preamble</span>(<span class="ident">out</span>, <span class="ident">serde_package_name</span>)<span class="question-mark">?</span>;
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">emitter</span> <span class="op">=</span> <span class="ident">PythonEmitter</span> {
+        <span class="ident">out</span>: <span class="ident">IndentedWriter</span>::<span class="ident">new</span>(<span class="ident">out</span>, <span class="ident">IndentConfig</span>::<span class="ident">Space</span>(<span class="number">4</span>)),
+        <span class="ident">serde_package_name</span>,
+    };
+    <span class="ident">emitter</span>.<span class="ident">output_preamble</span>()<span class="question-mark">?</span>;
     <span class="kw">for</span> (<span class="ident">name</span>, <span class="ident">format</span>) <span class="kw">in</span> <span class="ident">registry</span> {
-        <span class="ident">output_container</span>(<span class="ident">out</span>, <span class="ident">name</span>, <span class="ident">format</span>)<span class="question-mark">?</span>;
+        <span class="ident">emitter</span>.<span class="ident">output_container</span>(<span class="ident">name</span>, <span class="ident">format</span>)<span class="question-mark">?</span>;
     }
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="kw">fn</span> <span class="ident">output_preamble</span>(<span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>, <span class="ident">serde_package_name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="macro">writeln</span><span class="macro">!</span>(
-        <span class="ident">out</span>,
-        <span class="string">r#&quot;from dataclasses import dataclass
+<span class="kw">struct</span> <span class="ident">PythonEmitter</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="ident">out</span>: <span class="ident">IndentedWriter</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="ident">serde_package_name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">PythonEmitter</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">Write</span>,
+{
+    <span class="kw">fn</span> <span class="ident">output_preamble</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="self">self</span>.<span class="ident">out</span>,
+            <span class="string">r#&quot;from dataclasses import dataclass
 import typing
 {}import serde_types as st&quot;#</span>,
-        <span class="kw">match</span> <span class="ident">serde_package_name</span> {
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;&quot;</span>.<span class="ident">to_string</span>(),
-            <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;from {} &quot;</span>, <span class="ident">name</span>),
+            <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">serde_package_name</span> {
+                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;&quot;</span>.<span class="ident">to_string</span>(),
+                <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;from {} &quot;</span>, <span class="ident">name</span>),
+            }
+        )
+    }
+
+    <span class="kw">fn</span> <span class="ident">quote_type</span>(<span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+        <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
+        <span class="kw">match</span> <span class="ident">format</span> {
+            <span class="ident">TypeName</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;\&quot;{}\&quot;&quot;</span>, <span class="ident">x</span>), <span class="comment">// Need quotes because of circular dependencies.</span>
+            <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.unit&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">Bool</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.bool&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">I8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.int8&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">I16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.int16&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">I32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.int32&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">I64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.int64&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">I128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.int128&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">U8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.uint8&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">U16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.uint16&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">U32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.uint32&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">U64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.uint64&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">U128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.uint128&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">F32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.float32&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">F64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.float64&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">Char</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.char&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">Str</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;str&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">Bytes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;bytes&quot;</span>.<span class="ident">into</span>(),
+
+            <span class="prelude-ty">Option</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;typing.Optional[{}]&quot;</span>, <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">format</span>)),
+            <span class="ident">Seq</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;typing.Sequence[{}]&quot;</span>, <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">format</span>)),
+            <span class="ident">Map</span> { <span class="ident">key</span>, <span class="ident">value</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
+                <span class="string">&quot;typing.Dict[{}, {}]&quot;</span>,
+                <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">key</span>),
+                <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">value</span>)
+            ),
+            <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;typing.Tuple[{}]&quot;</span>, <span class="self">Self</span>::<span class="ident">quote_types</span>(<span class="ident">formats</span>)),
+            <span class="ident">TupleArray</span> { <span class="ident">content</span>, <span class="ident">size</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
+                <span class="string">&quot;typing.Tuple[{}]&quot;</span>,
+                <span class="self">Self</span>::<span class="ident">quote_types</span>(<span class="kw-2">&amp;</span><span class="macro">vec</span><span class="macro">!</span>[<span class="ident">content</span>.<span class="ident">as_ref</span>().<span class="ident">clone</span>(); <span class="kw-2">*</span><span class="ident">size</span>])
+            ), <span class="comment">// Sadly, there are no fixed-size arrays in python.</span>
+
+            <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;unexpected value&quot;</span>),
         }
-    )
-}
-
-<span class="kw">fn</span> <span class="ident">quote_type</span>(<span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
-    <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
-    <span class="kw">match</span> <span class="ident">format</span> {
-        <span class="ident">TypeName</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;\&quot;{}\&quot;&quot;</span>, <span class="ident">x</span>), <span class="comment">// Need quotes because of circular dependencies.</span>
-        <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.unit&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">Bool</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.bool&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">I8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.int8&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">I16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.int16&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">I32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.int32&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">I64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.int64&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">I128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.int128&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">U8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.uint8&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">U16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.uint16&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">U32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.uint32&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">U64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.uint64&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">U128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.uint128&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">F32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.float32&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">F64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.float64&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">Char</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;st.char&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">Str</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;str&quot;</span>.<span class="ident">into</span>(),
-        <span class="ident">Bytes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;bytes&quot;</span>.<span class="ident">into</span>(),
-
-        <span class="prelude-ty">Option</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;typing.Optional[{}]&quot;</span>, <span class="ident">quote_type</span>(<span class="ident">format</span>)),
-        <span class="ident">Seq</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;typing.Sequence[{}]&quot;</span>, <span class="ident">quote_type</span>(<span class="ident">format</span>)),
-        <span class="ident">Map</span> { <span class="ident">key</span>, <span class="ident">value</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;typing.Dict[{}, {}]&quot;</span>, <span class="ident">quote_type</span>(<span class="ident">key</span>), <span class="ident">quote_type</span>(<span class="ident">value</span>)),
-        <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;typing.Tuple[{}]&quot;</span>, <span class="ident">quote_types</span>(<span class="ident">formats</span>)),
-        <span class="ident">TupleArray</span> { <span class="ident">content</span>, <span class="ident">size</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
-            <span class="string">&quot;typing.Tuple[{}]&quot;</span>,
-            <span class="ident">quote_types</span>(<span class="kw-2">&amp;</span><span class="macro">vec</span><span class="macro">!</span>[<span class="ident">content</span>.<span class="ident">as_ref</span>().<span class="ident">clone</span>(); <span class="kw-2">*</span><span class="ident">size</span>])
-        ), <span class="comment">// Sadly, there are no fixed-size arrays in python.</span>
-
-        <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;unexpected value&quot;</span>),
     }
-}
 
-<span class="kw">fn</span> <span class="ident">quote_types</span>(<span class="ident">formats</span>: <span class="kw-2">&amp;</span>[<span class="ident">Format</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
-    <span class="ident">formats</span>
-        .<span class="ident">iter</span>()
-        .<span class="ident">map</span>(<span class="ident">quote_type</span>)
-        .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
-        .<span class="ident">join</span>(<span class="string">&quot;, &quot;</span>)
-}
-
-<span class="kw">fn</span> <span class="ident">output_fields</span>(<span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>, <span class="ident">indentation</span>: <span class="ident">usize</span>, <span class="ident">fields</span>: <span class="kw-2">&amp;</span>[<span class="ident">Named</span><span class="op">&lt;</span><span class="ident">Format</span><span class="op">&gt;</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">tab</span> <span class="op">=</span> <span class="string">&quot; &quot;</span>.<span class="ident">repeat</span>(<span class="ident">indentation</span>);
-    <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;{}{}: {}&quot;</span>, <span class="ident">tab</span>, <span class="ident">field</span>.<span class="ident">name</span>, <span class="ident">quote_type</span>(<span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>))<span class="question-mark">?</span>;
+    <span class="kw">fn</span> <span class="ident">quote_types</span>(<span class="ident">formats</span>: <span class="kw-2">&amp;</span>[<span class="ident">Format</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+        <span class="ident">formats</span>
+            .<span class="ident">iter</span>()
+            .<span class="ident">map</span>(<span class="self">Self</span>::<span class="ident">quote_type</span>)
+            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
+            .<span class="ident">join</span>(<span class="string">&quot;, &quot;</span>)
     }
-    <span class="prelude-val">Ok</span>(())
-}
 
-<span class="kw">fn</span> <span class="ident">output_variant</span>(
-    <span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>,
-    <span class="ident">base</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-    <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-    <span class="ident">index</span>: <span class="ident">u32</span>,
-    <span class="ident">variant</span>: <span class="kw-2">&amp;</span><span class="ident">VariantFormat</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="kw">use</span> <span class="ident">VariantFormat</span>::<span class="kw-2">*</span>;
-    <span class="kw">match</span> <span class="ident">variant</span> {
-        <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">writeln</span><span class="macro">!</span>(
-            <span class="ident">out</span>,
-            <span class="string">&quot;\n@dataclass\nclass {}__{}({}):\n    INDEX = {}\n&quot;</span>,
-            <span class="ident">base</span>, <span class="ident">name</span>, <span class="ident">base</span>, <span class="ident">index</span>,
-        ),
-        <span class="ident">NewType</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">writeln</span><span class="macro">!</span>(
-            <span class="ident">out</span>,
-            <span class="string">&quot;\n@dataclass\nclass {}__{}({}):\n    INDEX = {}\n    value: {}\n&quot;</span>,
-            <span class="ident">base</span>,
-            <span class="ident">name</span>,
-            <span class="ident">base</span>,
-            <span class="ident">index</span>,
-            <span class="ident">quote_type</span>(<span class="ident">format</span>)
-        ),
-        <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">writeln</span><span class="macro">!</span>(
-            <span class="ident">out</span>,
-            <span class="string">&quot;\n@dataclass\nclass {}__{}({}):\n    INDEX = {}\n    value: typing.Tuple[{}]\n&quot;</span>,
-            <span class="ident">base</span>,
-            <span class="ident">name</span>,
-            <span class="ident">base</span>,
-            <span class="ident">index</span>,
-            <span class="ident">quote_types</span>(<span class="ident">formats</span>)
-        ),
-        <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">output_fields</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">fields</span>: <span class="kw-2">&amp;</span>[<span class="ident">Named</span><span class="op">&lt;</span><span class="ident">Format</span><span class="op">&gt;</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
             <span class="macro">writeln</span><span class="macro">!</span>(
-                <span class="ident">out</span>,
-                <span class="string">&quot;\n@dataclass\nclass {}__{}({}):\n    INDEX = {}&quot;</span>,
-                <span class="ident">base</span>, <span class="ident">name</span>, <span class="ident">base</span>, <span class="ident">index</span>
+                <span class="self">self</span>.<span class="ident">out</span>,
+                <span class="string">&quot;{}: {}&quot;</span>,
+                <span class="ident">field</span>.<span class="ident">name</span>,
+                <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>)
             )<span class="question-mark">?</span>;
-            <span class="ident">output_fields</span>(<span class="ident">out</span>, <span class="number">4</span>, <span class="ident">fields</span>)<span class="question-mark">?</span>;
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>)
         }
-        <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;incorrect value&quot;</span>),
+        <span class="prelude-val">Ok</span>(())
     }
-}
 
-<span class="kw">fn</span> <span class="ident">output_variants</span>(
-    <span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>,
-    <span class="ident">base</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-    <span class="ident">variants</span>: <span class="kw-2">&amp;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Named</span><span class="op">&lt;</span><span class="ident">VariantFormat</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="kw">for</span> (<span class="ident">index</span>, <span class="ident">variant</span>) <span class="kw">in</span> <span class="ident">variants</span> {
-        <span class="ident">output_variant</span>(<span class="ident">out</span>, <span class="ident">base</span>, <span class="kw-2">&amp;</span><span class="ident">variant</span>.<span class="ident">name</span>, <span class="kw-2">*</span><span class="ident">index</span>, <span class="kw-2">&amp;</span><span class="ident">variant</span>.<span class="ident">value</span>)<span class="question-mark">?</span>;
-    }
-    <span class="prelude-val">Ok</span>(())
-}
-
-<span class="kw">fn</span> <span class="ident">output_container</span>(<span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">ContainerFormat</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="kw">use</span> <span class="ident">ContainerFormat</span>::<span class="kw-2">*</span>;
-    <span class="kw">match</span> <span class="ident">format</span> {
-        <span class="ident">UnitStruct</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;\n@dataclass\nclass {}:\n    pass\n&quot;</span>, <span class="ident">name</span>),
-        <span class="ident">NewTypeStruct</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">writeln</span><span class="macro">!</span>(
-            <span class="ident">out</span>,
-            <span class="string">&quot;\n@dataclass\nclass {}:\n    value: {}\n&quot;</span>,
-            <span class="ident">name</span>,
-            <span class="ident">quote_type</span>(<span class="ident">format</span>)
-        ),
-        <span class="ident">TupleStruct</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">writeln</span><span class="macro">!</span>(
-            <span class="ident">out</span>,
-            <span class="string">&quot;\n@dataclass\nclass {}:\n    value: typing.Tuple[{}]\n&quot;</span>,
-            <span class="ident">name</span>,
-            <span class="ident">quote_types</span>(<span class="ident">formats</span>)
-        ),
-        <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;\n@dataclass\nclass {}:&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
-            <span class="ident">output_fields</span>(<span class="ident">out</span>, <span class="number">4</span>, <span class="ident">fields</span>)<span class="question-mark">?</span>;
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>)
-        }
-        <span class="ident">Enum</span>(<span class="ident">variants</span>) <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="comment">// Initializing VARIANTS with a temporary value for typechecking purposes.</span>
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">out</span>, <span class="string">&quot;\nclass {}:\n    VARIANTS = []\n&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
-            <span class="ident">output_variants</span>(<span class="ident">out</span>, <span class="ident">name</span>, <span class="ident">variants</span>)<span class="question-mark">?</span>;
-            <span class="macro">writeln</span><span class="macro">!</span>(
-                <span class="ident">out</span>,
-                <span class="string">&quot;{}.VARIANTS = [\n{}]\n&quot;</span>,
+    <span class="kw">fn</span> <span class="ident">output_variant</span>(
+        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="ident">base</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+        <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+        <span class="ident">index</span>: <span class="ident">u32</span>,
+        <span class="ident">variant</span>: <span class="kw-2">&amp;</span><span class="ident">VariantFormat</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">use</span> <span class="ident">VariantFormat</span>::<span class="kw-2">*</span>;
+        <span class="kw">match</span> <span class="ident">variant</span> {
+            <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">writeln</span><span class="macro">!</span>(
+                <span class="self">self</span>.<span class="ident">out</span>,
+                <span class="string">&quot;\n@dataclass\nclass {}__{}({}):\n    INDEX = {}\n&quot;</span>,
+                <span class="ident">base</span>, <span class="ident">name</span>, <span class="ident">base</span>, <span class="ident">index</span>,
+            ),
+            <span class="ident">NewType</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">writeln</span><span class="macro">!</span>(
+                <span class="self">self</span>.<span class="ident">out</span>,
+                <span class="string">&quot;\n@dataclass\nclass {}__{}({}):\n    INDEX = {}\n    value: {}\n&quot;</span>,
+                <span class="ident">base</span>,
                 <span class="ident">name</span>,
-                <span class="ident">variants</span>
-                    .<span class="ident">iter</span>()
-                    .<span class="ident">map</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">v</span>)<span class="op">|</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;    {}__{},\n&quot;</span>, <span class="ident">name</span>, <span class="ident">v</span>.<span class="ident">name</span>))
-                    .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
-                    .<span class="ident">join</span>(<span class="string">&quot;&quot;</span>)
-            )
+                <span class="ident">base</span>,
+                <span class="ident">index</span>,
+                <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">format</span>)
+            ),
+            <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">writeln</span><span class="macro">!</span>(
+                <span class="self">self</span>.<span class="ident">out</span>,
+                <span class="string">&quot;\n@dataclass\nclass {}__{}({}):\n    INDEX = {}\n    value: typing.Tuple[{}]\n&quot;</span>,
+                <span class="ident">base</span>,
+                <span class="ident">name</span>,
+                <span class="ident">base</span>,
+                <span class="ident">index</span>,
+                <span class="self">Self</span>::<span class="ident">quote_types</span>(<span class="ident">formats</span>)
+            ),
+            <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="macro">writeln</span><span class="macro">!</span>(
+                    <span class="self">self</span>.<span class="ident">out</span>,
+                    <span class="string">&quot;\n@dataclass\nclass {}__{}({}):\n    INDEX = {}&quot;</span>,
+                    <span class="ident">base</span>, <span class="ident">name</span>, <span class="ident">base</span>, <span class="ident">index</span>
+                )<span class="question-mark">?</span>;
+                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
+                <span class="self">self</span>.<span class="ident">output_fields</span>(<span class="ident">fields</span>)<span class="question-mark">?</span>;
+                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+                <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>)
+            }
+            <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;incorrect value&quot;</span>),
+        }
+    }
+
+    <span class="kw">fn</span> <span class="ident">output_variants</span>(
+        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="ident">base</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+        <span class="ident">variants</span>: <span class="kw-2">&amp;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Named</span><span class="op">&lt;</span><span class="ident">VariantFormat</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">for</span> (<span class="ident">index</span>, <span class="ident">variant</span>) <span class="kw">in</span> <span class="ident">variants</span> {
+            <span class="self">self</span>.<span class="ident">output_variant</span>(<span class="ident">base</span>, <span class="kw-2">&amp;</span><span class="ident">variant</span>.<span class="ident">name</span>, <span class="kw-2">*</span><span class="ident">index</span>, <span class="kw-2">&amp;</span><span class="ident">variant</span>.<span class="ident">value</span>)<span class="question-mark">?</span>;
+        }
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">fn</span> <span class="ident">output_container</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">ContainerFormat</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">use</span> <span class="ident">ContainerFormat</span>::<span class="kw-2">*</span>;
+        <span class="kw">match</span> <span class="ident">format</span> {
+            <span class="ident">UnitStruct</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\n@dataclass\nclass {}:\n    pass\n&quot;</span>, <span class="ident">name</span>),
+            <span class="ident">NewTypeStruct</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">writeln</span><span class="macro">!</span>(
+                <span class="self">self</span>.<span class="ident">out</span>,
+                <span class="string">&quot;\n@dataclass\nclass {}:\n    value: {}\n&quot;</span>,
+                <span class="ident">name</span>,
+                <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">format</span>)
+            ),
+            <span class="ident">TupleStruct</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">writeln</span><span class="macro">!</span>(
+                <span class="self">self</span>.<span class="ident">out</span>,
+                <span class="string">&quot;\n@dataclass\nclass {}:\n    value: typing.Tuple[{}]\n&quot;</span>,
+                <span class="ident">name</span>,
+                <span class="self">Self</span>::<span class="ident">quote_types</span>(<span class="ident">formats</span>)
+            ),
+            <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\n@dataclass\nclass {}:&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
+                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
+                <span class="self">self</span>.<span class="ident">output_fields</span>(<span class="ident">fields</span>)<span class="question-mark">?</span>;
+                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+                <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>)
+            }
+            <span class="ident">Enum</span>(<span class="ident">variants</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="comment">// Initializing VARIANTS with a temporary value for typechecking purposes.</span>
+                <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\nclass {}:\n    VARIANTS = []\n&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
+                <span class="self">self</span>.<span class="ident">output_variants</span>(<span class="ident">name</span>, <span class="ident">variants</span>)<span class="question-mark">?</span>;
+                <span class="macro">writeln</span><span class="macro">!</span>(
+                    <span class="self">self</span>.<span class="ident">out</span>,
+                    <span class="string">&quot;{}.VARIANTS = [\n{}]\n&quot;</span>,
+                    <span class="ident">name</span>,
+                    <span class="ident">variants</span>
+                        .<span class="ident">iter</span>()
+                        .<span class="ident">map</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">v</span>)<span class="op">|</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;    {}__{},\n&quot;</span>, <span class="ident">name</span>, <span class="ident">v</span>.<span class="ident">name</span>))
+                        .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
+                        .<span class="ident">join</span>(<span class="string">&quot;&quot;</span>)
+                )
+            }
         }
     }
 }

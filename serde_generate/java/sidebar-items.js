@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["output",""]],"struct":[["Installer",""]]});
+initSidebarItems({"fn":[["output","Output class definitions for the given registry. All definitions are \"public static\" definitions within a single class `class_name`."]],"struct":[["Installer",""]]});
