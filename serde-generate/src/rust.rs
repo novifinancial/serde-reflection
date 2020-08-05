@@ -7,6 +7,7 @@ use crate::{
     DocComments, ExternalDefinitions,
 };
 use serde_reflection::{ContainerFormat, Format, Named, Registry, VariantFormat};
+use std::borrow::Cow;
 use std::collections::{BTreeMap, HashSet};
 use std::io::{Result, Write};
 use std::path::PathBuf;
@@ -48,21 +49,21 @@ pub fn output_with_external_dependencies_and_comments(
     let known_sizes = external_names
         .iter()
         .map(<String as std::ops::Deref>::deref)
-        .collect();
+        .collect::<HashSet<_>>();
 
     let mut emitter = RustEmitter {
         out: IndentedWriter::new(out, IndentConfig::Space(4)),
         comments,
         track_visibility: true,
         with_derive_macros,
-        known_sizes,
+        known_sizes: Cow::Owned(known_sizes),
     };
 
     emitter.output_preamble(external_definitions)?;
     for name in entries {
         let format = &registry[name];
         emitter.output_container(name, format)?;
-        emitter.known_sizes.insert(name);
+        emitter.known_sizes.to_mut().insert(name);
     }
     Ok(())
 }
@@ -83,28 +84,25 @@ pub fn quote_container_definitions_with_comments(
     let entries = analyzer::best_effort_topological_sort(&dependencies);
 
     let mut result = BTreeMap::new();
-    let known_sizes = HashSet::new();
-
-    let mut content = Vec::new();
-    let mut emitter = RustEmitter {
-        out: IndentedWriter::new(&mut content, IndentConfig::Space(4)),
-        comments,
-        track_visibility: false,
-        with_derive_macros: false,
-        known_sizes,
-    };
+    let mut known_sizes = HashSet::new();
 
     for name in entries {
-        emitter.out.as_mut().clear();
-        let format = &registry[name];
-        emitter.output_container(name, format)?;
-        emitter.known_sizes.insert(name);
+        let mut content = Vec::new();
+        {
+            let mut emitter = RustEmitter {
+                out: IndentedWriter::new(&mut content, IndentConfig::Space(4)),
+                comments,
+                track_visibility: false,
+                with_derive_macros: false,
+                known_sizes: Cow::Borrowed(&known_sizes),
+            };
+            let format = &registry[name];
+            emitter.output_container(name, format)?;
+        }
+        known_sizes.insert(name);
         result.insert(
             name.to_string(),
-            String::from_utf8_lossy(&emitter.out.as_ref())
-                .trim()
-                .to_string()
-                + "\n",
+            String::from_utf8_lossy(&content).trim().to_string() + "\n",
         );
     }
     Ok(result)
@@ -115,7 +113,7 @@ struct RustEmitter<'a, T> {
     comments: &'a DocComments,
     track_visibility: bool,
     with_derive_macros: bool,
-    known_sizes: HashSet<&'a str>,
+    known_sizes: Cow<'a, HashSet<&'a str>>,
 }
 
 impl<'a, T> RustEmitter<'a, T>

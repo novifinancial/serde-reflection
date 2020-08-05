@@ -41,18 +41,6 @@ impl<T> IndentedWriter<T> {
     }
 }
 
-impl<T> AsRef<T> for IndentedWriter<T> {
-    fn as_ref(&self) -> &T {
-        &self.w
-    }
-}
-
-impl<T> AsMut<T> for IndentedWriter<T> {
-    fn as_mut(&mut self) -> &mut T {
-        &mut self.w
-    }
-}
-
 impl<T: Write> Write for IndentedWriter<T> {
     fn write(&mut self, mut buf: &[u8]) -> Result<usize> {
         let mut bytes_written = 0;
