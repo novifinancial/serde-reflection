@@ -400,6 +400,14 @@
 <span id="400">400</span>
 <span id="401">401</span>
 <span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -417,15 +425,15 @@
 
 <span class="doccomment">/// Write container definitions in Rust.</span>
 <span class="doccomment">/// * All definitions are made `pub`.</span>
-<span class="doccomment">/// * If `with_derive_macros` is true, the crate `serde` and `serde_bytes` are assumed to be available.</span>
+<span class="doccomment">/// * If `with_serialization` is true, the crate `serde` and `serde_bytes` are assumed to be available.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">output</span>(
     <span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>,
-    <span class="ident">with_derive_macros</span>: <span class="ident">bool</span>,
+    <span class="ident">with_serialization</span>: <span class="ident">bool</span>,
     <span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">Registry</span>,
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
     <span class="ident">output_with_external_dependencies_and_comments</span>(
         <span class="ident">out</span>,
-        <span class="ident">with_derive_macros</span>,
+        <span class="ident">with_serialization</span>,
         <span class="ident">registry</span>,
         <span class="kw-2">&amp;</span><span class="ident">BTreeMap</span>::<span class="ident">new</span>(),
         <span class="kw-2">&amp;</span><span class="ident">BTreeMap</span>::<span class="ident">new</span>(),
@@ -439,7 +447,7 @@
 <span class="doccomment">/// (including for Map and Bytes) will be added manually at the end of the generated file.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">output_with_external_dependencies_and_comments</span>(
     <span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>,
-    <span class="ident">with_derive_macros</span>: <span class="ident">bool</span>,
+    <span class="ident">with_serialization</span>: <span class="ident">bool</span>,
     <span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">Registry</span>,
     <span class="ident">external_definitions</span>: <span class="kw-2">&amp;</span><span class="ident">ExternalDefinitions</span>,
     <span class="ident">comments</span>: <span class="kw-2">&amp;</span><span class="ident">DocComments</span>,
@@ -458,7 +466,8 @@
         <span class="ident">out</span>: <span class="ident">IndentedWriter</span>::<span class="ident">new</span>(<span class="ident">out</span>, <span class="ident">IndentConfig</span>::<span class="ident">Space</span>(<span class="number">4</span>)),
         <span class="ident">comments</span>,
         <span class="ident">track_visibility</span>: <span class="bool-val">true</span>,
-        <span class="ident">with_derive_macros</span>,
+        <span class="ident">with_derive_macros</span>: <span class="bool-val">true</span>,
+        <span class="ident">with_serialization</span>,
         <span class="ident">known_sizes</span>: <span class="ident">Cow</span>::<span class="ident">Owned</span>(<span class="ident">known_sizes</span>),
     };
 
@@ -497,6 +506,7 @@
                 <span class="ident">comments</span>,
                 <span class="ident">track_visibility</span>: <span class="bool-val">false</span>,
                 <span class="ident">with_derive_macros</span>: <span class="bool-val">false</span>,
+                <span class="ident">with_serialization</span>: <span class="bool-val">false</span>,
                 <span class="ident">known_sizes</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="kw-2">&amp;</span><span class="ident">known_sizes</span>),
             };
             <span class="kw">let</span> <span class="ident">format</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">registry</span>[<span class="ident">name</span>];
@@ -516,6 +526,7 @@
     <span class="ident">comments</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">DocComments</span>,
     <span class="ident">track_visibility</span>: <span class="ident">bool</span>,
     <span class="ident">with_derive_macros</span>: <span class="ident">bool</span>,
+    <span class="ident">with_serialization</span>: <span class="ident">bool</span>,
     <span class="ident">known_sizes</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
@@ -549,10 +560,10 @@
         <span class="kw">if</span> <span class="op">!</span><span class="ident">external_names</span>.<span class="ident">contains</span>(<span class="string">&quot;Map&quot;</span>) {
             <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;use std::collections::BTreeMap as Map;&quot;</span>)<span class="question-mark">?</span>;
         }
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">with_derive_macros</span> {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">with_serialization</span> {
             <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;use serde::{{Serialize, Deserialize}};&quot;</span>)<span class="question-mark">?</span>;
         }
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">with_derive_macros</span> <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="op">!</span><span class="ident">external_names</span>.<span class="ident">contains</span>(<span class="string">&quot;Bytes&quot;</span>) {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">with_serialization</span> <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="op">!</span><span class="ident">external_names</span>.<span class="ident">contains</span>(<span class="string">&quot;Bytes&quot;</span>) {
             <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;use serde_bytes::ByteBuf as Bytes;&quot;</span>)<span class="question-mark">?</span>;
         }
         <span class="kw">for</span> (<span class="ident">module</span>, <span class="ident">definitions</span>) <span class="kw">in</span> <span class="ident">external_definitions</span> {
@@ -567,7 +578,7 @@
             }
         }
         <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
-        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">with_derive_macros</span> <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="op">!</span><span class="ident">external_names</span>.<span class="ident">contains</span>(<span class="string">&quot;Bytes&quot;</span>) {
+        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">with_serialization</span> <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="op">!</span><span class="ident">external_names</span>.<span class="ident">contains</span>(<span class="string">&quot;Bytes&quot;</span>) {
             <span class="comment">// If we are not going to use Serde derive macros, use plain vectors.</span>
             <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;type Bytes = Vec&lt;u8&gt;;\n&quot;</span>)<span class="question-mark">?</span>;
         }
@@ -665,11 +676,11 @@
             ),
             <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;{} {{&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
-                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
+                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
                 <span class="kw">let</span> <span class="ident">tracking</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">mem</span>::<span class="ident">replace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">track_visibility</span>, <span class="bool-val">false</span>);
                 <span class="self">self</span>.<span class="ident">output_fields</span>(<span class="kw-2">&amp;</span>[<span class="ident">base</span>, <span class="ident">name</span>], <span class="ident">fields</span>)<span class="question-mark">?</span>;
                 <span class="self">self</span>.<span class="ident">track_visibility</span> <span class="op">=</span> <span class="ident">tracking</span>;
-                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
                 <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}},&quot;</span>)
             }
             <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;incorrect value&quot;</span>),
@@ -692,7 +703,12 @@
     <span class="kw">fn</span> <span class="ident">output_container</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">ContainerFormat</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">output_comment</span>(<span class="kw-2">&amp;</span>[<span class="ident">name</span>])<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">prefix</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">with_derive_macros</span> {
-            <span class="string">&quot;#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, PartialOrd)]\n&quot;</span>.<span class="ident">to_string</span>()
+            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">with_serialization</span> {
+                <span class="string">&quot;#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, PartialOrd)]\n&quot;</span>
+                    .<span class="ident">to_string</span>()
+            } <span class="kw">else</span> {
+                <span class="string">&quot;#[derive(Clone, Debug, PartialEq, PartialOrd)]\n&quot;</span>.<span class="ident">to_string</span>()
+            }
         } <span class="kw">else</span> {
             <span class="ident">String</span>::<span class="ident">new</span>()
         };
@@ -720,16 +736,16 @@
             ),
             <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;{}struct {} {{&quot;</span>, <span class="ident">prefix</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
-                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
+                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
                 <span class="self">self</span>.<span class="ident">output_fields</span>(<span class="kw-2">&amp;</span>[<span class="ident">name</span>], <span class="ident">fields</span>)<span class="question-mark">?</span>;
-                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
                 <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)
             }
             <span class="ident">Enum</span>(<span class="ident">variants</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;{}enum {} {{&quot;</span>, <span class="ident">prefix</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
-                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
+                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
                 <span class="self">self</span>.<span class="ident">output_variants</span>(<span class="ident">name</span>, <span class="ident">variants</span>)<span class="question-mark">?</span>;
-                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
                 <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)
             }
         }
@@ -788,7 +804,7 @@ serde_bytes = &quot;0.11&quot;
         <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">create_dir</span>(<span class="ident">dir_path</span>.<span class="ident">join</span>(<span class="string">&quot;src&quot;</span>))<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">source_path</span> <span class="op">=</span> <span class="ident">dir_path</span>.<span class="ident">join</span>(<span class="string">&quot;src/lib.rs&quot;</span>);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">source</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">File</span>::<span class="ident">create</span>(<span class="kw-2">&amp;</span><span class="ident">source_path</span>)<span class="question-mark">?</span>;
-        <span class="ident">output</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">source</span>, <span class="comment">/* with_derive_macros */</span> <span class="bool-val">true</span>, <span class="kw-2">&amp;</span><span class="ident">registry</span>)
+        <span class="ident">output</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">source</span>, <span class="comment">/* with_serialization */</span> <span class="bool-val">true</span>, <span class="kw-2">&amp;</span><span class="ident">registry</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">install_serde_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {

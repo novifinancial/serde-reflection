@@ -436,9 +436,9 @@ import typing
                     <span class="string">&quot;\n@dataclass\nclass {}__{}({}):\n    INDEX = {}&quot;</span>,
                     <span class="ident">base</span>, <span class="ident">name</span>, <span class="ident">base</span>, <span class="ident">index</span>
                 )<span class="question-mark">?</span>;
-                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
+                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
                 <span class="self">self</span>.<span class="ident">output_fields</span>(<span class="ident">fields</span>)<span class="question-mark">?</span>;
-                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
                 <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>)
             }
             <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;incorrect value&quot;</span>),
@@ -474,9 +474,9 @@ import typing
             ),
             <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\n@dataclass\nclass {}:&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
-                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
+                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
                 <span class="self">self</span>.<span class="ident">output_fields</span>(<span class="ident">fields</span>)<span class="question-mark">?</span>;
-                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
                 <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>)
             }
             <span class="ident">Enum</span>(<span class="ident">variants</span>) <span class="op">=</span><span class="op">&gt;</span> {

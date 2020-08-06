@@ -512,14 +512,14 @@
     <span class="kw">fn</span> <span class="ident">output_open_namespace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">namespace</span> {
             <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\nnamespace {} {{\n&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
-            <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
+            <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
         }
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">fn</span> <span class="ident">output_close_namespace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">namespace</span> {
-            <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+            <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
             <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}} // end of namespace {}&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
@@ -637,10 +637,10 @@
             ),
             <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;struct {} {{&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
-                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
+                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
                 <span class="self">self</span>.<span class="ident">output_fields</span>(<span class="ident">fields</span>)<span class="question-mark">?</span>;
                 <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">operator</span>)<span class="question-mark">?</span>;
-                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
                 <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}};&quot;</span>)
             }
             <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;incorrect value&quot;</span>),
@@ -680,15 +680,15 @@
             ),
             <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;struct {} {{&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
-                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
+                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
                 <span class="self">self</span>.<span class="ident">output_fields</span>(<span class="ident">fields</span>)<span class="question-mark">?</span>;
                 <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">operator</span>)<span class="question-mark">?</span>;
-                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
                 <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}};\n&quot;</span>)
             }
             <span class="ident">Enum</span>(<span class="ident">variants</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;struct {} {{&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
-                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
+                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
                 <span class="self">self</span>.<span class="ident">output_variants</span>(<span class="ident">variants</span>)<span class="question-mark">?</span>;
                 <span class="macro">writeln</span><span class="macro">!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
@@ -700,7 +700,7 @@
                         .<span class="ident">join</span>(<span class="string">&quot;, &quot;</span>),
                 )<span class="question-mark">?</span>;
                 <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">operator</span>)<span class="question-mark">?</span>;
-                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
                 <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}};\n&quot;</span>)
             }
         }
@@ -712,7 +712,7 @@
             <span class="string">&quot;inline bool operator==(const {0} &amp;lhs, const {0} &amp;rhs) {{&quot;</span>,
             <span class="ident">name</span>,
         )<span class="question-mark">?</span>;
-        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
         <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
             <span class="macro">writeln</span><span class="macro">!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
@@ -721,7 +721,7 @@
             )<span class="question-mark">?</span>;
         }
         <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;return true;&quot;</span>)<span class="question-mark">?</span>;
-        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
         <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)
     }
 
@@ -734,7 +734,7 @@ template &lt;typename Serializer&gt;
 void serde::Serializable&lt;{0}&gt;::serialize(const {0} &amp;obj, Serializer &amp;serializer) {{&quot;#</span>,
             <span class="ident">name</span>,
         )<span class="question-mark">?</span>;
-        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
         <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
             <span class="macro">writeln</span><span class="macro">!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
@@ -742,7 +742,7 @@ void serde::Serializable&lt;{0}&gt;::serialize(const {0} &amp;obj, Serializer &a
                 <span class="ident">field</span>,
             )<span class="question-mark">?</span>;
         }
-        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
         <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)
     }
 
@@ -755,7 +755,7 @@ template &lt;typename Deserializer&gt;
 {0} serde::Deserializable&lt;{0}&gt;::deserialize(Deserializer &amp;deserializer) {{&quot;#</span>,
             <span class="ident">name</span>,
         )<span class="question-mark">?</span>;
-        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">inc_level</span>();
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
         <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;{} obj;&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
         <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
             <span class="macro">writeln</span><span class="macro">!</span>(
@@ -765,7 +765,7 @@ template &lt;typename Deserializer&gt;
             )<span class="question-mark">?</span>;
         }
         <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;return obj;&quot;</span>)<span class="question-mark">?</span>;
-        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">dec_level</span>();
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
         <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)
     }
 
