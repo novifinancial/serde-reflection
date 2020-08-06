@@ -22,13 +22,13 @@ pub fn output(out: &mut dyn Write, registry: &Registry, class_name: &str) -> Res
 
     emitter.output_preamble()?;
     writeln!(emitter.out, "public final class {} {{\n", class_name)?;
-    emitter.out.inc_level();
+    emitter.out.indent();
     for (name, format) in registry {
         emitter.output_container(name, format)?;
         writeln!(emitter.out)?;
     }
     emitter.output_trait_helpers(registry)?;
-    emitter.out.dec_level();
+    emitter.out.unindent();
     writeln!(emitter.out, "}}")
 }
 
@@ -165,12 +165,12 @@ where
         }
         let prefix = if self.nested_class { "static " } else { "" };
         writeln!(self.out, "{}final class TraitHelpers {{", prefix)?;
-        self.out.inc_level();
+        self.out.indent();
         for (mangled_name, subtype) in &subtypes {
             self.output_serialization_helper(mangled_name, subtype)?;
             self.output_deserialization_helper(mangled_name, subtype)?;
         }
-        self.out.dec_level();
+        self.out.unindent();
         writeln!(self.out, "}}\n")
     }
 
@@ -295,7 +295,7 @@ where
             name,
             Self::quote_type(format0, "")
         )?;
-        self.out.inc_level();
+        self.out.indent();
         match format0 {
             Option(format) => {
                 write!(
@@ -376,7 +376,7 @@ for ({} item : value) {{
 
             _ => panic!("unexpected case"),
         }
-        self.out.dec_level();
+        self.out.unindent();
         writeln!(self.out, "}}\n")
     }
 
@@ -389,7 +389,7 @@ for ({} item : value) {{
         Self::quote_type(format0, ""),
         name,
     )?;
-        self.out.inc_level();
+        self.out.indent();
         match format0 {
             Option(format) => {
                 write!(
@@ -487,7 +487,7 @@ return obj;
 
             _ => panic!("unexpected case"),
         }
-        self.out.dec_level();
+        self.out.unindent();
         writeln!(self.out, "}}\n")
     }
 
@@ -553,7 +553,7 @@ return obj;
             };
             writeln!(self.out, "{}final class {} {{", prefix, name)?;
         }
-        self.out.inc_level();
+        self.out.indent();
         // Fields
         for field in fields {
             writeln!(
@@ -581,21 +581,21 @@ return obj;
                 .collect::<Vec<_>>()
                 .join(", ")
         )?;
-        self.out.inc_level();
+        self.out.indent();
         for field in fields {
             writeln!(self.out, "assert {} != null;", &field.name)?;
         }
         for field in fields {
             writeln!(self.out, "this.{} = {};", &field.name, &field.name)?;
         }
-        self.out.dec_level();
+        self.out.unindent();
         writeln!(self.out, "}}")?;
         // Serialize
         writeln!(
             self.out,
             "\npublic void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception {{",
         )?;
-        self.out.inc_level();
+        self.out.indent();
         if let Some(index) = variant_index {
             writeln!(self.out, "serializer.serialize_variant_index({});", index)?;
         }
@@ -606,7 +606,7 @@ return obj;
                 Self::quote_serialize_value(&field.name, &field.value, &self.package_prefix)
             )?;
         }
-        self.out.dec_level();
+        self.out.unindent();
         writeln!(self.out, "}}\n")?;
         // Deserialize (struct) or Load (variant)
         if variant_index.is_none() {
@@ -622,7 +622,7 @@ return obj;
             name,
         )?;
         }
-        self.out.inc_level();
+        self.out.indent();
         writeln!(self.out, "Builder builder = new Builder();")?;
         for field in fields {
             writeln!(
@@ -633,11 +633,11 @@ return obj;
             )?;
         }
         writeln!(self.out, "return builder.build();")?;
-        self.out.dec_level();
+        self.out.unindent();
         writeln!(self.out, "}}\n")?;
         // Equality
         write!(self.out, "public boolean equals(Object obj) {{")?;
-        self.out.inc_level();
+        self.out.indent();
         writeln!(
             self.out,
             r#"
@@ -655,11 +655,11 @@ if (getClass() != obj.getClass()) return false;
             )?;
         }
         writeln!(self.out, "return true;")?;
-        self.out.dec_level();
+        self.out.unindent();
         writeln!(self.out, "}}\n")?;
         // Hashing
         writeln!(self.out, "public int hashCode() {{")?;
-        self.out.inc_level();
+        self.out.indent();
         writeln!(self.out, "int value = 7;",)?;
         for field in fields {
             writeln!(
@@ -669,12 +669,12 @@ if (getClass() != obj.getClass()) return false;
             )?;
         }
         writeln!(self.out, "return value;")?;
-        self.out.dec_level();
+        self.out.unindent();
         writeln!(self.out, "}}")?;
         // Builder
         self.output_struct_or_variant_container_builder(name, fields)?;
         // End of class
-        self.out.dec_level();
+        self.out.unindent();
         writeln!(self.out, "}}")
     }
 
@@ -686,7 +686,7 @@ if (getClass() != obj.getClass()) return false;
         // Beginning of builder class
         writeln!(self.out)?;
         writeln!(self.out, "public static final class Builder {{")?;
-        self.out.inc_level();
+        self.out.indent();
         // Fields
         for field in fields {
             writeln!(
@@ -714,7 +714,7 @@ if (getClass() != obj.getClass()) return false;
                 .join(",")
         )?;
         // End of class
-        self.out.dec_level();
+        self.out.unindent();
         writeln!(self.out, "}}")
     }
 
@@ -729,7 +729,7 @@ if (getClass() != obj.getClass()) return false;
             "public "
         };
         writeln!(self.out, "{}abstract class {} {{", prefix, name)?;
-        self.out.inc_level();
+        self.out.indent();
         writeln!(
         self.out,
         "abstract public void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception;\n",
@@ -737,7 +737,7 @@ if (getClass() != obj.getClass()) return false;
         write!(
         self.out,
         "public static {} deserialize(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{", name)?;
-        self.out.inc_level();
+        self.out.indent();
         writeln!(
             self.out,
             r#"
@@ -746,7 +746,7 @@ int index = deserializer.deserialize_variant_index();
 switch (index) {{"#,
             name,
         )?;
-        self.out.inc_level();
+        self.out.indent();
         for (index, variant) in variants {
             writeln!(
                 self.out,
@@ -759,12 +759,12 @@ switch (index) {{"#,
             "default: throw new java.lang.Exception(\"Unknown variant index for {}: \" + index);",
             name,
         )?;
-        self.out.dec_level();
+        self.out.unindent();
         writeln!(self.out, "}}")?;
-        self.out.dec_level();
+        self.out.unindent();
         writeln!(self.out, "}}")?;
         self.output_variants(name, variants)?;
-        self.out.dec_level();
+        self.out.unindent();
         writeln!(self.out, "}}\n")
     }
 

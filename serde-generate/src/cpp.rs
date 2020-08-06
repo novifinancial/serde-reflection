@@ -78,14 +78,14 @@ where
     fn output_open_namespace(&mut self) -> Result<()> {
         if let Some(name) = self.namespace {
             writeln!(self.out, "\nnamespace {} {{\n", name)?;
-            self.out.inc_level();
+            self.out.indent();
         }
         Ok(())
     }
 
     fn output_close_namespace(&mut self) -> Result<()> {
         if let Some(name) = self.namespace {
-            self.out.dec_level();
+            self.out.unindent();
             writeln!(self.out, "}} // end of namespace {}", name)?;
         }
         Ok(())
@@ -203,10 +203,10 @@ where
             ),
             Struct(fields) => {
                 writeln!(self.out, "struct {} {{", name)?;
-                self.out.inc_level();
+                self.out.indent();
                 self.output_fields(fields)?;
                 writeln!(self.out, "{}", operator)?;
-                self.out.dec_level();
+                self.out.unindent();
                 writeln!(self.out, "}};")
             }
             Variable(_) => panic!("incorrect value"),
@@ -246,15 +246,15 @@ where
             ),
             Struct(fields) => {
                 writeln!(self.out, "struct {} {{", name)?;
-                self.out.inc_level();
+                self.out.indent();
                 self.output_fields(fields)?;
                 writeln!(self.out, "{}", operator)?;
-                self.out.dec_level();
+                self.out.unindent();
                 writeln!(self.out, "}};\n")
             }
             Enum(variants) => {
                 writeln!(self.out, "struct {} {{", name)?;
-                self.out.inc_level();
+                self.out.indent();
                 self.output_variants(variants)?;
                 writeln!(
                     self.out,
@@ -266,7 +266,7 @@ where
                         .join(", "),
                 )?;
                 writeln!(self.out, "{}", operator)?;
-                self.out.dec_level();
+                self.out.unindent();
                 writeln!(self.out, "}};\n")
             }
         }
@@ -278,7 +278,7 @@ where
             "inline bool operator==(const {0} &lhs, const {0} &rhs) {{",
             name,
         )?;
-        self.out.inc_level();
+        self.out.indent();
         for field in fields {
             writeln!(
                 self.out,
@@ -287,7 +287,7 @@ where
             )?;
         }
         writeln!(self.out, "return true;")?;
-        self.out.dec_level();
+        self.out.unindent();
         writeln!(self.out, "}}\n")
     }
 
@@ -300,7 +300,7 @@ template <typename Serializer>
 void serde::Serializable<{0}>::serialize(const {0} &obj, Serializer &serializer) {{"#,
             name,
         )?;
-        self.out.inc_level();
+        self.out.indent();
         for field in fields {
             writeln!(
                 self.out,
@@ -308,7 +308,7 @@ void serde::Serializable<{0}>::serialize(const {0} &obj, Serializer &serializer)
                 field,
             )?;
         }
-        self.out.dec_level();
+        self.out.unindent();
         writeln!(self.out, "}}")
     }
 
@@ -321,7 +321,7 @@ template <typename Deserializer>
 {0} serde::Deserializable<{0}>::deserialize(Deserializer &deserializer) {{"#,
             name,
         )?;
-        self.out.inc_level();
+        self.out.indent();
         writeln!(self.out, "{} obj;", name)?;
         for field in fields {
             writeln!(
@@ -331,7 +331,7 @@ template <typename Deserializer>
             )?;
         }
         writeln!(self.out, "return obj;")?;
-        self.out.dec_level();
+        self.out.unindent();
         writeln!(self.out, "}}")
     }
 

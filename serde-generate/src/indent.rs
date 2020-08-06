@@ -1,6 +1,5 @@
 use std::io::{Result, Write};
 
-#[allow(dead_code)]
 #[derive(Clone, Copy)]
 pub enum IndentConfig {
     Tab,
@@ -8,36 +7,45 @@ pub enum IndentConfig {
 }
 
 pub struct IndentedWriter<T> {
-    w: T,
-    indent_level: usize,
-    indent: IndentConfig,
+    out: T,
+    indentation: Vec<u8>,
+    config: IndentConfig,
     at_begining_of_line: bool,
 }
 
 impl<T> IndentedWriter<T> {
-    pub fn new(w: T, indent: IndentConfig) -> Self {
+    pub fn new(out: T, config: IndentConfig) -> Self {
         Self {
-            w,
-            indent_level: 0,
-            indent,
+            out,
+            indentation: Vec::new(),
+            config,
             at_begining_of_line: true,
         }
     }
 
-    pub fn inc_level(&mut self) {
-        self.inc_level_by(1);
+    pub fn indent(&mut self) {
+        match self.config {
+            IndentConfig::Tab => {
+                self.indentation.push(b'\t');
+            }
+            IndentConfig::Space(n) => {
+                for _ in 0..n {
+                    self.indentation.push(b' ');
+                }
+            }
+        }
     }
 
-    pub fn dec_level(&mut self) {
-        self.dec_level_by(1);
-    }
-
-    pub fn inc_level_by(&mut self, n: usize) {
-        self.indent_level = self.indent_level.saturating_add(n);
-    }
-
-    pub fn dec_level_by(&mut self, n: usize) {
-        self.indent_level = self.indent_level.saturating_sub(n);
+    pub fn unindent(&mut self) {
+        match self.config {
+            IndentConfig::Tab => {
+                self.indentation.pop();
+            }
+            IndentConfig::Space(n) => {
+                self.indentation
+                    .truncate(self.indentation.len().saturating_sub(n));
+            }
+        }
     }
 }
 
@@ -54,24 +62,15 @@ impl<T: Write> Write for IndentedWriter<T> {
                 };
 
             if self.at_begining_of_line && !before_newline.is_empty() {
-                for _ in 0..self.indent_level {
-                    match self.indent {
-                        IndentConfig::Tab => self.w.write_all(b"\t")?,
-                        IndentConfig::Space(n) => {
-                            for _ in 0..n {
-                                self.w.write_all(b" ")?;
-                            }
-                        }
-                    }
-                }
+                self.out.write_all(&self.indentation)?;
                 self.at_begining_of_line = false;
             }
 
-            self.w.write_all(before_newline)?;
+            self.out.write_all(before_newline)?;
             bytes_written += before_newline.len();
 
             if has_newline {
-                self.w.write_all(b"\n")?;
+                self.out.write_all(b"\n")?;
                 bytes_written += 1;
                 self.at_begining_of_line = true;
             }
@@ -83,7 +82,7 @@ impl<T: Write> Write for IndentedWriter<T> {
     }
 
     fn flush(&mut self) -> Result<()> {
-        self.w.flush()
+        self.out.flush()
     }
 }
 
@@ -93,21 +92,22 @@ mod test {
 
     #[test]
     fn basic() -> Result<()> {
-        let mut out: Vec<u8> = Vec::new();
+        let mut buffer: Vec<u8> = Vec::new();
 
-        let mut w = IndentedWriter::new(&mut out, IndentConfig::Space(2));
+        let mut out = IndentedWriter::new(&mut buffer, IndentConfig::Space(2));
 
-        writeln!(w, "foo")?;
-        w.inc_level();
-        writeln!(w, "bar")?;
-        writeln!(w)?;
-        writeln!(w, "bar")?;
-        w.inc_level();
-        writeln!(w, "foobar")?;
-        writeln!(w)?;
-        writeln!(w, "foobar")?;
-        w.dec_level_by(2);
-        writeln!(w, "foo")?;
+        writeln!(out, "foo")?;
+        out.indent();
+        writeln!(out, "bar")?;
+        writeln!(out)?;
+        writeln!(out, "bar")?;
+        out.indent();
+        writeln!(out, "foobar")?;
+        writeln!(out)?;
+        writeln!(out, "foobar")?;
+        out.unindent();
+        out.unindent();
+        writeln!(out, "foo")?;
 
         let expect: &[u8] = b"\
 foo
@@ -119,7 +119,7 @@ foo
     foobar
 foo
 ";
-        assert_eq!(out, expect);
+        assert_eq!(buffer, expect);
 
         Ok(())
     }

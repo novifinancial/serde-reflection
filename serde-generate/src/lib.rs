@@ -112,14 +112,14 @@
 pub mod analyzer;
 /// Support for code-generation in C++
 pub mod cpp;
+/// Utility function to generate indented text
+pub mod indent;
 /// Support for code-generation in Java
 pub mod java;
 /// Support for code-generation in Python 3
 pub mod python3;
 /// Support for code-generation in Rust
 pub mod rust;
-
-mod indent;
 
 #[doc(hidden)]
 /// Utility functions to help testing code generators.

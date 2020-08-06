@@ -262,11 +262,11 @@ where
             ),
             Struct(fields) => {
                 writeln!(self.out, "{} {{", name)?;
-                self.out.inc_level();
+                self.out.indent();
                 let tracking = std::mem::replace(&mut self.track_visibility, false);
                 self.output_fields(&[base, name], fields)?;
                 self.track_visibility = tracking;
-                self.out.dec_level();
+                self.out.unindent();
                 writeln!(self.out, "}},")
             }
             Variable(_) => panic!("incorrect value"),
@@ -317,16 +317,16 @@ where
             ),
             Struct(fields) => {
                 writeln!(self.out, "{}struct {} {{", prefix, name)?;
-                self.out.inc_level();
+                self.out.indent();
                 self.output_fields(&[name], fields)?;
-                self.out.dec_level();
+                self.out.unindent();
                 writeln!(self.out, "}}\n")
             }
             Enum(variants) => {
                 writeln!(self.out, "{}enum {} {{", prefix, name)?;
-                self.out.inc_level();
+                self.out.indent();
                 self.output_variants(name, variants)?;
-                self.out.dec_level();
+                self.out.unindent();
                 writeln!(self.out, "}}\n")
             }
         }
