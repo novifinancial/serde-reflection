@@ -14,15 +14,15 @@ use std::path::PathBuf;
 
 /// Write container definitions in Rust.
 /// * All definitions are made `pub`.
-/// * If `with_derive_macros` is true, the crate `serde` and `serde_bytes` are assumed to be available.
+/// * If `with_serialization` is true, the crate `serde` and `serde_bytes` are assumed to be available.
 pub fn output(
     out: &mut dyn Write,
-    with_derive_macros: bool,
+    with_serialization: bool,
     registry: &Registry,
 ) -> std::result::Result<(), Box<dyn std::error::Error>> {
     output_with_external_dependencies_and_comments(
         out,
-        with_derive_macros,
+        with_serialization,
         registry,
         &BTreeMap::new(),
         &BTreeMap::new(),
@@ -36,7 +36,7 @@ pub fn output(
 /// (including for Map and Bytes) will be added manually at the end of the generated file.
 pub fn output_with_external_dependencies_and_comments(
     out: &mut dyn Write,
-    with_derive_macros: bool,
+    with_serialization: bool,
     registry: &Registry,
     external_definitions: &ExternalDefinitions,
     comments: &DocComments,
@@ -55,7 +55,8 @@ pub fn output_with_external_dependencies_and_comments(
         out: IndentedWriter::new(out, IndentConfig::Space(4)),
         comments,
         track_visibility: true,
-        with_derive_macros,
+        with_derive_macros: true,
+        with_serialization,
         known_sizes: Cow::Owned(known_sizes),
     };
 
@@ -94,6 +95,7 @@ pub fn quote_container_definitions_with_comments(
                 comments,
                 track_visibility: false,
                 with_derive_macros: false,
+                with_serialization: false,
                 known_sizes: Cow::Borrowed(&known_sizes),
             };
             let format = &registry[name];
@@ -113,6 +115,7 @@ struct RustEmitter<'a, T> {
     comments: &'a DocComments,
     track_visibility: bool,
     with_derive_macros: bool,
+    with_serialization: bool,
     known_sizes: Cow<'a, HashSet<&'a str>>,
 }
 
@@ -146,10 +149,10 @@ where
         if !external_names.contains("Map") {
             writeln!(self.out, "use std::collections::BTreeMap as Map;")?;
         }
-        if self.with_derive_macros {
+        if self.with_serialization {
             writeln!(self.out, "use serde::{{Serialize, Deserialize}};")?;
         }
-        if self.with_derive_macros && !external_names.contains("Bytes") {
+        if self.with_serialization && !external_names.contains("Bytes") {
             writeln!(self.out, "use serde_bytes::ByteBuf as Bytes;")?;
         }
         for (module, definitions) in external_definitions {
@@ -164,7 +167,7 @@ where
             }
         }
         writeln!(self.out)?;
-        if !self.with_derive_macros && !external_names.contains("Bytes") {
+        if !self.with_serialization && !external_names.contains("Bytes") {
             // If we are not going to use Serde derive macros, use plain vectors.
             writeln!(self.out, "type Bytes = Vec<u8>;\n")?;
         }
@@ -289,7 +292,12 @@ where
     fn output_container(&mut self, name: &str, format: &ContainerFormat) -> Result<()> {
         self.output_comment(&[name])?;
         let mut prefix = if self.with_derive_macros {
-            "#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, PartialOrd)]\n".to_string()
+            if self.with_serialization {
+                "#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, PartialOrd)]\n"
+                    .to_string()
+            } else {
+                "#[derive(Clone, Debug, PartialEq, PartialOrd)]\n".to_string()
+            }
         } else {
             String::new()
         };
@@ -385,7 +393,7 @@ serde_bytes = "0.11"
         std::fs::create_dir(dir_path.join("src"))?;
         let source_path = dir_path.join("src/lib.rs");
         let mut source = std::fs::File::create(&source_path)?;
-        output(&mut source, /* with_derive_macros */ true, &registry)
+        output(&mut source, /* with_serialization */ true, &registry)
     }
 
     fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {
