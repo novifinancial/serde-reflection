@@ -149,9 +149,9 @@ import typing
                     "\n@dataclass\nclass {}__{}({}):\n    INDEX = {}",
                     base, name, base, index
                 )?;
-                self.out.inc_level();
+                self.out.indent();
                 self.output_fields(fields)?;
-                self.out.dec_level();
+                self.out.unindent();
                 writeln!(self.out)
             }
             Variable(_) => panic!("incorrect value"),
@@ -187,9 +187,9 @@ import typing
             ),
             Struct(fields) => {
                 writeln!(self.out, "\n@dataclass\nclass {}:", name)?;
-                self.out.inc_level();
+                self.out.indent();
                 self.output_fields(fields)?;
-                self.out.dec_level();
+                self.out.unindent();
                 writeln!(self.out)
             }
             Enum(variants) => {
