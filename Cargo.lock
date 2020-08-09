@@ -469,6 +469,7 @@ name = "serde-generate"
 version = "0.9.0"
 dependencies = [
  "bincode",
+ "heck",
  "hex",
  "include_dir",
  "libra-canonical-serialization",
