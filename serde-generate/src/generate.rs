@@ -94,7 +94,7 @@ fn main() {
                         rust::output(&mut out, /* with_derive_macros */ true, &registry).unwrap()
                     }
                     Language::Cpp => cpp::output(&mut out, &registry, Some(&name)).unwrap(),
-                    Language::Java => java::output(&mut out, &registry, &name).unwrap(),
+                    Language::Java => panic!("Code generation in Java requires `--install-dir`"),
                 }
             }
         }

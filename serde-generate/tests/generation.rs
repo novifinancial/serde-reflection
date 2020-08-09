@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use serde_generate::{cpp, java, python3, rust, test_utils, SourceInstaller};
+use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::Write;
 use std::process::Command;
@@ -300,30 +301,21 @@ fn test_that_java_code_compiles() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
 
-    let source_path = dir.path().join("Test.java");
-    let mut source = File::create(&source_path).unwrap();
-    java::output(&mut source, &registry, "Test").unwrap();
+    let config = java::JavaCodegenConfig::default().package_name(Some("test".to_string()));
+    config
+        .write_source_files(dir.path().to_path_buf(), &registry)
+        .unwrap();
 
     let paths = std::iter::empty()
         .chain(std::fs::read_dir("runtime/java/com/facebook/serde").unwrap())
         .chain(std::fs::read_dir("runtime/java/com/facebook/bincode").unwrap())
+        .chain(std::fs::read_dir(dir.path().join("test")).unwrap())
         .map(|e| e.unwrap().path());
     let status = Command::new("javac")
         .arg("-Xlint")
         .arg("-d")
         .arg(dir.path())
         .args(paths)
-        .status()
-        .unwrap();
-    assert!(status.success());
-
-    let status = Command::new("javac")
-        .arg("-Xlint")
-        .arg("-cp")
-        .arg(dir.path())
-        .arg("-d")
-        .arg(dir.path())
-        .arg(source_path)
         .status()
         .unwrap();
     assert!(status.success());
@@ -334,9 +326,37 @@ fn test_that_java_code_with_comments_compiles() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
 
+    let config = java::JavaCodegenConfig::default()
+        .package_name(Some("test".to_string()))
+        .comments(
+            vec![(
+                vec!["test".to_string(), "SerdeData".to_string()],
+                "Some\ncomments".to_string(),
+            )]
+            .into_iter()
+            .collect(),
+        );
+
+    config
+        .write_source_files(dir.path().to_path_buf(), &registry)
+        .unwrap();
+
+    // Comment was correctly generated.
+    let content = std::fs::read_to_string(dir.path().join("test/SerdeData.java")).unwrap();
+    assert!(content.contains(
+        r#"
+/**
+ * Some
+ * comments
+ */
+"#
+    ));
+
+    // Files compile.
     let paths = std::iter::empty()
         .chain(std::fs::read_dir("runtime/java/com/facebook/serde").unwrap())
         .chain(std::fs::read_dir("runtime/java/com/facebook/bincode").unwrap())
+        .chain(std::fs::read_dir(dir.path().join("test")).unwrap())
         .map(|e| e.unwrap().path());
     let status = Command::new("javac")
         .arg("-Xlint")
@@ -347,62 +367,18 @@ fn test_that_java_code_with_comments_compiles() {
         .unwrap();
     assert!(status.success());
 
-    let source_path = dir.path().join("Test.java");
-    let mut source = File::create(&source_path).unwrap();
-
-    let comments = vec![(
-        vec!["Test".to_string(), "SerdeData".to_string()],
-        "Some\ncomments".to_string(),
-    )]
-    .into_iter()
-    .collect();
-    let mut definitions = std::collections::BTreeMap::new();
-
-    java::output_with_external_dependencies_and_comments(
-        &mut source,
-        &registry,
-        "Test",
-        &definitions,
-        &comments,
-    )
-    .unwrap();
-
-    // Comment was correctly generated.
-    let content = std::fs::read_to_string(&source_path).unwrap();
-    assert!(content.contains(
-        r#"
-    /**
-     * Some
-     * comments
-     */
-"#
-    ));
-
-    // File compiles.
-    let status = Command::new("javac")
-        .arg("-Xlint")
-        .arg("-cp")
-        .arg(dir.path())
-        .arg("-d")
-        .arg(dir.path())
-        .arg(source_path.clone())
-        .status()
-        .unwrap();
-    assert!(status.success());
-
     // (wrongly) Declare TraitHelpers as external.
+    let mut definitions = BTreeMap::new();
     definitions.insert("foo".to_string(), vec!["TraitHelpers".to_string()]);
+    let config = java::JavaCodegenConfig::default()
+        .package_name(Some("test".to_string()))
+        .external_definitions(definitions);
 
-    java::output_with_external_dependencies_and_comments(
-        &mut source,
-        &registry,
-        "Test",
-        &definitions,
-        &comments,
-    )
-    .unwrap();
+    config
+        .write_source_files(dir.path().to_path_buf(), &registry)
+        .unwrap();
 
     // References were updated.
-    let content = std::fs::read_to_string(&source_path).unwrap();
+    let content = std::fs::read_to_string(dir.path().join("test/SerdeData.java")).unwrap();
     assert!(content.contains("foo.TraitHelpers."));
 }
