@@ -343,8 +343,10 @@ fn test_java_lcs_runtime_on_simple_data() {
     let registry = get_local_registry().unwrap();
     let dir = tempdir().unwrap();
 
-    let mut source = File::create(&dir.path().join("Testing.java")).unwrap();
-    java::output(&mut source, &registry, "Testing").unwrap();
+    let config = java::JavaCodegenConfig::default().package_name(Some("testing".to_string()));
+    config
+        .write_source_files(dir.path().to_path_buf(), &registry)
+        .unwrap();
 
     let reference = lcs::to_bytes(&Test {
         a: vec![4, 6],
@@ -365,18 +367,20 @@ import com.facebook.serde.Unsigned;
 import com.facebook.serde.Tuple2;
 import com.facebook.lcs.LcsDeserializer;
 import com.facebook.lcs.LcsSerializer;
+import testing.Choice;
+import testing.Test;
 
 public class Main {{
     public static void main(String[] args) throws java.lang.Exception {{
         byte[] input = new byte[] {{{}}};
 
         Deserializer deserializer = new LcsDeserializer(input);
-        Testing.Test test = Testing.Test.deserialize(deserializer);
+        Test test = Test.deserialize(deserializer);
 
         List<@Unsigned Integer> a = Arrays.asList(4, 6);
         Tuple2<Long, @Unsigned Long> b = new Tuple2<>(Long.valueOf(-3), Long.valueOf(5));
-        Testing.Choice c = new Testing.Choice.C(Byte.valueOf((byte) 7));
-        Testing.Test test2 = new Testing.Test(a, b, c);
+        Choice c = new Choice.C(Byte.valueOf((byte) 7));
+        Test test2 = new Test(a, b, c);
 
         assert test.equals(test2);
 
@@ -399,6 +403,7 @@ public class Main {{
     let paths = std::iter::empty()
         .chain(std::fs::read_dir("runtime/java/com/facebook/serde").unwrap())
         .chain(std::fs::read_dir("runtime/java/com/facebook/lcs").unwrap())
+        .chain(std::fs::read_dir(dir.path().join("testing")).unwrap())
         .map(|e| e.unwrap().path());
     let status = Command::new("javac")
         .arg("-Xlint")
@@ -415,7 +420,6 @@ public class Main {{
         .arg(dir.path())
         .arg("-d")
         .arg(dir.path())
-        .arg(dir.path().join("Testing.java"))
         .arg(dir.path().join("Main.java"))
         .status()
         .unwrap();
@@ -436,8 +440,10 @@ fn test_java_lcs_runtime_on_supported_types() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
 
-    let mut source = File::create(&dir.path().join("Testing.java")).unwrap();
-    java::output(&mut source, &registry, "Testing").unwrap();
+    let config = java::JavaCodegenConfig::default().package_name(Some("testing".to_string()));
+    config
+        .write_source_files(dir.path().to_path_buf(), &registry)
+        .unwrap();
 
     let values = test_utils::get_sample_values();
     let encodings = values
@@ -468,6 +474,7 @@ import com.facebook.serde.Unsigned;
 import com.facebook.serde.Tuple2;
 import com.facebook.lcs.LcsDeserializer;
 import com.facebook.lcs.LcsSerializer;
+import testing.SerdeData;
 
 public class Main {{
     public static void main(String[] args) throws java.lang.Exception {{
@@ -475,7 +482,7 @@ public class Main {{
 
         for (int i = 0; i < inputs.length; i++) {{
             Deserializer deserializer = new LcsDeserializer(inputs[i]);
-            Testing.SerdeData test = Testing.SerdeData.deserialize(deserializer);
+            SerdeData test = SerdeData.deserialize(deserializer);
 
             Serializer serializer = new LcsSerializer();
             test.serialize(serializer);
@@ -493,6 +500,7 @@ public class Main {{
     let paths = std::iter::empty()
         .chain(std::fs::read_dir("runtime/java/com/facebook/serde").unwrap())
         .chain(std::fs::read_dir("runtime/java/com/facebook/lcs").unwrap())
+        .chain(std::fs::read_dir(dir.path().join("testing")).unwrap())
         .map(|e| e.unwrap().path());
     let status = Command::new("javac")
         .arg("-Xlint")
@@ -509,7 +517,6 @@ public class Main {{
         .arg(dir.path())
         .arg("-d")
         .arg(dir.path())
-        .arg(dir.path().join("Testing.java"))
         .arg(dir.path().join("Main.java"))
         .status()
         .unwrap();
