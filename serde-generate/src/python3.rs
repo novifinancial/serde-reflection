@@ -6,7 +6,7 @@ use crate::{
     CodegenConfig,
 };
 use serde_reflection::{ContainerFormat, Format, Named, Registry, VariantFormat};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::io::{Result, Write};
 use std::path::PathBuf;
 
@@ -16,6 +16,10 @@ pub struct PythonCodegenConfig<'a> {
     inner: &'a CodegenConfig,
     /// Whether the module providing Serde definitions is located within package.
     serde_package_name: Option<String>,
+    /// Mapping from external type names to suitably qualified names (e.g. "MyClass" -> "my_module.MyClass").
+    /// Assumes suitable imports (e.g. "from my_package import my_module").
+    /// Derived from `config.external_definitions`.
+    external_qualified_names: HashMap<String, String>,
 }
 
 /// Shared state for the code generation of a Python source file.
@@ -24,18 +28,35 @@ struct PythonEmitter<'a, T> {
     out: IndentedWriter<T>,
     /// Configuration.
     config: &'a PythonCodegenConfig<'a>,
+    /// Current namespace (e.g. vec!["my_package", "my_module", "MyClass"])
+    current_namespace: Vec<String>,
 }
 
 impl<'a> PythonCodegenConfig<'a> {
     /// Default configuration.
     pub fn new(inner: &'a CodegenConfig) -> Self {
+        let mut external_qualified_names = HashMap::new();
+        for (module_path, names) in &inner.external_definitions {
+            let module = {
+                let mut path = module_path.split('.').collect::<Vec<_>>();
+                if path.len() < 2 {
+                    module_path
+                } else {
+                    path.pop().unwrap()
+                }
+            };
+            for name in names {
+                external_qualified_names.insert(name.to_string(), format!("{}.{}", module, name));
+            }
+        }
         Self {
             inner,
             serde_package_name: None,
+            external_qualified_names,
         }
     }
 
-    /// Sets whether the module providing Serde definitions is located within package.
+    /// Whether the module providing Serde definitions is located within a package.
     pub fn with_serde_package_name(mut self, serde_package_name: Option<String>) -> Self {
         self.serde_package_name = serde_package_name;
         self
@@ -43,9 +64,16 @@ impl<'a> PythonCodegenConfig<'a> {
 
     /// Write container definitions in Python.
     pub fn output(&self, out: &mut dyn Write, registry: &Registry) -> Result<()> {
+        let current_namespace = self
+            .inner
+            .module_name
+            .split('.')
+            .map(String::from)
+            .collect();
         let mut emitter = PythonEmitter {
             out: IndentedWriter::new(out, IndentConfig::Space(4)),
             config: self,
+            current_namespace,
         };
         emitter.output_preamble()?;
         for (name, format) in registry {
@@ -59,6 +87,16 @@ impl<'a, T> PythonEmitter<'a, T>
 where
     T: Write,
 {
+    fn quote_import(&self, module: &str) -> String {
+        let mut parts = module.split('.').collect::<Vec<_>>();
+        if parts.len() <= 1 {
+            format!("import {}", module)
+        } else {
+            let module_name = parts.pop().unwrap();
+            format!("from {} import {}", parts.join("."), module_name)
+        }
+    }
+
     fn output_preamble(&mut self) -> Result<()> {
         writeln!(
             self.out,
@@ -69,13 +107,30 @@ import typing
                 None => "".to_string(),
                 Some(name) => format!("from {} ", name),
             }
-        )
+        )?;
+        for module in self.config.inner.external_definitions.keys() {
+            writeln!(self.out, "{}\n", self.quote_import(module),)?;
+        }
+        Ok(())
     }
 
-    fn quote_type(format: &Format) -> String {
+    /// Compute a reference to the registry type `name`.
+    /// Use a qualified name in case of external definitions.
+    fn quote_qualified_name(&self, name: &str) -> String {
+        self.config
+            .external_qualified_names
+            .get(name)
+            .cloned()
+            .unwrap_or_else(|| {
+                // Need quotes because of circular dependencies.
+                format!("\"{}\"", name.to_string())
+            })
+    }
+
+    fn quote_type(&self, format: &Format) -> String {
         use Format::*;
         match format {
-            TypeName(x) => format!("\"{}\"", x), // Need quotes because of circular dependencies.
+            TypeName(x) => self.quote_qualified_name(x),
             Unit => "st.unit".into(),
             Bool => "st.bool".into(),
             I8 => "st.int8".into(),
@@ -94,29 +149,43 @@ import typing
             Str => "str".into(),
             Bytes => "bytes".into(),
 
-            Option(format) => format!("typing.Optional[{}]", Self::quote_type(format)),
-            Seq(format) => format!("typing.Sequence[{}]", Self::quote_type(format)),
+            Option(format) => format!("typing.Optional[{}]", self.quote_type(format)),
+            Seq(format) => format!("typing.Sequence[{}]", self.quote_type(format)),
             Map { key, value } => format!(
                 "typing.Dict[{}, {}]",
-                Self::quote_type(key),
-                Self::quote_type(value)
+                self.quote_type(key),
+                self.quote_type(value)
             ),
-            Tuple(formats) => format!("typing.Tuple[{}]", Self::quote_types(formats)),
+            Tuple(formats) => format!("typing.Tuple[{}]", self.quote_types(formats)),
             TupleArray { content, size } => format!(
                 "typing.Tuple[{}]",
-                Self::quote_types(&vec![content.as_ref().clone(); *size])
+                self.quote_types(&vec![content.as_ref().clone(); *size])
             ), // Sadly, there are no fixed-size arrays in python.
 
             Variable(_) => panic!("unexpected value"),
         }
     }
 
-    fn quote_types(formats: &[Format]) -> String {
+    fn quote_types(&self, formats: &[Format]) -> String {
         formats
             .iter()
-            .map(Self::quote_type)
+            .map(|x| self.quote_type(x))
             .collect::<Vec<_>>()
             .join(", ")
+    }
+
+    fn output_comment(&mut self, name: &str) -> std::io::Result<()> {
+        let mut path = self.current_namespace.clone();
+        path.push(name.to_string());
+        if let Some(doc) = self.config.inner.comments.get(&path) {
+            write!(
+                self.out,
+                r#"""" {}
+""""#,
+                doc
+            )?;
+        }
+        Ok(())
     }
 
     fn output_fields(&mut self, fields: &[Named<Format>]) -> Result<()> {
@@ -125,7 +194,7 @@ import typing
                 self.out,
                 "{}: {}",
                 field.name,
-                Self::quote_type(&field.value)
+                self.quote_type(&field.value)
             )?;
         }
         Ok(())
@@ -139,95 +208,92 @@ import typing
         variant: &VariantFormat,
     ) -> Result<()> {
         use VariantFormat::*;
-        match variant {
-            Unit => writeln!(
-                self.out,
-                "\n@dataclass\nclass {}__{}({}):\n    INDEX = {}\n",
-                base, name, base, index,
-            ),
-            NewType(format) => writeln!(
-                self.out,
-                "\n@dataclass\nclass {}__{}({}):\n    INDEX = {}\n    value: {}\n",
-                base,
-                name,
-                base,
-                index,
-                Self::quote_type(format)
-            ),
-            Tuple(formats) => writeln!(
-                self.out,
-                "\n@dataclass\nclass {}__{}({}):\n    INDEX = {}\n    value: typing.Tuple[{}]\n",
-                base,
-                name,
-                base,
-                index,
-                Self::quote_types(formats)
-            ),
-            Struct(fields) => {
-                writeln!(
-                    self.out,
-                    "\n@dataclass\nclass {}__{}({}):\n    INDEX = {}",
-                    base, name, base, index
-                )?;
-                self.out.indent();
-                self.output_fields(fields)?;
-                self.out.unindent();
-                writeln!(self.out)
-            }
+        let fields = match variant {
+            Unit => Vec::new(),
+            NewType(format) => vec![Named {
+                name: "value".to_string(),
+                value: format.as_ref().clone(),
+            }],
+            Tuple(formats) => vec![Named {
+                name: "value".to_string(),
+                value: Format::Tuple(formats.clone()),
+            }],
+            Struct(fields) => fields.clone(),
             Variable(_) => panic!("incorrect value"),
-        }
+        };
+
+        // Regarding comments, we pretend the namespace is `[module, base, name]`.
+        self.output_comment(&name)?;
+        writeln!(
+            self.out,
+            "\n@dataclass\nclass {0}__{1}({0}):\n    INDEX = {2}",
+            base, name, index
+        )?;
+        self.out.indent();
+        self.current_namespace.push(name.to_string());
+        self.output_fields(&fields)?;
+        self.out.unindent();
+        self.current_namespace.pop();
+        writeln!(self.out)
     }
 
-    fn output_variants(
+    fn output_enum_container(
         &mut self,
-        base: &str,
+        name: &str,
         variants: &BTreeMap<u32, Named<VariantFormat>>,
     ) -> Result<()> {
+        self.output_comment(name)?;
+        // Initializing VARIANTS with a temporary value for typechecking purposes.
+        writeln!(self.out, "\nclass {}:\n    VARIANTS = []\n", name)?;
+        self.current_namespace.push(name.to_string());
         for (index, variant) in variants {
-            self.output_variant(base, &variant.name, *index, &variant.value)?;
+            self.output_variant(name, &variant.name, *index, &variant.value)?;
         }
-        Ok(())
+        self.current_namespace.pop();
+        writeln!(
+            self.out,
+            "{}.VARIANTS = [\n{}]\n",
+            name,
+            variants
+                .iter()
+                .map(|(_, v)| format!("    {}__{},\n", name, v.name))
+                .collect::<Vec<_>>()
+                .join("")
+        )
     }
 
     fn output_container(&mut self, name: &str, format: &ContainerFormat) -> Result<()> {
         use ContainerFormat::*;
-        match format {
-            UnitStruct => writeln!(self.out, "\n@dataclass\nclass {}:\n    pass\n", name),
-            NewTypeStruct(format) => writeln!(
-                self.out,
-                "\n@dataclass\nclass {}:\n    value: {}\n",
-                name,
-                Self::quote_type(format)
-            ),
-            TupleStruct(formats) => writeln!(
-                self.out,
-                "\n@dataclass\nclass {}:\n    value: typing.Tuple[{}]\n",
-                name,
-                Self::quote_types(formats)
-            ),
-            Struct(fields) => {
-                writeln!(self.out, "\n@dataclass\nclass {}:", name)?;
-                self.out.indent();
-                self.output_fields(fields)?;
-                self.out.unindent();
-                writeln!(self.out)
-            }
+        let fields = match format {
+            UnitStruct => Vec::new(),
+            NewTypeStruct(format) => vec![Named {
+                name: "value".to_string(),
+                value: format.as_ref().clone(),
+            }],
+            TupleStruct(formats) => vec![Named {
+                name: "value".to_string(),
+                value: Format::Tuple(formats.clone()),
+            }],
+            Struct(fields) => fields.clone(),
             Enum(variants) => {
-                // Initializing VARIANTS with a temporary value for typechecking purposes.
-                writeln!(self.out, "\nclass {}:\n    VARIANTS = []\n", name)?;
-                self.output_variants(name, variants)?;
-                writeln!(
-                    self.out,
-                    "{}.VARIANTS = [\n{}]\n",
-                    name,
-                    variants
-                        .iter()
-                        .map(|(_, v)| format!("    {}__{},\n", name, v.name))
-                        .collect::<Vec<_>>()
-                        .join("")
-                )
+                // Enum case.
+                self.output_enum_container(name, variants)?;
+                return Ok(());
             }
+        };
+        // Struct case.
+        self.output_comment(name)?;
+        writeln!(self.out, "\n@dataclass\nclass {}:", name)?;
+        self.out.indent();
+        self.current_namespace.push(name.to_string());
+        if fields.is_empty() {
+            writeln!(self.out, "pass")?;
+        } else {
+            self.output_fields(&fields)?;
         }
+        self.current_namespace.pop();
+        self.out.unindent();
+        writeln!(self.out)
     }
 }
 
