@@ -33,6 +33,64 @@ fn test_that_python_code_parses() {
 }
 
 #[test]
+fn test_that_python_code_with_codegen_options_parses() {
+    let registry = test_utils::get_registry().unwrap();
+    let dir = tempdir().unwrap();
+
+    let source_path = dir.path().join("test.py");
+    let mut source = File::create(&source_path).unwrap();
+
+    let inner = CodegenConfig::new("testing".to_string()).with_comments(
+        vec![(
+            vec!["testing".to_string(), "SerdeData".to_string()],
+            "Some\ncomments".to_string(),
+        ), (
+            vec!["testing".to_string(), "List".to_string(), "Node".to_string()],
+            "Some other comments".to_string(),
+        )]
+        .into_iter()
+        .collect(),
+    );
+    let config = python3::PythonCodegenConfig::new(&inner);
+    config.output(&mut source, &registry).unwrap();
+
+    // Comment was correctly generated.
+    let content = std::fs::read_to_string(&source_path).unwrap();
+    assert!(content.contains(r#"
+""" Some
+comments
+"""
+"#));
+    assert!(content.contains(r#"
+""" Some other comments
+"""
+"#));
+
+    let python_path = format!(
+        "{}:runtime/python",
+        std::env::var("PYTHONPATH").unwrap_or_default()
+    );
+    let status = Command::new("python3")
+        .arg(source_path.clone())
+        .env("PYTHONPATH", python_path)
+        .status()
+        .unwrap();
+    assert!(status.success());
+
+    // Pretend that "Tree" is external.
+    let mut definitions = BTreeMap::new();
+    definitions.insert("pkg.foo".to_string(), vec!["Tree".to_string()]);
+    let inner = CodegenConfig::new("test".to_string()).with_external_definitions(definitions);
+    let config = python3::PythonCodegenConfig::new(&inner);
+    config.output(&mut source, &registry).unwrap();
+
+    let content = std::fs::read_to_string(&source_path).unwrap();
+    assert!(content.contains("from pkg import foo"));
+    assert!(content.contains("value: foo.Tree"));
+    assert!(!content.contains("value: Tree"));
+}
+
+#[test]
 fn test_that_installed_python_code_passes_pyre_check() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
@@ -211,7 +269,7 @@ fn test_that_rust_code_compiles() {
 
 // Quick test using rustc directly.
 #[test]
-fn test_that_rust_code_with_comments_compiles() {
+fn test_that_rust_code_with_codegen_options_compiles() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
     let source_path = dir.path().join("test.rs");
@@ -342,7 +400,7 @@ fn test_that_java_code_compiles() {
 }
 
 #[test]
-fn test_that_java_code_with_comments_compiles() {
+fn test_that_java_code_with_codegen_options_compiles() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
 
