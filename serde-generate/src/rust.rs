@@ -32,6 +32,8 @@ struct RustEmitter<'a, T> {
     config: &'a RustCodegenConfig<'a>,
     /// Track which definitions have a known size. (Used to add `Box` types.)
     known_sizes: Cow<'a, HashSet<&'a str>>,
+    /// Current namespace (e.g. vec!["my_package", "my_module", "MyClass"])
+    current_namespace: Vec<String>,
 }
 
 impl<'a> RustCodegenConfig<'a> {
@@ -68,8 +70,6 @@ impl<'a> RustCodegenConfig<'a> {
     }
 
     /// Write container definitions in Rust.
-    /// * All definitions are made `pub`.
-    /// * If `with_serialization` is true, the crate `serde` and `serde_bytes` are assumed to be available.
     pub fn output(
         &self,
         out: &mut dyn Write,
@@ -91,10 +91,17 @@ impl<'a> RustCodegenConfig<'a> {
             .map(<String as std::ops::Deref>::deref)
             .collect::<HashSet<_>>();
 
+        let current_namespace = self
+            .inner
+            .module_name
+            .split('.')
+            .map(String::from)
+            .collect();
         let mut emitter = RustEmitter {
             out: IndentedWriter::new(out, IndentConfig::Space(4)),
             config: self,
             known_sizes: Cow::Owned(known_sizes),
+            current_namespace,
         };
 
         emitter.output_preamble()?;
@@ -116,6 +123,12 @@ impl<'a> RustCodegenConfig<'a> {
 
         let mut result = BTreeMap::new();
         let mut known_sizes = HashSet::new();
+        let current_namespace = self
+            .inner
+            .module_name
+            .split('.')
+            .map(String::from)
+            .collect::<Vec<_>>();
 
         for name in entries {
             let mut content = Vec::new();
@@ -124,6 +137,7 @@ impl<'a> RustCodegenConfig<'a> {
                     out: IndentedWriter::new(&mut content, IndentConfig::Space(4)),
                     config: self,
                     known_sizes: Cow::Borrowed(&known_sizes),
+                    current_namespace: current_namespace.clone(),
                 };
                 let format = &registry[name];
                 emitter.output_container(name, format)?;
@@ -142,14 +156,10 @@ impl<'a, T> RustEmitter<'a, T>
 where
     T: std::io::Write,
 {
-    fn output_comment(&mut self, qualified_name: &[&str]) -> std::io::Result<()> {
-        if let Some(doc) = self.config.inner.comments.get(
-            &qualified_name
-                .to_vec()
-                .into_iter()
-                .map(String::from)
-                .collect::<Vec<_>>(),
-        ) {
+    fn output_comment(&mut self, name: &str) -> std::io::Result<()> {
+        let mut path = self.current_namespace.clone();
+        path.push(name.to_string());
+        if let Some(doc) = self.config.inner.comments.get(&path) {
             let text = textwrap::indent(doc, "/// ").replace("\n\n", "\n///\n");
             write!(self.out, "\n{}", text)?;
         }
@@ -255,12 +265,7 @@ where
             ""
         };
         for field in fields {
-            let qualified_name = {
-                let mut name = base.to_vec();
-                name.push(&field.name);
-                name
-            };
-            self.output_comment(&qualified_name)?;
+            self.output_comment(&field.name)?;
             writeln!(
                 self.out,
                 "{}{}: {},",
@@ -273,6 +278,7 @@ where
     }
 
     fn output_variant(&mut self, base: &str, name: &str, variant: &VariantFormat) -> Result<()> {
+        self.output_comment(name)?;
         use VariantFormat::*;
         match variant {
             Unit => writeln!(self.out, "{},", name),
@@ -290,9 +296,11 @@ where
             ),
             Struct(fields) => {
                 writeln!(self.out, "{} {{", name)?;
+                self.current_namespace.push(name.to_string());
                 self.out.indent();
                 self.output_fields(&[base, name], fields)?;
                 self.out.unindent();
+                self.current_namespace.pop();
                 writeln!(self.out, "}},")
             }
             Variable(_) => panic!("incorrect value"),
@@ -306,14 +314,13 @@ where
     ) -> Result<()> {
         for (expected_index, (index, variant)) in variants.iter().enumerate() {
             assert_eq!(*index, expected_index as u32);
-            self.output_comment(&[base, &variant.name])?;
             self.output_variant(base, &variant.name, &variant.value)?;
         }
         Ok(())
     }
 
     fn output_container(&mut self, name: &str, format: &ContainerFormat) -> Result<()> {
-        self.output_comment(&[name])?;
+        self.output_comment(name)?;
         let mut derive_macros = self.config.derive_macros.clone();
         if self.config.inner.serialization {
             derive_macros.push("Serialize".to_string());
@@ -355,16 +362,20 @@ where
             ),
             Struct(fields) => {
                 writeln!(self.out, "{}struct {} {{", prefix, name)?;
+                self.current_namespace.push(name.to_string());
                 self.out.indent();
                 self.output_fields(&[name], fields)?;
                 self.out.unindent();
+                self.current_namespace.pop();
                 writeln!(self.out, "}}\n")
             }
             Enum(variants) => {
                 writeln!(self.out, "{}enum {} {{", prefix, name)?;
+                self.current_namespace.push(name.to_string());
                 self.out.indent();
                 self.output_variants(name, variants)?;
                 self.out.unindent();
+                self.current_namespace.pop();
                 writeln!(self.out, "}}\n")
             }
         }
