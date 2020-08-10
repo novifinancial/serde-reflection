@@ -45,7 +45,9 @@
 //!
 //! // Create Python class definitions.
 //! let mut source = Vec::new();
-//! serde_generate::python3::output(&mut source, &registry)?;
+//! let inner = serde_generate::CodegenConfig::new("testing".to_string());
+//! let config = serde_generate::python3::PythonCodegenConfig::new(&inner);
+//! config.output(&mut source, &registry)?;
 //!
 //! assert_eq!(
 //! #  "\n".to_string() + &

@@ -1,41 +1,61 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use crate::indent::{IndentConfig, IndentedWriter};
+use crate::{
+    indent::{IndentConfig, IndentedWriter},
+    CodegenConfig,
+};
 use serde_reflection::{ContainerFormat, Format, Named, Registry, VariantFormat};
 use std::collections::BTreeMap;
 use std::io::{Result, Write};
 use std::path::PathBuf;
 
-/// Write container definitions in Python.
-/// * The packages `dataclasses` and `typing` are assumed to be available.
-/// * The module `serde_types` is assumed to be available.
-pub fn output(out: &mut dyn Write, registry: &Registry) -> Result<()> {
-    output_with_optional_serde_package(out, registry, None)
-}
-
-fn output_with_optional_serde_package(
-    out: &mut dyn Write,
-    registry: &Registry,
+/// Main configuration object for code-generation in Python.
+pub struct PythonCodegenConfig<'a> {
+    /// Language-independent configuration.
+    inner: &'a CodegenConfig,
+    /// Whether the module providing Serde definitions is located within package.
     serde_package_name: Option<String>,
-) -> Result<()> {
-    let mut emitter = PythonEmitter {
-        out: IndentedWriter::new(out, IndentConfig::Space(4)),
-        serde_package_name,
-    };
-    emitter.output_preamble()?;
-    for (name, format) in registry {
-        emitter.output_container(name, format)?;
-    }
-    Ok(())
 }
 
-struct PythonEmitter<T> {
+/// Shared state for the code generation of a Python source file.
+struct PythonEmitter<'a, T> {
+    /// Writer.
     out: IndentedWriter<T>,
-    serde_package_name: Option<String>,
+    /// Configuration.
+    config: &'a PythonCodegenConfig<'a>,
 }
 
-impl<T> PythonEmitter<T>
+impl<'a> PythonCodegenConfig<'a> {
+    /// Default configuration.
+    pub fn new(inner: &'a CodegenConfig) -> Self {
+        Self {
+            inner,
+            serde_package_name: None,
+        }
+    }
+
+    /// Sets whether the module providing Serde definitions is located within package.
+    pub fn serde_package_name(mut self, serde_package_name: Option<String>) -> Self {
+        self.serde_package_name = serde_package_name;
+        self
+    }
+
+    /// Write container definitions in Python.
+    pub fn output(&self, out: &mut dyn Write, registry: &Registry) -> Result<()> {
+        let mut emitter = PythonEmitter {
+            out: IndentedWriter::new(out, IndentConfig::Space(4)),
+            config: self,
+        };
+        emitter.output_preamble()?;
+        for (name, format) in registry {
+            emitter.output_container(name, format)?;
+        }
+        Ok(())
+    }
+}
+
+impl<'a, T> PythonEmitter<'a, T>
 where
     T: Write,
 {
@@ -45,7 +65,7 @@ where
             r#"from dataclasses import dataclass
 import typing
 {}import serde_types as st"#,
-            match &self.serde_package_name {
+            match &self.config.serde_package_name {
                 None => "".to_string(),
                 Some(name) => format!("from {} ", name),
             }
@@ -246,11 +266,13 @@ impl crate::SourceInstaller for Installer {
 
     fn install_module(
         &self,
-        config: &crate::CodegenConfig,
+        inner: &crate::CodegenConfig,
         registry: &Registry,
     ) -> std::result::Result<(), Self::Error> {
-        let mut file = self.create_module_init_file(&config.module_name)?;
-        output_with_optional_serde_package(&mut file, registry, self.serde_package_name.clone())?;
+        let mut file = self.create_module_init_file(&inner.module_name)?;
+        let config =
+            PythonCodegenConfig::new(inner).serde_package_name(self.serde_package_name.clone());
+        config.output(&mut file, registry)?;
         Ok(())
     }
 
