@@ -246,10 +246,10 @@ impl crate::SourceInstaller for Installer {
 
     fn install_module(
         &self,
-        name: &str,
+        config: &crate::CodegenConfig,
         registry: &Registry,
     ) -> std::result::Result<(), Self::Error> {
-        let mut file = self.create_module_init_file(name)?;
+        let mut file = self.create_module_init_file(&config.module_name)?;
         output_with_optional_serde_package(&mut file, registry, self.serde_package_name.clone())?;
         Ok(())
     }

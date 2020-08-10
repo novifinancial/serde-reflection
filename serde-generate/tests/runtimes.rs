@@ -4,7 +4,7 @@
 use heck::CamelCase;
 use libra_canonical_serialization as lcs;
 use serde::{Deserialize, Serialize};
-use serde_generate::{cpp, java, python3, rust, test_utils};
+use serde_generate::{cpp, java, python3, rust, test_utils, CodegenConfig};
 use serde_reflection::{Registry, Result, Samples, Tracer, TracerConfig};
 use std::fs::File;
 use std::io::Write;
@@ -281,7 +281,7 @@ fn test_cpp_runtime_on_simple_date(runtime: Runtime) {
     let dir = tempdir().unwrap();
     let header_path = dir.path().join("test.hpp");
     let mut header = File::create(&header_path).unwrap();
-    cpp::output(&mut header, &registry, None).unwrap();
+    cpp::output(&mut header, &registry, "testing").unwrap();
 
     let reference = runtime.serialize(&Test {
         a: vec![4, 6],
@@ -299,6 +299,7 @@ fn test_cpp_runtime_on_simple_date(runtime: Runtime) {
 #include "test.hpp"
 
 using namespace serde;
+using namespace testing;
 
 int main() {{
     std::vector<uint8_t> input = {{{0}}};
@@ -362,7 +363,7 @@ fn test_cpp_runtime_on_supported_types(runtime: Runtime) {
     let dir = tempdir().unwrap();
     let header_path = dir.path().join("test.hpp");
     let mut header = File::create(&header_path).unwrap();
-    cpp::output(&mut header, &registry, None).unwrap();
+    cpp::output(&mut header, &registry, "testing").unwrap();
 
     let values = test_utils::get_sample_values();
     let encodings = values
@@ -392,6 +393,7 @@ fn test_cpp_runtime_on_supported_types(runtime: Runtime) {
 #include "test.hpp"
 
 using namespace serde;
+using namespace testing;
 
 int main() {{
     try {{
@@ -450,7 +452,8 @@ fn test_java_runtime_on_simple_data(runtime: Runtime) {
     let registry = get_local_registry().unwrap();
     let dir = tempdir().unwrap();
 
-    let config = java::JavaCodegenConfig::default().package_name(Some("testing".to_string()));
+    let inner = CodegenConfig::new("testing".to_string());
+    let config = java::JavaCodegenConfig::new(&inner);
     config
         .write_source_files(dir.path().to_path_buf(), &registry)
         .unwrap();
@@ -559,7 +562,8 @@ fn test_java_runtime_on_supported_types(runtime: Runtime) {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
 
-    let config = java::JavaCodegenConfig::default().package_name(Some("testing".to_string()));
+    let inner = CodegenConfig::new("testing".to_string());
+    let config = java::JavaCodegenConfig::new(&inner);
     config
         .write_source_files(dir.path().to_path_buf(), &registry)
         .unwrap();

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use crate::indent::{IndentConfig, IndentedWriter};
-use crate::{DocComments, ExternalDefinitions};
 use include_dir::include_dir as include_directory;
 use serde_reflection::{ContainerFormat, Format, FormatHolder, Named, Registry, VariantFormat};
 use std::{
@@ -11,13 +10,13 @@ use std::{
     path::PathBuf,
 };
 
-/// Configuration object controlling code-generation in Java.
-#[derive(Clone)]
-pub struct JavaCodegenConfig {
-    package_name: Option<String>,
-    serialization: bool,
-    external_definitions: ExternalDefinitions,
-    comments: DocComments,
+/// Main configuration object for code-generation in Java.
+pub struct JavaCodegenConfig<'a> {
+    /// Language-independent configuration.
+    inner: &'a crate::CodegenConfig,
+    /// Mapping from external type names to fully-qualified class names (e.g. "MyClass" -> "com.facebook.my_package.MyClass").
+    /// Derived from `config.external_definitions`.
+    external_qualified_names: HashMap<String, String>,
 }
 
 /// Shared state for the code generation of a Java source file.
@@ -25,10 +24,7 @@ struct JavaEmitter<'a, T> {
     /// Writer.
     out: IndentedWriter<T>,
     /// Configuration.
-    config: &'a JavaCodegenConfig,
-    /// Mapping from type names to fully-qualified class names (e.g. "MyClass" -> "com.facebook.my_package.MyClass").
-    /// Typically computed from the given registry and `config.external_definitions`.
-    qualified_names: &'a HashMap<String, String>,
+    config: &'a JavaCodegenConfig<'a>,
     /// Current namespace (e.g. vec!["com", "facebook", "my_package", "MyClass"])
     current_namespace: Vec<String>,
     /// Current (non-qualified) generated class names that could clash with names in the registry
@@ -38,40 +34,19 @@ struct JavaEmitter<'a, T> {
     current_reserved_names: HashMap<String, usize>,
 }
 
-impl Default for JavaCodegenConfig {
-    fn default() -> Self {
-        Self {
-            package_name: None,
-            serialization: true,
-            external_definitions: BTreeMap::new(),
-            comments: BTreeMap::new(),
+impl<'a> JavaCodegenConfig<'a> {
+    pub fn new(inner: &'a crate::CodegenConfig) -> Self {
+        let mut external_qualified_names = HashMap::new();
+        for (namespace, names) in &inner.external_definitions {
+            for name in names {
+                external_qualified_names
+                    .insert(name.to_string(), format!("{}.{}", namespace, name));
+            }
         }
-    }
-}
-
-impl JavaCodegenConfig {
-    /// Make generated classes belong to the given package.
-    pub fn package_name(mut self, package_name: Option<String>) -> Self {
-        self.package_name = package_name;
-        self
-    }
-
-    /// Whether to include serialization methods.
-    pub fn serialization(mut self, serialization: bool) -> Self {
-        self.serialization = serialization;
-        self
-    }
-
-    /// Container names provided by external modules.
-    pub fn external_definitions(mut self, external_definitions: ExternalDefinitions) -> Self {
-        self.external_definitions = external_definitions;
-        self
-    }
-
-    /// Comments attached to particular entity.
-    pub fn comments(mut self, comments: DocComments) -> Self {
-        self.comments = comments;
-        self
+        Self {
+            inner,
+            external_qualified_names,
+        }
     }
 
     /// Output class definitions for ` registry` in separate source files.
@@ -82,68 +57,32 @@ impl JavaCodegenConfig {
         install_dir: std::path::PathBuf,
         registry: &Registry,
     ) -> Result<()> {
+        let current_namespace = self
+            .inner
+            .module_name
+            .split('.')
+            .map(String::from)
+            .collect::<Vec<_>>();
+
         let mut dir_path = install_dir;
-        if let Some(package) = &self.package_name {
-            let parts = package.split('.').collect::<Vec<_>>();
-            for part in &parts {
-                dir_path = dir_path.join(part);
-            }
+        for part in &current_namespace {
+            dir_path = dir_path.join(part);
         }
         std::fs::create_dir_all(&dir_path)?;
 
-        let current_namespace = match &self.package_name {
-            Some(name) => name.split('.').map(String::from).collect(),
-            None => Vec::new(),
-        };
-        let qualified_names =
-            Self::get_qualified_names(&current_namespace, registry, &self.external_definitions);
-
         for (name, format) in registry {
-            self.write_container_class(
-                &dir_path,
-                current_namespace.clone(),
-                &qualified_names,
-                name,
-                format,
-            )?;
+            self.write_container_class(&dir_path, current_namespace.clone(), name, format)?;
         }
-        if self.serialization {
-            self.write_helper_class(&dir_path, current_namespace, &qualified_names, registry)?;
+        if self.inner.serialization {
+            self.write_helper_class(&dir_path, current_namespace, registry)?;
         }
         Ok(())
-    }
-
-    /// Maps containers names in `registry` to their qualified names in the targe namespace.
-    /// Also map external definitions mentioned in `registry` to their external namespaces.
-    fn get_qualified_names(
-        target_namespace: &[String],
-        registry: &Registry,
-        external_definitions: &ExternalDefinitions,
-    ) -> HashMap<String, String> {
-        let mut qualified_names = HashMap::new();
-        if !target_namespace.is_empty() {
-            let namespace = target_namespace.join(".");
-            for name in registry.keys() {
-                qualified_names.insert(name.to_string(), format!("{}.{}", namespace, name));
-            }
-            qualified_names.insert(
-                "TraitHelpers".to_string(),
-                format!("{}.TraitHelpers", namespace),
-            );
-        }
-        for (namespace, names) in external_definitions {
-            for name in names {
-                qualified_names.insert(name.to_string(), format!("{}.{}", namespace, name));
-            }
-        }
-        qualified_names
     }
 
     fn write_container_class(
         &self,
         dir_path: &std::path::Path,
         current_namespace: Vec<String>,
-        qualified_names: &HashMap<String, String>,
         name: &str,
         format: &ContainerFormat,
     ) -> Result<()> {
@@ -151,7 +90,6 @@ impl JavaCodegenConfig {
         let mut emitter = JavaEmitter {
             out: IndentedWriter::new(&mut file, IndentConfig::Space(4)),
             config: self,
-            qualified_names,
             current_namespace,
             current_reserved_names: HashMap::new(),
         };
@@ -164,14 +102,12 @@ impl JavaCodegenConfig {
         &self,
         dir_path: &std::path::Path,
         current_namespace: Vec<String>,
-        qualified_names: &HashMap<String, String>,
         registry: &Registry,
     ) -> Result<()> {
         let mut file = std::fs::File::create(dir_path.join("TraitHelpers.java"))?;
         let mut emitter = JavaEmitter {
             out: IndentedWriter::new(&mut file, IndentConfig::Space(4)),
             config: self,
-            qualified_names,
             current_namespace,
             current_reserved_names: HashMap::new(),
         };
@@ -186,9 +122,7 @@ where
     T: Write,
 {
     fn output_preamble(&mut self) -> Result<()> {
-        if let Some(name) = &self.config.package_name {
-            writeln!(self.out, "package {};\n", name)?;
-        }
+        writeln!(self.out, "package {};\n", self.config.inner.module_name)?;
         // Java doesn't let us annotate fully-qualified class names.
         writeln!(self.out, "import java.math.BigInteger;\n")?;
         Ok(())
@@ -200,10 +134,11 @@ where
     /// short string `name` if possible.
     fn quote_qualified_name(&self, name: &str) -> String {
         let qname = self
-            .qualified_names
+            .config
+            .external_qualified_names
             .get(name)
             .cloned()
-            .unwrap_or_else(|| name.to_string());
+            .unwrap_or_else(|| format!("{}.{}", self.config.inner.module_name, name));
         let mut path = qname.split('.').collect::<Vec<_>>();
         if path.len() <= 1 {
             return qname;
@@ -226,7 +161,7 @@ where
     fn output_comment(&mut self, name: &str) -> std::io::Result<()> {
         let mut path = self.current_namespace.clone();
         path.push(name.to_string());
-        if let Some(doc) = self.config.comments.get(&path) {
+        if let Some(doc) = self.config.inner.comments.get(&path) {
             let text = textwrap::indent(doc, " * ").replace("\n\n", "\n *\n");
             writeln!(self.out, "/**\n{} */", text)?;
         }
@@ -741,7 +676,7 @@ return obj;
         self.out.unindent();
         writeln!(self.out, "}}\n")?;
         // Serialize
-        if self.config.serialization {
+        if self.config.inner.serialization {
             writeln!(
                 self.out,
                 "public void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception {{",
@@ -761,7 +696,7 @@ return obj;
             writeln!(self.out, "}}\n")?;
         }
         // Deserialize (struct) or Load (variant)
-        if self.config.serialization {
+        if self.config.inner.serialization {
             if variant_index.is_none() {
                 writeln!(
                     self.out,
@@ -885,7 +820,7 @@ if (getClass() != obj.getClass()) return false;
             .map(|v| v.name.as_str())
             .collect::<Vec<_>>();
         self.enter_class(name, &reserved_names);
-        if self.config.serialization {
+        if self.config.inner.serialization {
             writeln!(
                 self.out,
                 "abstract public void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception;\n"
@@ -982,10 +917,10 @@ impl crate::SourceInstaller for Installer {
 
     fn install_module(
         &self,
-        package_name: &str,
+        inner: &crate::CodegenConfig,
         registry: &Registry,
     ) -> std::result::Result<(), Self::Error> {
-        let config = JavaCodegenConfig::default().package_name(Some(package_name.to_string()));
+        let config = JavaCodegenConfig::new(inner);
         config.write_source_files(self.install_dir.clone(), registry)?;
         Ok(())
     }
