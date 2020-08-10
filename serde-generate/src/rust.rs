@@ -49,20 +49,20 @@ impl<'a> RustCodegenConfig<'a> {
     }
 
     /// Which derive macros should be added (independently from serialization).
-    pub fn derive_macros(mut self, derive_macros: Vec<String>) -> Self {
+    pub fn with_derive_macros(mut self, derive_macros: Vec<String>) -> Self {
         self.derive_macros = derive_macros;
         self
     }
 
     /// Additional block of text added after `derive_macros` (if any), before each new
     /// container definition.
-    pub fn custom_derive_block(mut self, custom_derive_block: Option<String>) -> Self {
+    pub fn with_custom_derive_block(mut self, custom_derive_block: Option<String>) -> Self {
         self.custom_derive_block = custom_derive_block;
         self
     }
 
     /// Whether definitions and fields should be marked as `pub`.
-    pub fn track_visibility(mut self, track_visibility: bool) -> Self {
+    pub fn with_track_visibility(mut self, track_visibility: bool) -> Self {
         self.track_visibility = track_visibility;
         self
     }

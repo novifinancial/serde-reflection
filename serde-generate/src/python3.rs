@@ -36,7 +36,7 @@ impl<'a> PythonCodegenConfig<'a> {
     }
 
     /// Sets whether the module providing Serde definitions is located within package.
-    pub fn serde_package_name(mut self, serde_package_name: Option<String>) -> Self {
+    pub fn with_serde_package_name(mut self, serde_package_name: Option<String>) -> Self {
         self.serde_package_name = serde_package_name;
         self
     }
@@ -270,8 +270,8 @@ impl crate::SourceInstaller for Installer {
         registry: &Registry,
     ) -> std::result::Result<(), Self::Error> {
         let mut file = self.create_module_init_file(&inner.module_name)?;
-        let config =
-            PythonCodegenConfig::new(inner).serde_package_name(self.serde_package_name.clone());
+        let config = PythonCodegenConfig::new(inner)
+            .with_serde_package_name(self.serde_package_name.clone());
         config.output(&mut file, registry)?;
         Ok(())
     }

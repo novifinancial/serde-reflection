@@ -193,7 +193,7 @@ fn test_that_rust_code_compiles() {
     let source_path = dir.path().join("test.rs");
     let mut source = File::create(&source_path).unwrap();
 
-    let inner = CodegenConfig::new("testing".to_string()).serialization(false);
+    let inner = CodegenConfig::new("testing".to_string()).with_serialization(false);
     let config = rust::RustCodegenConfig::new(&inner);
     config.output(&mut source, &registry).unwrap();
 
@@ -227,9 +227,9 @@ fn test_that_rust_code_with_comments_compiles() {
     .collect();
 
     let inner = CodegenConfig::new("testing".to_string())
-        .comments(comments)
-        .external_definitions(definitions)
-        .serialization(false);
+        .with_comments(comments)
+        .with_external_definitions(definitions)
+        .with_serialization(false);
     let config = rust::RustCodegenConfig::new(&inner);
     config.output(&mut source, &registry).unwrap();
 
@@ -346,7 +346,7 @@ fn test_that_java_code_with_comments_compiles() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
 
-    let inner = CodegenConfig::new("test".to_string()).comments(
+    let inner = CodegenConfig::new("test".to_string()).with_comments(
         vec![(
             vec!["test".to_string(), "SerdeData".to_string()],
             "Some\ncomments".to_string(),
@@ -388,7 +388,7 @@ fn test_that_java_code_with_comments_compiles() {
     // (wrongly) Declare TraitHelpers as external.
     let mut definitions = BTreeMap::new();
     definitions.insert("foo".to_string(), vec!["TraitHelpers".to_string()]);
-    let inner = CodegenConfig::new("test".to_string()).external_definitions(definitions);
+    let inner = CodegenConfig::new("test".to_string()).with_external_definitions(definitions);
     let config = java::JavaCodegenConfig::new(&inner);
 
     config
