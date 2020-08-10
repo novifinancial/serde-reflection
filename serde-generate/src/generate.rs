@@ -92,7 +92,7 @@ fn main() {
                 let mut out = stdout.lock();
                 match options.language {
                     Language::Python3 => python3::PythonCodegenConfig::new(&config)
-                        .serde_package_name(serde_package_name_opt)
+                        .with_serde_package_name(serde_package_name_opt)
                         .output(&mut out, &registry)
                         .unwrap(),
                     Language::Rust => rust::RustCodegenConfig::new(&config)

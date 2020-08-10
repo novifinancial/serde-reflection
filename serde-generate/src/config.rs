@@ -53,19 +53,19 @@ impl CodegenConfig {
     }
 
     /// Whether to include serialization methods.
-    pub fn serialization(mut self, serialization: bool) -> Self {
+    pub fn with_serialization(mut self, serialization: bool) -> Self {
         self.serialization = serialization;
         self
     }
 
     /// Container names provided by external modules.
-    pub fn external_definitions(mut self, external_definitions: ExternalDefinitions) -> Self {
+    pub fn with_external_definitions(mut self, external_definitions: ExternalDefinitions) -> Self {
         self.external_definitions = external_definitions;
         self
     }
 
     /// Comments attached to particular entity.
-    pub fn comments(mut self, comments: DocComments) -> Self {
+    pub fn with_comments(mut self, comments: DocComments) -> Self {
         self.comments = comments;
         self
     }
