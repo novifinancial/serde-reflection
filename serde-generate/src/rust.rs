@@ -4,7 +4,7 @@
 use crate::{
     analyzer,
     indent::{IndentConfig, IndentedWriter},
-    DocComments, ExternalDefinitions,
+    CodegenConfig,
 };
 use serde_reflection::{ContainerFormat, Format, Named, Registry, VariantFormat};
 use std::borrow::Cow;
@@ -12,111 +12,130 @@ use std::collections::{BTreeMap, HashSet};
 use std::io::{Result, Write};
 use std::path::PathBuf;
 
-/// Write container definitions in Rust.
-/// * All definitions are made `pub`.
-/// * If `with_serialization` is true, the crate `serde` and `serde_bytes` are assumed to be available.
-pub fn output(
-    out: &mut dyn Write,
-    with_serialization: bool,
-    registry: &Registry,
-) -> std::result::Result<(), Box<dyn std::error::Error>> {
-    output_with_external_dependencies_and_comments(
-        out,
-        with_serialization,
-        registry,
-        &BTreeMap::new(),
-        &BTreeMap::new(),
-    )
+/// Main configuration object for code-generation in Rust.
+pub struct RustCodegenConfig<'a> {
+    /// Language-independent configuration.
+    inner: &'a CodegenConfig,
+    /// Which derive macros should be added (independently from serialization).
+    derive_macros: Vec<String>,
+    /// Additional block of text added before each new container definition.
+    custom_derive_block: Option<String>,
+    /// Whether definitions and fields should be marked as `pub`.
+    track_visibility: bool,
 }
 
-/// Same as `output` but allow some type definitions to be provided by external modules, and
-/// doc comments to be attached to named components.
-/// * A `use` statement will be generated for every external definition provided by a non-empty module name.
-/// * The empty module name is allowed and can be used to signal that custom definitions
-/// (including for Map and Bytes) will be added manually at the end of the generated file.
-pub fn output_with_external_dependencies_and_comments(
-    out: &mut dyn Write,
-    with_serialization: bool,
-    registry: &Registry,
-    external_definitions: &ExternalDefinitions,
-    comments: &DocComments,
-) -> std::result::Result<(), Box<dyn std::error::Error>> {
-    let external_names = external_definitions.values().cloned().flatten().collect();
-    let dependencies =
-        analyzer::get_dependency_map_with_external_dependencies(registry, &external_names)?;
-    let entries = analyzer::best_effort_topological_sort(&dependencies);
+/// Shared state for the code generation of a Rust source file.
+struct RustEmitter<'a, T> {
+    /// Writer.
+    out: IndentedWriter<T>,
+    /// Configuration.
+    config: &'a RustCodegenConfig<'a>,
+    /// Track which definitions have a known size. (Used to add `Box` types.)
+    known_sizes: Cow<'a, HashSet<&'a str>>,
+}
 
-    let known_sizes = external_names
-        .iter()
-        .map(<String as std::ops::Deref>::deref)
-        .collect::<HashSet<_>>();
-
-    let mut emitter = RustEmitter {
-        out: IndentedWriter::new(out, IndentConfig::Space(4)),
-        comments,
-        track_visibility: true,
-        with_derive_macros: true,
-        with_serialization,
-        known_sizes: Cow::Owned(known_sizes),
-    };
-
-    emitter.output_preamble(external_definitions)?;
-    for name in entries {
-        let format = &registry[name];
-        emitter.output_container(name, format)?;
-        emitter.known_sizes.to_mut().insert(name);
+impl<'a> RustCodegenConfig<'a> {
+    /// Default config for Rust code generation.
+    pub fn new(inner: &'a CodegenConfig) -> Self {
+        Self {
+            inner,
+            derive_macros: vec!["Clone", "Debug", "PartialEq", "PartialOrd"]
+                .into_iter()
+                .map(String::from)
+                .collect(),
+            custom_derive_block: None,
+            track_visibility: true,
+        }
     }
-    Ok(())
-}
 
-/// For each container, generate a Rust definition suitable for documentation purposes.
-pub fn quote_container_definitions(
-    registry: &Registry,
-) -> std::result::Result<BTreeMap<String, String>, Box<dyn std::error::Error>> {
-    quote_container_definitions_with_comments(registry, &BTreeMap::new())
-}
+    /// Which derive macros should be added (independently from serialization).
+    pub fn derive_macros(mut self, derive_macros: Vec<String>) -> Self {
+        self.derive_macros = derive_macros;
+        self
+    }
 
-/// Same as quote_container_definitions but including doc comments.
-pub fn quote_container_definitions_with_comments(
-    registry: &Registry,
-    comments: &DocComments,
-) -> std::result::Result<BTreeMap<String, String>, Box<dyn std::error::Error>> {
-    let dependencies = analyzer::get_dependency_map(registry)?;
-    let entries = analyzer::best_effort_topological_sort(&dependencies);
+    /// Additional block of text added after `derive_macros` (if any), before each new
+    /// container definition.
+    pub fn custom_derive_block(mut self, custom_derive_block: Option<String>) -> Self {
+        self.custom_derive_block = custom_derive_block;
+        self
+    }
 
-    let mut result = BTreeMap::new();
-    let mut known_sizes = HashSet::new();
+    /// Whether definitions and fields should be marked as `pub`.
+    pub fn track_visibility(mut self, track_visibility: bool) -> Self {
+        self.track_visibility = track_visibility;
+        self
+    }
 
-    for name in entries {
-        let mut content = Vec::new();
-        {
-            let mut emitter = RustEmitter {
-                out: IndentedWriter::new(&mut content, IndentConfig::Space(4)),
-                comments,
-                track_visibility: false,
-                with_derive_macros: false,
-                with_serialization: false,
-                known_sizes: Cow::Borrowed(&known_sizes),
-            };
+    /// Write container definitions in Rust.
+    /// * All definitions are made `pub`.
+    /// * If `with_serialization` is true, the crate `serde` and `serde_bytes` are assumed to be available.
+    pub fn output(
+        &self,
+        out: &mut dyn Write,
+        registry: &Registry,
+    ) -> std::result::Result<(), Box<dyn std::error::Error>> {
+        let external_names = self
+            .inner
+            .external_definitions
+            .values()
+            .cloned()
+            .flatten()
+            .collect();
+        let dependencies =
+            analyzer::get_dependency_map_with_external_dependencies(registry, &external_names)?;
+        let entries = analyzer::best_effort_topological_sort(&dependencies);
+
+        let known_sizes = external_names
+            .iter()
+            .map(<String as std::ops::Deref>::deref)
+            .collect::<HashSet<_>>();
+
+        let mut emitter = RustEmitter {
+            out: IndentedWriter::new(out, IndentConfig::Space(4)),
+            config: self,
+            known_sizes: Cow::Owned(known_sizes),
+        };
+
+        emitter.output_preamble()?;
+        for name in entries {
             let format = &registry[name];
             emitter.output_container(name, format)?;
+            emitter.known_sizes.to_mut().insert(name);
         }
-        known_sizes.insert(name);
-        result.insert(
-            name.to_string(),
-            String::from_utf8_lossy(&content).trim().to_string() + "\n",
-        );
+        Ok(())
     }
-    Ok(result)
-}
 
-struct RustEmitter<'a, T> {
-    out: IndentedWriter<T>,
-    comments: &'a DocComments,
-    track_visibility: bool,
-    with_derive_macros: bool,
-    with_serialization: bool,
-    known_sizes: Cow<'a, HashSet<&'a str>>,
+    /// For each container, generate a Rust definition.
+    pub fn quote_container_definitions(
+        &self,
+        registry: &Registry,
+    ) -> std::result::Result<BTreeMap<String, String>, Box<dyn std::error::Error>> {
+        let dependencies = analyzer::get_dependency_map(registry)?;
+        let entries = analyzer::best_effort_topological_sort(&dependencies);
+
+        let mut result = BTreeMap::new();
+        let mut known_sizes = HashSet::new();
+
+        for name in entries {
+            let mut content = Vec::new();
+            {
+                let mut emitter = RustEmitter {
+                    out: IndentedWriter::new(&mut content, IndentConfig::Space(4)),
+                    config: self,
+                    known_sizes: Cow::Borrowed(&known_sizes),
+                };
+                let format = &registry[name];
+                emitter.output_container(name, format)?;
+            }
+            known_sizes.insert(name);
+            result.insert(
+                name.to_string(),
+                String::from_utf8_lossy(&content).trim().to_string() + "\n",
+            );
+        }
+        Ok(result)
+    }
 }
 
 impl<'a, T> RustEmitter<'a, T>
@@ -124,23 +143,24 @@ where
     T: std::io::Write,
 {
     fn output_comment(&mut self, qualified_name: &[&str]) -> std::io::Result<()> {
-        if let Some(doc) = self.comments.get(
+        if let Some(doc) = self.config.inner.comments.get(
             &qualified_name
                 .to_vec()
                 .into_iter()
                 .map(String::from)
                 .collect::<Vec<_>>(),
         ) {
-            let prefix = "/// ";
-            let empty_line = "\n".to_string() + "///\n";
-            let text = textwrap::indent(doc, &prefix).replace("\n\n", &empty_line);
+            let text = textwrap::indent(doc, "/// ").replace("\n\n", "\n///\n");
             write!(self.out, "\n{}", text)?;
         }
         Ok(())
     }
 
-    fn output_preamble(&mut self, external_definitions: &ExternalDefinitions) -> Result<()> {
-        let external_names = external_definitions
+    fn output_preamble(&mut self) -> Result<()> {
+        let external_names = self
+            .config
+            .inner
+            .external_definitions
             .values()
             .cloned()
             .flatten()
@@ -149,13 +169,13 @@ where
         if !external_names.contains("Map") {
             writeln!(self.out, "use std::collections::BTreeMap as Map;")?;
         }
-        if self.with_serialization {
+        if self.config.inner.serialization {
             writeln!(self.out, "use serde::{{Serialize, Deserialize}};")?;
         }
-        if self.with_serialization && !external_names.contains("Bytes") {
+        if self.config.inner.serialization && !external_names.contains("Bytes") {
             writeln!(self.out, "use serde_bytes::ByteBuf as Bytes;")?;
         }
-        for (module, definitions) in external_definitions {
+        for (module, definitions) in &self.config.inner.external_definitions {
             // Skip the empty module name.
             if !module.is_empty() {
                 writeln!(
@@ -167,7 +187,7 @@ where
             }
         }
         writeln!(self.out)?;
-        if !self.with_serialization && !external_names.contains("Bytes") {
+        if !self.config.inner.serialization && !external_names.contains("Bytes") {
             // If we are not going to use Serde derive macros, use plain vectors.
             writeln!(self.out, "type Bytes = Vec<u8>;\n")?;
         }
@@ -228,7 +248,12 @@ where
     }
 
     fn output_fields(&mut self, base: &[&str], fields: &[Named<Format>]) -> Result<()> {
-        let prefix = if self.track_visibility { "pub " } else { "" };
+        // Do not add 'pub' within variants.
+        let prefix = if base.len() <= 1 && self.config.track_visibility {
+            "pub "
+        } else {
+            ""
+        };
         for field in fields {
             let qualified_name = {
                 let mut name = base.to_vec();
@@ -266,9 +291,7 @@ where
             Struct(fields) => {
                 writeln!(self.out, "{} {{", name)?;
                 self.out.indent();
-                let tracking = std::mem::replace(&mut self.track_visibility, false);
                 self.output_fields(&[base, name], fields)?;
-                self.track_visibility = tracking;
                 self.out.unindent();
                 writeln!(self.out, "}},")
             }
@@ -291,17 +314,20 @@ where
 
     fn output_container(&mut self, name: &str, format: &ContainerFormat) -> Result<()> {
         self.output_comment(&[name])?;
-        let mut prefix = if self.with_derive_macros {
-            if self.with_serialization {
-                "#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, PartialOrd)]\n"
-                    .to_string()
-            } else {
-                "#[derive(Clone, Debug, PartialEq, PartialOrd)]\n".to_string()
-            }
-        } else {
-            String::new()
-        };
-        if self.track_visibility {
+        let mut derive_macros = self.config.derive_macros.clone();
+        if self.config.inner.serialization {
+            derive_macros.push("Serialize".to_string());
+            derive_macros.push("Deserialize".to_string());
+        }
+        let mut prefix = String::new();
+        if !derive_macros.is_empty() {
+            prefix.push_str(&format!("#[derive({})]\n", derive_macros.join(", ")));
+        }
+        if let Some(text) = &self.config.custom_derive_block {
+            prefix.push_str(text);
+            prefix.push_str("\n");
+        }
+        if self.config.track_visibility {
             prefix.push_str("pub ");
         }
 
@@ -313,7 +339,11 @@ where
                 "{}struct {}({}{});\n",
                 prefix,
                 name,
-                if self.track_visibility { "pub " } else { "" },
+                if self.config.track_visibility {
+                    "pub "
+                } else {
+                    ""
+                },
                 Self::quote_type(format, Some(&self.known_sizes))
             ),
             TupleStruct(formats) => writeln!(
@@ -363,11 +393,12 @@ impl crate::SourceInstaller for Installer {
 
     fn install_module(
         &self,
-        config: &crate::CodegenConfig,
+        inner: &CodegenConfig,
         registry: &Registry,
     ) -> std::result::Result<(), Self::Error> {
+        let config = RustCodegenConfig::new(inner);
         let (name, version) = {
-            let parts = config.module_name.splitn(2, ':').collect::<Vec<_>>();
+            let parts = inner.module_name.splitn(2, ':').collect::<Vec<_>>();
             if parts.len() >= 2 {
                 (parts[0].to_string(), parts[1].to_string())
             } else {
@@ -393,7 +424,7 @@ serde_bytes = "0.11"
         std::fs::create_dir(dir_path.join("src"))?;
         let source_path = dir_path.join("src/lib.rs");
         let mut source = std::fs::File::create(&source_path)?;
-        output(&mut source, /* with_serialization */ true, &registry)
+        config.output(&mut source, &registry)
     }
 
     fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {

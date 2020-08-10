@@ -86,13 +86,15 @@ fn main() {
     match options.target_source_dir {
         None => {
             if let Some((registry, name)) = named_registry_opt {
+                let config = CodegenConfig::new(name.to_string());
+
                 let stdout = std::io::stdout();
                 let mut out = stdout.lock();
                 match options.language {
                     Language::Python3 => python3::output(&mut out, &registry).unwrap(),
-                    Language::Rust => {
-                        rust::output(&mut out, /* with_derive_macros */ true, &registry).unwrap()
-                    }
+                    Language::Rust => rust::RustCodegenConfig::new(&config)
+                        .output(&mut out, &registry)
+                        .unwrap(),
                     Language::Cpp => cpp::output(&mut out, &registry, &name).unwrap(),
                     Language::Java => panic!("Code generation in Java requires `--install-dir`"),
                 }

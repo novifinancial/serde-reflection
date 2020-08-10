@@ -183,7 +183,10 @@ fn test_that_rust_code_compiles() {
     let dir = tempdir().unwrap();
     let source_path = dir.path().join("test.rs");
     let mut source = File::create(&source_path).unwrap();
-    rust::output(&mut source, /* with_derive_macros */ false, &registry).unwrap();
+
+    let inner = CodegenConfig::new("testing".to_string()).serialization(false);
+    let config = rust::RustCodegenConfig::new(&inner);
+    config.output(&mut source, &registry).unwrap();
 
     let status = Command::new("rustc")
         .current_dir(dir.path())
@@ -213,14 +216,13 @@ fn test_that_rust_code_with_comments_compiles() {
     ]
     .into_iter()
     .collect();
-    rust::output_with_external_dependencies_and_comments(
-        &mut source,
-        /* with_derive_macros */ false,
-        &registry,
-        &definitions,
-        &comments,
-    )
-    .unwrap();
+
+    let inner = CodegenConfig::new("testing".to_string())
+        .comments(comments)
+        .external_definitions(definitions)
+        .serialization(false);
+    let config = rust::RustCodegenConfig::new(&inner);
+    config.output(&mut source, &registry).unwrap();
 
     // Comment was correctly generated.
     let content = std::fs::read_to_string(&source_path).unwrap();
@@ -284,9 +286,14 @@ serde_bytes = "0.11"
     )
     .unwrap();
     std::fs::create_dir(dir.path().join("src")).unwrap();
+
+    let inner = CodegenConfig::new("testing".to_string());
+    let config = rust::RustCodegenConfig::new(&inner);
+
     let source_path = dir.path().join("src/lib.rs");
     let mut source = File::create(&source_path).unwrap();
-    rust::output(&mut source, /* with_derive_macros */ true, &registry).unwrap();
+    config.output(&mut source, &registry).unwrap();
+
     // Use a stable `target` dir to avoid downloading and recompiling crates everytime.
     let target_dir = std::env::current_dir().unwrap().join("../target");
     let status = Command::new("cargo")
