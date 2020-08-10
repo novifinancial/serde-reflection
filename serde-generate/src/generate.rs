@@ -86,7 +86,7 @@ fn main() {
     match options.target_source_dir {
         None => {
             if let Some((registry, name)) = named_registry_opt {
-                let config = CodegenConfig::new(name.to_string());
+                let config = CodegenConfig::new(name);
 
                 let stdout = std::io::stdout();
                 let mut out = stdout.lock();
@@ -95,7 +95,9 @@ fn main() {
                     Language::Rust => rust::RustCodegenConfig::new(&config)
                         .output(&mut out, &registry)
                         .unwrap(),
-                    Language::Cpp => cpp::output(&mut out, &registry, &name).unwrap(),
+                    Language::Cpp => cpp::CppCodegenConfig::new(&config)
+                        .output(&mut out, &registry)
+                        .unwrap(),
                     Language::Java => panic!("Code generation in Java requires `--install-dir`"),
                 }
             }
