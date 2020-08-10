@@ -1,7 +1,10 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use crate::indent::{IndentConfig, IndentedWriter};
+use crate::{
+    indent::{IndentConfig, IndentedWriter},
+    CodegenConfig,
+};
 use include_dir::include_dir as include_directory;
 use serde_reflection::{ContainerFormat, Format, FormatHolder, Named, Registry, VariantFormat};
 use std::{
@@ -13,7 +16,7 @@ use std::{
 /// Main configuration object for code-generation in Java.
 pub struct JavaCodegenConfig<'a> {
     /// Language-independent configuration.
-    inner: &'a crate::CodegenConfig,
+    inner: &'a CodegenConfig,
     /// Mapping from external type names to fully-qualified class names (e.g. "MyClass" -> "com.facebook.my_package.MyClass").
     /// Derived from `config.external_definitions`.
     external_qualified_names: HashMap<String, String>,
@@ -35,7 +38,7 @@ struct JavaEmitter<'a, T> {
 }
 
 impl<'a> JavaCodegenConfig<'a> {
-    pub fn new(inner: &'a crate::CodegenConfig) -> Self {
+    pub fn new(inner: &'a CodegenConfig) -> Self {
         let mut external_qualified_names = HashMap::new();
         for (namespace, names) in &inner.external_definitions {
             for name in names {
@@ -917,7 +920,7 @@ impl crate::SourceInstaller for Installer {
 
     fn install_module(
         &self,
-        inner: &crate::CodegenConfig,
+        inner: &CodegenConfig,
         registry: &Registry,
     ) -> std::result::Result<(), Self::Error> {
         let config = JavaCodegenConfig::new(inner);

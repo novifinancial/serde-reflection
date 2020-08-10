@@ -223,9 +223,13 @@ serde_bytes = "0.11"
     )
     .unwrap();
     std::fs::create_dir(dir.path().join("src")).unwrap();
+
+    let inner = CodegenConfig::new("testing".to_string());
+    let config = rust::RustCodegenConfig::new(&inner);
+
     let source_path = dir.path().join("src/main.rs");
     let mut source = File::create(&source_path).unwrap();
-    rust::output(&mut source, /* with_derive_macros */ true, &registry).unwrap();
+    config.output(&mut source, &registry).unwrap();
 
     let values = test_utils::get_sample_values();
     let hex_encodings: Vec<_> = values
