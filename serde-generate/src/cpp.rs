@@ -7,7 +7,7 @@ use crate::{
     CodegenConfig,
 };
 use serde_reflection::{ContainerFormat, Format, Named, Registry, VariantFormat};
-use std::collections::{BTreeMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::io::{Result, Write};
 use std::path::PathBuf;
 
@@ -15,6 +15,9 @@ use std::path::PathBuf;
 pub struct CppCodegenConfig<'a> {
     /// Language-independent configuration.
     inner: &'a CodegenConfig,
+    /// Mapping from external type names to suitably qualified names (e.g. "MyClass" -> "name::MyClass").
+    /// Derived from `config.external_definitions`.
+    external_qualified_names: HashMap<String, String>,
 }
 
 /// Shared state for the code generation of a C++ source file.
@@ -23,17 +26,27 @@ struct CppEmitter<'a, T> {
     out: IndentedWriter<T>,
     /// Configuration.
     config: &'a CppCodegenConfig<'a>,
-    /// Qualifiers to be added in front of container names, when needed.
-    namespace_prefix: String,
     /// Track which type names have been declared so far. (Used to add forward declarations.)
     known_names: HashSet<&'a str>,
     /// Track which definitions have a known size. (Used to add shared pointers.)
     known_sizes: HashSet<&'a str>,
+    /// Current namespace (e.g. vec!["name", "MyClass"])
+    current_namespace: Vec<String>,
 }
 
 impl<'a> CppCodegenConfig<'a> {
     pub fn new(inner: &'a CodegenConfig) -> Self {
-        Self { inner }
+        let mut external_qualified_names = HashMap::new();
+        for (namespace, names) in &inner.external_definitions {
+            for name in names {
+                external_qualified_names
+                    .insert(name.to_string(), format!("{}::{}", namespace, name));
+            }
+        }
+        Self {
+            inner,
+            external_qualified_names,
+        }
     }
 
     pub fn output(
@@ -41,13 +54,18 @@ impl<'a> CppCodegenConfig<'a> {
         out: &mut dyn Write,
         registry: &Registry,
     ) -> std::result::Result<(), Box<dyn std::error::Error>> {
-        let namespace_prefix = format!("{}::", self.inner.module_name);
+        let current_namespace = self
+            .inner
+            .module_name
+            .split("::")
+            .map(String::from)
+            .collect();
         let mut emitter = CppEmitter {
             out: IndentedWriter::new(out, IndentConfig::Space(4)),
             config: self,
-            namespace_prefix,
             known_names: HashSet::new(),
             known_sizes: HashSet::new(),
+            current_namespace,
         };
 
         emitter.output_preamble()?;
@@ -111,23 +129,46 @@ where
         Ok(())
     }
 
-    /// If known_sizes is present, we must try to return a type with a known size as well.
-    /// A non-empty `namespace_prefix` is required when the type is quoted from a nested struct.
-    fn quote_type(
-        format: &Format,
-        known_sizes: Option<&HashSet<&str>>,
-        namespace_prefix: &str,
-    ) -> String {
+    fn enter_class(&mut self, name: &str) {
+        self.out.indent();
+        self.current_namespace.push(name.to_string());
+    }
+
+    fn leave_class(&mut self) {
+        self.out.unindent();
+        self.current_namespace.pop();
+    }
+
+    fn output_comment(&mut self, name: &str) -> std::io::Result<()> {
+        let mut path = self.current_namespace.clone();
+        path.push(name.to_string());
+        if let Some(doc) = self.config.inner.comments.get(&path) {
+            let text = textwrap::indent(doc, "/// ").replace("\n\n", "\n///\n");
+            write!(self.out, "\n{}", text)?;
+        }
+        Ok(())
+    }
+
+    /// Compute a fully qualified reference to the container type `name`.
+    fn quote_qualified_name(&self, name: &str) -> String {
+        self.config
+            .external_qualified_names
+            .get(name)
+            .cloned()
+            .unwrap_or_else(|| format!("{}::{}", self.config.inner.module_name, name))
+    }
+
+    fn quote_type(&self, format: &Format, require_known_size: bool) -> String {
         use Format::*;
         match format {
             TypeName(x) => {
-                if let Some(set) = known_sizes {
-                    if !set.contains(x.as_str()) {
-                        // Cannot use unique_ptr because we need a copy constructor (e.g. for vectors).
-                        return format!("std::shared_ptr<{}{}>", namespace_prefix, x);
-                    }
+                let qname = self.quote_qualified_name(x);
+                if require_known_size && !self.known_sizes.contains(x.as_str()) {
+                    // Cannot use unique_ptr because we need a copy constructor (e.g. for vectors).
+                    format!("std::shared_ptr<{}>", qname)
+                } else {
+                    qname
                 }
-                format!("{}{}", namespace_prefix, x)
             }
             Unit => "std::monostate".into(),
             Bool => "bool".into(),
@@ -149,24 +190,21 @@ where
 
             Option(format) => format!(
                 "std::optional<{}>",
-                Self::quote_type(format, known_sizes, namespace_prefix)
+                self.quote_type(format, require_known_size)
             ),
-            Seq(format) => format!(
-                "std::vector<{}>",
-                Self::quote_type(format, None, namespace_prefix)
-            ),
+            Seq(format) => format!("std::vector<{}>", self.quote_type(format, false)),
             Map { key, value } => format!(
                 "std::map<{}, {}>",
-                Self::quote_type(key, None, namespace_prefix),
-                Self::quote_type(value, None, namespace_prefix)
+                self.quote_type(key, false),
+                self.quote_type(value, false)
             ),
             Tuple(formats) => format!(
                 "std::tuple<{}>",
-                Self::quote_types(formats, known_sizes, namespace_prefix)
+                self.quote_types(formats, require_known_size)
             ),
             TupleArray { content, size } => format!(
                 "std::array<{}, {}>",
-                Self::quote_type(content, known_sizes, namespace_prefix),
+                self.quote_type(content, require_known_size),
                 *size
             ),
 
@@ -174,14 +212,10 @@ where
         }
     }
 
-    fn quote_types(
-        formats: &[Format],
-        known_sizes: Option<&HashSet<&str>>,
-        namespace_prefix: &str,
-    ) -> String {
+    fn quote_types(&self, formats: &[Format], require_known_size: bool) -> String {
         formats
             .iter()
-            .map(|x| Self::quote_type(x, known_sizes, namespace_prefix))
+            .map(|x| self.quote_type(x, require_known_size))
             .collect::<Vec<_>>()
             .join(", ")
     }
@@ -191,11 +225,7 @@ where
             writeln!(
                 self.out,
                 "{} {};",
-                Self::quote_type(
-                    &field.value,
-                    Some(&self.known_sizes),
-                    &self.namespace_prefix
-                ),
+                self.quote_type(&field.value, true),
                 field.name
             )?;
         }
@@ -203,6 +233,7 @@ where
     }
 
     fn output_variant(&mut self, name: &str, variant: &VariantFormat) -> Result<()> {
+        self.output_comment(name)?;
         use VariantFormat::*;
         let operator = format!("friend bool operator==(const {}&, const {}&);", name, name);
         match variant {
@@ -211,22 +242,23 @@ where
                 self.out,
                 "struct {} {{\n    {} value;\n    {}\n}};",
                 name,
-                Self::quote_type(format, Some(&self.known_sizes), &self.namespace_prefix),
+                self.quote_type(format, true),
                 operator,
             ),
             Tuple(formats) => writeln!(
                 self.out,
                 "struct {} {{\n    std::tuple<{}> value;\n    {}\n}};",
                 name,
-                Self::quote_types(formats, Some(&self.known_sizes), &self.namespace_prefix),
+                self.quote_types(formats, true),
                 operator
             ),
             Struct(fields) => {
+                self.output_comment(name)?;
                 writeln!(self.out, "struct {} {{", name)?;
-                self.out.indent();
+                self.enter_class(name);
                 self.output_fields(fields)?;
                 writeln!(self.out, "{}", operator)?;
-                self.out.unindent();
+                self.leave_class();
                 writeln!(self.out, "}};")
             }
             Variable(_) => panic!("incorrect value"),
@@ -254,27 +286,29 @@ where
                 self.out,
                 "struct {} {{\n    {} value;\n    {}\n}};\n",
                 name,
-                Self::quote_type(format, Some(&self.known_sizes), ""),
+                self.quote_type(format, true),
                 operator,
             ),
             TupleStruct(formats) => writeln!(
                 self.out,
                 "struct {} {{\n    std::tuple<{}> value;\n    {}\n}};\n",
                 name,
-                Self::quote_types(formats, Some(&self.known_sizes), ""),
+                self.quote_types(formats, true),
                 operator,
             ),
             Struct(fields) => {
+                self.output_comment(name)?;
                 writeln!(self.out, "struct {} {{", name)?;
-                self.out.indent();
+                self.enter_class(name);
                 self.output_fields(fields)?;
                 writeln!(self.out, "{}", operator)?;
-                self.out.unindent();
+                self.leave_class();
                 writeln!(self.out, "}};\n")
             }
             Enum(variants) => {
+                self.output_comment(name)?;
                 writeln!(self.out, "struct {} {{", name)?;
-                self.out.indent();
+                self.enter_class(name);
                 self.output_variants(variants)?;
                 writeln!(
                     self.out,
@@ -286,7 +320,7 @@ where
                         .join(", "),
                 )?;
                 writeln!(self.out, "{}", operator)?;
-                self.out.unindent();
+                self.leave_class();
                 writeln!(self.out, "}};\n")
             }
         }
@@ -359,7 +393,7 @@ template <typename Deserializer>
         self.output_open_namespace()?;
         self.output_struct_equality_test(name, fields)?;
         self.output_close_namespace()?;
-        let namespaced_name = format!("{}{}", self.namespace_prefix, name);
+        let namespaced_name = self.quote_qualified_name(name);
         if self.config.inner.serialization {
             self.output_struct_serializable(&namespaced_name, fields)?;
             self.output_struct_deserializable(&namespaced_name, fields)?;

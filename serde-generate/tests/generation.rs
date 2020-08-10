@@ -33,7 +33,7 @@ fn test_that_python_code_parses() {
 }
 
 #[test]
-fn test_that_python_code_with_codegen_options_parses() {
+fn test_that_python_code_parses_with_codegen_options() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
 
@@ -41,30 +41,41 @@ fn test_that_python_code_with_codegen_options_parses() {
     let mut source = File::create(&source_path).unwrap();
 
     let inner = CodegenConfig::new("testing".to_string()).with_comments(
-        vec![(
-            vec!["testing".to_string(), "SerdeData".to_string()],
-            "Some\ncomments".to_string(),
-        ), (
-            vec!["testing".to_string(), "List".to_string(), "Node".to_string()],
-            "Some other comments".to_string(),
-        )]
+        vec![
+            (
+                vec!["testing".to_string(), "SerdeData".to_string()],
+                "Some\ncomments".to_string(),
+            ),
+            (
+                vec![
+                    "testing".to_string(),
+                    "List".to_string(),
+                    "Node".to_string(),
+                ],
+                "Some other comments".to_string(),
+            ),
+        ]
         .into_iter()
         .collect(),
     );
     let config = python3::PythonCodegenConfig::new(&inner);
     config.output(&mut source, &registry).unwrap();
 
-    // Comment was correctly generated.
+    // Check that comments were correctly generated.
     let content = std::fs::read_to_string(&source_path).unwrap();
-    assert!(content.contains(r#"
+    assert!(content.contains(
+        r#"
 """ Some
 comments
 """
-"#));
-    assert!(content.contains(r#"
+"#
+    ));
+    assert!(content.contains(
+        r#"
 """ Some other comments
 """
-"#));
+"#
+    ));
 
     let python_path = format!(
         "{}:runtime/python",
@@ -80,7 +91,7 @@ comments
     // Pretend that "Tree" is external.
     let mut definitions = BTreeMap::new();
     definitions.insert("pkg.foo".to_string(), vec!["Tree".to_string()]);
-    let inner = CodegenConfig::new("test".to_string()).with_external_definitions(definitions);
+    let inner = CodegenConfig::new("testing".to_string()).with_external_definitions(definitions);
     let config = python3::PythonCodegenConfig::new(&inner);
     config.output(&mut source, &registry).unwrap();
 
@@ -95,7 +106,7 @@ fn test_that_installed_python_code_passes_pyre_check() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
 
-    let config = CodegenConfig::new("test".to_string());
+    let config = CodegenConfig::new("testing".to_string());
     let installer = python3::Installer::new(dir.path().join("src"), /* serde package */ None);
     installer.install_module(&config, &registry).unwrap();
     installer.install_serde_runtime().unwrap();
@@ -139,6 +150,7 @@ fn test_that_cpp_code_compiles() {
     let dir = tempdir().unwrap();
     let header_path = dir.path().join("test.hpp");
     let mut header = File::create(&header_path).unwrap();
+
     let inner = CodegenConfig::new("testing".to_string());
     let config = cpp::CppCodegenConfig::new(&inner);
     config.output(&mut header, &registry).unwrap();
@@ -243,6 +255,85 @@ int main() {{
     assert!(status.success());
 }
 
+#[test]
+fn test_that_cpp_code_compiles_with_codegen_options() {
+    let registry = test_utils::get_registry().unwrap();
+    let dir = tempdir().unwrap();
+    let header_path = dir.path().join("test.hpp");
+    let mut header = File::create(&header_path).unwrap();
+
+    let inner = CodegenConfig::new("testing".to_string()).with_comments(
+        vec![
+            (
+                vec!["testing".to_string(), "SerdeData".to_string()],
+                "Some\ncomments".to_string(),
+            ),
+            (
+                vec![
+                    "testing".to_string(),
+                    "List".to_string(),
+                    "Node".to_string(),
+                ],
+                "Some other comments".to_string(),
+            ),
+        ]
+        .into_iter()
+        .collect(),
+    );
+    let config = cpp::CppCodegenConfig::new(&inner);
+    config.output(&mut header, &registry).unwrap();
+
+    // Check that comments were correctly generated.
+    let content = std::fs::read_to_string(&header_path).unwrap();
+    assert!(content.contains(
+        r#"
+    /// Some
+    /// comments
+"#
+    ));
+    assert!(content.contains(
+        r#"
+        /// Some other comments
+"#
+    ));
+    // see below
+    assert!(content.contains("testing::Tree"));
+
+    let source_path = dir.path().join("test.cpp");
+    let mut source = File::create(&source_path).unwrap();
+    writeln!(
+        source,
+        r#"
+#include "bincode.hpp"
+#include "test.hpp"
+"#
+    )
+    .unwrap();
+
+    let status = Command::new("clang++")
+        .arg("--std=c++17")
+        .arg("-c")
+        .arg("-o")
+        .arg(dir.path().join("test.o"))
+        .arg("-I")
+        .arg("runtime/cpp")
+        .arg(source_path.clone())
+        .status()
+        .unwrap();
+    assert!(status.success());
+
+    // Pretend that "Tree" is external.
+    let mut definitions = BTreeMap::new();
+    definitions.insert("pkg::foo".to_string(), vec!["Tree".to_string()]);
+    let inner = CodegenConfig::new("testing".to_string()).with_external_definitions(definitions);
+    let config = cpp::CppCodegenConfig::new(&inner);
+    config.output(&mut source, &registry).unwrap();
+
+    let content = std::fs::read_to_string(&source_path).unwrap();
+    assert!(content.contains("pkg::foo::Tree"));
+    assert!(!content.contains("testing::Tree"));
+}
+
 // Quick test using rustc directly.
 #[test]
 fn test_that_rust_code_compiles() {
@@ -269,7 +360,7 @@ fn test_that_rust_code_compiles() {
 
 // Quick test using rustc directly.
 #[test]
-fn test_that_rust_code_with_codegen_options_compiles() {
+fn test_that_rust_code_compiles_with_codegen_options() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
     let source_path = dir.path().join("test.rs");
@@ -378,7 +469,7 @@ fn test_that_java_code_compiles() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
 
-    let inner = CodegenConfig::new("test".to_string());
+    let inner = CodegenConfig::new("testing".to_string());
     let config = java::JavaCodegenConfig::new(&inner);
     config
         .write_source_files(dir.path().to_path_buf(), &registry)
@@ -387,7 +478,7 @@ fn test_that_java_code_compiles() {
     let paths = std::iter::empty()
         .chain(std::fs::read_dir("runtime/java/com/facebook/serde").unwrap())
         .chain(std::fs::read_dir("runtime/java/com/facebook/bincode").unwrap())
-        .chain(std::fs::read_dir(dir.path().join("test")).unwrap())
+        .chain(std::fs::read_dir(dir.path().join("testing")).unwrap())
         .map(|e| e.unwrap().path());
     let status = Command::new("javac")
         .arg("-Xlint")
@@ -400,13 +491,13 @@ fn test_that_java_code_compiles() {
 }
 
 #[test]
-fn test_that_java_code_with_codegen_options_compiles() {
+fn test_that_java_code_compiles_with_codegen_options() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
 
-    let inner = CodegenConfig::new("test".to_string()).with_comments(
+    let inner = CodegenConfig::new("testing".to_string()).with_comments(
         vec![(
-            vec!["test".to_string(), "SerdeData".to_string()],
+            vec!["testing".to_string(), "SerdeData".to_string()],
             "Some\ncomments".to_string(),
         )]
         .into_iter()
@@ -418,7 +509,7 @@ fn test_that_java_code_with_codegen_options_compiles() {
         .unwrap();
 
     // Comment was correctly generated.
-    let content = std::fs::read_to_string(dir.path().join("test/SerdeData.java")).unwrap();
+    let content = std::fs::read_to_string(dir.path().join("testing/SerdeData.java")).unwrap();
     assert!(content.contains(
         r#"
 /**
@@ -432,7 +523,7 @@ fn test_that_java_code_with_codegen_options_compiles() {
     let paths = std::iter::empty()
         .chain(std::fs::read_dir("runtime/java/com/facebook/serde").unwrap())
         .chain(std::fs::read_dir("runtime/java/com/facebook/bincode").unwrap())
-        .chain(std::fs::read_dir(dir.path().join("test")).unwrap())
+        .chain(std::fs::read_dir(dir.path().join("testing")).unwrap())
         .map(|e| e.unwrap().path());
     let status = Command::new("javac")
         .arg("-Xlint")
@@ -446,7 +537,7 @@ fn test_that_java_code_with_codegen_options_compiles() {
     // (wrongly) Declare TraitHelpers as external.
     let mut definitions = BTreeMap::new();
     definitions.insert("foo".to_string(), vec!["TraitHelpers".to_string()]);
-    let inner = CodegenConfig::new("test".to_string()).with_external_definitions(definitions);
+    let inner = CodegenConfig::new("testing".to_string()).with_external_definitions(definitions);
     let config = java::JavaCodegenConfig::new(&inner);
 
     config
@@ -454,6 +545,6 @@ fn test_that_java_code_with_codegen_options_compiles() {
         .unwrap();
 
     // References were updated.
-    let content = std::fs::read_to_string(dir.path().join("test/SerdeData.java")).unwrap();
+    let content = std::fs::read_to_string(dir.path().join("testing/SerdeData.java")).unwrap();
     assert!(content.contains("foo.TraitHelpers."));
 }
