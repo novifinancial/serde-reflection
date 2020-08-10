@@ -178,12 +178,7 @@ import typing
         let mut path = self.current_namespace.clone();
         path.push(name.to_string());
         if let Some(doc) = self.config.inner.comments.get(&path) {
-            write!(
-                self.out,
-                r#"""" {}
-""""#,
-                doc
-            )?;
+            write!(self.out, "\"\"\" {}\n\"\"\"", doc)?;
         }
         Ok(())
     }

@@ -365,9 +365,12 @@ fn test_that_rust_code_compiles_with_codegen_options() {
     let dir = tempdir().unwrap();
     let source_path = dir.path().join("test.rs");
     let mut source = File::create(&source_path).unwrap();
-    let comments = vec![(vec!["SerdeData".to_string()], "Some\ncomments".to_string())]
-        .into_iter()
-        .collect();
+    let comments = vec![(
+        vec!["testing".to_string(), "SerdeData".to_string()],
+        "Some\ncomments".to_string(),
+    )]
+    .into_iter()
+    .collect();
     let definitions = vec![
         ("foo".to_string(), vec!["Map".to_string()]),
         (String::new(), vec!["Bytes".into()]),
