@@ -94,7 +94,10 @@ fn test_python_runtime_on_simple_data(runtime: Runtime) {
     let dir = tempdir().unwrap();
     let source_path = dir.path().join("test.py");
     let mut source = File::create(&source_path).unwrap();
-    python3::output(&mut source, &registry).unwrap();
+
+    let inner = CodegenConfig::new("testing".to_string());
+    let config = python3::PythonCodegenConfig::new(&inner);
+    config.output(&mut source, &registry).unwrap();
 
     let reference = runtime.serialize(&Test {
         a: vec![4, 6],
@@ -150,7 +153,10 @@ fn test_python_runtime_on_all_supported_types(runtime: Runtime) {
     let dir = tempdir().unwrap();
     let source_path = dir.path().join("test.py");
     let mut source = File::create(&source_path).unwrap();
-    python3::output(&mut source, &registry).unwrap();
+
+    let inner = CodegenConfig::new("testing".to_string());
+    let config = python3::PythonCodegenConfig::new(&inner);
+    config.output(&mut source, &registry).unwrap();
 
     let values = test_utils::get_sample_values();
     let hex_encodings: Vec<_> = values

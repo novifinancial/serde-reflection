@@ -91,7 +91,10 @@ fn main() {
                 let stdout = std::io::stdout();
                 let mut out = stdout.lock();
                 match options.language {
-                    Language::Python3 => python3::output(&mut out, &registry).unwrap(),
+                    Language::Python3 => python3::PythonCodegenConfig::new(&config)
+                        .serde_package_name(serde_package_name_opt)
+                        .output(&mut out, &registry)
+                        .unwrap(),
                     Language::Rust => rust::RustCodegenConfig::new(&config)
                         .output(&mut out, &registry)
                         .unwrap(),

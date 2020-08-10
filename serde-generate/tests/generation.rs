@@ -12,9 +12,13 @@ use tempfile::tempdir;
 fn test_that_python_code_parses() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
+
     let source_path = dir.path().join("test.py");
     let mut source = File::create(&source_path).unwrap();
-    python3::output(&mut source, &registry).unwrap();
+
+    let inner = CodegenConfig::new("testing".to_string());
+    let config = python3::PythonCodegenConfig::new(&inner);
+    config.output(&mut source, &registry).unwrap();
 
     let python_path = format!(
         "{}:runtime/python",
