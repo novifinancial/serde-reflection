@@ -285,7 +285,10 @@ fn test_cpp_runtime_on_simple_date(runtime: Runtime) {
     let dir = tempdir().unwrap();
     let header_path = dir.path().join("test.hpp");
     let mut header = File::create(&header_path).unwrap();
-    cpp::output(&mut header, &registry, "testing").unwrap();
+
+    let inner = CodegenConfig::new("testing".to_string());
+    let config = cpp::CppCodegenConfig::new(&inner);
+    config.output(&mut header, &registry).unwrap();
 
     let reference = runtime.serialize(&Test {
         a: vec![4, 6],
@@ -367,7 +370,10 @@ fn test_cpp_runtime_on_supported_types(runtime: Runtime) {
     let dir = tempdir().unwrap();
     let header_path = dir.path().join("test.hpp");
     let mut header = File::create(&header_path).unwrap();
-    cpp::output(&mut header, &registry, "testing").unwrap();
+
+    let inner = CodegenConfig::new("testing".to_string());
+    let config = cpp::CppCodegenConfig::new(&inner);
+    config.output(&mut header, &registry).unwrap();
 
     let values = test_utils::get_sample_values();
     let encodings = values
