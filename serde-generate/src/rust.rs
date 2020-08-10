@@ -363,11 +363,11 @@ impl crate::SourceInstaller for Installer {
 
     fn install_module(
         &self,
-        public_name: &str,
+        config: &crate::CodegenConfig,
         registry: &Registry,
     ) -> std::result::Result<(), Self::Error> {
         let (name, version) = {
-            let parts = public_name.splitn(2, ':').collect::<Vec<_>>();
+            let parts = config.module_name.splitn(2, ':').collect::<Vec<_>>();
             if parts.len() >= 2 {
                 (parts[0].to_string(), parts[1].to_string())
             } else {

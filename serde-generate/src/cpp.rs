@@ -13,12 +13,9 @@ use std::path::PathBuf;
 pub fn output(
     out: &mut dyn Write,
     registry: &Registry,
-    namespace: Option<&str>,
+    namespace: &str,
 ) -> std::result::Result<(), Box<dyn std::error::Error>> {
-    let namespace_prefix = match namespace {
-        None => "::".to_string(),
-        Some(name) => format!("{}::", name),
-    };
+    let namespace_prefix = format!("{}::", namespace);
     let mut emitter = CppEmitter {
         out: IndentedWriter::new(out, IndentConfig::Space(4)),
         namespace,
@@ -56,7 +53,7 @@ pub fn output(
 
 struct CppEmitter<'a, T> {
     out: IndentedWriter<T>,
-    namespace: Option<&'a str>,
+    namespace: &'a str,
     namespace_prefix: String,
     known_names: HashSet<&'a str>,
     known_sizes: HashSet<&'a str>,
@@ -76,18 +73,14 @@ where
     }
 
     fn output_open_namespace(&mut self) -> Result<()> {
-        if let Some(name) = self.namespace {
-            writeln!(self.out, "\nnamespace {} {{\n", name)?;
-            self.out.indent();
-        }
+        writeln!(self.out, "\nnamespace {} {{\n", self.namespace)?;
+        self.out.indent();
         Ok(())
     }
 
     fn output_close_namespace(&mut self) -> Result<()> {
-        if let Some(name) = self.namespace {
-            self.out.unindent();
-            writeln!(self.out, "}} // end of namespace {}", name)?;
-        }
+        self.out.unindent();
+        writeln!(self.out, "}} // end of namespace {}", self.namespace)?;
         Ok(())
     }
 
@@ -406,11 +399,11 @@ impl crate::SourceInstaller for Installer {
 
     fn install_module(
         &self,
-        name: &str,
+        config: &crate::CodegenConfig,
         registry: &Registry,
     ) -> std::result::Result<(), Self::Error> {
-        let mut file = self.create_header_file(name)?;
-        output(&mut file, &registry, Some(name))
+        let mut file = self.create_header_file(&config.module_name)?;
+        output(&mut file, &registry, &config.module_name)
     }
 
     fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {

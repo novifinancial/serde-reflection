@@ -125,31 +125,7 @@ pub mod rust;
 /// Utility functions to help testing code generators.
 pub mod test_utils;
 
-/// Track types definitions provided by external modules.
-pub type ExternalDefinitions =
-    std::collections::BTreeMap</* module */ String, /* type names */ Vec<String>>;
+/// Common configuration objects and traits used in public APIs.
+mod config;
 
-/// Track documentation to be attached to particular definitions.
-pub type DocComments =
-    std::collections::BTreeMap</* qualified name */ Vec<String>, /* comment */ String>;
-
-/// How to copy generated source code and available runtimes for a given language.
-pub trait SourceInstaller {
-    type Error;
-
-    /// Create a module exposing the container types contained in the registry.
-    fn install_module(
-        &self,
-        name: &str,
-        registry: &serde_reflection::Registry,
-    ) -> std::result::Result<(), Self::Error>;
-
-    /// Install the serde runtime.
-    fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error>;
-
-    /// Install the bincode runtime.
-    fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error>;
-
-    /// Install the Libra Canonical Serialization (LCS) runtime.
-    fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error>;
-}
+pub use config::*;

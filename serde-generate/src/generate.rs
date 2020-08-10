@@ -7,7 +7,7 @@
 //! cargo run --bin serdegen -- --help
 //! '''
 
-use serde_generate::{cpp, java, python3, rust, SourceInstaller};
+use serde_generate::{cpp, java, python3, rust, CodegenConfig, SourceInstaller};
 use serde_reflection::Registry;
 use std::path::PathBuf;
 use structopt::{clap::arg_enum, StructOpt};
@@ -93,7 +93,7 @@ fn main() {
                     Language::Rust => {
                         rust::output(&mut out, /* with_derive_macros */ true, &registry).unwrap()
                     }
-                    Language::Cpp => cpp::output(&mut out, &registry, Some(&name)).unwrap(),
+                    Language::Cpp => cpp::output(&mut out, &registry, &name).unwrap(),
                     Language::Java => panic!("Code generation in Java requires `--install-dir`"),
                 }
             }
@@ -111,7 +111,8 @@ fn main() {
                 };
 
             if let Some((registry, name)) = named_registry_opt {
-                installer.install_module(&name, &registry).unwrap();
+                let config = CodegenConfig::new(name);
+                installer.install_module(&config, &registry).unwrap();
             }
 
             let runtimes: std::collections::BTreeSet<_> =

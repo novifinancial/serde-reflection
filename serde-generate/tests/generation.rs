@@ -1,7 +1,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use serde_generate::{cpp, java, python3, rust, test_utils, SourceInstaller};
+use serde_generate::{cpp, java, python3, rust, test_utils, CodegenConfig, SourceInstaller};
 use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::Write;
@@ -33,8 +33,9 @@ fn test_that_installed_python_code_passes_pyre_check() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
 
+    let config = CodegenConfig::new("test".to_string());
     let installer = python3::Installer::new(dir.path().join("src"), /* serde package */ None);
-    installer.install_module("test", &registry).unwrap();
+    installer.install_module(&config, &registry).unwrap();
     installer.install_serde_runtime().unwrap();
     installer.install_bincode_runtime().unwrap();
     installer.install_lcs_runtime().unwrap();
@@ -76,7 +77,7 @@ fn test_that_cpp_code_compiles() {
     let dir = tempdir().unwrap();
     let header_path = dir.path().join("test.hpp");
     let mut header = File::create(&header_path).unwrap();
-    cpp::output(&mut header, &registry, None).unwrap();
+    cpp::output(&mut header, &registry, "test").unwrap();
 
     let source_path = dir.path().join("test.cpp");
     let mut source = File::create(&source_path).unwrap();
@@ -108,7 +109,7 @@ fn test_that_cpp_code_links() {
     let dir = tempdir().unwrap();
     let header_path = dir.path().join("test.hpp");
     let mut header = File::create(&header_path).unwrap();
-    cpp::output(&mut header, &registry, None).unwrap();
+    cpp::output(&mut header, &registry, "testing").unwrap();
 
     let source_path = dir.path().join("lib.cpp");
     let mut source = File::create(&source_path).unwrap();
@@ -119,6 +120,7 @@ fn test_that_cpp_code_links() {
 #include "test.hpp"
 
 using namespace serde;
+using namespace testing;
 
 std::vector<uint8_t> serialize_data(SerdeData data) {{
     auto serializer = LcsSerializer();
@@ -142,6 +144,7 @@ SerdeData deserialize_data(const std::vector<uint8_t> &input) {{
 #include "test.hpp"
 
 using namespace serde;
+using namespace testing;
 
 extern std::vector<uint8_t> serialize_data(SerdeData data);
 
@@ -301,7 +304,8 @@ fn test_that_java_code_compiles() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
 
-    let config = java::JavaCodegenConfig::default().package_name(Some("test".to_string()));
+    let inner = CodegenConfig::new("test".to_string());
+    let config = java::JavaCodegenConfig::new(&inner);
     config
         .write_source_files(dir.path().to_path_buf(), &registry)
         .unwrap();
@@ -326,17 +330,15 @@ fn test_that_java_code_with_comments_compiles() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
 
-    let config = java::JavaCodegenConfig::default()
-        .package_name(Some("test".to_string()))
-        .comments(
-            vec![(
-                vec!["test".to_string(), "SerdeData".to_string()],
-                "Some\ncomments".to_string(),
-            )]
-            .into_iter()
-            .collect(),
-        );
-
+    let inner = CodegenConfig::new("test".to_string()).comments(
+        vec![(
+            vec!["test".to_string(), "SerdeData".to_string()],
+            "Some\ncomments".to_string(),
+        )]
+        .into_iter()
+        .collect(),
+    );
+    let config = java::JavaCodegenConfig::new(&inner);
     config
         .write_source_files(dir.path().to_path_buf(), &registry)
         .unwrap();
@@ -370,9 +372,8 @@ fn test_that_java_code_with_comments_compiles() {
     // (wrongly) Declare TraitHelpers as external.
     let mut definitions = BTreeMap::new();
     definitions.insert("foo".to_string(), vec!["TraitHelpers".to_string()]);
-    let config = java::JavaCodegenConfig::default()
-        .package_name(Some("test".to_string()))
-        .external_definitions(definitions);
+    let inner = CodegenConfig::new("test".to_string()).external_definitions(definitions);
+    let config = java::JavaCodegenConfig::new(&inner);
 
     config
         .write_source_files(dir.path().to_path_buf(), &registry)
