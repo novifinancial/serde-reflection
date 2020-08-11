@@ -431,6 +431,65 @@
 <span id="431">431</span>
 <span id="432">432</span>
 <span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -438,62 +497,97 @@
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">analyzer</span>,
     <span class="ident">indent</span>::{<span class="ident">IndentConfig</span>, <span class="ident">IndentedWriter</span>},
+    <span class="ident">CodeGeneratorConfig</span>,
 };
 <span class="kw">use</span> <span class="ident">serde_reflection</span>::{<span class="ident">ContainerFormat</span>, <span class="ident">Format</span>, <span class="ident">Named</span>, <span class="ident">Registry</span>, <span class="ident">VariantFormat</span>};
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">collections</span>::{<span class="ident">BTreeMap</span>, <span class="ident">HashSet</span>};
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">collections</span>::{<span class="ident">BTreeMap</span>, <span class="ident">HashMap</span>, <span class="ident">HashSet</span>};
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::{<span class="prelude-ty">Result</span>, <span class="ident">Write</span>};
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">path</span>::<span class="ident">PathBuf</span>;
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">output</span>(
-    <span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>,
-    <span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">Registry</span>,
-    <span class="ident">namespace</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">namespace_prefix</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">namespace</span> {
-        <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;::&quot;</span>.<span class="ident">to_string</span>(),
-        <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}::&quot;</span>, <span class="ident">name</span>),
-    };
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">emitter</span> <span class="op">=</span> <span class="ident">CppEmitter</span> {
-        <span class="ident">out</span>: <span class="ident">IndentedWriter</span>::<span class="ident">new</span>(<span class="ident">out</span>, <span class="ident">IndentConfig</span>::<span class="ident">Space</span>(<span class="number">4</span>)),
-        <span class="ident">namespace</span>,
-        <span class="ident">namespace_prefix</span>,
-        <span class="ident">known_names</span>: <span class="ident">HashSet</span>::<span class="ident">new</span>(),
-        <span class="ident">known_sizes</span>: <span class="ident">HashSet</span>::<span class="ident">new</span>(),
-    };
-
-    <span class="ident">emitter</span>.<span class="ident">output_preamble</span>()<span class="question-mark">?</span>;
-    <span class="ident">emitter</span>.<span class="ident">output_open_namespace</span>()<span class="question-mark">?</span>;
-
-    <span class="kw">let</span> <span class="ident">dependencies</span> <span class="op">=</span> <span class="ident">analyzer</span>::<span class="ident">get_dependency_map</span>(<span class="ident">registry</span>)<span class="question-mark">?</span>;
-    <span class="kw">let</span> <span class="ident">entries</span> <span class="op">=</span> <span class="ident">analyzer</span>::<span class="ident">best_effort_topological_sort</span>(<span class="kw-2">&amp;</span><span class="ident">dependencies</span>);
-
-    <span class="kw">for</span> <span class="ident">name</span> <span class="kw">in</span> <span class="ident">entries</span> {
-        <span class="kw">for</span> <span class="ident">dependency</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">dependencies</span>[<span class="ident">name</span>] {
-            <span class="kw">if</span> <span class="op">!</span><span class="ident">emitter</span>.<span class="ident">known_names</span>.<span class="ident">contains</span>(<span class="ident">dependency</span>) {
-                <span class="ident">emitter</span>.<span class="ident">output_container_forward_definition</span>(<span class="kw-2">*</span><span class="ident">dependency</span>)<span class="question-mark">?</span>;
-                <span class="ident">emitter</span>.<span class="ident">known_names</span>.<span class="ident">insert</span>(<span class="kw-2">*</span><span class="ident">dependency</span>);
-            }
-        }
-        <span class="kw">let</span> <span class="ident">format</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">registry</span>[<span class="ident">name</span>];
-        <span class="ident">emitter</span>.<span class="ident">output_container</span>(<span class="ident">name</span>, <span class="ident">format</span>)<span class="question-mark">?</span>;
-        <span class="ident">emitter</span>.<span class="ident">known_sizes</span>.<span class="ident">insert</span>(<span class="ident">name</span>);
-        <span class="ident">emitter</span>.<span class="ident">known_names</span>.<span class="ident">insert</span>(<span class="ident">name</span>);
-    }
-
-    <span class="ident">emitter</span>.<span class="ident">output_close_namespace</span>()<span class="question-mark">?</span>;
-    <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">emitter</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
-    <span class="kw">for</span> (<span class="ident">name</span>, <span class="ident">format</span>) <span class="kw">in</span> <span class="ident">registry</span> {
-        <span class="ident">emitter</span>.<span class="ident">output_container_traits</span>(<span class="kw-2">&amp;</span><span class="ident">name</span>, <span class="ident">format</span>)<span class="question-mark">?</span>;
-    }
-    <span class="prelude-val">Ok</span>(())
+<span class="doccomment">/// Main configuration object for code-generation in C++.</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CodeGenerator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Language-independent configuration.</span>
+    <span class="ident">config</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">CodeGeneratorConfig</span>,
+    <span class="doccomment">/// Mapping from external type names to suitably qualified names (e.g. &quot;MyClass&quot; -&gt; &quot;name::MyClass&quot;).</span>
+    <span class="doccomment">/// Derived from `config.external_definitions`.</span>
+    <span class="ident">external_qualified_names</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">String</span><span class="op">&gt;</span>,
 }
 
+<span class="doccomment">/// Shared state for the code generation of a C++ source file.</span>
 <span class="kw">struct</span> <span class="ident">CppEmitter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Writer.</span>
     <span class="ident">out</span>: <span class="ident">IndentedWriter</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">namespace</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>,
-    <span class="ident">namespace_prefix</span>: <span class="ident">String</span>,
+    <span class="doccomment">/// Generator.</span>
+    <span class="ident">generator</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">CodeGenerator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Track which type names have been declared so far. (Used to add forward declarations.)</span>
     <span class="ident">known_names</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Track which definitions have a known size. (Used to add shared pointers.)</span>
     <span class="ident">known_sizes</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Current namespace (e.g. vec![&quot;name&quot;, &quot;MyClass&quot;])</span>
+    <span class="ident">current_namespace</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">CodeGenerator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Create a C++ code generator for the given config.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">config</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">CodeGeneratorConfig</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">external_qualified_names</span> <span class="op">=</span> <span class="ident">HashMap</span>::<span class="ident">new</span>();
+        <span class="kw">for</span> (<span class="ident">namespace</span>, <span class="ident">names</span>) <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">config</span>.<span class="ident">external_definitions</span> {
+            <span class="kw">for</span> <span class="ident">name</span> <span class="kw">in</span> <span class="ident">names</span> {
+                <span class="ident">external_qualified_names</span>
+                    .<span class="ident">insert</span>(<span class="ident">name</span>.<span class="ident">to_string</span>(), <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}::{}&quot;</span>, <span class="ident">namespace</span>, <span class="ident">name</span>));
+            }
+        }
+        <span class="self">Self</span> {
+            <span class="ident">config</span>,
+            <span class="ident">external_qualified_names</span>,
+        }
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">output</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>,
+        <span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">Registry</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">current_namespace</span> <span class="op">=</span> <span class="self">self</span>
+            .<span class="ident">config</span>
+            .<span class="ident">module_name</span>
+            .<span class="ident">split</span>(<span class="string">&quot;::&quot;</span>)
+            .<span class="ident">map</span>(<span class="ident">String</span>::<span class="ident">from</span>)
+            .<span class="ident">collect</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">emitter</span> <span class="op">=</span> <span class="ident">CppEmitter</span> {
+            <span class="ident">out</span>: <span class="ident">IndentedWriter</span>::<span class="ident">new</span>(<span class="ident">out</span>, <span class="ident">IndentConfig</span>::<span class="ident">Space</span>(<span class="number">4</span>)),
+            <span class="ident">generator</span>: <span class="self">self</span>,
+            <span class="ident">known_names</span>: <span class="ident">HashSet</span>::<span class="ident">new</span>(),
+            <span class="ident">known_sizes</span>: <span class="ident">HashSet</span>::<span class="ident">new</span>(),
+            <span class="ident">current_namespace</span>,
+        };
+
+        <span class="ident">emitter</span>.<span class="ident">output_preamble</span>()<span class="question-mark">?</span>;
+        <span class="ident">emitter</span>.<span class="ident">output_open_namespace</span>()<span class="question-mark">?</span>;
+
+        <span class="kw">let</span> <span class="ident">dependencies</span> <span class="op">=</span> <span class="ident">analyzer</span>::<span class="ident">get_dependency_map</span>(<span class="ident">registry</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">entries</span> <span class="op">=</span> <span class="ident">analyzer</span>::<span class="ident">best_effort_topological_sort</span>(<span class="kw-2">&amp;</span><span class="ident">dependencies</span>);
+
+        <span class="kw">for</span> <span class="ident">name</span> <span class="kw">in</span> <span class="ident">entries</span> {
+            <span class="kw">for</span> <span class="ident">dependency</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">dependencies</span>[<span class="ident">name</span>] {
+                <span class="kw">if</span> <span class="op">!</span><span class="ident">emitter</span>.<span class="ident">known_names</span>.<span class="ident">contains</span>(<span class="ident">dependency</span>) {
+                    <span class="ident">emitter</span>.<span class="ident">output_container_forward_definition</span>(<span class="kw-2">*</span><span class="ident">dependency</span>)<span class="question-mark">?</span>;
+                    <span class="ident">emitter</span>.<span class="ident">known_names</span>.<span class="ident">insert</span>(<span class="kw-2">*</span><span class="ident">dependency</span>);
+                }
+            }
+            <span class="kw">let</span> <span class="ident">format</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">registry</span>[<span class="ident">name</span>];
+            <span class="ident">emitter</span>.<span class="ident">output_container</span>(<span class="ident">name</span>, <span class="ident">format</span>)<span class="question-mark">?</span>;
+            <span class="ident">emitter</span>.<span class="ident">known_sizes</span>.<span class="ident">insert</span>(<span class="ident">name</span>);
+            <span class="ident">emitter</span>.<span class="ident">known_names</span>.<span class="ident">insert</span>(<span class="ident">name</span>);
+        }
+
+        <span class="ident">emitter</span>.<span class="ident">output_close_namespace</span>()<span class="question-mark">?</span>;
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">emitter</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
+        <span class="kw">for</span> (<span class="ident">name</span>, <span class="ident">format</span>) <span class="kw">in</span> <span class="ident">registry</span> {
+            <span class="ident">emitter</span>.<span class="ident">output_container_traits</span>(<span class="kw-2">&amp;</span><span class="ident">name</span>, <span class="ident">format</span>)<span class="question-mark">?</span>;
+        }
+        <span class="prelude-val">Ok</span>(())
+    }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">CppEmitter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span>
@@ -510,38 +604,65 @@
     }
 
     <span class="kw">fn</span> <span class="ident">output_open_namespace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">namespace</span> {
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\nnamespace {} {{\n&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
-            <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
-        }
+        <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="self">self</span>.<span class="ident">out</span>,
+            <span class="string">&quot;\nnamespace {} {{\n&quot;</span>,
+            <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">module_name</span>
+        )<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">fn</span> <span class="ident">output_close_namespace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">namespace</span> {
-            <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}} // end of namespace {}&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
+        <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="self">self</span>.<span class="ident">out</span>,
+            <span class="string">&quot;}} // end of namespace {}&quot;</span>,
+            <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">module_name</span>
+        )<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">fn</span> <span class="ident">enter_class</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) {
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
+        <span class="self">self</span>.<span class="ident">current_namespace</span>.<span class="ident">push</span>(<span class="ident">name</span>.<span class="ident">to_string</span>());
+    }
+
+    <span class="kw">fn</span> <span class="ident">leave_class</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
+        <span class="self">self</span>.<span class="ident">current_namespace</span>.<span class="ident">pop</span>();
+    }
+
+    <span class="kw">fn</span> <span class="ident">output_comment</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">current_namespace</span>.<span class="ident">clone</span>();
+        <span class="ident">path</span>.<span class="ident">push</span>(<span class="ident">name</span>.<span class="ident">to_string</span>());
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">doc</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">comments</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>) {
+            <span class="kw">let</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">textwrap</span>::<span class="ident">indent</span>(<span class="ident">doc</span>, <span class="string">&quot;/// &quot;</span>).<span class="ident">replace</span>(<span class="string">&quot;\n\n&quot;</span>, <span class="string">&quot;\n///\n&quot;</span>);
+            <span class="macro">write</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\n{}&quot;</span>, <span class="ident">text</span>)<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="doccomment">/// If known_sizes is present, we must try to return a type with a known size as well.</span>
-    <span class="doccomment">/// A non-empty `namespace_prefix` is required when the type is quoted from a nested struct.</span>
-    <span class="kw">fn</span> <span class="ident">quote_type</span>(
-        <span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>,
-        <span class="ident">known_sizes</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-        <span class="ident">namespace_prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+    <span class="doccomment">/// Compute a fully qualified reference to the container type `name`.</span>
+    <span class="kw">fn</span> <span class="ident">quote_qualified_name</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+        <span class="self">self</span>.<span class="ident">generator</span>
+            .<span class="ident">external_qualified_names</span>
+            .<span class="ident">get</span>(<span class="ident">name</span>)
+            .<span class="ident">cloned</span>()
+            .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}::{}&quot;</span>, <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">module_name</span>, <span class="ident">name</span>))
+    }
+
+    <span class="kw">fn</span> <span class="ident">quote_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>, <span class="ident">require_known_size</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
         <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
         <span class="kw">match</span> <span class="ident">format</span> {
             <span class="ident">TypeName</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">set</span>) <span class="op">=</span> <span class="ident">known_sizes</span> {
-                    <span class="kw">if</span> <span class="op">!</span><span class="ident">set</span>.<span class="ident">contains</span>(<span class="ident">x</span>.<span class="ident">as_str</span>()) {
-                        <span class="comment">// Cannot use unique_ptr because we need a copy constructor (e.g. for vectors).</span>
-                        <span class="kw">return</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;std::shared_ptr&lt;{}{}&gt;&quot;</span>, <span class="ident">namespace_prefix</span>, <span class="ident">x</span>);
-                    }
+                <span class="kw">let</span> <span class="ident">qname</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">quote_qualified_name</span>(<span class="ident">x</span>);
+                <span class="kw">if</span> <span class="ident">require_known_size</span> <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">known_sizes</span>.<span class="ident">contains</span>(<span class="ident">x</span>.<span class="ident">as_str</span>()) {
+                    <span class="comment">// Cannot use unique_ptr because we need a copy constructor (e.g. for vectors).</span>
+                    <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;std::shared_ptr&lt;{}&gt;&quot;</span>, <span class="ident">qname</span>)
+                } <span class="kw">else</span> {
+                    <span class="ident">qname</span>
                 }
-                <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}{}&quot;</span>, <span class="ident">namespace_prefix</span>, <span class="ident">x</span>)
             }
             <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;std::monostate&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">Bool</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;bool&quot;</span>.<span class="ident">into</span>(),
@@ -563,24 +684,21 @@
 
             <span class="prelude-ty">Option</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
                 <span class="string">&quot;std::optional&lt;{}&gt;&quot;</span>,
-                <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">format</span>, <span class="ident">known_sizes</span>, <span class="ident">namespace_prefix</span>)
+                <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format</span>, <span class="ident">require_known_size</span>)
             ),
-            <span class="ident">Seq</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
-                <span class="string">&quot;std::vector&lt;{}&gt;&quot;</span>,
-                <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">format</span>, <span class="prelude-val">None</span>, <span class="ident">namespace_prefix</span>)
-            ),
+            <span class="ident">Seq</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;std::vector&lt;{}&gt;&quot;</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format</span>, <span class="bool-val">false</span>)),
             <span class="ident">Map</span> { <span class="ident">key</span>, <span class="ident">value</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
                 <span class="string">&quot;std::map&lt;{}, {}&gt;&quot;</span>,
-                <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">key</span>, <span class="prelude-val">None</span>, <span class="ident">namespace_prefix</span>),
-                <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">value</span>, <span class="prelude-val">None</span>, <span class="ident">namespace_prefix</span>)
+                <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">key</span>, <span class="bool-val">false</span>),
+                <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">value</span>, <span class="bool-val">false</span>)
             ),
             <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
                 <span class="string">&quot;std::tuple&lt;{}&gt;&quot;</span>,
-                <span class="self">Self</span>::<span class="ident">quote_types</span>(<span class="ident">formats</span>, <span class="ident">known_sizes</span>, <span class="ident">namespace_prefix</span>)
+                <span class="self">self</span>.<span class="ident">quote_types</span>(<span class="ident">formats</span>, <span class="ident">require_known_size</span>)
             ),
             <span class="ident">TupleArray</span> { <span class="ident">content</span>, <span class="ident">size</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
                 <span class="string">&quot;std::array&lt;{}, {}&gt;&quot;</span>,
-                <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">content</span>, <span class="ident">known_sizes</span>, <span class="ident">namespace_prefix</span>),
+                <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">content</span>, <span class="ident">require_known_size</span>),
                 <span class="kw-2">*</span><span class="ident">size</span>
             ),
 
@@ -588,14 +706,10 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">quote_types</span>(
-        <span class="ident">formats</span>: <span class="kw-2">&amp;</span>[<span class="ident">Format</span>],
-        <span class="ident">known_sizes</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-        <span class="ident">namespace_prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+    <span class="kw">fn</span> <span class="ident">quote_types</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">formats</span>: <span class="kw-2">&amp;</span>[<span class="ident">Format</span>], <span class="ident">require_known_size</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
         <span class="ident">formats</span>
             .<span class="ident">iter</span>()
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">x</span>, <span class="ident">known_sizes</span>, <span class="ident">namespace_prefix</span>))
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">x</span>, <span class="ident">require_known_size</span>))
             .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
             .<span class="ident">join</span>(<span class="string">&quot;, &quot;</span>)
     }
@@ -605,11 +719,7 @@
             <span class="macro">writeln</span><span class="macro">!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">&quot;{} {};&quot;</span>,
-                <span class="self">Self</span>::<span class="ident">quote_type</span>(
-                    <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>,
-                    <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">known_sizes</span>),
-                    <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">namespace_prefix</span>
-                ),
+                <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>, <span class="bool-val">true</span>),
                 <span class="ident">field</span>.<span class="ident">name</span>
             )<span class="question-mark">?</span>;
         }
@@ -617,6 +727,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">output_variant</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">variant</span>: <span class="kw-2">&amp;</span><span class="ident">VariantFormat</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">output_comment</span>(<span class="ident">name</span>)<span class="question-mark">?</span>;
         <span class="kw">use</span> <span class="ident">VariantFormat</span>::<span class="kw-2">*</span>;
         <span class="kw">let</span> <span class="ident">operator</span> <span class="op">=</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;friend bool operator==(const {}&amp;, const {}&amp;);&quot;</span>, <span class="ident">name</span>, <span class="ident">name</span>);
         <span class="kw">match</span> <span class="ident">variant</span> {
@@ -625,22 +736,23 @@
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">&quot;struct {} {{\n    {} value;\n    {}\n}};&quot;</span>,
                 <span class="ident">name</span>,
-                <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">format</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">known_sizes</span>), <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">namespace_prefix</span>),
+                <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format</span>, <span class="bool-val">true</span>),
                 <span class="ident">operator</span>,
             ),
             <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">writeln</span><span class="macro">!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">&quot;struct {} {{\n    std::tuple&lt;{}&gt; value;\n    {}\n}};&quot;</span>,
                 <span class="ident">name</span>,
-                <span class="self">Self</span>::<span class="ident">quote_types</span>(<span class="ident">formats</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">known_sizes</span>), <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">namespace_prefix</span>),
+                <span class="self">self</span>.<span class="ident">quote_types</span>(<span class="ident">formats</span>, <span class="bool-val">true</span>),
                 <span class="ident">operator</span>
             ),
             <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="self">self</span>.<span class="ident">output_comment</span>(<span class="ident">name</span>)<span class="question-mark">?</span>;
                 <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;struct {} {{&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
-                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
+                <span class="self">self</span>.<span class="ident">enter_class</span>(<span class="ident">name</span>);
                 <span class="self">self</span>.<span class="ident">output_fields</span>(<span class="ident">fields</span>)<span class="question-mark">?</span>;
                 <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">operator</span>)<span class="question-mark">?</span>;
-                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
+                <span class="self">self</span>.<span class="ident">leave_class</span>();
                 <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}};&quot;</span>)
             }
             <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;incorrect value&quot;</span>),
@@ -668,27 +780,29 @@
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">&quot;struct {} {{\n    {} value;\n    {}\n}};\n&quot;</span>,
                 <span class="ident">name</span>,
-                <span class="self">Self</span>::<span class="ident">quote_type</span>(<span class="ident">format</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">known_sizes</span>), <span class="string">&quot;&quot;</span>),
+                <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format</span>, <span class="bool-val">true</span>),
                 <span class="ident">operator</span>,
             ),
             <span class="ident">TupleStruct</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">writeln</span><span class="macro">!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">&quot;struct {} {{\n    std::tuple&lt;{}&gt; value;\n    {}\n}};\n&quot;</span>,
                 <span class="ident">name</span>,
-                <span class="self">Self</span>::<span class="ident">quote_types</span>(<span class="ident">formats</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">known_sizes</span>), <span class="string">&quot;&quot;</span>),
+                <span class="self">self</span>.<span class="ident">quote_types</span>(<span class="ident">formats</span>, <span class="bool-val">true</span>),
                 <span class="ident">operator</span>,
             ),
             <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="self">self</span>.<span class="ident">output_comment</span>(<span class="ident">name</span>)<span class="question-mark">?</span>;
                 <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;struct {} {{&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
-                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
+                <span class="self">self</span>.<span class="ident">enter_class</span>(<span class="ident">name</span>);
                 <span class="self">self</span>.<span class="ident">output_fields</span>(<span class="ident">fields</span>)<span class="question-mark">?</span>;
                 <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">operator</span>)<span class="question-mark">?</span>;
-                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
+                <span class="self">self</span>.<span class="ident">leave_class</span>();
                 <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}};\n&quot;</span>)
             }
             <span class="ident">Enum</span>(<span class="ident">variants</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="self">self</span>.<span class="ident">output_comment</span>(<span class="ident">name</span>)<span class="question-mark">?</span>;
                 <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;struct {} {{&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
-                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
+                <span class="self">self</span>.<span class="ident">enter_class</span>(<span class="ident">name</span>);
                 <span class="self">self</span>.<span class="ident">output_variants</span>(<span class="ident">variants</span>)<span class="question-mark">?</span>;
                 <span class="macro">writeln</span><span class="macro">!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
@@ -700,7 +814,7 @@
                         .<span class="ident">join</span>(<span class="string">&quot;, &quot;</span>),
                 )<span class="question-mark">?</span>;
                 <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">operator</span>)<span class="question-mark">?</span>;
-                <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
+                <span class="self">self</span>.<span class="ident">leave_class</span>();
                 <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}};\n&quot;</span>)
             }
         }
@@ -773,9 +887,12 @@ template &lt;typename Deserializer&gt;
         <span class="self">self</span>.<span class="ident">output_open_namespace</span>()<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">output_struct_equality_test</span>(<span class="ident">name</span>, <span class="ident">fields</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">output_close_namespace</span>()<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">namespaced_name</span> <span class="op">=</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}{}&quot;</span>, <span class="self">self</span>.<span class="ident">namespace_prefix</span>, <span class="ident">name</span>);
-        <span class="self">self</span>.<span class="ident">output_struct_serializable</span>(<span class="kw-2">&amp;</span><span class="ident">namespaced_name</span>, <span class="ident">fields</span>)<span class="question-mark">?</span>;
-        <span class="self">self</span>.<span class="ident">output_struct_deserializable</span>(<span class="kw-2">&amp;</span><span class="ident">namespaced_name</span>, <span class="ident">fields</span>)
+        <span class="kw">let</span> <span class="ident">namespaced_name</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">quote_qualified_name</span>(<span class="ident">name</span>);
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">serialization</span> {
+            <span class="self">self</span>.<span class="ident">output_struct_serializable</span>(<span class="kw-2">&amp;</span><span class="ident">namespaced_name</span>, <span class="ident">fields</span>)<span class="question-mark">?</span>;
+            <span class="self">self</span>.<span class="ident">output_struct_deserializable</span>(<span class="kw-2">&amp;</span><span class="ident">namespaced_name</span>, <span class="ident">fields</span>)<span class="question-mark">?</span>;
+        }
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">fn</span> <span class="ident">get_variant_fields</span>(<span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">VariantFormat</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span> {
@@ -840,11 +957,12 @@ template &lt;typename Deserializer&gt;
 
     <span class="kw">fn</span> <span class="ident">install_module</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+        <span class="ident">config</span>: <span class="kw-2">&amp;</span><span class="kw">crate</span>::<span class="ident">CodeGeneratorConfig</span>,
         <span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">Registry</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">create_header_file</span>(<span class="ident">name</span>)<span class="question-mark">?</span>;
-        <span class="ident">output</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">file</span>, <span class="kw-2">&amp;</span><span class="ident">registry</span>, <span class="prelude-val">Some</span>(<span class="ident">name</span>))
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">create_header_file</span>(<span class="kw-2">&amp;</span><span class="ident">config</span>.<span class="ident">module_name</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">generator</span> <span class="op">=</span> <span class="ident">CodeGenerator</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="ident">config</span>);
+        <span class="ident">generator</span>.<span class="ident">output</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">file</span>, <span class="kw-2">&amp;</span><span class="ident">registry</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">install_serde_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {

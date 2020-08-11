@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["output",""]],"struct":[["Installer",""]]});
+initSidebarItems({"struct":[["CodeGenerator","Main configuration object for code-generation in C++."],["Installer",""]]});
