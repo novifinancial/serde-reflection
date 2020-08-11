@@ -292,6 +292,7 @@ import typing
     }
 }
 
+/// Installer for generated source files in Python.
 pub struct Installer {
     install_dir: PathBuf,
     serde_package_name: Option<String>,

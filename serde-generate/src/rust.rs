@@ -382,6 +382,7 @@ where
     }
 }
 
+/// Installer for generated source files in Rust.
 pub struct Installer {
     install_dir: PathBuf,
 }

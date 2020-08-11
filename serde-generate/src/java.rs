@@ -892,6 +892,7 @@ switch (index) {{"#,
     }
 }
 
+/// Installer for generated source files in Java.
 pub struct Installer {
     install_dir: PathBuf,
 }

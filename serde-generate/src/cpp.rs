@@ -443,6 +443,7 @@ template <typename Deserializer>
     }
 }
 
+/// Installer for generated source files in C++.
 pub struct Installer {
     install_dir: PathBuf,
 }
