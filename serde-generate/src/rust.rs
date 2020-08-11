@@ -4,7 +4,7 @@
 use crate::{
     analyzer,
     indent::{IndentConfig, IndentedWriter},
-    CodegenConfig,
+    CodeGeneratorConfig,
 };
 use serde_reflection::{ContainerFormat, Format, Named, Registry, VariantFormat};
 use std::borrow::Cow;
@@ -13,9 +13,9 @@ use std::io::{Result, Write};
 use std::path::PathBuf;
 
 /// Main configuration object for code-generation in Rust.
-pub struct RustCodegenConfig<'a> {
+pub struct CodeGenerator<'a> {
     /// Language-independent configuration.
-    inner: &'a CodegenConfig,
+    config: &'a CodeGeneratorConfig,
     /// Which derive macros should be added (independently from serialization).
     derive_macros: Vec<String>,
     /// Additional block of text added before each new container definition.
@@ -28,19 +28,19 @@ pub struct RustCodegenConfig<'a> {
 struct RustEmitter<'a, T> {
     /// Writer.
     out: IndentedWriter<T>,
-    /// Configuration.
-    config: &'a RustCodegenConfig<'a>,
+    /// Generator.
+    generator: &'a CodeGenerator<'a>,
     /// Track which definitions have a known size. (Used to add `Box` types.)
     known_sizes: Cow<'a, HashSet<&'a str>>,
     /// Current namespace (e.g. vec!["my_package", "my_module", "MyClass"])
     current_namespace: Vec<String>,
 }
 
-impl<'a> RustCodegenConfig<'a> {
-    /// Default config for Rust code generation.
-    pub fn new(inner: &'a CodegenConfig) -> Self {
+impl<'a> CodeGenerator<'a> {
+    /// Create a Rust code generator for the given config.
+    pub fn new(config: &'a CodeGeneratorConfig) -> Self {
         Self {
-            inner,
+            config,
             derive_macros: vec!["Clone", "Debug", "PartialEq", "PartialOrd"]
                 .into_iter()
                 .map(String::from)
@@ -76,7 +76,7 @@ impl<'a> RustCodegenConfig<'a> {
         registry: &Registry,
     ) -> std::result::Result<(), Box<dyn std::error::Error>> {
         let external_names = self
-            .inner
+            .config
             .external_definitions
             .values()
             .cloned()
@@ -92,14 +92,14 @@ impl<'a> RustCodegenConfig<'a> {
             .collect::<HashSet<_>>();
 
         let current_namespace = self
-            .inner
+            .config
             .module_name
             .split('.')
             .map(String::from)
             .collect();
         let mut emitter = RustEmitter {
             out: IndentedWriter::new(out, IndentConfig::Space(4)),
-            config: self,
+            generator: self,
             known_sizes: Cow::Owned(known_sizes),
             current_namespace,
         };
@@ -124,7 +124,7 @@ impl<'a> RustCodegenConfig<'a> {
         let mut result = BTreeMap::new();
         let mut known_sizes = HashSet::new();
         let current_namespace = self
-            .inner
+            .config
             .module_name
             .split('.')
             .map(String::from)
@@ -135,7 +135,7 @@ impl<'a> RustCodegenConfig<'a> {
             {
                 let mut emitter = RustEmitter {
                     out: IndentedWriter::new(&mut content, IndentConfig::Space(4)),
-                    config: self,
+                    generator: self,
                     known_sizes: Cow::Borrowed(&known_sizes),
                     current_namespace: current_namespace.clone(),
                 };
@@ -159,7 +159,7 @@ where
     fn output_comment(&mut self, name: &str) -> std::io::Result<()> {
         let mut path = self.current_namespace.clone();
         path.push(name.to_string());
-        if let Some(doc) = self.config.inner.comments.get(&path) {
+        if let Some(doc) = self.generator.config.comments.get(&path) {
             let text = textwrap::indent(doc, "/// ").replace("\n\n", "\n///\n");
             write!(self.out, "\n{}", text)?;
         }
@@ -168,8 +168,8 @@ where
 
     fn output_preamble(&mut self) -> Result<()> {
         let external_names = self
+            .generator
             .config
-            .inner
             .external_definitions
             .values()
             .cloned()
@@ -179,13 +179,13 @@ where
         if !external_names.contains("Map") {
             writeln!(self.out, "use std::collections::BTreeMap as Map;")?;
         }
-        if self.config.inner.serialization {
+        if self.generator.config.serialization {
             writeln!(self.out, "use serde::{{Serialize, Deserialize}};")?;
         }
-        if self.config.inner.serialization && !external_names.contains("Bytes") {
+        if self.generator.config.serialization && !external_names.contains("Bytes") {
             writeln!(self.out, "use serde_bytes::ByteBuf as Bytes;")?;
         }
-        for (module, definitions) in &self.config.inner.external_definitions {
+        for (module, definitions) in &self.generator.config.external_definitions {
             // Skip the empty module name.
             if !module.is_empty() {
                 writeln!(
@@ -197,7 +197,7 @@ where
             }
         }
         writeln!(self.out)?;
-        if !self.config.inner.serialization && !external_names.contains("Bytes") {
+        if !self.generator.config.serialization && !external_names.contains("Bytes") {
             // If we are not going to use Serde derive macros, use plain vectors.
             writeln!(self.out, "type Bytes = Vec<u8>;\n")?;
         }
@@ -259,7 +259,7 @@ where
 
     fn output_fields(&mut self, base: &[&str], fields: &[Named<Format>]) -> Result<()> {
         // Do not add 'pub' within variants.
-        let prefix = if base.len() <= 1 && self.config.track_visibility {
+        let prefix = if base.len() <= 1 && self.generator.track_visibility {
             "pub "
         } else {
             ""
@@ -321,8 +321,8 @@ where
 
     fn output_container(&mut self, name: &str, format: &ContainerFormat) -> Result<()> {
         self.output_comment(name)?;
-        let mut derive_macros = self.config.derive_macros.clone();
-        if self.config.inner.serialization {
+        let mut derive_macros = self.generator.derive_macros.clone();
+        if self.generator.config.serialization {
             derive_macros.push("Serialize".to_string());
             derive_macros.push("Deserialize".to_string());
         }
@@ -330,11 +330,11 @@ where
         if !derive_macros.is_empty() {
             prefix.push_str(&format!("#[derive({})]\n", derive_macros.join(", ")));
         }
-        if let Some(text) = &self.config.custom_derive_block {
+        if let Some(text) = &self.generator.custom_derive_block {
             prefix.push_str(text);
             prefix.push_str("\n");
         }
-        if self.config.track_visibility {
+        if self.generator.track_visibility {
             prefix.push_str("pub ");
         }
 
@@ -346,7 +346,7 @@ where
                 "{}struct {}({}{});\n",
                 prefix,
                 name,
-                if self.config.track_visibility {
+                if self.generator.track_visibility {
                     "pub "
                 } else {
                     ""
@@ -404,12 +404,12 @@ impl crate::SourceInstaller for Installer {
 
     fn install_module(
         &self,
-        inner: &CodegenConfig,
+        config: &CodeGeneratorConfig,
         registry: &Registry,
     ) -> std::result::Result<(), Self::Error> {
-        let config = RustCodegenConfig::new(inner);
+        let generator = CodeGenerator::new(config);
         let (name, version) = {
-            let parts = inner.module_name.splitn(2, ':').collect::<Vec<_>>();
+            let parts = config.module_name.splitn(2, ':').collect::<Vec<_>>();
             if parts.len() >= 2 {
                 (parts[0].to_string(), parts[1].to_string())
             } else {
@@ -435,7 +435,7 @@ serde_bytes = "0.11"
         std::fs::create_dir(dir_path.join("src"))?;
         let source_path = dir_path.join("src/lib.rs");
         let mut source = std::fs::File::create(&source_path)?;
-        config.output(&mut source, &registry)
+        generator.output(&mut source, &registry)
     }
 
     fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {

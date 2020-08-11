@@ -3,7 +3,7 @@
 
 use crate::{
     indent::{IndentConfig, IndentedWriter},
-    CodegenConfig,
+    CodeGeneratorConfig,
 };
 use include_dir::include_dir as include_directory;
 use serde_reflection::{ContainerFormat, Format, FormatHolder, Named, Registry, VariantFormat};
@@ -14,9 +14,9 @@ use std::{
 };
 
 /// Main configuration object for code-generation in Java.
-pub struct JavaCodegenConfig<'a> {
+pub struct CodeGenerator<'a> {
     /// Language-independent configuration.
-    inner: &'a CodegenConfig,
+    config: &'a CodeGeneratorConfig,
     /// Mapping from external type names to fully-qualified class names (e.g. "MyClass" -> "com.facebook.my_package.MyClass").
     /// Derived from `config.external_definitions`.
     external_qualified_names: HashMap<String, String>,
@@ -26,8 +26,8 @@ pub struct JavaCodegenConfig<'a> {
 struct JavaEmitter<'a, T> {
     /// Writer.
     out: IndentedWriter<T>,
-    /// Configuration.
-    config: &'a JavaCodegenConfig<'a>,
+    /// Generator.
+    generator: &'a CodeGenerator<'a>,
     /// Current namespace (e.g. vec!["com", "facebook", "my_package", "MyClass"])
     current_namespace: Vec<String>,
     /// Current (non-qualified) generated class names that could clash with names in the registry
@@ -37,17 +37,18 @@ struct JavaEmitter<'a, T> {
     current_reserved_names: HashMap<String, usize>,
 }
 
-impl<'a> JavaCodegenConfig<'a> {
-    pub fn new(inner: &'a CodegenConfig) -> Self {
+impl<'a> CodeGenerator<'a> {
+    /// Create a Java code generator for the given config.
+    pub fn new(config: &'a CodeGeneratorConfig) -> Self {
         let mut external_qualified_names = HashMap::new();
-        for (namespace, names) in &inner.external_definitions {
+        for (namespace, names) in &config.external_definitions {
             for name in names {
                 external_qualified_names
                     .insert(name.to_string(), format!("{}.{}", namespace, name));
             }
         }
         Self {
-            inner,
+            config,
             external_qualified_names,
         }
     }
@@ -61,7 +62,7 @@ impl<'a> JavaCodegenConfig<'a> {
         registry: &Registry,
     ) -> Result<()> {
         let current_namespace = self
-            .inner
+            .config
             .module_name
             .split('.')
             .map(String::from)
@@ -76,7 +77,7 @@ impl<'a> JavaCodegenConfig<'a> {
         for (name, format) in registry {
             self.write_container_class(&dir_path, current_namespace.clone(), name, format)?;
         }
-        if self.inner.serialization {
+        if self.config.serialization {
             self.write_helper_class(&dir_path, current_namespace, registry)?;
         }
         Ok(())
@@ -92,7 +93,7 @@ impl<'a> JavaCodegenConfig<'a> {
         let mut file = std::fs::File::create(dir_path.join(name.to_string() + ".java"))?;
         let mut emitter = JavaEmitter {
             out: IndentedWriter::new(&mut file, IndentConfig::Space(4)),
-            config: self,
+            generator: self,
             current_namespace,
             current_reserved_names: HashMap::new(),
         };
@@ -110,7 +111,7 @@ impl<'a> JavaCodegenConfig<'a> {
         let mut file = std::fs::File::create(dir_path.join("TraitHelpers.java"))?;
         let mut emitter = JavaEmitter {
             out: IndentedWriter::new(&mut file, IndentConfig::Space(4)),
-            config: self,
+            generator: self,
             current_namespace,
             current_reserved_names: HashMap::new(),
         };
@@ -125,7 +126,7 @@ where
     T: Write,
 {
     fn output_preamble(&mut self) -> Result<()> {
-        writeln!(self.out, "package {};\n", self.config.inner.module_name)?;
+        writeln!(self.out, "package {};\n", self.generator.config.module_name)?;
         // Java doesn't let us annotate fully-qualified class names.
         writeln!(self.out, "import java.math.BigInteger;\n")?;
         Ok(())
@@ -137,11 +138,11 @@ where
     /// short string `name` if possible.
     fn quote_qualified_name(&self, name: &str) -> String {
         let qname = self
-            .config
+            .generator
             .external_qualified_names
             .get(name)
             .cloned()
-            .unwrap_or_else(|| format!("{}.{}", self.config.inner.module_name, name));
+            .unwrap_or_else(|| format!("{}.{}", self.generator.config.module_name, name));
         let mut path = qname.split('.').collect::<Vec<_>>();
         if path.len() <= 1 {
             return qname;
@@ -164,7 +165,7 @@ where
     fn output_comment(&mut self, name: &str) -> std::io::Result<()> {
         let mut path = self.current_namespace.clone();
         path.push(name.to_string());
-        if let Some(doc) = self.config.inner.comments.get(&path) {
+        if let Some(doc) = self.generator.config.comments.get(&path) {
             let text = textwrap::indent(doc, " * ").replace("\n\n", "\n *\n");
             writeln!(self.out, "/**\n{} */", text)?;
         }
@@ -679,7 +680,7 @@ return obj;
         self.out.unindent();
         writeln!(self.out, "}}\n")?;
         // Serialize
-        if self.config.inner.serialization {
+        if self.generator.config.serialization {
             writeln!(
                 self.out,
                 "public void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception {{",
@@ -699,7 +700,7 @@ return obj;
             writeln!(self.out, "}}\n")?;
         }
         // Deserialize (struct) or Load (variant)
-        if self.config.inner.serialization {
+        if self.generator.config.serialization {
             if variant_index.is_none() {
                 writeln!(
                     self.out,
@@ -823,7 +824,7 @@ if (getClass() != obj.getClass()) return false;
             .map(|v| v.name.as_str())
             .collect::<Vec<_>>();
         self.enter_class(name, &reserved_names);
-        if self.config.inner.serialization {
+        if self.generator.config.serialization {
             writeln!(
                 self.out,
                 "abstract public void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception;\n"
@@ -920,11 +921,11 @@ impl crate::SourceInstaller for Installer {
 
     fn install_module(
         &self,
-        inner: &CodegenConfig,
+        config: &CodeGeneratorConfig,
         registry: &Registry,
     ) -> std::result::Result<(), Self::Error> {
-        let config = JavaCodegenConfig::new(inner);
-        config.write_source_files(self.install_dir.clone(), registry)?;
+        let generator = CodeGenerator::new(config);
+        generator.write_source_files(self.install_dir.clone(), registry)?;
         Ok(())
     }
 

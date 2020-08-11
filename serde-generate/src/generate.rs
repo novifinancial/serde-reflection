@@ -7,7 +7,7 @@
 //! cargo run --bin serdegen -- --help
 //! '''
 
-use serde_generate::{cpp, java, python3, rust, CodegenConfig, SourceInstaller};
+use serde_generate::{cpp, java, python3, rust, CodeGeneratorConfig, SourceInstaller};
 use serde_reflection::Registry;
 use std::path::PathBuf;
 use structopt::{clap::arg_enum, StructOpt};
@@ -86,19 +86,19 @@ fn main() {
     match options.target_source_dir {
         None => {
             if let Some((registry, name)) = named_registry_opt {
-                let config = CodegenConfig::new(name);
+                let config = CodeGeneratorConfig::new(name);
 
                 let stdout = std::io::stdout();
                 let mut out = stdout.lock();
                 match options.language {
-                    Language::Python3 => python3::PythonCodegenConfig::new(&config)
+                    Language::Python3 => python3::CodeGenerator::new(&config)
                         .with_serde_package_name(serde_package_name_opt)
                         .output(&mut out, &registry)
                         .unwrap(),
-                    Language::Rust => rust::RustCodegenConfig::new(&config)
+                    Language::Rust => rust::CodeGenerator::new(&config)
                         .output(&mut out, &registry)
                         .unwrap(),
-                    Language::Cpp => cpp::CppCodegenConfig::new(&config)
+                    Language::Cpp => cpp::CodeGenerator::new(&config)
                         .output(&mut out, &registry)
                         .unwrap(),
                     Language::Java => panic!("Code generation in Java requires `--install-dir`"),
@@ -118,7 +118,7 @@ fn main() {
                 };
 
             if let Some((registry, name)) = named_registry_opt {
-                let config = CodegenConfig::new(name);
+                let config = CodeGeneratorConfig::new(name);
                 installer.install_module(&config, &registry).unwrap();
             }
 

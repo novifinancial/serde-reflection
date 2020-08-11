@@ -1,7 +1,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use serde_generate::{cpp, java, python3, rust, test_utils, CodegenConfig, SourceInstaller};
+use serde_generate::{cpp, java, python3, rust, test_utils, CodeGeneratorConfig, SourceInstaller};
 use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::Write;
@@ -16,9 +16,9 @@ fn test_that_python_code_parses() {
     let source_path = dir.path().join("test.py");
     let mut source = File::create(&source_path).unwrap();
 
-    let inner = CodegenConfig::new("testing".to_string());
-    let config = python3::PythonCodegenConfig::new(&inner);
-    config.output(&mut source, &registry).unwrap();
+    let config = CodeGeneratorConfig::new("testing".to_string());
+    let generator = python3::CodeGenerator::new(&config);
+    generator.output(&mut source, &registry).unwrap();
 
     let python_path = format!(
         "{}:runtime/python",
@@ -40,7 +40,7 @@ fn test_that_python_code_parses_with_codegen_options() {
     let source_path = dir.path().join("test.py");
     let mut source = File::create(&source_path).unwrap();
 
-    let inner = CodegenConfig::new("testing".to_string()).with_comments(
+    let config = CodeGeneratorConfig::new("testing".to_string()).with_comments(
         vec![
             (
                 vec!["testing".to_string(), "SerdeData".to_string()],
@@ -58,8 +58,8 @@ fn test_that_python_code_parses_with_codegen_options() {
         .into_iter()
         .collect(),
     );
-    let config = python3::PythonCodegenConfig::new(&inner);
-    config.output(&mut source, &registry).unwrap();
+    let generator = python3::CodeGenerator::new(&config);
+    generator.output(&mut source, &registry).unwrap();
 
     // Check that comments were correctly generated.
     let content = std::fs::read_to_string(&source_path).unwrap();
@@ -91,9 +91,10 @@ comments
     // Pretend that "Tree" is external.
     let mut definitions = BTreeMap::new();
     definitions.insert("pkg.foo".to_string(), vec!["Tree".to_string()]);
-    let inner = CodegenConfig::new("testing".to_string()).with_external_definitions(definitions);
-    let config = python3::PythonCodegenConfig::new(&inner);
-    config.output(&mut source, &registry).unwrap();
+    let config =
+        CodeGeneratorConfig::new("testing".to_string()).with_external_definitions(definitions);
+    let generator = python3::CodeGenerator::new(&config);
+    generator.output(&mut source, &registry).unwrap();
 
     let content = std::fs::read_to_string(&source_path).unwrap();
     assert!(content.contains("from pkg import foo"));
@@ -106,7 +107,7 @@ fn test_that_installed_python_code_passes_pyre_check() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
 
-    let config = CodegenConfig::new("testing".to_string());
+    let config = CodeGeneratorConfig::new("testing".to_string());
     let installer = python3::Installer::new(dir.path().join("src"), /* serde package */ None);
     installer.install_module(&config, &registry).unwrap();
     installer.install_serde_runtime().unwrap();
@@ -151,9 +152,9 @@ fn test_that_cpp_code_compiles() {
     let header_path = dir.path().join("test.hpp");
     let mut header = File::create(&header_path).unwrap();
 
-    let inner = CodegenConfig::new("testing".to_string());
-    let config = cpp::CppCodegenConfig::new(&inner);
-    config.output(&mut header, &registry).unwrap();
+    let config = CodeGeneratorConfig::new("testing".to_string());
+    let generator = cpp::CodeGenerator::new(&config);
+    generator.output(&mut header, &registry).unwrap();
 
     let source_path = dir.path().join("test.cpp");
     let mut source = File::create(&source_path).unwrap();
@@ -186,9 +187,9 @@ fn test_that_cpp_code_links() {
     let header_path = dir.path().join("test.hpp");
     let mut header = File::create(&header_path).unwrap();
 
-    let inner = CodegenConfig::new("testing".to_string());
-    let config = cpp::CppCodegenConfig::new(&inner);
-    config.output(&mut header, &registry).unwrap();
+    let config = CodeGeneratorConfig::new("testing".to_string());
+    let generator = cpp::CodeGenerator::new(&config);
+    generator.output(&mut header, &registry).unwrap();
 
     let source_path = dir.path().join("lib.cpp");
     let mut source = File::create(&source_path).unwrap();
@@ -262,7 +263,7 @@ fn test_that_cpp_code_compiles_with_codegen_options() {
     let header_path = dir.path().join("test.hpp");
     let mut header = File::create(&header_path).unwrap();
 
-    let inner = CodegenConfig::new("testing".to_string()).with_comments(
+    let config = CodeGeneratorConfig::new("testing".to_string()).with_comments(
         vec![
             (
                 vec!["testing".to_string(), "SerdeData".to_string()],
@@ -280,8 +281,8 @@ fn test_that_cpp_code_compiles_with_codegen_options() {
         .into_iter()
         .collect(),
     );
-    let config = cpp::CppCodegenConfig::new(&inner);
-    config.output(&mut header, &registry).unwrap();
+    let generator = cpp::CodeGenerator::new(&config);
+    generator.output(&mut header, &registry).unwrap();
 
     // Check that comments were correctly generated.
     let content = std::fs::read_to_string(&header_path).unwrap();
@@ -325,9 +326,10 @@ fn test_that_cpp_code_compiles_with_codegen_options() {
     // Pretend that "Tree" is external.
     let mut definitions = BTreeMap::new();
     definitions.insert("pkg::foo".to_string(), vec!["Tree".to_string()]);
-    let inner = CodegenConfig::new("testing".to_string()).with_external_definitions(definitions);
-    let config = cpp::CppCodegenConfig::new(&inner);
-    config.output(&mut source, &registry).unwrap();
+    let config =
+        CodeGeneratorConfig::new("testing".to_string()).with_external_definitions(definitions);
+    let generator = cpp::CodeGenerator::new(&config);
+    generator.output(&mut source, &registry).unwrap();
 
     let content = std::fs::read_to_string(&source_path).unwrap();
     assert!(content.contains("pkg::foo::Tree"));
@@ -342,9 +344,9 @@ fn test_that_rust_code_compiles() {
     let source_path = dir.path().join("test.rs");
     let mut source = File::create(&source_path).unwrap();
 
-    let inner = CodegenConfig::new("testing".to_string()).with_serialization(false);
-    let config = rust::RustCodegenConfig::new(&inner);
-    config.output(&mut source, &registry).unwrap();
+    let config = CodeGeneratorConfig::new("testing".to_string()).with_serialization(false);
+    let generator = rust::CodeGenerator::new(&config);
+    generator.output(&mut source, &registry).unwrap();
 
     let status = Command::new("rustc")
         .current_dir(dir.path())
@@ -378,12 +380,12 @@ fn test_that_rust_code_compiles_with_codegen_options() {
     .into_iter()
     .collect();
 
-    let inner = CodegenConfig::new("testing".to_string())
+    let config = CodeGeneratorConfig::new("testing".to_string())
         .with_comments(comments)
         .with_external_definitions(definitions)
         .with_serialization(false);
-    let config = rust::RustCodegenConfig::new(&inner);
-    config.output(&mut source, &registry).unwrap();
+    let generator = rust::CodeGenerator::new(&config);
+    generator.output(&mut source, &registry).unwrap();
 
     // Comment was correctly generated.
     let content = std::fs::read_to_string(&source_path).unwrap();
@@ -448,12 +450,12 @@ serde_bytes = "0.11"
     .unwrap();
     std::fs::create_dir(dir.path().join("src")).unwrap();
 
-    let inner = CodegenConfig::new("testing".to_string());
-    let config = rust::RustCodegenConfig::new(&inner);
+    let config = CodeGeneratorConfig::new("testing".to_string());
+    let generator = rust::CodeGenerator::new(&config);
 
     let source_path = dir.path().join("src/lib.rs");
     let mut source = File::create(&source_path).unwrap();
-    config.output(&mut source, &registry).unwrap();
+    generator.output(&mut source, &registry).unwrap();
 
     // Use a stable `target` dir to avoid downloading and recompiling crates everytime.
     let target_dir = std::env::current_dir().unwrap().join("../target");
@@ -472,9 +474,9 @@ fn test_that_java_code_compiles() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
 
-    let inner = CodegenConfig::new("testing".to_string());
-    let config = java::JavaCodegenConfig::new(&inner);
-    config
+    let config = CodeGeneratorConfig::new("testing".to_string());
+    let generator = java::CodeGenerator::new(&config);
+    generator
         .write_source_files(dir.path().to_path_buf(), &registry)
         .unwrap();
 
@@ -498,7 +500,7 @@ fn test_that_java_code_compiles_with_codegen_options() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
 
-    let inner = CodegenConfig::new("testing".to_string()).with_comments(
+    let config = CodeGeneratorConfig::new("testing".to_string()).with_comments(
         vec![(
             vec!["testing".to_string(), "SerdeData".to_string()],
             "Some\ncomments".to_string(),
@@ -506,8 +508,8 @@ fn test_that_java_code_compiles_with_codegen_options() {
         .into_iter()
         .collect(),
     );
-    let config = java::JavaCodegenConfig::new(&inner);
-    config
+    let generator = java::CodeGenerator::new(&config);
+    generator
         .write_source_files(dir.path().to_path_buf(), &registry)
         .unwrap();
 
@@ -540,10 +542,11 @@ fn test_that_java_code_compiles_with_codegen_options() {
     // (wrongly) Declare TraitHelpers as external.
     let mut definitions = BTreeMap::new();
     definitions.insert("foo".to_string(), vec!["TraitHelpers".to_string()]);
-    let inner = CodegenConfig::new("testing".to_string()).with_external_definitions(definitions);
-    let config = java::JavaCodegenConfig::new(&inner);
+    let config =
+        CodeGeneratorConfig::new("testing".to_string()).with_external_definitions(definitions);
+    let generator = java::CodeGenerator::new(&config);
 
-    config
+    generator
         .write_source_files(dir.path().to_path_buf(), &registry)
         .unwrap();
 
