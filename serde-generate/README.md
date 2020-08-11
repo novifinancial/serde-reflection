@@ -49,7 +49,9 @@ let registry = tracer.registry().unwrap();
 
 // Create Python class definitions.
 let mut source = Vec::new();
-serde_generate::python3::output(&mut source, &registry)?;
+let inner = serde_generate::CodeGeneratorConfig::new("testing".to_string());
+let config = serde_generate::python3::CodeGenerator::new(&inner);
+config.output(&mut source, &registry)?;
 
 assert_eq!(
     String::from_utf8_lossy(&source),
