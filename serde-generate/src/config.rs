@@ -5,7 +5,7 @@ use std::collections::BTreeMap;
 
 /// Code generation options meant to be supported by all languages.
 #[derive(Clone, Debug)]
-pub struct CodegenConfig {
+pub struct CodeGeneratorConfig {
     pub(crate) module_name: String,
     pub(crate) serialization: bool,
     pub(crate) external_definitions: ExternalDefinitions,
@@ -27,7 +27,7 @@ pub trait SourceInstaller {
     /// Create a module exposing the container types contained in the registry.
     fn install_module(
         &self,
-        config: &CodegenConfig,
+        config: &CodeGeneratorConfig,
         registry: &serde_reflection::Registry,
     ) -> std::result::Result<(), Self::Error>;
 
@@ -41,7 +41,7 @@ pub trait SourceInstaller {
     fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error>;
 }
 
-impl CodegenConfig {
+impl CodeGeneratorConfig {
     /// Default config for the given module name.
     pub fn new(module_name: String) -> Self {
         Self {

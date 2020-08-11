@@ -4,7 +4,7 @@
 use crate::{
     analyzer,
     indent::{IndentConfig, IndentedWriter},
-    CodegenConfig,
+    CodeGeneratorConfig,
 };
 use serde_reflection::{ContainerFormat, Format, Named, Registry, VariantFormat};
 use std::collections::{BTreeMap, HashMap, HashSet};
@@ -12,9 +12,9 @@ use std::io::{Result, Write};
 use std::path::PathBuf;
 
 /// Main configuration object for code-generation in C++.
-pub struct CppCodegenConfig<'a> {
+pub struct CodeGenerator<'a> {
     /// Language-independent configuration.
-    inner: &'a CodegenConfig,
+    config: &'a CodeGeneratorConfig,
     /// Mapping from external type names to suitably qualified names (e.g. "MyClass" -> "name::MyClass").
     /// Derived from `config.external_definitions`.
     external_qualified_names: HashMap<String, String>,
@@ -24,8 +24,8 @@ pub struct CppCodegenConfig<'a> {
 struct CppEmitter<'a, T> {
     /// Writer.
     out: IndentedWriter<T>,
-    /// Configuration.
-    config: &'a CppCodegenConfig<'a>,
+    /// Generator.
+    generator: &'a CodeGenerator<'a>,
     /// Track which type names have been declared so far. (Used to add forward declarations.)
     known_names: HashSet<&'a str>,
     /// Track which definitions have a known size. (Used to add shared pointers.)
@@ -34,17 +34,18 @@ struct CppEmitter<'a, T> {
     current_namespace: Vec<String>,
 }
 
-impl<'a> CppCodegenConfig<'a> {
-    pub fn new(inner: &'a CodegenConfig) -> Self {
+impl<'a> CodeGenerator<'a> {
+    /// Create a C++ code generator for the given config.
+    pub fn new(config: &'a CodeGeneratorConfig) -> Self {
         let mut external_qualified_names = HashMap::new();
-        for (namespace, names) in &inner.external_definitions {
+        for (namespace, names) in &config.external_definitions {
             for name in names {
                 external_qualified_names
                     .insert(name.to_string(), format!("{}::{}", namespace, name));
             }
         }
         Self {
-            inner,
+            config,
             external_qualified_names,
         }
     }
@@ -55,14 +56,14 @@ impl<'a> CppCodegenConfig<'a> {
         registry: &Registry,
     ) -> std::result::Result<(), Box<dyn std::error::Error>> {
         let current_namespace = self
-            .inner
+            .config
             .module_name
             .split("::")
             .map(String::from)
             .collect();
         let mut emitter = CppEmitter {
             out: IndentedWriter::new(out, IndentConfig::Space(4)),
-            config: self,
+            generator: self,
             known_names: HashSet::new(),
             known_sizes: HashSet::new(),
             current_namespace,
@@ -113,7 +114,7 @@ where
         writeln!(
             self.out,
             "\nnamespace {} {{\n",
-            self.config.inner.module_name
+            self.generator.config.module_name
         )?;
         self.out.indent();
         Ok(())
@@ -124,7 +125,7 @@ where
         writeln!(
             self.out,
             "}} // end of namespace {}",
-            self.config.inner.module_name
+            self.generator.config.module_name
         )?;
         Ok(())
     }
@@ -142,7 +143,7 @@ where
     fn output_comment(&mut self, name: &str) -> std::io::Result<()> {
         let mut path = self.current_namespace.clone();
         path.push(name.to_string());
-        if let Some(doc) = self.config.inner.comments.get(&path) {
+        if let Some(doc) = self.generator.config.comments.get(&path) {
             let text = textwrap::indent(doc, "/// ").replace("\n\n", "\n///\n");
             write!(self.out, "\n{}", text)?;
         }
@@ -151,11 +152,11 @@ where
 
     /// Compute a fully qualified reference to the container type `name`.
     fn quote_qualified_name(&self, name: &str) -> String {
-        self.config
+        self.generator
             .external_qualified_names
             .get(name)
             .cloned()
-            .unwrap_or_else(|| format!("{}::{}", self.config.inner.module_name, name))
+            .unwrap_or_else(|| format!("{}::{}", self.generator.config.module_name, name))
     }
 
     fn quote_type(&self, format: &Format, require_known_size: bool) -> String {
@@ -394,7 +395,7 @@ template <typename Deserializer>
         self.output_struct_equality_test(name, fields)?;
         self.output_close_namespace()?;
         let namespaced_name = self.quote_qualified_name(name);
-        if self.config.inner.serialization {
+        if self.generator.config.serialization {
             self.output_struct_serializable(&namespaced_name, fields)?;
             self.output_struct_deserializable(&namespaced_name, fields)?;
         }
@@ -463,12 +464,12 @@ impl crate::SourceInstaller for Installer {
 
     fn install_module(
         &self,
-        inner: &crate::CodegenConfig,
+        config: &crate::CodeGeneratorConfig,
         registry: &Registry,
     ) -> std::result::Result<(), Self::Error> {
-        let mut file = self.create_header_file(&inner.module_name)?;
-        let config = CppCodegenConfig::new(&inner);
-        config.output(&mut file, &registry)
+        let mut file = self.create_header_file(&config.module_name)?;
+        let generator = CodeGenerator::new(&config);
+        generator.output(&mut file, &registry)
     }
 
     fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {

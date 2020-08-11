@@ -4,7 +4,7 @@
 use heck::CamelCase;
 use libra_canonical_serialization as lcs;
 use serde::{Deserialize, Serialize};
-use serde_generate::{cpp, java, python3, rust, test_utils, CodegenConfig};
+use serde_generate::{cpp, java, python3, rust, test_utils, CodeGeneratorConfig};
 use serde_reflection::{Registry, Result, Samples, Tracer, TracerConfig};
 use std::fs::File;
 use std::io::Write;
@@ -95,9 +95,9 @@ fn test_python_runtime_on_simple_data(runtime: Runtime) {
     let source_path = dir.path().join("test.py");
     let mut source = File::create(&source_path).unwrap();
 
-    let inner = CodegenConfig::new("testing".to_string());
-    let config = python3::PythonCodegenConfig::new(&inner);
-    config.output(&mut source, &registry).unwrap();
+    let config = CodeGeneratorConfig::new("testing".to_string());
+    let generator = python3::CodeGenerator::new(&config);
+    generator.output(&mut source, &registry).unwrap();
 
     let reference = runtime.serialize(&Test {
         a: vec![4, 6],
@@ -154,9 +154,9 @@ fn test_python_runtime_on_all_supported_types(runtime: Runtime) {
     let source_path = dir.path().join("test.py");
     let mut source = File::create(&source_path).unwrap();
 
-    let inner = CodegenConfig::new("testing".to_string());
-    let config = python3::PythonCodegenConfig::new(&inner);
-    config.output(&mut source, &registry).unwrap();
+    let config = CodeGeneratorConfig::new("testing".to_string());
+    let generator = python3::CodeGenerator::new(&config);
+    generator.output(&mut source, &registry).unwrap();
 
     let values = test_utils::get_sample_values();
     let hex_encodings: Vec<_> = values
@@ -230,12 +230,12 @@ serde_bytes = "0.11"
     .unwrap();
     std::fs::create_dir(dir.path().join("src")).unwrap();
 
-    let inner = CodegenConfig::new("testing".to_string());
-    let config = rust::RustCodegenConfig::new(&inner);
+    let config = CodeGeneratorConfig::new("testing".to_string());
+    let generator = rust::CodeGenerator::new(&config);
 
     let source_path = dir.path().join("src/main.rs");
     let mut source = File::create(&source_path).unwrap();
-    config.output(&mut source, &registry).unwrap();
+    generator.output(&mut source, &registry).unwrap();
 
     let values = test_utils::get_sample_values();
     let hex_encodings: Vec<_> = values
@@ -292,9 +292,9 @@ fn test_cpp_runtime_on_simple_date(runtime: Runtime) {
     let header_path = dir.path().join("test.hpp");
     let mut header = File::create(&header_path).unwrap();
 
-    let inner = CodegenConfig::new("testing".to_string());
-    let config = cpp::CppCodegenConfig::new(&inner);
-    config.output(&mut header, &registry).unwrap();
+    let config = CodeGeneratorConfig::new("testing".to_string());
+    let generator = cpp::CodeGenerator::new(&config);
+    generator.output(&mut header, &registry).unwrap();
 
     let reference = runtime.serialize(&Test {
         a: vec![4, 6],
@@ -377,9 +377,9 @@ fn test_cpp_runtime_on_supported_types(runtime: Runtime) {
     let header_path = dir.path().join("test.hpp");
     let mut header = File::create(&header_path).unwrap();
 
-    let inner = CodegenConfig::new("testing".to_string());
-    let config = cpp::CppCodegenConfig::new(&inner);
-    config.output(&mut header, &registry).unwrap();
+    let config = CodeGeneratorConfig::new("testing".to_string());
+    let generator = cpp::CodeGenerator::new(&config);
+    generator.output(&mut header, &registry).unwrap();
 
     let values = test_utils::get_sample_values();
     let encodings = values
@@ -468,9 +468,9 @@ fn test_java_runtime_on_simple_data(runtime: Runtime) {
     let registry = get_local_registry().unwrap();
     let dir = tempdir().unwrap();
 
-    let inner = CodegenConfig::new("testing".to_string());
-    let config = java::JavaCodegenConfig::new(&inner);
-    config
+    let config = CodeGeneratorConfig::new("testing".to_string());
+    let generator = java::CodeGenerator::new(&config);
+    generator
         .write_source_files(dir.path().to_path_buf(), &registry)
         .unwrap();
 
@@ -578,9 +578,9 @@ fn test_java_runtime_on_supported_types(runtime: Runtime) {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
 
-    let inner = CodegenConfig::new("testing".to_string());
-    let config = java::JavaCodegenConfig::new(&inner);
-    config
+    let config = CodeGeneratorConfig::new("testing".to_string());
+    let generator = java::CodeGenerator::new(&config);
+    generator
         .write_source_files(dir.path().to_path_buf(), &registry)
         .unwrap();
 

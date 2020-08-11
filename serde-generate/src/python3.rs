@@ -3,7 +3,7 @@
 
 use crate::{
     indent::{IndentConfig, IndentedWriter},
-    CodegenConfig,
+    CodeGeneratorConfig,
 };
 use serde_reflection::{ContainerFormat, Format, Named, Registry, VariantFormat};
 use std::collections::{BTreeMap, HashMap};
@@ -11,9 +11,9 @@ use std::io::{Result, Write};
 use std::path::PathBuf;
 
 /// Main configuration object for code-generation in Python.
-pub struct PythonCodegenConfig<'a> {
+pub struct CodeGenerator<'a> {
     /// Language-independent configuration.
-    inner: &'a CodegenConfig,
+    config: &'a CodeGeneratorConfig,
     /// Whether the module providing Serde definitions is located within package.
     serde_package_name: Option<String>,
     /// Mapping from external type names to suitably qualified names (e.g. "MyClass" -> "my_module.MyClass").
@@ -26,17 +26,17 @@ pub struct PythonCodegenConfig<'a> {
 struct PythonEmitter<'a, T> {
     /// Writer.
     out: IndentedWriter<T>,
-    /// Configuration.
-    config: &'a PythonCodegenConfig<'a>,
+    /// Generator.
+    generator: &'a CodeGenerator<'a>,
     /// Current namespace (e.g. vec!["my_package", "my_module", "MyClass"])
     current_namespace: Vec<String>,
 }
 
-impl<'a> PythonCodegenConfig<'a> {
-    /// Default configuration.
-    pub fn new(inner: &'a CodegenConfig) -> Self {
+impl<'a> CodeGenerator<'a> {
+    /// Create a Python code generator for the given config.
+    pub fn new(config: &'a CodeGeneratorConfig) -> Self {
         let mut external_qualified_names = HashMap::new();
-        for (module_path, names) in &inner.external_definitions {
+        for (module_path, names) in &config.external_definitions {
             let module = {
                 let mut path = module_path.split('.').collect::<Vec<_>>();
                 if path.len() < 2 {
@@ -50,7 +50,7 @@ impl<'a> PythonCodegenConfig<'a> {
             }
         }
         Self {
-            inner,
+            config,
             serde_package_name: None,
             external_qualified_names,
         }
@@ -65,14 +65,14 @@ impl<'a> PythonCodegenConfig<'a> {
     /// Write container definitions in Python.
     pub fn output(&self, out: &mut dyn Write, registry: &Registry) -> Result<()> {
         let current_namespace = self
-            .inner
+            .config
             .module_name
             .split('.')
             .map(String::from)
             .collect();
         let mut emitter = PythonEmitter {
             out: IndentedWriter::new(out, IndentConfig::Space(4)),
-            config: self,
+            generator: self,
             current_namespace,
         };
         emitter.output_preamble()?;
@@ -103,12 +103,12 @@ where
             r#"from dataclasses import dataclass
 import typing
 {}import serde_types as st"#,
-            match &self.config.serde_package_name {
+            match &self.generator.serde_package_name {
                 None => "".to_string(),
                 Some(name) => format!("from {} ", name),
             }
         )?;
-        for module in self.config.inner.external_definitions.keys() {
+        for module in self.generator.config.external_definitions.keys() {
             writeln!(self.out, "{}\n", self.quote_import(module),)?;
         }
         Ok(())
@@ -117,7 +117,7 @@ import typing
     /// Compute a reference to the registry type `name`.
     /// Use a qualified name in case of external definitions.
     fn quote_qualified_name(&self, name: &str) -> String {
-        self.config
+        self.generator
             .external_qualified_names
             .get(name)
             .cloned()
@@ -177,7 +177,7 @@ import typing
     fn output_comment(&mut self, name: &str) -> std::io::Result<()> {
         let mut path = self.current_namespace.clone();
         path.push(name.to_string());
-        if let Some(doc) = self.config.inner.comments.get(&path) {
+        if let Some(doc) = self.generator.config.comments.get(&path) {
             write!(self.out, "\"\"\" {}\n\"\"\"", doc)?;
         }
         Ok(())
@@ -327,13 +327,13 @@ impl crate::SourceInstaller for Installer {
 
     fn install_module(
         &self,
-        inner: &crate::CodegenConfig,
+        config: &crate::CodeGeneratorConfig,
         registry: &Registry,
     ) -> std::result::Result<(), Self::Error> {
-        let mut file = self.create_module_init_file(&inner.module_name)?;
-        let config = PythonCodegenConfig::new(inner)
-            .with_serde_package_name(self.serde_package_name.clone());
-        config.output(&mut file, registry)?;
+        let mut file = self.create_module_init_file(&config.module_name)?;
+        let generator =
+            CodeGenerator::new(config).with_serde_package_name(self.serde_package_name.clone());
+        generator.output(&mut file, registry)?;
         Ok(())
     }
 
