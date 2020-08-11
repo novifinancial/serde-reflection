@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["CodeGenerator","Main configuration object for code-generation in Java."],["Installer",""]]});
+initSidebarItems({"struct":[["CodeGenerator","Main configuration object for code-generation in Java."],["Installer","Installer for generated source files in Java."]]});
