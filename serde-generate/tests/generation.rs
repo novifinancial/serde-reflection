@@ -65,15 +65,15 @@ fn test_that_python_code_parses_with_codegen_options() {
     let content = std::fs::read_to_string(&source_path).unwrap();
     assert!(content.contains(
         r#"
-""" Some
-comments
-"""
+    """Some
+    comments
+    """
 "#
     ));
     assert!(content.contains(
         r#"
-""" Some other comments
-"""
+    """Some other comments
+    """
 "#
     ));
 

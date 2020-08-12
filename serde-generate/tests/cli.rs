@@ -38,14 +38,13 @@ fn test_that_installed_python_code_parses() {
         std::env::var("PYTHONPATH").unwrap_or_default(),
         dir.path().to_string_lossy(),
     );
-    let output = Command::new("python3")
+    let status = Command::new("python3")
         .arg("-c")
         .arg("import serde_types; import bincode; import lcs; import test_types")
         .env("PYTHONPATH", python_path)
-        .output()
+        .status()
         .unwrap();
-    assert_eq!(String::new(), String::from_utf8_lossy(&output.stderr));
-    assert!(output.status.success());
+    assert!(status.success());
 }
 
 #[test]
@@ -91,14 +90,13 @@ __all__ = ["lcs", "serde", "bincode", "test_types"]
         std::env::var("PYTHONPATH").unwrap_or_default(),
         dir.path().to_string_lossy(),
     );
-    let output = Command::new("python3")
+    let status = Command::new("python3")
         .arg("-c")
         .arg("from my_package import serde_types; from my_package import bincode; from my_package import lcs; from my_package import test_types")
         .env("PYTHONPATH", python_path)
-        .output()
+        .status()
         .unwrap();
-    assert_eq!(String::new(), String::from_utf8_lossy(&output.stderr));
-    assert!(output.status.success());
+    assert!(status.success());
 }
 
 #[test]
