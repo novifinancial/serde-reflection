@@ -1,7 +1,9 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use serde_generate::{cpp, java, python3, rust, test_utils, CodeGeneratorConfig, SourceInstaller};
+use serde_generate::{
+    cpp, golang, java, python3, rust, test_utils, CodeGeneratorConfig, SourceInstaller,
+};
 use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::Write;
@@ -553,4 +555,36 @@ fn test_that_java_code_compiles_with_codegen_options() {
     // References were updated.
     let content = std::fs::read_to_string(dir.path().join("testing/SerdeData.java")).unwrap();
     assert!(content.contains("foo.TraitHelpers."));
+}
+
+#[test]
+fn test_that_golang_code_compiles() {
+    let registry = test_utils::get_registry().unwrap();
+    let dir = tempdir().unwrap();
+    let source_path = dir.path().join("test.go");
+    let mut source = File::create(&source_path).unwrap();
+
+    let config = CodeGeneratorConfig::new("main".to_string());
+    let generator = golang::CodeGenerator::new(&config);
+    generator.output(&mut source, &registry).unwrap();
+
+    writeln!(&mut source, "func main() {{}}").unwrap();
+
+    let go_path = format!(
+        "{}:{}",
+        std::env::var("GOPATH").unwrap_or_default(),
+        std::env::current_dir()
+            .unwrap()
+            .join("runtime/golang")
+            .to_str()
+            .unwrap()
+    );
+    let status = Command::new("go")
+        .current_dir(dir.path())
+        .env("GOPATH", go_path)
+        .arg("build")
+        .arg(source_path)
+        .status()
+        .unwrap();
+    assert!(status.success());
 }

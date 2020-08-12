@@ -7,7 +7,7 @@
 //! cargo run --bin serdegen -- --help
 //! '''
 
-use serde_generate::{cpp, java, python3, rust, CodeGeneratorConfig, SourceInstaller};
+use serde_generate::{cpp, golang, java, python3, rust, CodeGeneratorConfig, SourceInstaller};
 use serde_reflection::Registry;
 use std::path::PathBuf;
 use structopt::{clap::arg_enum, StructOpt};
@@ -19,6 +19,7 @@ enum Language {
     Cpp,
     Rust,
     Java,
+    Go,
 }
 }
 
@@ -101,6 +102,9 @@ fn main() {
                     Language::Cpp => cpp::CodeGenerator::new(&config)
                         .output(&mut out, &registry)
                         .unwrap(),
+                    Language::Go => golang::CodeGenerator::new(&config)
+                        .output(&mut out, &registry)
+                        .unwrap(),
                     Language::Java => panic!("Code generation in Java requires `--install-dir`"),
                 }
             }
@@ -115,6 +119,7 @@ fn main() {
                     Language::Rust => Box::new(rust::Installer::new(install_dir)),
                     Language::Cpp => Box::new(cpp::Installer::new(install_dir)),
                     Language::Java => Box::new(java::Installer::new(install_dir)),
+                    Language::Go => Box::new(golang::Installer::new(install_dir)),
                 };
 
             if let Some((registry, name)) = named_registry_opt {

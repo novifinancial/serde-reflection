@@ -18,6 +18,9 @@ The following target languages are currently supported:
 * Python 3
 * Rust 2018
 
+In progress:
+* Go
+
 ### Supported Encodings
 
 Type definitions in a target language are meant to be used together with a runtime library that
