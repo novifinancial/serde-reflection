@@ -100,7 +100,8 @@ where
     fn output_preamble(&mut self) -> Result<()> {
         writeln!(
             self.out,
-            r#"from dataclasses import dataclass
+            r#"# pyre-strict
+from dataclasses import dataclass
 import typing
 {}import serde_types as st"#,
             match &self.generator.serde_package_name {
@@ -178,7 +179,7 @@ import typing
         let mut path = self.current_namespace.clone();
         path.push(name.to_string());
         if let Some(doc) = self.generator.config.comments.get(&path) {
-            write!(self.out, "\"\"\" {}\n\"\"\"", doc)?;
+            writeln!(self.out, "\"\"\"{}\n\"\"\"", doc)?;
         }
         Ok(())
     }
@@ -218,13 +219,10 @@ import typing
         };
 
         // Regarding comments, we pretend the namespace is `[module, base, name]`.
-        self.output_comment(&name)?;
-        writeln!(
-            self.out,
-            "\n@dataclass\nclass {0}__{1}({0}):\n    INDEX = {2}",
-            base, name, index
-        )?;
+        writeln!(self.out, "\n@dataclass\nclass {0}__{1}({0}):", base, name)?;
         self.out.indent();
+        self.output_comment(&name)?;
+        writeln!(self.out, "INDEX = {}  # type: int", index)?;
         self.current_namespace.push(name.to_string());
         self.output_fields(&fields)?;
         self.out.unindent();
@@ -237,14 +235,19 @@ import typing
         name: &str,
         variants: &BTreeMap<u32, Named<VariantFormat>>,
     ) -> Result<()> {
-        self.output_comment(name)?;
         // Initializing VARIANTS with a temporary value for typechecking purposes.
-        writeln!(self.out, "\nclass {}:\n    VARIANTS = []\n", name)?;
+        writeln!(self.out, "\nclass {}:", name)?;
+        self.out.indent();
+        self.output_comment(&name)?;
+        writeln!(self.out, "VARIANTS = []  # type: typing.Sequence[typing.Type[{}]]\n", name)?;
+        self.out.unindent();
+
         self.current_namespace.push(name.to_string());
         for (index, variant) in variants {
             self.output_variant(name, &variant.name, *index, &variant.value)?;
         }
         self.current_namespace.pop();
+
         writeln!(
             self.out,
             "{}.VARIANTS = [\n{}]\n",
@@ -277,9 +280,9 @@ import typing
             }
         };
         // Struct case.
-        self.output_comment(name)?;
         writeln!(self.out, "\n@dataclass\nclass {}:", name)?;
         self.out.indent();
+        self.output_comment(name)?;
         self.current_namespace.push(name.to_string());
         if fields.is_empty() {
             writeln!(self.out, "pass")?;

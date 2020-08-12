@@ -53,6 +53,7 @@
 //! #  "\n".to_string() + &
 //!     String::from_utf8_lossy(&source),
 //!     r#"
+//! ## pyre-strict
 //! from dataclasses import dataclass
 //! import typing
 //! import serde_types as st
