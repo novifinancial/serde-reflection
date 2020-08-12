@@ -13,6 +13,9 @@
 //! * Python 3
 //! * Rust 2018
 //!
+//! In progress:
+//! * Go
+//!
 //! ## Supported Encodings
 //!
 //! Type definitions in a target language are meant to be used together with a runtime library that
@@ -116,6 +119,8 @@ pub mod analyzer;
 /// Support for code-generation in C++
 pub mod cpp;
 /// Utility function to generate indented text
+pub mod golang;
+/// Support for code-generation in Go
 pub mod indent;
 /// Support for code-generation in Java
 pub mod java;

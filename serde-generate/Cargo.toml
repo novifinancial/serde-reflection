@@ -16,6 +16,7 @@ exclude = [
 ]
 
 [dependencies]
+heck = "0.3.1"
 include_dir = "0.6"
 maplit = "1.0.2"
 serde = { version = "1.0.112", features = ["derive"] }
@@ -27,7 +28,6 @@ textwrap = "0.12.1"
 serde-reflection = { path = "../serde-reflection", version = "0.3.0" }
 
 [dev-dependencies]
-heck = "0.3.1"
 tempfile = "3.1"
 bincode = "1.2"
 hex = "0.4.2"
