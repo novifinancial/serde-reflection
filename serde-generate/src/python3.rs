@@ -185,6 +185,10 @@ import typing
     }
 
     fn output_fields(&mut self, fields: &[Named<Format>]) -> Result<()> {
+        if fields.is_empty() {
+            writeln!(self.out, "pass")?;
+            return Ok(());
+        }
         for field in fields {
             writeln!(
                 self.out,
@@ -222,7 +226,9 @@ import typing
         writeln!(self.out, "\n@dataclass\nclass {0}__{1}({0}):", base, name)?;
         self.out.indent();
         self.output_comment(&name)?;
-        writeln!(self.out, "INDEX = {}  # type: int", index)?;
+        if self.generator.config.serialization {
+            writeln!(self.out, "INDEX = {}  # type: int", index)?;
+        }
         self.current_namespace.push(name.to_string());
         self.output_fields(&fields)?;
         self.out.unindent();
@@ -235,11 +241,18 @@ import typing
         name: &str,
         variants: &BTreeMap<u32, Named<VariantFormat>>,
     ) -> Result<()> {
-        // Initializing VARIANTS with a temporary value for typechecking purposes.
         writeln!(self.out, "\nclass {}:", name)?;
         self.out.indent();
         self.output_comment(&name)?;
-        writeln!(self.out, "VARIANTS = []  # type: typing.Sequence[typing.Type[{}]]\n", name)?;
+        if self.generator.config.serialization {
+            writeln!(
+                self.out,
+                "VARIANTS = []  # type: typing.Sequence[typing.Type[{}]]\n",
+                name
+            )?;
+        } else {
+            writeln!(self.out, "pass\n")?;
+        }
         self.out.unindent();
 
         self.current_namespace.push(name.to_string());
@@ -248,16 +261,19 @@ import typing
         }
         self.current_namespace.pop();
 
-        writeln!(
-            self.out,
-            "{}.VARIANTS = [\n{}]\n",
-            name,
-            variants
-                .iter()
-                .map(|(_, v)| format!("    {}__{},\n", name, v.name))
-                .collect::<Vec<_>>()
-                .join("")
-        )
+        if self.generator.config.serialization {
+            writeln!(
+                self.out,
+                "{}.VARIANTS = [\n{}]\n",
+                name,
+                variants
+                    .iter()
+                    .map(|(_, v)| format!("    {}__{},\n", name, v.name))
+                    .collect::<Vec<_>>()
+                    .join("")
+            )?;
+        }
+        Ok(())
     }
 
     fn output_container(&mut self, name: &str, format: &ContainerFormat) -> Result<()> {
@@ -284,11 +300,7 @@ import typing
         self.out.indent();
         self.output_comment(name)?;
         self.current_namespace.push(name.to_string());
-        if fields.is_empty() {
-            writeln!(self.out, "pass")?;
-        } else {
-            self.output_fields(&fields)?;
-        }
+        self.output_fields(&fields)?;
         self.current_namespace.pop();
         self.out.unindent();
         writeln!(self.out)
