@@ -588,3 +588,35 @@ fn test_that_golang_code_compiles() {
         .unwrap();
     assert!(status.success());
 }
+
+#[test]
+fn test_that_golang_code_compiles_without_serialization() {
+    let registry = test_utils::get_registry().unwrap();
+    let dir = tempdir().unwrap();
+    let source_path = dir.path().join("test.go");
+    let mut source = File::create(&source_path).unwrap();
+
+    let config = CodeGeneratorConfig::new("main".to_string()).with_serialization(false);
+    let generator = golang::CodeGenerator::new(&config);
+    generator.output(&mut source, &registry).unwrap();
+
+    writeln!(&mut source, "func main() {{}}").unwrap();
+
+    let go_path = format!(
+        "{}:{}",
+        std::env::var("GOPATH").unwrap_or_default(),
+        std::env::current_dir()
+            .unwrap()
+            .join("runtime/golang")
+            .to_str()
+            .unwrap()
+    );
+    let status = Command::new("go")
+        .current_dir(dir.path())
+        .env("GOPATH", go_path)
+        .arg("build")
+        .arg(source_path)
+        .status()
+        .unwrap();
+    assert!(status.success());
+}
