@@ -4,11 +4,11 @@
 package serde
 
 type Uint128 struct {
-    High uint64
-    Low uint64
+	High uint64
+	Low  uint64
 }
 
 type Int128 struct {
-    High int64
-    Low uint64
+	High int64
+	Low  uint64
 }
