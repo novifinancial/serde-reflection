@@ -70,7 +70,9 @@ impl<'a> CodeGenerator<'a> {
             emitter.output_container(name, format)?;
         }
 
-        emitter.output_trait_helpers(registry)?;
+        if self.config.serialization {
+            emitter.output_trait_helpers(registry)?;
+        }
 
         Ok(())
     }
@@ -81,14 +83,15 @@ where
     T: Write,
 {
     fn output_preamble(&mut self) -> Result<()> {
-        writeln!(self.out, "package {}\n", self.generator.config.module_name)?;
         writeln!(
             self.out,
-            r#"
-import "fmt"
-import "serde"
-"#
+            "package {}\n\n",
+            self.generator.config.module_name
         )?;
+        if self.generator.config.serialization {
+            writeln!(self.out, "import \"fmt\"")?;
+        }
+        writeln!(self.out, "import \"serde\"\n")?;
         Ok(())
     }
 
