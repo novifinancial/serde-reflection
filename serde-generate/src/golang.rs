@@ -59,7 +59,8 @@ impl<'a> CodeGenerator<'a> {
             .collect::<Vec<_>>();
 
         let mut emitter = GoEmitter {
-            out: IndentedWriter::new(out, IndentConfig::Space(4)),
+            // `go fmt` indents using tabs so let's do the same.
+            out: IndentedWriter::new(out, IndentConfig::Tab),
             generator: self,
             current_namespace,
         };
@@ -317,10 +318,10 @@ where
                     self.out,
                     r#"
 if (value != nil) {{
-    if err := serializer.SerializeOptionTag(true); err != nil {{ return err }}
-    {}
+	if err := serializer.SerializeOptionTag(true); err != nil {{ return err }}
+	{}
 }} else {{
-    if err := serializer.SerializeOptionTag(false); err != nil {{ return err }}
+	if err := serializer.SerializeOptionTag(false); err != nil {{ return err }}
 }}
 "#,
                     self.quote_serialize_value("(*value)", format)
@@ -333,7 +334,7 @@ if (value != nil) {{
                     r#"
 if err := serializer.SerializeLen(len(value)); err != nil {{ return err }}
 for _, item := range(value) {{
-    {}
+	{}
 }}
 "#,
                     self.quote_serialize_value("item", format)
@@ -348,10 +349,10 @@ if err := serializer.SerializeLen(len(value)); err != nil {{ return err }}
 offsets := make([]int, len(value))
 count := 0
 for k, v := range(value) {{
-    offsets[count] = serializer.GetBufferOffset()
-    count += 1
-    {}
-    {}
+	offsets[count] = serializer.GetBufferOffset()
+	count += 1
+	{}
+	{}
 }}
 serializer.SortMapEntries(offsets);
 "#,
@@ -373,7 +374,7 @@ serializer.SortMapEntries(offsets);
                     self.out,
                     r#"
 for _, item := range(value) {{
-    {}
+	{}
 }}
 "#,
                     self.quote_serialize_value("item", content),
@@ -406,7 +407,7 @@ var value *{}
 tag, err := deserializer.DeserializeOptionTag()
 if err != nil {{ return value, err }}
 if (tag) {{
-    {}
+	{}
 }}
 return value, nil
 "#,
@@ -423,7 +424,7 @@ length, err := deserializer.DeserializeLen()
 if err != nil {{ return nil, err }}
 obj := make([]{}, length)
 for i := range(obj) {{
-    {}
+	{}
 }}
 return obj, nil
 "#,
@@ -441,17 +442,17 @@ if err != nil {{ return nil, err }}
 obj := make(map[{0}]{1})
 previous_slice := serde.Slice {{ 0, 0 }}
 for i := 0; i < length; i++ {{
-    var slice serde.Slice
-    slice.Start = deserializer.GetBufferOffset()
-    var key {0}
-    {2}
-    slice.End = deserializer.GetBufferOffset()
-    if (i > 0) {{
-        err := deserializer.CheckThatKeySlicesAreIncreasing(previous_slice, slice)
-        if err != nil {{ return nil, err }}
-    }}
-    previous_slice = slice
-    {3}
+	var slice serde.Slice
+	slice.Start = deserializer.GetBufferOffset()
+	var key {0}
+	{2}
+	slice.End = deserializer.GetBufferOffset()
+	if (i > 0) {{
+		err := deserializer.CheckThatKeySlicesAreIncreasing(previous_slice, slice)
+		if err != nil {{ return nil, err }}
+	}}
+	previous_slice = slice
+	{3}
 }}
 return obj, nil
 "#,
@@ -486,7 +487,7 @@ return obj, nil
                     r#"
 var obj [{1}]{0}
 for i := range(obj) {{
-    {2}
+	{2}
 }}
 return obj, nil
 "#,
@@ -640,27 +641,26 @@ if err != nil {{ return nil, err }}
 
 switch index {{"#,
             )?;
-            self.out.indent();
             for (index, variant) in variants {
                 writeln!(
                     self.out,
-                    r#"case {}: {{
-    val, err := load_{}__{}(deserializer)
-    if err != nil {{
-        return nil, err
-    }} else {{
-        return &val, nil
-    }}
-}}"#,
+                    r#"case {}:
+	val, err := load_{}__{}(deserializer)
+	if err != nil {{
+		return nil, err
+	}} else {{
+		return &val, nil
+	}}
+"#,
                     index, name, variant.name
                 )?;
             }
             writeln!(
                 self.out,
-                "default: return nil, fmt.Errorf(\"Unknown variant index for {}: %d\", index)",
+                "default:
+	return nil, fmt.Errorf(\"Unknown variant index for {}: %d\", index)",
                 name,
             )?;
-            self.out.unindent();
             writeln!(self.out, "}}")?;
             self.out.unindent();
             writeln!(self.out, "}}")?;
