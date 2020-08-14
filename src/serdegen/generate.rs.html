@@ -135,6 +135,11 @@
 <span id="135">135</span>
 <span id="136">136</span>
 <span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -145,7 +150,7 @@
 <span class="doccomment">//! cargo run --bin serdegen -- --help</span>
 <span class="doccomment">//! &#39;&#39;&#39;</span>
 
-<span class="kw">use</span> <span class="ident">serde_generate</span>::{<span class="ident">cpp</span>, <span class="ident">java</span>, <span class="ident">python3</span>, <span class="ident">rust</span>, <span class="ident">CodeGeneratorConfig</span>, <span class="ident">SourceInstaller</span>};
+<span class="kw">use</span> <span class="ident">serde_generate</span>::{<span class="ident">cpp</span>, <span class="ident">golang</span>, <span class="ident">java</span>, <span class="ident">python3</span>, <span class="ident">rust</span>, <span class="ident">CodeGeneratorConfig</span>, <span class="ident">SourceInstaller</span>};
 <span class="kw">use</span> <span class="ident">serde_reflection</span>::<span class="ident">Registry</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">path</span>::<span class="ident">PathBuf</span>;
 <span class="kw">use</span> <span class="ident">structopt</span>::{<span class="ident">clap</span>::<span class="ident">arg_enum</span>, <span class="ident">StructOpt</span>};
@@ -157,6 +162,7 @@
     <span class="ident">Cpp</span>,
     <span class="ident">Rust</span>,
     <span class="ident">Java</span>,
+    <span class="ident">Go</span>,
 }
 }
 
@@ -239,6 +245,9 @@
                     <span class="ident">Language</span>::<span class="ident">Cpp</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">cpp</span>::<span class="ident">CodeGenerator</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="ident">config</span>)
                         .<span class="ident">output</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">out</span>, <span class="kw-2">&amp;</span><span class="ident">registry</span>)
                         .<span class="ident">unwrap</span>(),
+                    <span class="ident">Language</span>::<span class="ident">Go</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">golang</span>::<span class="ident">CodeGenerator</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="ident">config</span>)
+                        .<span class="ident">output</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">out</span>, <span class="kw-2">&amp;</span><span class="ident">registry</span>)
+                        .<span class="ident">unwrap</span>(),
                     <span class="ident">Language</span>::<span class="ident">Java</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;Code generation in Java requires `--install-dir`&quot;</span>),
                 }
             }
@@ -253,6 +262,7 @@
                     <span class="ident">Language</span>::<span class="ident">Rust</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">rust</span>::<span class="ident">Installer</span>::<span class="ident">new</span>(<span class="ident">install_dir</span>)),
                     <span class="ident">Language</span>::<span class="ident">Cpp</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">cpp</span>::<span class="ident">Installer</span>::<span class="ident">new</span>(<span class="ident">install_dir</span>)),
                     <span class="ident">Language</span>::<span class="ident">Java</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">java</span>::<span class="ident">Installer</span>::<span class="ident">new</span>(<span class="ident">install_dir</span>)),
+                    <span class="ident">Language</span>::<span class="ident">Go</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">golang</span>::<span class="ident">Installer</span>::<span class="ident">new</span>(<span class="ident">install_dir</span>)),
                 };
 
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">registry</span>, <span class="ident">name</span>)) <span class="op">=</span> <span class="ident">named_registry_opt</span> {
