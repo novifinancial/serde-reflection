@@ -4,14 +4,14 @@
 use serde_generate::{java, test_utils, CodeGeneratorConfig};
 use std::collections::BTreeMap;
 use std::process::Command;
-use tempfile::tempdir;
+use tempfile::{tempdir, TempDir};
 
-#[test]
-fn test_that_java_code_compiles() {
+fn test_that_java_code_compiles_with_config(
+    config: &CodeGeneratorConfig,
+) -> (TempDir, std::path::PathBuf) {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
 
-    let config = CodeGeneratorConfig::new("testing".to_string());
     let generator = java::CodeGenerator::new(&config);
     generator
         .write_source_files(dir.path().to_path_buf(), &registry)
@@ -30,28 +30,37 @@ fn test_that_java_code_compiles() {
         .status()
         .unwrap();
     assert!(status.success());
+
+    let path = dir.path().join("testing");
+    (dir, path)
 }
 
 #[test]
-fn test_that_java_code_compiles_with_codegen_options() {
-    let registry = test_utils::get_registry().unwrap();
-    let dir = tempdir().unwrap();
+fn test_that_java_code_compiles() {
+    let config = CodeGeneratorConfig::new("testing".to_string());
+    test_that_java_code_compiles_with_config(&config);
+}
 
-    let config = CodeGeneratorConfig::new("testing".to_string()).with_comments(
-        vec![(
-            vec!["testing".to_string(), "SerdeData".to_string()],
-            "Some\ncomments".to_string(),
-        )]
-        .into_iter()
-        .collect(),
-    );
-    let generator = java::CodeGenerator::new(&config);
-    generator
-        .write_source_files(dir.path().to_path_buf(), &registry)
-        .unwrap();
+#[test]
+fn test_that_java_code_compiles_without_serialization() {
+    let config = CodeGeneratorConfig::new("testing".to_string()).with_serialization(false);
+    test_that_java_code_compiles_with_config(&config);
+}
+
+#[test]
+fn test_that_java_code_compiles_with_comments() {
+    let comments = vec![(
+        vec!["testing".to_string(), "SerdeData".to_string()],
+        "Some\ncomments".to_string(),
+    )]
+    .into_iter()
+    .collect();
+    let config = CodeGeneratorConfig::new("testing".to_string()).with_comments(comments);
+
+    let (_dir, path) = test_that_java_code_compiles_with_config(&config);
 
     // Comment was correctly generated.
-    let content = std::fs::read_to_string(dir.path().join("testing/SerdeData.java")).unwrap();
+    let content = std::fs::read_to_string(path.join("SerdeData.java")).unwrap();
     assert!(content.contains(
         r#"
 /**
@@ -60,21 +69,6 @@ fn test_that_java_code_compiles_with_codegen_options() {
  */
 "#
     ));
-
-    // Files compile.
-    let paths = std::iter::empty()
-        .chain(std::fs::read_dir("runtime/java/com/facebook/serde").unwrap())
-        .chain(std::fs::read_dir("runtime/java/com/facebook/bincode").unwrap())
-        .chain(std::fs::read_dir(dir.path().join("testing")).unwrap())
-        .map(|e| e.unwrap().path());
-    let status = Command::new("javac")
-        .arg("-Xlint")
-        .arg("-d")
-        .arg(dir.path())
-        .args(paths)
-        .status()
-        .unwrap();
-    assert!(status.success());
 }
 
 #[test]

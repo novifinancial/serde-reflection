@@ -6,9 +6,11 @@ use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::Write;
 use std::process::Command;
-use tempfile::tempdir;
+use tempfile::{tempdir, TempDir};
 
-fn test_that_golang_code_compiles_with_config(config: &CodeGeneratorConfig) -> std::path::PathBuf {
+fn test_that_golang_code_compiles_with_config(
+    config: &CodeGeneratorConfig,
+) -> (TempDir, std::path::PathBuf) {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
     let source_path = dir.path().join("test.go");
@@ -37,7 +39,7 @@ fn test_that_golang_code_compiles_with_config(config: &CodeGeneratorConfig) -> s
         .unwrap();
     assert!(status.success());
 
-    source_path.clone()
+    (dir, source_path.clone())
 }
 
 #[test]
@@ -53,9 +55,35 @@ fn test_that_golang_code_compiles_without_serialization() {
 }
 
 #[test]
-fn test_that_golang_code_compiles_without_comments() {
-    let config = CodeGeneratorConfig::new("main".to_string()).with_serialization(false);
-    test_that_golang_code_compiles_with_config(&config);
+fn test_that_golang_code_compiles_with_comments() {
+    let comments = vec![
+        (
+            vec!["main".to_string(), "SerdeData".to_string()],
+            "Some\ncomments".to_string(),
+        ),
+        (
+            vec!["main".to_string(), "List".to_string(), "Node".to_string()],
+            "Some other comments".to_string(),
+        ),
+    ]
+    .into_iter()
+    .collect();
+    let config = CodeGeneratorConfig::new("main".to_string()).with_comments(comments);
+
+    let (_dir, source_path) = test_that_golang_code_compiles_with_config(&config);
+    // Comments were correctly generated.
+    let content = std::fs::read_to_string(&source_path).unwrap();
+    assert!(content.contains(
+        r#"
+// Some
+// comments
+"#
+    ));
+    assert!(content.contains(
+        r#"
+// Some other comments
+"#
+    ));
 }
 
 #[test]

@@ -6,16 +6,16 @@ use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::Write;
 use std::process::Command;
-use tempfile::tempdir;
+use tempfile::{tempdir, TempDir};
 
-#[test]
-fn test_that_cpp_code_compiles() {
+fn test_that_cpp_code_compiles_with_config(
+    config: &CodeGeneratorConfig,
+) -> (TempDir, std::path::PathBuf) {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
     let header_path = dir.path().join("test.hpp");
     let mut header = File::create(&header_path).unwrap();
 
-    let config = CodeGeneratorConfig::new("testing".to_string());
     let generator = cpp::CodeGenerator::new(&config);
     generator.output(&mut header, &registry).unwrap();
 
@@ -37,10 +37,81 @@ fn test_that_cpp_code_compiles() {
         .arg(dir.path().join("test.o"))
         .arg("-I")
         .arg("runtime/cpp")
-        .arg(source_path)
+        .arg(source_path.clone())
         .status()
         .unwrap();
     assert!(status.success());
+
+    (dir, header_path.clone())
+}
+
+#[test]
+fn test_that_cpp_code_compiles() {
+    let config = CodeGeneratorConfig::new("testing".to_string());
+    test_that_cpp_code_compiles_with_config(&config);
+}
+
+#[test]
+fn test_that_cpp_code_compiles_without_serialization() {
+    let config = CodeGeneratorConfig::new("testing".to_string()).with_serialization(false);
+    test_that_cpp_code_compiles_with_config(&config);
+}
+
+#[test]
+fn test_that_cpp_code_compiles_with_comments() {
+    let comments = vec![
+        (
+            vec!["testing".to_string(), "SerdeData".to_string()],
+            "Some\ncomments".to_string(),
+        ),
+        (
+            vec![
+                "testing".to_string(),
+                "List".to_string(),
+                "Node".to_string(),
+            ],
+            "Some other comments".to_string(),
+        ),
+    ]
+    .into_iter()
+    .collect();
+    let config = CodeGeneratorConfig::new("testing".to_string()).with_comments(comments);
+
+    let (_dir, header_path) = test_that_cpp_code_compiles_with_config(&config);
+
+    // Comments were correctly generated.
+    let content = std::fs::read_to_string(&header_path).unwrap();
+    assert!(content.contains(
+        r#"
+    /// Some
+    /// comments
+"#
+    ));
+    assert!(content.contains(
+        r#"
+        /// Some other comments
+"#
+    ));
+}
+
+#[test]
+fn test_cpp_code_with_external_definitions() {
+    let registry = test_utils::get_registry().unwrap();
+    let dir = tempdir().unwrap();
+    let header_path = dir.path().join("test.hpp");
+    let mut header = File::create(&header_path).unwrap();
+
+    // Pretend that "Tree" is external.
+    let mut definitions = BTreeMap::new();
+    definitions.insert("pkg::foo".to_string(), vec!["Tree".to_string()]);
+    let config =
+        CodeGeneratorConfig::new("testing".to_string()).with_external_definitions(definitions);
+    let generator = cpp::CodeGenerator::new(&config);
+    generator.output(&mut header, &registry).unwrap();
+
+    let content = std::fs::read_to_string(&header_path).unwrap();
+    assert!(content.contains("pkg::foo::Tree"));
+    assert!(!content.contains("testing::Tree"));
 }
 
 #[test]
@@ -117,92 +188,4 @@ int main() {{
         .status()
         .unwrap();
     assert!(status.success());
-}
-
-#[test]
-fn test_that_cpp_code_compiles_with_codegen_options() {
-    let registry = test_utils::get_registry().unwrap();
-    let dir = tempdir().unwrap();
-    let header_path = dir.path().join("test.hpp");
-    let mut header = File::create(&header_path).unwrap();
-
-    let config = CodeGeneratorConfig::new("testing".to_string()).with_comments(
-        vec![
-            (
-                vec!["testing".to_string(), "SerdeData".to_string()],
-                "Some\ncomments".to_string(),
-            ),
-            (
-                vec![
-                    "testing".to_string(),
-                    "List".to_string(),
-                    "Node".to_string(),
-                ],
-                "Some other comments".to_string(),
-            ),
-        ]
-        .into_iter()
-        .collect(),
-    );
-    let generator = cpp::CodeGenerator::new(&config);
-    generator.output(&mut header, &registry).unwrap();
-
-    // Check that comments were correctly generated.
-    let content = std::fs::read_to_string(&header_path).unwrap();
-    assert!(content.contains(
-        r#"
-    /// Some
-    /// comments
-"#
-    ));
-    assert!(content.contains(
-        r#"
-        /// Some other comments
-"#
-    ));
-    // see below
-    assert!(content.contains("testing::Tree"));
-
-    let source_path = dir.path().join("test.cpp");
-    let mut source = File::create(&source_path).unwrap();
-    writeln!(
-        source,
-        r#"
-#include "bincode.hpp"
-#include "test.hpp"
-"#
-    )
-    .unwrap();
-
-    let status = Command::new("clang++")
-        .arg("--std=c++17")
-        .arg("-c")
-        .arg("-o")
-        .arg(dir.path().join("test.o"))
-        .arg("-I")
-        .arg("runtime/cpp")
-        .arg(source_path.clone())
-        .status()
-        .unwrap();
-    assert!(status.success());
-}
-
-#[test]
-fn test_cpp_code_with_external_definitions() {
-    let registry = test_utils::get_registry().unwrap();
-    let dir = tempdir().unwrap();
-    let header_path = dir.path().join("test.hpp");
-    let mut header = File::create(&header_path).unwrap();
-
-    // Pretend that "Tree" is external.
-    let mut definitions = BTreeMap::new();
-    definitions.insert("pkg::foo".to_string(), vec!["Tree".to_string()]);
-    let config =
-        CodeGeneratorConfig::new("testing".to_string()).with_external_definitions(definitions);
-    let generator = cpp::CodeGenerator::new(&config);
-    generator.output(&mut header, &registry).unwrap();
-
-    let content = std::fs::read_to_string(&header_path).unwrap();
-    assert!(content.contains("pkg::foo::Tree"));
-    assert!(!content.contains("testing::Tree"));
 }
