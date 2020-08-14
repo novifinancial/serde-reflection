@@ -649,6 +649,7 @@ return obj;
         self.enter_class(name, reserved_names);
         // Fields
         for field in fields {
+            self.output_comment(&field.name)?;
             writeln!(
                 self.out,
                 "public final {} {};",
@@ -838,10 +839,8 @@ if (getClass() != obj.getClass()) return false;
             writeln!(
                 self.out,
                 r#"
-{} obj;
 int index = deserializer.deserialize_variant_index();
 switch (index) {{"#,
-                name,
             )?;
             self.out.indent();
             for (index, variant) in variants {
