@@ -5,17 +5,17 @@ use serde_generate::{rust, test_utils, CodeGeneratorConfig};
 use std::fs::File;
 use std::io::Write;
 use std::process::Command;
-use tempfile::tempdir;
+use tempfile::{tempdir, TempDir};
 
 // Quick test using rustc directly.
-#[test]
-fn test_that_rust_code_compiles() {
+fn test_that_rust_code_compiles_with_config(
+    config: &CodeGeneratorConfig,
+) -> (TempDir, std::path::PathBuf) {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
     let source_path = dir.path().join("test.rs");
     let mut source = File::create(&source_path).unwrap();
 
-    let config = CodeGeneratorConfig::new("testing".to_string()).with_serialization(false);
     let generator = rust::CodeGenerator::new(&config);
     generator.output(&mut source, &registry).unwrap();
 
@@ -25,25 +25,43 @@ fn test_that_rust_code_compiles() {
         .arg("lib")
         .arg("--edition")
         .arg("2018")
-        .arg(source_path)
+        .arg(source_path.clone())
         .status()
         .unwrap();
     assert!(status.success());
+
+    (dir, source_path.clone())
 }
 
-// Quick test using rustc directly.
 #[test]
-fn test_that_rust_code_compiles_with_codegen_options() {
-    let registry = test_utils::get_registry().unwrap();
-    let dir = tempdir().unwrap();
-    let source_path = dir.path().join("test.rs");
-    let mut source = File::create(&source_path).unwrap();
+fn test_that_rust_code_compiles() {
+    let config = CodeGeneratorConfig::new("testing".to_string()).with_serialization(false);
+    test_that_rust_code_compiles_with_config(&config);
+}
+
+#[test]
+fn test_that_rust_code_compiles_with_comments() {
     let comments = vec![(
         vec!["testing".to_string(), "SerdeData".to_string()],
         "Some\ncomments".to_string(),
     )]
     .into_iter()
     .collect();
+    let config = CodeGeneratorConfig::new("testing".to_string())
+        .with_serialization(false)
+        .with_comments(comments);
+    let (_dir, source_path) = test_that_rust_code_compiles_with_config(&config);
+    let content = std::fs::read_to_string(&source_path).unwrap();
+    assert!(content.contains("/// Some\n/// comments\n"));
+}
+
+#[test]
+fn test_that_rust_code_compiles_with_external_definitions() {
+    let registry = test_utils::get_registry().unwrap();
+    let dir = tempdir().unwrap();
+    let source_path = dir.path().join("test.rs");
+    let mut source = File::create(&source_path).unwrap();
+
     let definitions = vec![
         ("foo".to_string(), vec!["Map".to_string()]),
         (String::new(), vec!["Bytes".into()]),
@@ -52,15 +70,10 @@ fn test_that_rust_code_compiles_with_codegen_options() {
     .collect();
 
     let config = CodeGeneratorConfig::new("testing".to_string())
-        .with_comments(comments)
         .with_external_definitions(definitions)
         .with_serialization(false);
     let generator = rust::CodeGenerator::new(&config);
     generator.output(&mut source, &registry).unwrap();
-
-    // Comment was correctly generated.
-    let content = std::fs::read_to_string(&source_path).unwrap();
-    assert!(content.contains("/// Some\n/// comments\n"));
 
     let output = Command::new("rustc")
         .current_dir(dir.path())
@@ -71,7 +84,7 @@ fn test_that_rust_code_compiles_with_codegen_options() {
         .arg(source_path.clone())
         .output()
         .unwrap();
-    assert!(!output.status.success());
+    assert!(!output.status.success()); // Must fail.
 
     // Externally defined names "Map" and "Bytes" have caused the usual imports to be
     // replaced by `use foo::Map` (and nothing, respectively), so we must add the definitions.
@@ -101,7 +114,7 @@ mod foo {{
 
 // Full test using cargo. This may take a while.
 #[test]
-fn test_that_rust_code_compiles_with_derive_macros() {
+fn test_that_rust_code_compiles_with_serialization() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
     std::fs::write(

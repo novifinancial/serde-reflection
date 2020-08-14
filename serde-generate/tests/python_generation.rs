@@ -6,17 +6,17 @@ use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::Write;
 use std::process::Command;
-use tempfile::tempdir;
+use tempfile::{tempdir, TempDir};
 
-#[test]
-fn test_that_python_code_parses() {
+fn test_that_python_code_parses_with_config(
+    config: &CodeGeneratorConfig,
+) -> (TempDir, std::path::PathBuf) {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
 
     let source_path = dir.path().join("test.py");
     let mut source = File::create(&source_path).unwrap();
 
-    let config = CodeGeneratorConfig::new("testing".to_string());
     let generator = python3::CodeGenerator::new(&config);
     generator.output(&mut source, &registry).unwrap();
 
@@ -25,41 +25,48 @@ fn test_that_python_code_parses() {
         std::env::var("PYTHONPATH").unwrap_or_default()
     );
     let status = Command::new("python3")
-        .arg(source_path)
+        .arg(source_path.clone())
         .env("PYTHONPATH", python_path)
         .status()
         .unwrap();
     assert!(status.success());
+
+    (dir, source_path.clone())
 }
 
 #[test]
-fn test_that_python_code_parses_with_codegen_options() {
-    let registry = test_utils::get_registry().unwrap();
-    let dir = tempdir().unwrap();
+fn test_that_python_code_parses() {
+    let config = CodeGeneratorConfig::new("testing".to_string());
+    test_that_python_code_parses_with_config(&config);
+}
 
-    let source_path = dir.path().join("test.py");
-    let mut source = File::create(&source_path).unwrap();
+#[test]
+fn test_that_python_code_parses_without_serialization() {
+    let config = CodeGeneratorConfig::new("testing".to_string()).with_serialization(false);
+    test_that_python_code_parses_with_config(&config);
+}
 
-    let config = CodeGeneratorConfig::new("testing".to_string()).with_comments(
-        vec![
-            (
-                vec!["testing".to_string(), "SerdeData".to_string()],
-                "Some\ncomments".to_string(),
-            ),
-            (
-                vec![
-                    "testing".to_string(),
-                    "List".to_string(),
-                    "Node".to_string(),
-                ],
-                "Some other comments".to_string(),
-            ),
-        ]
-        .into_iter()
-        .collect(),
-    );
-    let generator = python3::CodeGenerator::new(&config);
-    generator.output(&mut source, &registry).unwrap();
+#[test]
+fn test_that_python_code_parses_with_comments() {
+    let comments = vec![
+        (
+            vec!["testing".to_string(), "SerdeData".to_string()],
+            "Some\ncomments".to_string(),
+        ),
+        (
+            vec![
+                "testing".to_string(),
+                "List".to_string(),
+                "Node".to_string(),
+            ],
+            "Some other comments".to_string(),
+        ),
+    ]
+    .into_iter()
+    .collect();
+
+    let config = CodeGeneratorConfig::new("testing".to_string()).with_comments(comments);
+    let (_dir, source_path) = test_that_python_code_parses_with_config(&config);
 
     // Check that comments were correctly generated.
     let content = std::fs::read_to_string(&source_path).unwrap();
@@ -76,17 +83,6 @@ fn test_that_python_code_parses_with_codegen_options() {
     """
 "#
     ));
-
-    let python_path = format!(
-        "{}:runtime/python",
-        std::env::var("PYTHONPATH").unwrap_or_default()
-    );
-    let status = Command::new("python3")
-        .arg(source_path.clone())
-        .env("PYTHONPATH", python_path)
-        .status()
-        .unwrap();
-    assert!(status.success());
 }
 
 #[test]
