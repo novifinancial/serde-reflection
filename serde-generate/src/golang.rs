@@ -714,19 +714,20 @@ impl Installer {
         Installer { install_dir }
     }
 
-    fn install_runtime(
-        &self,
-        source_dir: include_dir::Dir,
-        path: &str,
-    ) -> std::result::Result<(), Box<dyn std::error::Error>> {
-        let dir_path = self.install_dir.join(path);
-        std::fs::create_dir_all(&dir_path)?;
-        for entry in source_dir.files() {
-            let mut file = std::fs::File::create(dir_path.join(entry.path()))?;
-            file.write_all(entry.contents())?;
-        }
-        Ok(())
-    }
+    // TODO: not sure whether we need these code later, comment for now
+    // fn install_runtime(
+    //     &self,
+    //     source_dir: include_dir::Dir,
+    //     path: &str,
+    // ) -> std::result::Result<(), Box<dyn std::error::Error>> {
+    //     let dir_path = self.install_dir.join(path);
+    //     std::fs::create_dir_all(&dir_path)?;
+    //     for entry in source_dir.files() {
+    //         let mut file = std::fs::File::create(dir_path.join(entry.path()))?;
+    //         file.write_all(entry.contents())?;
+    //     }
+    //     Ok(())
+    // }
 }
 
 impl crate::SourceInstaller for Installer {
