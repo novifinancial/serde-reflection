@@ -176,8 +176,8 @@ func (d *Deserializer) DeserializeOptionTag() (bool, error) {
 	return d.DeserializeBool()
 }
 
-func (d *Deserializer) GetBufferOffset() int {
-	return d.buf.Len()
+func (d *Deserializer) GetBufferOffset() uint64 {
+	return uint64(d.buf.Len())
 }
 
 // CheckThatKeySlicesAreIncreasing is unimplemented.

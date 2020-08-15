@@ -140,8 +140,8 @@ func (s *Serializer) SerializeOptionTag(value bool) error {
 	return s.SerializeBool(value)
 }
 
-func (s *Serializer) GetBufferOffset() int {
-	return s.buf.Len()
+func (s *Serializer) GetBufferOffset() uint64 {
+	return uint64(s.buf.Len())
 }
 
 // SortMapEntries is unimplemented.

@@ -44,7 +44,7 @@ type Serializer interface {
 
 	SerializeOptionTag(value bool) error
 
-	GetBufferOffset() int
+	GetBufferOffset() uint64
 
 	SortMapEntries(offsets []int)
 
@@ -92,7 +92,7 @@ type Deserializer interface {
 
 	DeserializeOptionTag() (bool, error)
 
-	GetBufferOffset() int
+	GetBufferOffset() uint64
 
 	CheckThatKeySlicesAreIncreasing(key1, key2 Slice) error
 }

@@ -331,7 +331,7 @@ if (value != nil) {{
                 write!(
                     self.out,
                     r#"
-if err := serializer.SerializeLen(len(value)); err != nil {{ return err }}
+if err := serializer.SerializeLen(uint64(len(value))); err != nil {{ return err }}
 for _, item := range(value) {{
 	{}
 }}
@@ -344,11 +344,11 @@ for _, item := range(value) {{
                 write!(
                     self.out,
                     r#"
-if err := serializer.SerializeLen(len(value)); err != nil {{ return err }}
+if err := serializer.SerializeLen(uint64(len(value))); err != nil {{ return err }}
 offsets := make([]int, len(value))
 count := 0
 for k, v := range(value) {{
-	offsets[count] = serializer.GetBufferOffset()
+	offsets[count] = int(serializer.GetBufferOffset())
 	count += 1
 	{}
 	{}
@@ -440,7 +440,7 @@ length, err := deserializer.DeserializeLen()
 if err != nil {{ return nil, err }}
 obj := make(map[{0}]{1})
 previous_slice := serde.Slice {{ 0, 0 }}
-for i := 0; i < length; i++ {{
+for i := 0; i < int(length); i++ {{
 	var slice serde.Slice
 	slice.Start = deserializer.GetBufferOffset()
 	var key {0}
