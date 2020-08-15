@@ -36,12 +36,12 @@ func (d *Deserializer) DeserializeBytes() ([]byte, error) {
 	return ret, err
 }
 
-func (d *Deserializer) DeserializeLen() (int, error) {
+func (d *Deserializer) DeserializeLen() (uint64, error) {
 	ret, err := d.deserializeUleb128AsU32()
 	if ret > MaxSequenceLength {
 		return 0, errors.New("length is too large")
 	}
-	return int(ret), err
+	return uint64(ret), err
 }
 
 func (d *Deserializer) DeserializeStr() (string, error) {
@@ -70,17 +70,17 @@ func (d *Deserializer) DeserializeUnit() (struct{}, error) {
 
 // DeserializeChar is unimplemented.
 func (d *Deserializer) DeserializeChar() (rune, error) {
-	panic("unimplemented")
+	return 0, errors.New("unimplemented")
 }
 
 // DeserializeF32 is unimplemented.
 func (d *Deserializer) DeserializeF32() (float32, error) {
-	panic("unimplemented")
+	return 0, errors.New("unimplemented")
 }
 
 // DeserializeF64 is unimplemented.
 func (d *Deserializer) DeserializeF64() (float64, error) {
-	panic("unimplemented")
+	return 0, errors.New("unimplemented")
 }
 
 func (d *Deserializer) DeserializeU8() (uint8, error) {

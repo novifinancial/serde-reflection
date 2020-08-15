@@ -642,20 +642,20 @@ func TestSerializeDeserializeVariantIndex(t *testing.T) {
 }
 
 func TestSerializeDeserializeLenLimit(t *testing.T) {
-	t.Run("negative len", func(t *testing.T) {
+	t.Run("SerializeLen: length is too large", func(t *testing.T) {
 		s := new(lcs.Serializer)
-		err := s.SerializeLen(-1)
+		err := s.SerializeLen(^uint64(0))
 		assert.Error(t, err)
-		assert.Equal(t, "length must >= 0", err.Error())
+		assert.Equal(t, "length is too large", err.Error())
 	})
-	t.Run("overflow", func(t *testing.T) {
+	t.Run("DeserializeLen: length is too large", func(t *testing.T) {
 		s := new(lcs.Serializer)
 		err := s.SerializeVariantIndex(^uint32(0))
 		assert.NoError(t, err)
 
 		d := lcs.NewDeserializer(s.GetBytes())
 		ret, err := d.DeserializeLen()
-		assert.Equal(t, 0, ret)
+		assert.Equal(t, uint64(0), ret)
 		require.Error(t, err)
 		assert.Equal(t, "length is too large", err.Error())
 	})

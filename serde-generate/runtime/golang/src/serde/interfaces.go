@@ -38,7 +38,7 @@ type Serializer interface {
 
 	SerializeI128(value Int128) error
 
-	SerializeLen(value int) error
+	SerializeLen(value uint64) error
 
 	SerializeVariantIndex(value uint32) error
 
@@ -86,7 +86,7 @@ type Deserializer interface {
 
 	DeserializeI128() (Int128, error)
 
-	DeserializeLen() (int, error)
+	DeserializeLen() (uint64, error)
 
 	DeserializeVariantIndex() (uint32, error)
 

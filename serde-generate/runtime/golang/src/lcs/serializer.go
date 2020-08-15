@@ -24,16 +24,16 @@ func (s *Serializer) GetBytes() []byte {
 	return s.buf.Bytes()
 }
 
-func (s *Serializer) SerializeLen(value int) error {
-	if value < 0 {
-		return errors.New("length must >= 0")
+func (s *Serializer) SerializeLen(value uint64) error {
+	if value > MaxSequenceLength {
+		return errors.New("length is too large")
 	}
 	s.serializeU32AsUleb128(uint32(value))
 	return nil
 }
 
 func (s *Serializer) SerializeBytes(value []byte) error {
-	s.SerializeLen(len(value))
+	s.SerializeLen(uint64(len(value)))
 	s.buf.Write(value)
 	return nil
 }
@@ -55,17 +55,17 @@ func (s *Serializer) SerializeUnit(value struct{}) error {
 
 // SerializeChar is unimplemented.
 func (s *Serializer) SerializeChar(value rune) error {
-	panic("unimplemented")
+	return errors.New("unimplemented")
 }
 
 // SerializeF32 is unimplemented
 func (s *Serializer) SerializeF32(value float32) error {
-	panic("unimplemented")
+	return errors.New("unimplemented")
 }
 
 // SerializeF64 is unimplemented
 func (s *Serializer) SerializeF64(value float64) error {
-	panic("unimplemented")
+	return errors.New("unimplemented")
 }
 
 func (s *Serializer) SerializeU8(value uint8) error {
