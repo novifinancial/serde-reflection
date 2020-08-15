@@ -1,4 +1,4 @@
-module github.com/facebookincubator/serde-reflection
+module github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/src
 
 go 1.14
 

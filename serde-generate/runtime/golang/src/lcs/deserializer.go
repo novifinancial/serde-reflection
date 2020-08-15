@@ -6,21 +6,22 @@ package lcs
 import (
 	"bytes"
 	"errors"
+	"fmt"
 
-	"github.com/facebookincubator/serde-reflection/serde"
+	"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/src/serde"
 )
 
-// MaxSequenceLength is max length allowed for sequence
+// MaxSequenceLength is max length allowed for sequence.
 const MaxSequenceLength = (1 << 31) - 1
 
 const maxUint32 = uint64(^uint32(0))
 
-// Deserializer implements `serde.Deserializer` interface for deserializing LCS serialized bytes
+// Deserializer implements `serde.Deserializer` interface for deserializing LCS serialized bytes.
 type Deserializer struct {
 	buf *bytes.Buffer
 }
 
-// NewDeserializer creates a new `serde.Deserializer`
+// NewDeserializer creates a new `serde.Deserializer`.
 func NewDeserializer(input []byte) serde.Deserializer {
 	return &Deserializer{buf: bytes.NewBuffer(input)}
 }
@@ -50,24 +51,34 @@ func (d *Deserializer) DeserializeStr() (string, error) {
 
 func (d *Deserializer) DeserializeBool() (bool, error) {
 	ret, err := d.buf.ReadByte()
-	return ret == 1, err
+	if err != nil {
+		return false, err
+	}
+	switch ret {
+	case 0:
+		return false, nil
+	case 1:
+		return true, nil
+	default:
+		return false, fmt.Errorf("invalid bool byte: expected 0 / 1, but got %d", ret)
+	}
 }
 
 func (d *Deserializer) DeserializeUnit() (struct{}, error) {
 	return struct{}{}, nil
 }
 
-// DeserializeChar is unimplemented
+// DeserializeChar is unimplemented.
 func (d *Deserializer) DeserializeChar() (rune, error) {
 	panic("unimplemented")
 }
 
-// DeserializeF32 is unimplemented
+// DeserializeF32 is unimplemented.
 func (d *Deserializer) DeserializeF32() (float32, error) {
 	panic("unimplemented")
 }
 
-// DeserializeF64 is unimplemented
+// DeserializeF64 is unimplemented.
 func (d *Deserializer) DeserializeF64() (float64, error) {
 	panic("unimplemented")
 }
@@ -169,13 +180,13 @@ func (d *Deserializer) GetBufferOffset() int {
 	return d.buf.Len()
 }
 
-// CheckThatKeySlicesAreIncreasing is unimplemented yet
+// CheckThatKeySlicesAreIncreasing is unimplemented.
 func (d *Deserializer) CheckThatKeySlicesAreIncreasing(key1, key2 serde.Slice) error {
 	panic("unimplemented")
 }
 
 func (d *Deserializer) deserializeUleb128AsU32() (uint32, error) {
-	value := uint64(0)
+	var value uint64
 	for shift := 0; shift < 32; shift += 7 {
 		byte, err := d.buf.ReadByte()
 		if err != nil {

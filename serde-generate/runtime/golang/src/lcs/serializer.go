@@ -7,15 +7,15 @@ import (
 	"bytes"
 	"errors"
 
-	"github.com/facebookincubator/serde-reflection/serde"
+	"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/src/serde"
 )
 
-// Serializer implements `serde.Serializer` interface for serializing LCS bytes
+// Serializer implements `serde.Serializer` interface for serializing LCS bytes.
 type Serializer struct {
 	buf bytes.Buffer
 }
 
-// NewSerializer creates a new `serde.Serializer`
+// NewSerializer creates a new `serde.Serializer`.
 func NewSerializer() serde.Serializer {
 	return new(Serializer)
 }
@@ -53,7 +53,7 @@ func (s *Serializer) SerializeUnit(value struct{}) error {
 	return nil
 }
 
-// SerializeChar is unimplemented
+// SerializeChar is unimplemented.
 func (s *Serializer) SerializeChar(value rune) error {
 	panic("unimplemented")
 }
@@ -144,7 +144,7 @@ func (s *Serializer) GetBufferOffset() int {
 	return s.buf.Len()
 }
 
-// SortMapEntries is unimplemented yet
+// SortMapEntries is unimplemented.
 func (s *Serializer) SortMapEntries(offsets []int) {
 	panic("unimplemented")
 }
