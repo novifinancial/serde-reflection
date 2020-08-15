@@ -29,10 +29,32 @@ fn test_that_golang_code_compiles_with_config(
         .status()
         .unwrap();
     assert!(status.success());
+
+    let mut runtime_mod_path = std::env::current_exe().unwrap();
+    runtime_mod_path = runtime_mod_path.to_owned();
+    runtime_mod_path.pop();
+    runtime_mod_path.pop();
+    runtime_mod_path.pop();
+    runtime_mod_path.pop();
+    runtime_mod_path.push("serde-generate/runtime/golang/src");
+
     let status = Command::new("go")
         .current_dir(dir.path())
-        .arg("test")
-        .arg("./...")
+        .arg("mod")
+        .arg("edit")
+        .arg("-replace")
+        .arg(format!(
+            "github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/src={}",
+            runtime_mod_path.as_os_str().to_str().unwrap()
+        ))
+        .status()
+        .unwrap();
+    assert!(status.success());
+
+    let status = Command::new("go")
+        .current_dir(dir.path())
+        .arg("build")
+        .arg(source_path.clone())
         .status()
         .unwrap();
     assert!(status.success());
