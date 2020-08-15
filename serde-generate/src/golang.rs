@@ -6,7 +6,6 @@ use crate::{
     CodeGeneratorConfig,
 };
 use heck::CamelCase;
-use include_dir::include_dir as include_directory;
 use serde_reflection::{ContainerFormat, Format, FormatHolder, Named, Registry, VariantFormat};
 use std::{
     collections::{BTreeMap, HashMap},
@@ -92,7 +91,7 @@ where
         if self.generator.config.serialization {
             writeln!(self.out, "import \"fmt\"")?;
         }
-        writeln!(self.out, "import \"serde\"\n")?;
+        writeln!(self.out, "import \"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/src/serde\"\n")?;
         Ok(())
     }
 
@@ -749,7 +748,7 @@ impl crate::SourceInstaller for Installer {
     }
 
     fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.install_runtime(include_directory!("runtime/golang/src/serde"), "src/serde")
+        Ok(())
     }
 
     fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error> {

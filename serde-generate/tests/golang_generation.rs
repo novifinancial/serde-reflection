@@ -21,20 +21,18 @@ fn test_that_golang_code_compiles_with_config(
 
     writeln!(&mut source, "func main() {{}}").unwrap();
 
-    let go_path = format!(
-        "{}:{}",
-        std::env::var("GOPATH").unwrap_or_default(),
-        std::env::current_dir()
-            .unwrap()
-            .join("runtime/golang")
-            .to_str()
-            .unwrap()
-    );
     let status = Command::new("go")
         .current_dir(dir.path())
-        .env("GOPATH", go_path)
-        .arg("build")
-        .arg(source_path.clone())
+        .arg("mod")
+        .arg("init")
+        .arg("example.com/test")
+        .status()
+        .unwrap();
+    assert!(status.success());
+    let status = Command::new("go")
+        .current_dir(dir.path())
+        .arg("test")
+        .arg("./...")
         .status()
         .unwrap();
     assert!(status.success());
