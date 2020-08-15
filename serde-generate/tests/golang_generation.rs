@@ -51,6 +51,12 @@ fn test_that_golang_code_compiles_with_config(
         .unwrap();
     assert!(status.success());
 
+    let status = Command::new("cat")
+        .current_dir(dir.path())
+        .arg("go.mod")
+        .status()
+        .unwrap();
+    assert!(status.success());
     let status = Command::new("go")
         .current_dir(dir.path())
         .arg("build")
