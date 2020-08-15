@@ -443,10 +443,10 @@ obj := make(map[{0}]{1})
 previous_slice := serde.Slice {{ 0, 0 }}
 for i := 0; i < length; i++ {{
 	var slice serde.Slice
-	slice.Start = deserializer.GetBufferOffset()
+	slice.Start = uint64(deserializer.GetBufferOffset())
 	var key {0}
 	{2}
-	slice.End = deserializer.GetBufferOffset()
+	slice.End = uint64(deserializer.GetBufferOffset())
 	if (i > 0) {{
 		err := deserializer.CheckThatKeySlicesAreIncreasing(previous_slice, slice)
 		if err != nil {{ return nil, err }}

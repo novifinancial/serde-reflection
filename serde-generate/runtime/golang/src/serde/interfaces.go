@@ -88,11 +88,11 @@ type Deserializer interface {
 
 	DeserializeLen() (int, error)
 
-	DeserializeVariantIndex() (uint64, error)
+	DeserializeVariantIndex() (uint32, error)
 
 	DeserializeOptionTag() (bool, error)
 
-	GetBufferOffset() uint64
+	GetBufferOffset() int
 
 	CheckThatKeySlicesAreIncreasing(key1, key2 Slice) error
 }
