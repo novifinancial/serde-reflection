@@ -7,7 +7,7 @@ import (
 	"bytes"
 	"errors"
 
-	"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/src/serde"
+	"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/serde"
 )
 
 // Serializer implements `serde.Serializer` interface for serializing LCS bytes.

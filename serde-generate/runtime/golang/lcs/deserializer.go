@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/src/serde"
+	"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/serde"
 )
 
 // MaxSequenceLength is max length allowed for sequence.

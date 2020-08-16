@@ -91,7 +91,7 @@ where
         if self.generator.config.serialization {
             writeln!(self.out, "import \"fmt\"")?;
         }
-        writeln!(self.out, "import \"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/src/serde\"\n")?;
+        writeln!(self.out, "import \"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/serde\"\n")?;
         Ok(())
     }
 
@@ -713,21 +713,6 @@ impl Installer {
     pub fn new(install_dir: PathBuf) -> Self {
         Installer { install_dir }
     }
-
-    // TODO: not sure whether we need these code later, comment for now
-    // fn install_runtime(
-    //     &self,
-    //     source_dir: include_dir::Dir,
-    //     path: &str,
-    // ) -> std::result::Result<(), Box<dyn std::error::Error>> {
-    //     let dir_path = self.install_dir.join(path);
-    //     std::fs::create_dir_all(&dir_path)?;
-    //     for entry in source_dir.files() {
-    //         let mut file = std::fs::File::create(dir_path.join(entry.path()))?;
-    //         file.write_all(entry.contents())?;
-    //     }
-    //     Ok(())
-    // }
 }
 
 impl crate::SourceInstaller for Installer {
@@ -753,22 +738,10 @@ impl crate::SourceInstaller for Installer {
     }
 
     fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error> {
-        /*
-                self.install_runtime(
-                    include_directory!("runtime/golang/src/bincode"),
-                    "src/bincode",
-                )
-        */
         Ok(())
     }
 
     fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        /*
-                self.install_runtime(
-                    include_directory!("runtime/golang/src/lcs"),
-                    "src/lcs",
-                )
-        */
         Ok(())
     }
 }

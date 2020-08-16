@@ -36,7 +36,7 @@ fn test_that_golang_code_compiles_with_config(
     runtime_mod_path.pop();
     runtime_mod_path.pop();
     runtime_mod_path.pop();
-    runtime_mod_path.push("serde-generate/runtime/golang/src");
+    runtime_mod_path.push("serde-generate/runtime/golang");
 
     let status = Command::new("go")
         .current_dir(dir.path())
@@ -44,7 +44,7 @@ fn test_that_golang_code_compiles_with_config(
         .arg("edit")
         .arg("-replace")
         .arg(format!(
-            "github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/src={}",
+            "github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang={}",
             runtime_mod_path.as_os_str().to_str().unwrap()
         ))
         .status()
