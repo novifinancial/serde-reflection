@@ -145,7 +145,7 @@ func (s *Serializer) GetBufferOffset() uint64 {
 }
 
 // SortMapEntries is unimplemented.
-func (s *Serializer) SortMapEntries(offsets []int) {
+func (s *Serializer) SortMapEntries(offsets []uint64) {
 	panic("unimplemented")
 }
 
