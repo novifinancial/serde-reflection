@@ -46,7 +46,7 @@ type Serializer interface {
 
 	GetBufferOffset() uint64
 
-	SortMapEntries(offsets []int)
+	SortMapEntries(offsets []uint64)
 
 	GetBytes() []byte
 }

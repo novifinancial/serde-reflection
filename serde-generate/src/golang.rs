@@ -345,10 +345,10 @@ for _, item := range(value) {{
                     self.out,
                     r#"
 if err := serializer.SerializeLen(uint64(len(value))); err != nil {{ return err }}
-offsets := make([]int, len(value))
+offsets := make([]uint64, len(value))
 count := 0
 for k, v := range(value) {{
-	offsets[count] = int(serializer.GetBufferOffset())
+	offsets[count] = serializer.GetBufferOffset()
 	count += 1
 	{}
 	{}
