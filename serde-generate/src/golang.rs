@@ -713,6 +713,12 @@ impl Installer {
     pub fn new(install_dir: PathBuf) -> Self {
         Installer { install_dir }
     }
+    fn runtimes_installation_not_required() -> std::result::Result<(), Box<dyn std::error::Error>> {
+        Err(Box::new(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            "Runtime is installed by `go get`, no source code installation required",
+        )))
+    }
 }
 
 impl crate::SourceInstaller for Installer {
@@ -734,14 +740,14 @@ impl crate::SourceInstaller for Installer {
     }
 
     fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {
-        Ok(())
+        Self::runtimes_installation_not_required()
     }
 
     fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error> {
-        Ok(())
+        Self::runtimes_installation_not_required()
     }
 
     fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        Ok(())
+        Self::runtimes_installation_not_required()
     }
 }
