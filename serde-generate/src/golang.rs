@@ -6,7 +6,6 @@ use crate::{
     CodeGeneratorConfig,
 };
 use heck::CamelCase;
-use include_dir::include_dir as include_directory;
 use serde_reflection::{ContainerFormat, Format, FormatHolder, Named, Registry, VariantFormat};
 use std::{
     collections::{BTreeMap, HashMap},
@@ -92,7 +91,7 @@ where
         if self.generator.config.serialization {
             writeln!(self.out, "import \"fmt\"")?;
         }
-        writeln!(self.out, "import \"serde\"\n")?;
+        writeln!(self.out, "import \"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/serde\"\n")?;
         Ok(())
     }
 
@@ -332,7 +331,7 @@ if (value != nil) {{
                 write!(
                     self.out,
                     r#"
-if err := serializer.SerializeLen(len(value)); err != nil {{ return err }}
+if err := serializer.SerializeLen(uint64(len(value))); err != nil {{ return err }}
 for _, item := range(value) {{
 	{}
 }}
@@ -345,8 +344,8 @@ for _, item := range(value) {{
                 write!(
                     self.out,
                     r#"
-if err := serializer.SerializeLen(len(value)); err != nil {{ return err }}
-offsets := make([]int, len(value))
+if err := serializer.SerializeLen(uint64(len(value))); err != nil {{ return err }}
+offsets := make([]uint64, len(value))
 count := 0
 for k, v := range(value) {{
 	offsets[count] = serializer.GetBufferOffset()
@@ -441,7 +440,7 @@ length, err := deserializer.DeserializeLen()
 if err != nil {{ return nil, err }}
 obj := make(map[{0}]{1})
 previous_slice := serde.Slice {{ 0, 0 }}
-for i := 0; i < length; i++ {{
+for i := 0; i < int(length); i++ {{
 	var slice serde.Slice
 	slice.Start = deserializer.GetBufferOffset()
 	var key {0}
@@ -714,19 +713,11 @@ impl Installer {
     pub fn new(install_dir: PathBuf) -> Self {
         Installer { install_dir }
     }
-
-    fn install_runtime(
-        &self,
-        source_dir: include_dir::Dir,
-        path: &str,
-    ) -> std::result::Result<(), Box<dyn std::error::Error>> {
-        let dir_path = self.install_dir.join(path);
-        std::fs::create_dir_all(&dir_path)?;
-        for entry in source_dir.files() {
-            let mut file = std::fs::File::create(dir_path.join(entry.path()))?;
-            file.write_all(entry.contents())?;
-        }
-        Ok(())
+    fn runtimes_installation_not_required() -> std::result::Result<(), Box<dyn std::error::Error>> {
+        Err(Box::new(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            "Runtime is installed by `go get`, no source code installation required",
+        )))
     }
 }
 
@@ -749,26 +740,14 @@ impl crate::SourceInstaller for Installer {
     }
 
     fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.install_runtime(include_directory!("runtime/golang/src/serde"), "src/serde")
+        Self::runtimes_installation_not_required()
     }
 
     fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error> {
-        /*
-                self.install_runtime(
-                    include_directory!("runtime/golang/src/bincode"),
-                    "src/bincode",
-                )
-        */
-        Ok(())
+        Self::runtimes_installation_not_required()
     }
 
     fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        /*
-                self.install_runtime(
-                    include_directory!("runtime/golang/src/lcs"),
-                    "src/lcs",
-                )
-        */
-        Ok(())
+        Self::runtimes_installation_not_required()
     }
 }

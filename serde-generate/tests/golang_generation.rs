@@ -21,18 +21,38 @@ fn test_that_golang_code_compiles_with_config(
 
     writeln!(&mut source, "func main() {{}}").unwrap();
 
-    let go_path = format!(
-        "{}:{}",
-        std::env::var("GOPATH").unwrap_or_default(),
-        std::env::current_dir()
-            .unwrap()
-            .join("runtime/golang")
-            .to_str()
-            .unwrap()
-    );
     let status = Command::new("go")
         .current_dir(dir.path())
-        .env("GOPATH", go_path)
+        .arg("mod")
+        .arg("init")
+        .arg("example.com/test")
+        .status()
+        .unwrap();
+    assert!(status.success());
+
+    let mut runtime_mod_path = std::env::current_exe().unwrap();
+    runtime_mod_path = runtime_mod_path.to_owned();
+    runtime_mod_path.pop();
+    runtime_mod_path.pop();
+    runtime_mod_path.pop();
+    runtime_mod_path.pop();
+    runtime_mod_path.push("serde-generate/runtime/golang");
+
+    let status = Command::new("go")
+        .current_dir(dir.path())
+        .arg("mod")
+        .arg("edit")
+        .arg("-replace")
+        .arg(format!(
+            "github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang={}",
+            runtime_mod_path.as_os_str().to_str().unwrap()
+        ))
+        .status()
+        .unwrap();
+    assert!(status.success());
+
+    let status = Command::new("go")
+        .current_dir(dir.path())
         .arg("build")
         .arg(source_path.clone())
         .status()
