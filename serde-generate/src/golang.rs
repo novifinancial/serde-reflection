@@ -713,6 +713,7 @@ impl Installer {
     pub fn new(install_dir: PathBuf) -> Self {
         Installer { install_dir }
     }
+
     fn runtimes_installation_not_required() -> std::result::Result<(), Box<dyn std::error::Error>> {
         Err(Box::new(std::io::Error::new(
             std::io::ErrorKind::Other,

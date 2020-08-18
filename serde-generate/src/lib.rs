@@ -14,7 +14,7 @@
 //! * Rust 2018
 //!
 //! In progress:
-//! * Go
+//! * Go >= 1.13
 //!
 //! ## Supported Encodings
 //!
