@@ -97,14 +97,20 @@ where
             "package {}\n\n",
             self.generator.config.module_name
         )?;
+        writeln!(self.out, "import (")?;
+        self.out.indent();
         if self.generator.config.serialization {
-            writeln!(self.out, "import \"fmt\"")?;
+            writeln!(self.out, "\"fmt\"")?;
         }
-        writeln!(self.out, "import \"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/serde\"")?;
+        writeln!(
+            self.out,
+            "\"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/serde\""
+        )?;
         for path in self.generator.config.external_definitions.keys() {
-            writeln!(self.out, "import \"{}\"", path)?;
+            writeln!(self.out, "\"{}\"", path)?;
         }
-        writeln!(self.out)?;
+        self.out.unindent();
+        writeln!(self.out, ")\n")?;
         Ok(())
     }
 
@@ -263,8 +269,8 @@ where
             _ => format!("deserialize_{}(deserializer)", common::mangle_type(format)),
         };
         format!(
-            "{{ val, err := {}; if err != nil {{ return {}, err }} else {{ {} = val }} }}",
-            expr, fail, dest
+            "if val, err := {}; err == nil {{ {} = val }} else {{ return {}, err }}",
+            expr, dest, fail
         )
     }
 
@@ -369,9 +375,9 @@ for _, item := range(value) {{
                 write!(
                     self.out,
                     r#"
-var value *{}
 tag, err := deserializer.DeserializeOptionTag()
-if err != nil {{ return value, err }}
+if err != nil {{ return nil, err }}
+var value *{}
 if (tag) {{
 	{}
 }}
@@ -611,11 +617,10 @@ switch index {{"#,
                 writeln!(
                     self.out,
                     r#"case {}:
-	val, err := load_{}__{}(deserializer)
-	if err != nil {{
-		return nil, err
-	}} else {{
+	if val, err := load_{}__{}(deserializer); err == nil {{
 		return &val, nil
+	}} else {{
+		return nil, err
 	}}
 "#,
                     index, name, variant.name
