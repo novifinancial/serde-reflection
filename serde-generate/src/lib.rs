@@ -133,6 +133,8 @@ pub mod rust;
 /// Utility functions to help testing code generators.
 pub mod test_utils;
 
+/// Common logic for codegen.
+mod common;
 /// Common configuration objects and traits used in public APIs.
 mod config;
 
