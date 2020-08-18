@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use crate::{
+    common,
     indent::{IndentConfig, IndentedWriter},
     CodeGeneratorConfig,
 };
@@ -253,7 +254,7 @@ where
             format
                 .visit(&mut |f| {
                     if Self::needs_helper(f) {
-                        subtypes.insert(Self::mangle_type(f), f.clone());
+                        subtypes.insert(common::mangle_type(f), f.clone());
                     }
                     Ok(())
                 })
@@ -268,51 +269,6 @@ where
         }
         self.leave_class(reserved_names);
         writeln!(self.out, "}}\n")
-    }
-
-    fn mangle_type(format: &Format) -> String {
-        use Format::*;
-        match format {
-            TypeName(x) => x.to_string(),
-            Unit => "unit".into(),
-            Bool => "bool".into(),
-            I8 => "i8".into(),
-            I16 => "i16".into(),
-            I32 => "i32".into(),
-            I64 => "i64".into(),
-            I128 => "i128".into(),
-            U8 => "u8".into(),
-            U16 => "u16".into(),
-            U32 => "u32".into(),
-            U64 => "u64".into(),
-            U128 => "u128".into(),
-            F32 => "f32".into(),
-            F64 => "f64".into(),
-            Char => "char".into(),
-            Str => "str".into(),
-            Bytes => "bytes".into(),
-
-            Option(format) => format!("option_{}", Self::mangle_type(format)),
-            Seq(format) => format!("vector_{}", Self::mangle_type(format)),
-            Map { key, value } => format!(
-                "map_{}_to_{}",
-                Self::mangle_type(key),
-                Self::mangle_type(value)
-            ),
-            Tuple(formats) => format!(
-                "tuple{}_{}",
-                formats.len(),
-                formats
-                    .iter()
-                    .map(Self::mangle_type)
-                    .collect::<Vec<_>>()
-                    .join("_")
-            ),
-            TupleArray { content, size } => {
-                format!("array{}_{}_array", size, Self::mangle_type(content))
-            }
-            Variable(_) => panic!("unexpected value"),
-        }
     }
 
     fn needs_helper(format: &Format) -> bool {
@@ -347,7 +303,7 @@ where
             _ => format!(
                 "{}.serialize_{}({}, serializer);",
                 self.quote_qualified_name("TraitHelpers"),
-                Self::mangle_type(format),
+                common::mangle_type(format),
                 value
             ),
         }
@@ -380,7 +336,7 @@ where
             _ => format!(
                 "{}.deserialize_{}(deserializer)",
                 self.quote_qualified_name("TraitHelpers"),
-                Self::mangle_type(format),
+                common::mangle_type(format),
             ),
         }
     }
