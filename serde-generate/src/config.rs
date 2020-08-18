@@ -65,7 +65,11 @@ impl CodeGeneratorConfig {
     }
 
     /// Comments attached to particular entity.
-    pub fn with_comments(mut self, comments: DocComments) -> Self {
+    pub fn with_comments(mut self, mut comments: DocComments) -> Self {
+        // Make sure comments end with a (single) newline.
+        for comment in comments.values_mut() {
+            *comment = format!("{}\n", comment.trim());
+        }
         self.comments = comments;
         self
     }

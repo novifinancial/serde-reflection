@@ -145,7 +145,7 @@ where
         path.push(name.to_string());
         if let Some(doc) = self.generator.config.comments.get(&path) {
             let text = textwrap::indent(doc, "/// ").replace("\n\n", "\n///\n");
-            write!(self.out, "\n{}", text)?;
+            write!(self.out, "{}", text)?;
         }
         Ok(())
     }
@@ -223,6 +223,7 @@ where
 
     fn output_fields(&mut self, fields: &[Named<Format>]) -> Result<()> {
         for field in fields {
+            self.output_comment(&field.name)?;
             writeln!(
                 self.out,
                 "{} {};",
@@ -234,6 +235,7 @@ where
     }
 
     fn output_variant(&mut self, name: &str, variant: &VariantFormat) -> Result<()> {
+        writeln!(self.out)?;
         self.output_comment(name)?;
         use VariantFormat::*;
         let operator = format!("friend bool operator==(const {}&, const {}&);", name, name);
@@ -254,6 +256,7 @@ where
                 operator
             ),
             Struct(fields) => {
+                writeln!(self.out)?;
                 self.output_comment(name)?;
                 writeln!(self.out, "struct {} {{", name)?;
                 self.enter_class(name);
