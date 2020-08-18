@@ -109,7 +109,7 @@ where
         path.push(name.to_string());
         if let Some(doc) = self.generator.config.comments.get(&path) {
             let text = textwrap::indent(doc, "// ").replace("\n\n", "\n//\n");
-            writeln!(self.out, "{}", text)?;
+            write!(self.out, "{}", text)?;
         }
         Ok(())
     }
