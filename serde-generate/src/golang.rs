@@ -37,9 +37,17 @@ impl<'a> CodeGenerator<'a> {
     pub fn new(config: &'a CodeGeneratorConfig) -> Self {
         let mut external_qualified_names = HashMap::new();
         for (namespace, names) in &config.external_definitions {
+            let package_name = {
+                let path = namespace.rsplitn(2, '/').collect::<Vec<_>>();
+                if path.len() <= 1 {
+                    namespace
+                } else {
+                    path[0]
+                }
+            };
             for name in names {
                 external_qualified_names
-                    .insert(name.to_string(), format!("{}.{}", namespace, name));
+                    .insert(name.to_string(), format!("{}.{}", package_name, name));
             }
         }
         Self {
@@ -91,7 +99,11 @@ where
         if self.generator.config.serialization {
             writeln!(self.out, "import \"fmt\"")?;
         }
-        writeln!(self.out, "import \"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/serde\"\n")?;
+        writeln!(self.out, "import \"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/serde\"")?;
+        for path in self.generator.config.external_definitions.keys() {
+            writeln!(self.out, "import \"{}\"", path)?;
+        }
+        writeln!(self.out)?;
         Ok(())
     }
 
