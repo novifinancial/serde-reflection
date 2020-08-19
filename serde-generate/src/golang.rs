@@ -550,7 +550,7 @@ return obj, nil
         if self.generator.config.serialization {
             writeln!(
                 self.out,
-                "\nfunc (obj *{}) Serialize(serializer serde.Serializer) error {{",
+                "\nfunc (obj {}) Serialize(serializer serde.Serializer) error {{",
                 full_name
             )?;
             self.out.indent();
@@ -561,7 +561,7 @@ return obj, nil
                 writeln!(
                     self.out,
                     "{}",
-                    self.quote_serialize_value(&format!("(*obj).{}", &field.name), &field.value)
+                    self.quote_serialize_value(&format!("obj.{}", &field.name), &field.value)
                 )?;
             }
             writeln!(self.out, "return nil")?;
