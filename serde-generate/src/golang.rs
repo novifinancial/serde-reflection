@@ -506,7 +506,13 @@ return obj, nil
                     value: f.clone(),
                 })
                 .collect(),
-            Struct(fields) => fields.clone(),
+            Struct(fields) => fields
+                .iter()
+                .map(|f| Named {
+                    name: f.name.to_camel_case(),
+                    value: f.value.clone(),
+                })
+                .collect(),
             Variable(_) => panic!("incorrect value"),
         };
         self.output_struct_or_variant_container(Some(base), Some(index), name, &fields)
@@ -677,7 +683,19 @@ switch index {{"#,
                 })
                 .collect(),
             Enum(variants) => {
-                self.output_enum_container(name, variants)?;
+                let variants = variants
+                    .iter()
+                    .map(|(i, f)| {
+                        (
+                            *i,
+                            Named {
+                                name: f.name.to_camel_case(),
+                                value: f.value.clone(),
+                            },
+                        )
+                    })
+                    .collect();
+                self.output_enum_container(name, &variants)?;
                 return Ok(());
             }
         };
