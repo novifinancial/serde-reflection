@@ -30,14 +30,11 @@ fn test_that_golang_code_compiles_with_config(
         .unwrap();
     assert!(status.success());
 
-    let mut runtime_mod_path = std::env::current_exe().unwrap();
-    runtime_mod_path = runtime_mod_path.to_owned();
-    runtime_mod_path.pop();
-    runtime_mod_path.pop();
-    runtime_mod_path.pop();
-    runtime_mod_path.pop();
-    runtime_mod_path.push("serde-generate/runtime/golang");
-
+    let runtime_mod_path = std::env::current_exe()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .join("../../../serde-generate/runtime/golang");
     let status = Command::new("go")
         .current_dir(dir.path())
         .arg("mod")
@@ -45,7 +42,7 @@ fn test_that_golang_code_compiles_with_config(
         .arg("-replace")
         .arg(format!(
             "github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang={}",
-            runtime_mod_path.as_os_str().to_str().unwrap()
+            runtime_mod_path.to_str().unwrap()
         ))
         .status()
         .unwrap();
