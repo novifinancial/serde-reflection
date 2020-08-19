@@ -85,7 +85,7 @@ impl<'a> CodeGenerator<'a> {
             current_namespace,
         };
 
-        emitter.output_preamble()?;
+        emitter.output_preamble(registry)?;
 
         for (name, format) in registry {
             emitter.output_container(name, format)?;
@@ -103,24 +103,57 @@ impl<'a, T> GoEmitter<'a, T>
 where
     T: Write,
 {
-    fn output_preamble(&mut self) -> Result<()> {
+    fn output_preamble(&mut self, registry: &Registry) -> Result<()> {
         writeln!(
             self.out,
             "package {}\n\n",
             self.generator.config.module_name
         )?;
+        // Go does not support disabling warnings on unused imports.
+        if registry.is_empty() {
+            return Ok(());
+        }
         writeln!(self.out, "import (")?;
         self.out.indent();
-        if self.generator.config.serialization {
+        if self.generator.config.serialization && Self::has_enum(registry) {
             writeln!(self.out, "\"fmt\"")?;
         }
-        writeln!(self.out, "\"{}/serde\"", self.generator.serde_module_path)?;
+        if self.generator.config.serialization || Self::has_int128(registry) {
+            writeln!(self.out, "\"{}/serde\"", self.generator.serde_module_path)?;
+        }
         for path in self.generator.config.external_definitions.keys() {
             writeln!(self.out, "\"{}\"", path)?;
         }
         self.out.unindent();
         writeln!(self.out, ")\n")?;
         Ok(())
+    }
+
+    fn has_int128(registry: &Registry) -> bool {
+        for format in registry.values() {
+            if format
+                .visit(&mut |f| match f {
+                    Format::I128 | Format::U128 => {
+                        // Interrupt the visit if we find a (u)int128
+                        Err(serde_reflection::Error::Custom(String::new()))
+                    }
+                    _ => Ok(()),
+                })
+                .is_err()
+            {
+                return true;
+            }
+        }
+        false
+    }
+
+    fn has_enum(registry: &Registry) -> bool {
+        for format in registry.values() {
+            if let ContainerFormat::Enum(_) = format {
+                return true;
+            }
+        }
+        false
     }
 
     /// Compute a reference to the registry type `name`.
