@@ -1,17 +1,47 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+use serde::{Deserialize, Serialize};
 use serde_generate::{golang, test_utils, CodeGeneratorConfig};
+use serde_reflection::{Registry, Result, Samples, Tracer, TracerConfig};
 use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::Write;
 use std::process::Command;
 use tempfile::{tempdir, TempDir};
 
+#[derive(Serialize, Deserialize)]
+struct Test {
+    a: Vec<u32>,
+}
+
+fn get_small_registry() -> Result<Registry> {
+    let mut tracer = Tracer::new(TracerConfig::default());
+    let samples = Samples::new();
+    tracer.trace_type::<Test>(&samples)?;
+    Ok(tracer.registry()?)
+}
+
+fn get_empty_registry() -> Result<Registry> {
+    let tracer = Tracer::new(TracerConfig::default());
+    Ok(tracer.registry()?)
+}
+
 fn test_that_golang_code_compiles_with_config(
     config: &CodeGeneratorConfig,
 ) -> (TempDir, std::path::PathBuf) {
-    let registry = test_utils::get_registry().unwrap();
+    test_that_golang_code_compiles_with_config_and_registry(config, &get_empty_registry().unwrap());
+    test_that_golang_code_compiles_with_config_and_registry(config, &get_small_registry().unwrap());
+    test_that_golang_code_compiles_with_config_and_registry(
+        config,
+        &test_utils::get_registry().unwrap(),
+    )
+}
+
+fn test_that_golang_code_compiles_with_config_and_registry(
+    config: &CodeGeneratorConfig,
+    registry: &Registry,
+) -> (TempDir, std::path::PathBuf) {
     let dir = tempdir().unwrap();
     let source_path = dir.path().join("test.go");
     let mut source = File::create(&source_path).unwrap();
