@@ -703,16 +703,14 @@ fn test_java_lcs_runtime_autotest() {
 
 #[test]
 fn test_golang_runtime_tests() {
-    let mut runtime_mod_path = std::env::current_exe().unwrap();
-    runtime_mod_path = runtime_mod_path.to_owned();
-    runtime_mod_path.pop();
-    runtime_mod_path.pop();
-    runtime_mod_path.pop();
-    runtime_mod_path.pop();
-    runtime_mod_path.push("serde-generate/runtime/golang");
+    let runtime_mod_path = std::env::current_exe()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .join("../../../serde-generate/runtime/golang");
 
     let status = Command::new("go")
-        .current_dir(runtime_mod_path.as_os_str().to_str().unwrap())
+        .current_dir(runtime_mod_path.to_str().unwrap())
         .arg("test")
         .arg("./...")
         .status()
