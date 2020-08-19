@@ -60,7 +60,7 @@ struct Options {
     #[structopt(long)]
     module_name: Option<String>,
 
-    /// Optional package name where to find the `serde_types` module (useful in Python).
+    /// Optional package name (Python) or module path (Go) where to find Serde runtime dependencies.
     #[structopt(long)]
     serde_package_name: Option<String>,
 }
@@ -119,7 +119,9 @@ fn main() {
                     Language::Rust => Box::new(rust::Installer::new(install_dir)),
                     Language::Cpp => Box::new(cpp::Installer::new(install_dir)),
                     Language::Java => Box::new(java::Installer::new(install_dir)),
-                    Language::Go => Box::new(golang::Installer::new(install_dir)),
+                    Language::Go => {
+                        Box::new(golang::Installer::new(install_dir, serde_package_name_opt))
+                    }
                 };
 
             if let Some((registry, name)) = named_registry_opt {
