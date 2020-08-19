@@ -18,6 +18,9 @@ use std::{
 pub struct CodeGenerator<'a> {
     /// Language-independent configuration.
     config: &'a CodeGeneratorConfig,
+    /// Module path where to find the serde runtime packages (serde, lcs, bincode).
+    /// Default: "github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang".
+    serde_module_path: String,
     /// Mapping from external type names to fully-qualified class names (e.g. "MyClass" -> "com.facebook.my_package.MyClass").
     /// Derived from `config.external_definitions`.
     external_qualified_names: HashMap<String, String>,
@@ -53,8 +56,17 @@ impl<'a> CodeGenerator<'a> {
         }
         Self {
             config,
+            serde_module_path:
+                "github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang"
+                    .to_string(),
             external_qualified_names,
         }
+    }
+
+    /// Whether the package providing Serde definitions is located within a different module.
+    pub fn with_serde_module_path(mut self, serde_module_path: String) -> Self {
+        self.serde_module_path = serde_module_path;
+        self
     }
 
     /// Output class definitions for `registry`.
@@ -102,10 +114,7 @@ where
         if self.generator.config.serialization {
             writeln!(self.out, "\"fmt\"")?;
         }
-        writeln!(
-            self.out,
-            "\"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/serde\""
-        )?;
+        writeln!(self.out, "\"{}/serde\"", self.generator.serde_module_path)?;
         for path in self.generator.config.external_definitions.keys() {
             writeln!(self.out, "\"{}\"", path)?;
         }
@@ -679,11 +688,15 @@ switch index {{"#,
 /// Installer for generated source files in Go.
 pub struct Installer {
     install_dir: PathBuf,
+    serde_module_path: Option<String>,
 }
 
 impl Installer {
-    pub fn new(install_dir: PathBuf) -> Self {
-        Installer { install_dir }
+    pub fn new(install_dir: PathBuf, serde_module_path: Option<String>) -> Self {
+        Installer {
+            install_dir,
+            serde_module_path,
+        }
     }
 
     fn runtimes_installation_not_required() -> std::result::Result<(), Box<dyn std::error::Error>> {
@@ -702,12 +715,15 @@ impl crate::SourceInstaller for Installer {
         config: &CodeGeneratorConfig,
         registry: &Registry,
     ) -> std::result::Result<(), Self::Error> {
-        let dir_path = &self.install_dir;
-        std::fs::create_dir_all(dir_path)?;
-        let source_path = dir_path.join(format!("{}.go", config.module_name));
+        let dir_path = self.install_dir.join(&config.module_name);
+        std::fs::create_dir_all(&dir_path)?;
+        let source_path = dir_path.join("lib.go");
         let mut file = std::fs::File::create(source_path)?;
 
-        let generator = CodeGenerator::new(config);
+        let mut generator = CodeGenerator::new(config);
+        if let Some(path) = &self.serde_module_path {
+            generator = generator.with_serde_module_path(path.clone());
+        }
         generator.output(&mut file, registry)?;
         Ok(())
     }
