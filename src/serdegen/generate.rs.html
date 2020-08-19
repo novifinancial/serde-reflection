@@ -140,6 +140,8 @@
 <span id="140">140</span>
 <span id="141">141</span>
 <span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -203,7 +205,7 @@
     <span class="attribute">#[<span class="ident">structopt</span>(<span class="ident">long</span>)]</span>
     <span class="ident">module_name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
 
-    <span class="doccomment">/// Optional package name where to find the `serde_types` module (useful in Python).</span>
+    <span class="doccomment">/// Optional package name (Python) or module path (Go) where to find Serde runtime dependencies.</span>
     <span class="attribute">#[<span class="ident">structopt</span>(<span class="ident">long</span>)]</span>
     <span class="ident">serde_package_name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
 }
@@ -262,7 +264,9 @@
                     <span class="ident">Language</span>::<span class="ident">Rust</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">rust</span>::<span class="ident">Installer</span>::<span class="ident">new</span>(<span class="ident">install_dir</span>)),
                     <span class="ident">Language</span>::<span class="ident">Cpp</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">cpp</span>::<span class="ident">Installer</span>::<span class="ident">new</span>(<span class="ident">install_dir</span>)),
                     <span class="ident">Language</span>::<span class="ident">Java</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">java</span>::<span class="ident">Installer</span>::<span class="ident">new</span>(<span class="ident">install_dir</span>)),
-                    <span class="ident">Language</span>::<span class="ident">Go</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">golang</span>::<span class="ident">Installer</span>::<span class="ident">new</span>(<span class="ident">install_dir</span>)),
+                    <span class="ident">Language</span>::<span class="ident">Go</span> <span class="op">=</span><span class="op">&gt;</span> {
+                        <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">golang</span>::<span class="ident">Installer</span>::<span class="ident">new</span>(<span class="ident">install_dir</span>, <span class="ident">serde_package_name_opt</span>))
+                    }
                 };
 
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">registry</span>, <span class="ident">name</span>)) <span class="op">=</span> <span class="ident">named_registry_opt</span> {

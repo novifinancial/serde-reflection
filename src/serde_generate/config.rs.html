@@ -70,6 +70,10 @@
 <span id="70">70</span>
 <span id="71">71</span>
 <span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -138,7 +142,11 @@
     }
 
     <span class="doccomment">/// Comments attached to particular entity.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_comments</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">comments</span>: <span class="ident">DocComments</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_comments</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">comments</span>: <span class="ident">DocComments</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="comment">// Make sure comments end with a (single) newline.</span>
+        <span class="kw">for</span> <span class="ident">comment</span> <span class="kw">in</span> <span class="ident">comments</span>.<span class="ident">values_mut</span>() {
+            <span class="kw-2">*</span><span class="ident">comment</span> <span class="op">=</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}\n&quot;</span>, <span class="ident">comment</span>.<span class="ident">trim</span>());
+        }
         <span class="self">self</span>.<span class="ident">comments</span> <span class="op">=</span> <span class="ident">comments</span>;
         <span class="self">self</span>
     }
