@@ -479,6 +479,8 @@ impl crate::SourceInstaller for Installer {
     fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {
         let mut file = self.create_header_file("serde")?;
         write!(file, "{}", include_str!("../runtime/cpp/serde.hpp"))?;
+        let mut file = self.create_header_file("binary")?;
+        write!(file, "{}", include_str!("../runtime/cpp/binary.hpp"))?;
         Ok(())
     }
 
