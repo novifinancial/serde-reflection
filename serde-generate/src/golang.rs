@@ -576,14 +576,14 @@ return obj, nil
 
         // Link to base interface.
         if let Some(base) = variant_base {
-            writeln!(self.out, "\nfunc ({}) is{}() {{}}", full_name, base)?;
+            writeln!(self.out, "\nfunc (*{}) is{}() {{}}", full_name, base)?;
         }
 
         // Serialize
         if self.generator.config.serialization {
             writeln!(
                 self.out,
-                "\nfunc (obj {}) Serialize(serializer serde.Serializer) error {{",
+                "\nfunc (obj *{}) Serialize(serializer serde.Serializer) error {{",
                 full_name
             )?;
             self.out.indent();
