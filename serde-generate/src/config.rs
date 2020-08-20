@@ -1,15 +1,22 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 /// Code generation options meant to be supported by all languages.
 #[derive(Clone, Debug)]
 pub struct CodeGeneratorConfig {
     pub(crate) module_name: String,
     pub(crate) serialization: bool,
+    pub(crate) encodings: BTreeSet<Encoding>,
     pub(crate) external_definitions: ExternalDefinitions,
     pub(crate) comments: DocComments,
+}
+
+#[derive(Clone, Copy, Debug, PartialOrd, Ord, PartialEq, Eq)]
+pub enum Encoding {
+    Bincode,
+    Lcs,
 }
 
 /// Track types definitions provided by external modules.
@@ -47,6 +54,7 @@ impl CodeGeneratorConfig {
         Self {
             module_name,
             serialization: true,
+            encodings: BTreeSet::new(),
             external_definitions: BTreeMap::new(),
             comments: BTreeMap::new(),
         }
@@ -55,6 +63,15 @@ impl CodeGeneratorConfig {
     /// Whether to include serialization methods.
     pub fn with_serialization(mut self, serialization: bool) -> Self {
         self.serialization = serialization;
+        self
+    }
+
+    /// Whether to include specialized methods for specific encodings.
+    pub fn with_encodings<I>(mut self, encodings: I) -> Self
+    where
+        I: IntoIterator<Item = Encoding>,
+    {
+        self.encodings = encodings.into_iter().collect();
         self
     }
 
@@ -72,5 +89,14 @@ impl CodeGeneratorConfig {
         }
         self.comments = comments;
         self
+    }
+}
+
+impl Encoding {
+    pub fn name(self) -> &'static str {
+        match self {
+            Encoding::Bincode => "bincode",
+            Encoding::Lcs => "lcs",
+        }
     }
 }

@@ -750,11 +750,19 @@ impl Installer {
         }
     }
 
-    fn runtimes_installation_not_required() -> std::result::Result<(), Box<dyn std::error::Error>> {
-        Err(Box::new(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            "Runtime is installed by `go get`, no source code installation required",
-        )))
+    fn runtime_installation_message(
+        &self,
+        name: &str,
+    ) -> std::result::Result<(), Box<dyn std::error::Error>> {
+        eprintln!(
+            "Not installing sources for published package {}{}",
+            match &self.serde_module_path {
+                None => String::new(),
+                Some(path) => format!("{}/", path),
+            },
+            name
+        );
+        Ok(())
     }
 }
 
@@ -780,14 +788,14 @@ impl crate::SourceInstaller for Installer {
     }
 
     fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {
-        Self::runtimes_installation_not_required()
+        self.runtime_installation_message("serde")
     }
 
     fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error> {
-        Self::runtimes_installation_not_required()
+        self.runtime_installation_message("bincode")
     }
 
     fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        Self::runtimes_installation_not_required()
+        self.runtime_installation_message("lcs")
     }
 }
