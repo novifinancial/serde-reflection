@@ -4,7 +4,7 @@
 use heck::CamelCase;
 use libra_canonical_serialization as lcs;
 use serde::{Deserialize, Serialize};
-use serde_generate::{cpp, java, python3, rust, test_utils, CodeGeneratorConfig};
+use serde_generate::{cpp, java, python3, rust, test_utils, CodeGeneratorConfig, Encoding};
 use serde_reflection::{Registry, Result, Samples, Tracer, TracerConfig};
 use std::fs::File;
 use std::io::Write;
@@ -39,12 +39,18 @@ enum Runtime {
     Bincode,
 }
 
+impl std::convert::Into<Encoding> for Runtime {
+    fn into(self) -> Encoding {
+        match self {
+            Runtime::Lcs => Encoding::Lcs,
+            Runtime::Bincode => Encoding::Bincode,
+        }
+    }
+}
+
 impl Runtime {
     fn name(self) -> &'static str {
-        match self {
-            Self::Lcs => "lcs",
-            Self::Bincode => "bincode",
-        }
+        <Self as std::convert::Into<Encoding>>::into(self).name()
     }
 
     fn rust_package(self) -> &'static str {
@@ -292,7 +298,8 @@ fn test_cpp_runtime_on_simple_date(runtime: Runtime) {
     let header_path = dir.path().join("test.hpp");
     let mut header = File::create(&header_path).unwrap();
 
-    let config = CodeGeneratorConfig::new("testing".to_string());
+    let config =
+        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![runtime.into()]);
     let generator = cpp::CodeGenerator::new(&config);
     generator.output(&mut header, &registry).unwrap();
 
@@ -308,17 +315,13 @@ fn test_cpp_runtime_on_simple_date(runtime: Runtime) {
         source,
         r#"
 #include <cassert>
-#include "{1}.hpp"
 #include "test.hpp"
 
-using namespace serde;
 using namespace testing;
 
 int main() {{
     std::vector<uint8_t> input = {{{0}}};
-
-    auto deserializer = {2}Deserializer(input);
-    auto test = Deserializable<Test>::deserialize(deserializer);
+    auto test = Test::{1}Deserialize(input);
 
     auto a = std::vector<uint32_t> {{4, 6}};
     auto b = std::tuple<int64_t, uint64_t> {{-3, 5}};
@@ -327,9 +330,7 @@ int main() {{
 
     assert(test == test2);
 
-    auto serializer = {2}Serializer();
-    Serializable<Test>::serialize(test2, serializer);
-    auto output = std::move(serializer).bytes();
+    auto output = test2.{1}Serialize();
 
     assert(input == output);
 
@@ -342,7 +343,6 @@ int main() {{
             .collect::<Vec<_>>()
             .join(", "),
         runtime.name(),
-        runtime.name().to_camel_case(),
     )
     .unwrap();
 
@@ -377,7 +377,8 @@ fn test_cpp_runtime_on_supported_types(runtime: Runtime) {
     let header_path = dir.path().join("test.hpp");
     let mut header = File::create(&header_path).unwrap();
 
-    let config = CodeGeneratorConfig::new("testing".to_string());
+    let config =
+        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![runtime.into()]);
     let generator = cpp::CodeGenerator::new(&config);
     generator.output(&mut header, &registry).unwrap();
 
@@ -405,10 +406,8 @@ fn test_cpp_runtime_on_supported_types(runtime: Runtime) {
         r#"
 #include <iostream>
 #include <cassert>
-#include "{1}.hpp"
 #include "test.hpp"
 
-using namespace serde;
 using namespace testing;
 
 int main() {{
@@ -416,13 +415,8 @@ int main() {{
         std::vector<std::vector<uint8_t>> inputs = {{{0}}};
 
         for (auto input: inputs) {{
-            auto deserializer = {2}Deserializer(input);
-            auto test = Deserializable<SerdeData>::deserialize(deserializer);
-
-            auto serializer = {2}Serializer();
-            Serializable<SerdeData>::serialize(test, serializer);
-            auto output = std::move(serializer).bytes();
-
+            auto test = SerdeData::{1}Deserialize(input);
+            auto output = test.{1}Serialize();
             assert(input == output);
         }}
         return 0;
@@ -434,7 +428,6 @@ int main() {{
 "#,
         encodings,
         runtime.name(),
-        runtime.name().to_camel_case(),
     )
     .unwrap();
 

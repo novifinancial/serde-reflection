@@ -1,7 +1,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use serde_generate::{cpp, test_utils, CodeGeneratorConfig};
+use serde_generate::{cpp, test_utils, CodeGeneratorConfig, Encoding};
 use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::Write;
@@ -37,7 +37,7 @@ fn test_that_cpp_code_compiles_with_config(
         .arg(dir.path().join("test.o"))
         .arg("-I")
         .arg("runtime/cpp")
-        .arg(source_path.clone())
+        .arg(&source_path)
         .status()
         .unwrap();
     assert!(status.success());
@@ -48,6 +48,20 @@ fn test_that_cpp_code_compiles_with_config(
 #[test]
 fn test_that_cpp_code_compiles() {
     let config = CodeGeneratorConfig::new("testing".to_string());
+    test_that_cpp_code_compiles_with_config(&config);
+}
+
+#[test]
+fn test_that_cpp_code_compiles_with_lcs() {
+    let config =
+        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![Encoding::Lcs]);
+    test_that_cpp_code_compiles_with_config(&config);
+}
+
+#[test]
+fn test_that_cpp_code_compiles_with_bincode() {
+    let config =
+        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![Encoding::Bincode]);
     test_that_cpp_code_compiles_with_config(&config);
 }
 
@@ -121,7 +135,8 @@ fn test_that_cpp_code_links() {
     let header_path = dir.path().join("test.hpp");
     let mut header = File::create(&header_path).unwrap();
 
-    let config = CodeGeneratorConfig::new("testing".to_string());
+    let config =
+        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![Encoding::Lcs]);
     let generator = cpp::CodeGenerator::new(&config);
     generator.output(&mut header, &registry).unwrap();
 
