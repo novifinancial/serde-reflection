@@ -1,7 +1,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use serde_generate::{java, test_utils, CodeGeneratorConfig};
+use serde_generate::{java, test_utils, CodeGeneratorConfig, Encoding};
 use std::collections::BTreeMap;
 use std::process::Command;
 use tempfile::{tempdir, TempDir};
@@ -20,6 +20,7 @@ fn test_that_java_code_compiles_with_config(
     let paths = std::iter::empty()
         .chain(std::fs::read_dir("runtime/java/com/facebook/serde").unwrap())
         .chain(std::fs::read_dir("runtime/java/com/facebook/bincode").unwrap())
+        .chain(std::fs::read_dir("runtime/java/com/facebook/lcs").unwrap())
         .chain(std::fs::read_dir(dir.path().join("testing")).unwrap())
         .map(|e| e.unwrap().path());
     let status = Command::new("javac")
@@ -44,6 +45,20 @@ fn test_that_java_code_compiles() {
 #[test]
 fn test_that_java_code_compiles_without_serialization() {
     let config = CodeGeneratorConfig::new("testing".to_string()).with_serialization(false);
+    test_that_java_code_compiles_with_config(&config);
+}
+
+#[test]
+fn test_that_java_code_compiles_with_lcs() {
+    let config =
+        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![Encoding::Lcs]);
+    test_that_java_code_compiles_with_config(&config);
+}
+
+#[test]
+fn test_that_java_code_compiles_with_bincode() {
+    let config =
+        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![Encoding::Bincode]);
     test_that_java_code_compiles_with_config(&config);
 }
 

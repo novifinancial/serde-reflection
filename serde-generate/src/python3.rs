@@ -247,12 +247,13 @@ import typing
         if self.generator.config.serialization {
             writeln!(
                 self.out,
-                "VARIANTS = []  # type: typing.Sequence[typing.Type[{}]]\n",
+                "VARIANTS = []  # type: typing.Sequence[typing.Type[{}]]",
                 name
             )?;
         } else {
-            writeln!(self.out, "pass\n")?;
+            writeln!(self.out, "pass")?;
         }
+        writeln!(self.out)?;
         self.out.unindent();
 
         self.current_namespace.push(name.to_string());

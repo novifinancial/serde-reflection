@@ -461,7 +461,8 @@ fn test_java_runtime_on_simple_data(runtime: Runtime) {
     let registry = get_local_registry().unwrap();
     let dir = tempdir().unwrap();
 
-    let config = CodeGeneratorConfig::new("testing".to_string());
+    let config =
+        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![runtime.into()]);
     let generator = java::CodeGenerator::new(&config);
     generator
         .write_source_files(dir.path().to_path_buf(), &registry)
@@ -479,12 +480,8 @@ fn test_java_runtime_on_simple_data(runtime: Runtime) {
         r#"
 import java.util.List;
 import java.util.Arrays;
-import com.facebook.serde.Deserializer;
-import com.facebook.serde.Serializer;
 import com.facebook.serde.Unsigned;
 import com.facebook.serde.Tuple2;
-import com.facebook.{1}.{2}Deserializer;
-import com.facebook.{1}.{2}Serializer;
 import testing.Choice;
 import testing.Test;
 
@@ -492,8 +489,7 @@ public class Main {{
     public static void main(String[] args) throws java.lang.Exception {{
         byte[] input = new byte[] {{{0}}};
 
-        Deserializer deserializer = new {2}Deserializer(input);
-        Test test = Test.deserialize(deserializer);
+        Test test = Test.{1}Deserialize(input);
 
         List<@Unsigned Integer> a = Arrays.asList(4, 6);
         Tuple2<Long, @Unsigned Long> b = new Tuple2<>(Long.valueOf(-3), Long.valueOf(5));
@@ -502,9 +498,7 @@ public class Main {{
 
         assert test.equals(test2);
 
-        Serializer serializer = new {2}Serializer();
-        test2.serialize(serializer);
-        byte[] output = serializer.get_bytes();
+        byte[] output = test2.{1}Serialize();
 
         assert java.util.Arrays.equals(input, output);
     }}
@@ -516,7 +510,6 @@ public class Main {{
             .collect::<Vec<_>>()
             .join(", "),
         runtime.name(),
-        runtime.name().to_camel_case(),
     )
     .unwrap();
 
@@ -571,7 +564,8 @@ fn test_java_runtime_on_supported_types(runtime: Runtime) {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
 
-    let config = CodeGeneratorConfig::new("testing".to_string());
+    let config =
+        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![runtime.into()]);
     let generator = java::CodeGenerator::new(&config);
     generator
         .write_source_files(dir.path().to_path_buf(), &registry)
@@ -600,12 +594,8 @@ fn test_java_runtime_on_supported_types(runtime: Runtime) {
         r#"
 import java.util.List;
 import java.util.Arrays;
-import com.facebook.serde.Deserializer;
-import com.facebook.serde.Serializer;
 import com.facebook.serde.Unsigned;
 import com.facebook.serde.Tuple2;
-import com.facebook.{1}.{2}Deserializer;
-import com.facebook.{1}.{2}Serializer;
 import testing.SerdeData;
 
 public class Main {{
@@ -613,12 +603,9 @@ public class Main {{
         byte[][] inputs = new byte[][] {{{0}}};
 
         for (int i = 0; i < inputs.length; i++) {{
-            Deserializer deserializer = new {2}Deserializer(inputs[i]);
-            SerdeData test = SerdeData.deserialize(deserializer);
+            SerdeData test = SerdeData.{1}Deserialize(inputs[i]);
 
-            Serializer serializer = new {2}Serializer();
-            test.serialize(serializer);
-            byte[] output = serializer.get_bytes();
+            byte[] output = test.{1}Serialize();
 
             assert java.util.Arrays.equals(inputs[i], output);
         }}
@@ -627,7 +614,6 @@ public class Main {{
 "#,
         encodings,
         runtime.name(),
-        runtime.name().to_camel_case(),
     )
     .unwrap();
 
