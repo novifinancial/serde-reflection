@@ -3,7 +3,7 @@
 
 use crate::{
     indent::{IndentConfig, IndentedWriter},
-    CodeGeneratorConfig,
+    CodeGeneratorConfig, Encoding,
 };
 use serde_reflection::{ContainerFormat, Format, Named, Registry, VariantFormat};
 use std::collections::{BTreeMap, HashMap};
@@ -98,19 +98,23 @@ where
     }
 
     fn output_preamble(&mut self) -> Result<()> {
+        let from_serde_package = match &self.generator.serde_package_name {
+            None => "".to_string(),
+            Some(name) => format!("from {} ", name),
+        };
         writeln!(
             self.out,
             r#"# pyre-strict
 from dataclasses import dataclass
 import typing
 {}import serde_types as st"#,
-            match &self.generator.serde_package_name {
-                None => "".to_string(),
-                Some(name) => format!("from {} ", name),
-            }
+            from_serde_package,
         )?;
+        for encoding in &self.generator.config.encodings {
+            writeln!(self.out, "{}import {}", from_serde_package, encoding.name())?;
+        }
         for module in self.generator.config.external_definitions.keys() {
-            writeln!(self.out, "{}\n", self.quote_import(module),)?;
+            writeln!(self.out, "{}\n", self.quote_import(module))?;
         }
         Ok(())
     }
@@ -250,6 +254,10 @@ import typing
                 "VARIANTS = []  # type: typing.Sequence[typing.Type[{}]]",
                 name
             )?;
+            for encoding in &self.generator.config.encodings {
+                self.output_serialize_method_for_encoding(name, *encoding)?;
+                self.output_deserialize_method_for_encoding(name, *encoding)?;
+            }
         } else {
             writeln!(self.out, "pass")?;
         }
@@ -277,6 +285,38 @@ import typing
         Ok(())
     }
 
+    fn output_serialize_method_for_encoding(
+        &mut self,
+        name: &str,
+        encoding: Encoding,
+    ) -> Result<()> {
+        writeln!(
+            self.out,
+            r#"
+def {0}_serialize(self) -> bytes:
+    return {0}.serialize(self, {1})"#,
+            encoding.name(),
+            name
+        )
+    }
+
+    fn output_deserialize_method_for_encoding(
+        &mut self,
+        name: &str,
+        encoding: Encoding,
+    ) -> Result<()> {
+        writeln!(
+            self.out,
+            r#"
+@staticmethod
+def {0}_deserialize(input: bytes) -> '{1}':
+    v, buffer = {0}.deserialize(input, {1})
+    return v"#,
+            encoding.name(),
+            name
+        )
+    }
+
     fn output_container(&mut self, name: &str, format: &ContainerFormat) -> Result<()> {
         use ContainerFormat::*;
         let fields = match format {
@@ -302,6 +342,10 @@ import typing
         self.output_comment(name)?;
         self.current_namespace.push(name.to_string());
         self.output_fields(&fields)?;
+        for encoding in &self.generator.config.encodings {
+            self.output_serialize_method_for_encoding(name, *encoding)?;
+            self.output_deserialize_method_for_encoding(name, *encoding)?;
+        }
         self.current_namespace.pop();
         self.out.unindent();
         writeln!(self.out)

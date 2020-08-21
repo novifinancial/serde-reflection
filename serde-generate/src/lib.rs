@@ -48,34 +48,26 @@
 //!
 //! // Create Python class definitions.
 //! let mut source = Vec::new();
-//! let inner = serde_generate::CodeGeneratorConfig::new("testing".to_string());
-//! let config = serde_generate::python3::CodeGenerator::new(&inner);
-//! config.output(&mut source, &registry)?;
+//! let config = serde_generate::CodeGeneratorConfig::new("testing".to_string())
+//!     .with_encodings(vec![serde_generate::Encoding::Bincode]);
+//! let generator = serde_generate::python3::CodeGenerator::new(&config);
+//! generator.output(&mut source, &registry)?;
 //!
-//! assert_eq!(
-//! #  "\n".to_string() + &
-//!     String::from_utf8_lossy(&source),
+//! assert!(
+//!     String::from_utf8_lossy(&source).contains(
 //!     r#"
-//! ## pyre-strict
-//! from dataclasses import dataclass
-//! import typing
-//! import serde_types as st
-//!
 //! @dataclass
 //! class Test:
 //!     a: typing.Sequence[st.uint64]
 //!     b: typing.Tuple[st.uint32, st.uint32]
-//!
-//! "#.to_string());
+//! "#));
 //!
 //! // Append some test code to demonstrate Bincode deserialization
 //! // using the runtime in `serde_generate/runtime/python/bincode`.
 //! writeln!(
 //!     source,
 //!     r#"
-//! import bincode
-//!
-//! value, _ = bincode.deserialize(bytes.fromhex("{}"), Test)
+//! value = Test.bincode_deserialize(bytes.fromhex("{}"))
 //! assert value == Test(a=[4, 6], b=(3, 5))
 //! "#,
 //!     hex::encode(&bincode::serialize(&Test { a: vec![4, 6], b: (3, 5) }).unwrap()),
