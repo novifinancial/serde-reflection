@@ -101,7 +101,8 @@ fn test_python_runtime_on_simple_data(runtime: Runtime) {
     let source_path = dir.path().join("test.py");
     let mut source = File::create(&source_path).unwrap();
 
-    let config = CodeGeneratorConfig::new("testing".to_string());
+    let config =
+        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![runtime.into()]);
     let generator = python3::CodeGenerator::new(&config);
     generator.output(&mut source, &registry).unwrap();
 
@@ -113,20 +114,17 @@ fn test_python_runtime_on_simple_data(runtime: Runtime) {
     writeln!(
         source,
         r#"
-import {0}
-
 value = Test([4, 6], (3, 5), Choice__C(7))
 
-s = {0}.serialize(value, Test)
+s = value.{0}_serialize()
 assert s == bytes.fromhex("{1}")
 
-v, buffer = {0}.deserialize(s, Test)
-assert len(buffer) == 0
+v = Test.{0}_deserialize(s)
 assert v == value
 assert v.c.x == 7
 
 v.b = (3, 0)
-t = {0}.serialize(v, Test)
+t = v.{0}_serialize()
 assert len(t) == len(s)
 assert t != s
 "#,
@@ -160,7 +158,8 @@ fn test_python_runtime_on_all_supported_types(runtime: Runtime) {
     let source_path = dir.path().join("test.py");
     let mut source = File::create(&source_path).unwrap();
 
-    let config = CodeGeneratorConfig::new("testing".to_string());
+    let config =
+        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![runtime.into()]);
     let generator = python3::CodeGenerator::new(&config);
     generator.output(&mut source, &registry).unwrap();
 
@@ -173,15 +172,11 @@ fn test_python_runtime_on_all_supported_types(runtime: Runtime) {
     writeln!(
         source,
         r#"
-import {0}
-
 encodings = [bytes.fromhex(s) for s in [{1}]]
 
 for encoding in encodings:
-    v, buffer = {0}.deserialize(encoding, SerdeData)
-    assert len(buffer) == 0
-
-    s = {0}.serialize(v, SerdeData)
+    v = SerdeData.{0}_deserialize(encoding)
+    s = v.{0}_serialize()
     assert s == encoding
 "#,
         runtime.name(),

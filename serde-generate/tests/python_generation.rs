@@ -1,7 +1,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use serde_generate::{python3, test_utils, CodeGeneratorConfig, SourceInstaller};
+use serde_generate::{python3, test_utils, CodeGeneratorConfig, Encoding, SourceInstaller};
 use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::Write;
@@ -43,6 +43,20 @@ fn test_that_python_code_parses() {
 #[test]
 fn test_that_python_code_parses_without_serialization() {
     let config = CodeGeneratorConfig::new("testing".to_string()).with_serialization(false);
+    test_that_python_code_parses_with_config(&config);
+}
+
+#[test]
+fn test_that_python_code_parses_with_lcs() {
+    let config =
+        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![Encoding::Lcs]);
+    test_that_python_code_parses_with_config(&config);
+}
+
+#[test]
+fn test_that_python_code_parses_with_bincode() {
+    let config =
+        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![Encoding::Bincode]);
     test_that_python_code_parses_with_config(&config);
 }
 
@@ -112,7 +126,8 @@ fn test_that_installed_python_code_passes_pyre_check() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
 
-    let config = CodeGeneratorConfig::new("testing".to_string());
+    let config =
+        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![Encoding::Lcs]);
     let installer = python3::Installer::new(dir.path().join("src"), /* serde package */ None);
     installer.install_module(&config, &registry).unwrap();
     installer.install_serde_runtime().unwrap();
