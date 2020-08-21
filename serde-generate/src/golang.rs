@@ -121,6 +121,16 @@ where
         if self.generator.config.serialization || Self::has_int128(registry) {
             writeln!(self.out, "\"{}/serde\"", self.generator.serde_module_path)?;
         }
+        if self.generator.config.serialization {
+            for encoding in &self.generator.config.encodings {
+                writeln!(
+                    self.out,
+                    "\"{}/{}\"",
+                    self.generator.serde_module_path,
+                    encoding.name()
+                )?;
+            }
+        }
         for path in self.generator.config.external_definitions.keys() {
             writeln!(self.out, "\"{}\"", path)?;
         }
@@ -599,13 +609,28 @@ return obj, nil
             }
             writeln!(self.out, "return nil")?;
             self.out.unindent();
-            writeln!(self.out, "}}\n")?;
+            writeln!(self.out, "}}")?;
+
+            for encoding in &self.generator.config.encodings {
+                writeln!(
+                    self.out,
+                    r#"
+func (obj *{0}) {2}Serialize() ([]byte, error) {{
+	serializer := {1}.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil {{ return nil, err }}
+	return serializer.GetBytes(), nil
+}}"#,
+                    full_name,
+                    encoding.name(),
+                    encoding.name().to_camel_case()
+                )?;
+            }
         }
         // Deserialize (struct) or Load (variant)
         if self.generator.config.serialization {
             writeln!(
                 self.out,
-                "func {0}{1}(deserializer serde.Deserializer) ({1}, error) {{",
+                "\nfunc {0}{1}(deserializer serde.Deserializer) ({1}, error) {{",
                 if variant_base.is_none() {
                     "Deserialize"
                 } else {
@@ -624,7 +649,24 @@ return obj, nil
             }
             writeln!(self.out, "return obj, nil")?;
             self.out.unindent();
-            writeln!(self.out, "}}\n")?;
+            writeln!(self.out, "}}")?;
+
+            if variant_base.is_none() {
+                for encoding in &self.generator.config.encodings {
+                    writeln!(
+                        self.out,
+                        r#"
+func {2}Deserialize{0}(input []byte) ({0}, error) {{
+	deserializer := {1}.NewDeserializer(input);
+	obj, err := Deserialize{0}(deserializer)
+	return obj, err
+}}"#,
+                        full_name,
+                        encoding.name(),
+                        encoding.name().to_camel_case()
+                    )?;
+                }
+            }
         }
         Ok(())
     }
