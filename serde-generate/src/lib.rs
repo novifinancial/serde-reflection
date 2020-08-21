@@ -128,6 +128,8 @@ pub mod java;
 pub mod python3;
 /// Support for code-generation in Rust
 pub mod rust;
+/// Support for code-generation in Dart
+pub mod dart;
 
 #[doc(hidden)]
 /// Utility functions to help testing code generators.
