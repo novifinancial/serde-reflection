@@ -865,7 +865,11 @@ public byte[] {0}Serialize() throws java.lang.Exception {{
             r#"
 public static {0} {1}Deserialize(byte[] input) throws java.lang.Exception {{
     com.facebook.serde.Deserializer deserializer = new com.facebook.{1}.{2}Deserializer(input);
-    return deserialize(deserializer);
+    {0} value = deserialize(deserializer);
+    if (deserializer.get_buffer_offset() < input.length) {{
+         throw new Exception("Some input bytes were not read");
+    }}
+    return value;
 }}"#,
             name,
             encoding.name(),
