@@ -4,7 +4,7 @@
 use heck::CamelCase;
 use libra_canonical_serialization as lcs;
 use serde::{Deserialize, Serialize};
-use serde_generate::{cpp, java, python3, rust, test_utils, CodeGeneratorConfig, Encoding};
+use serde_generate::{cpp, golang, java, python3, rust, test_utils, CodeGeneratorConfig, Encoding};
 use serde_reflection::{Registry, Result, Samples, Tracer, TracerConfig};
 use std::fs::File;
 use std::io::Write;
@@ -695,7 +695,7 @@ fn test_java_lcs_runtime_autotest() {
 }
 
 #[test]
-fn test_golang_runtime_tests() {
+fn test_golang_runtime_autotests() {
     let runtime_mod_path = std::env::current_exe()
         .unwrap()
         .parent()
@@ -706,6 +706,98 @@ fn test_golang_runtime_tests() {
         .current_dir(runtime_mod_path.to_str().unwrap())
         .arg("test")
         .arg("./...")
+        .status()
+        .unwrap();
+    assert!(status.success());
+}
+
+#[test]
+fn test_golang_lcs_runtime_on_simple_data() {
+    test_golang_runtime_on_simple_data(Runtime::Lcs);
+}
+
+fn test_golang_runtime_on_simple_data(runtime: Runtime) {
+    let registry = get_local_registry().unwrap();
+    let dir = tempdir().unwrap();
+    let source_path = dir.path().join("test.go");
+    let mut source = File::create(&source_path).unwrap();
+
+    let config = CodeGeneratorConfig::new("main".to_string())
+        .with_encodings(vec![runtime.into()])
+        .with_external_definitions(
+            vec![("github.com/google/go-cmp/cmp".to_string(), vec![])]
+                .into_iter()
+                .collect(),
+        );
+    let generator = golang::CodeGenerator::new(&config);
+    generator.output(&mut source, &registry).unwrap();
+
+    let reference = runtime.serialize(&Test {
+        a: vec![4, 6],
+        b: (-3, 5),
+        c: Choice::C { x: 7 },
+    });
+
+    writeln!(
+        source,
+        r#"
+func main() {{
+	input := []byte{{{0}}}
+	test, err := {1}DeserializeTest(input)
+	if err != nil {{ panic("failed to deserialize") }}
+
+        test2 := Test {{
+		A: []uint32{{ 4, 6 }},
+		B: struct {{ Field0 int64; Field1 uint64 }} {{ -3, 5 }},
+		C: &Choice__C {{ X: 7 }},
+	}}
+	if !cmp.Equal(test, test2) {{ panic("test != test2") }}
+
+	output, err := test2.{1}Serialize()
+	if err != nil {{ panic("failed to serialize") }}
+	if !cmp.Equal(input, output) {{ panic("input != output") }}
+}}
+"#,
+        reference
+            .iter()
+            .map(|x| format!("{}", x))
+            .collect::<Vec<_>>()
+            .join(", "),
+        runtime.name().to_camel_case(),
+    )
+    .unwrap();
+
+    let status = Command::new("go")
+        .current_dir(dir.path())
+        .arg("mod")
+        .arg("init")
+        .arg("testing")
+        .status()
+        .unwrap();
+    assert!(status.success());
+
+    let runtime_mod_path = std::env::current_exe()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .join("../../../serde-generate/runtime/golang");
+    let status = Command::new("go")
+        .current_dir(dir.path())
+        .arg("mod")
+        .arg("edit")
+        .arg("-replace")
+        .arg(format!(
+            "github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang={}",
+            runtime_mod_path.to_str().unwrap()
+        ))
+        .status()
+        .unwrap();
+    assert!(status.success());
+
+    let status = Command::new("go")
+        .current_dir(dir.path())
+        .arg("run")
+        .arg(source_path.clone())
         .status()
         .unwrap();
     assert!(status.success());

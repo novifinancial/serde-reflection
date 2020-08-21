@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use serde::{Deserialize, Serialize};
-use serde_generate::{golang, test_utils, CodeGeneratorConfig};
+use serde_generate::{golang, test_utils, CodeGeneratorConfig, Encoding};
 use serde_reflection::{Registry, Result, Samples, Tracer, TracerConfig};
 use std::collections::BTreeMap;
 use std::fs::File;
@@ -98,6 +98,12 @@ fn test_that_golang_code_compiles() {
 #[test]
 fn test_that_golang_code_compiles_without_serialization() {
     let config = CodeGeneratorConfig::new("main".to_string()).with_serialization(false);
+    test_that_golang_code_compiles_with_config(&config);
+}
+
+#[test]
+fn test_that_golang_code_compiles_with_lcs() {
+    let config = CodeGeneratorConfig::new("main".to_string()).with_encodings(vec![Encoding::Lcs]);
     test_that_golang_code_compiles_with_config(&config);
 }
 
