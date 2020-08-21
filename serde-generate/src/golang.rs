@@ -115,7 +115,9 @@ where
         }
         writeln!(self.out, "import (")?;
         self.out.indent();
-        if self.generator.config.serialization && Self::has_enum(registry) {
+        if self.generator.config.serialization
+            && (Self::has_enum(registry) || !self.generator.config.encodings.is_empty())
+        {
             writeln!(self.out, "\"fmt\"")?;
         }
         if self.generator.config.serialization || Self::has_int128(registry) {
@@ -659,6 +661,9 @@ func (obj *{0}) {2}Serialize() ([]byte, error) {{
 func {2}Deserialize{0}(input []byte) ({0}, error) {{
 	deserializer := {1}.NewDeserializer(input);
 	obj, err := Deserialize{0}(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {{
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}}
 	return obj, err
 }}"#,
                         full_name,

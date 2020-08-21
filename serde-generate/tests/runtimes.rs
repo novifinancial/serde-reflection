@@ -127,6 +127,13 @@ v.b = (3, 0)
 t = v.{0}_serialize()
 assert len(t) == len(s)
 assert t != s
+
+seen_error = False
+try:
+    Test.{0}_deserialize(bytes.fromhex("{1}") + bytes([0]))
+except ValueError:
+    seen_error = True
+assert seen_error
 "#,
         runtime.name(),
         hex::encode(&reference),
@@ -329,7 +336,13 @@ int main() {{
 
     assert(input == output);
 
-    return 0;
+    input.push_back(1);
+    try {{
+        Test::{1}Deserialize(input);
+    }} catch (...) {{
+        return 0;
+    }}
+    return 1;
 }}
 "#,
         reference
@@ -496,6 +509,14 @@ public class Main {{
         byte[] output = test2.{1}Serialize();
 
         assert java.util.Arrays.equals(input, output);
+
+        byte[] input2 = new byte[] {{{0}, 1}};
+        try {{
+            Test.{1}Deserialize(input2);
+        }} catch (Exception e) {{
+            return;
+        }}
+        assert false;
     }}
 }}
 "#,
@@ -737,6 +758,10 @@ func main() {{
 	output, err := test2.{1}Serialize()
 	if err != nil {{ panic("failed to serialize") }}
 	if !cmp.Equal(input, output) {{ panic("input != output") }}
+
+	input2 := []byte{{{0}, 1}}
+	test2, err2 := {1}DeserializeTest(input2)
+	if err2 == nil {{ panic("was expecting an error") }}
 }}
 "#,
         reference
