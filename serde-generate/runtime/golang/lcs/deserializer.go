@@ -18,12 +18,16 @@ const maxUint32 = uint64(^uint32(0))
 
 // Deserializer implements `serde.Deserializer` interface for deserializing LCS serialized bytes.
 type Deserializer struct {
+	initial_size uint64
 	buf *bytes.Buffer
 }
 
 // NewDeserializer creates a new `serde.Deserializer`.
 func NewDeserializer(input []byte) serde.Deserializer {
-	return &Deserializer{buf: bytes.NewBuffer(input)}
+	return &Deserializer{
+		initial_size: uint64(len(input)),
+		buf: bytes.NewBuffer(input),
+	}
 }
 
 func (d *Deserializer) DeserializeBytes() ([]byte, error) {
@@ -177,7 +181,7 @@ func (d *Deserializer) DeserializeOptionTag() (bool, error) {
 }
 
 func (d *Deserializer) GetBufferOffset() uint64 {
-	return uint64(d.buf.Len())
+	return d.initial_size - uint64(d.buf.Len())
 }
 
 // CheckThatKeySlicesAreIncreasing is unimplemented.
