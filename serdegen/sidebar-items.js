@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["Language",""],["Runtime",""]],"fn":[["main",""]],"struct":[["Options",""]]});
+initSidebarItems({"enum":[["Language",""],["Runtime",""]],"fn":[["get_codegen_config",""],["main",""]],"struct":[["Options",""]]});

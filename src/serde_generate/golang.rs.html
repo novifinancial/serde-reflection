@@ -791,6 +791,61 @@
 <span id="791">791</span>
 <span id="792">792</span>
 <span id="793">793</span>
+<span id="794">794</span>
+<span id="795">795</span>
+<span id="796">796</span>
+<span id="797">797</span>
+<span id="798">798</span>
+<span id="799">799</span>
+<span id="800">800</span>
+<span id="801">801</span>
+<span id="802">802</span>
+<span id="803">803</span>
+<span id="804">804</span>
+<span id="805">805</span>
+<span id="806">806</span>
+<span id="807">807</span>
+<span id="808">808</span>
+<span id="809">809</span>
+<span id="810">810</span>
+<span id="811">811</span>
+<span id="812">812</span>
+<span id="813">813</span>
+<span id="814">814</span>
+<span id="815">815</span>
+<span id="816">816</span>
+<span id="817">817</span>
+<span id="818">818</span>
+<span id="819">819</span>
+<span id="820">820</span>
+<span id="821">821</span>
+<span id="822">822</span>
+<span id="823">823</span>
+<span id="824">824</span>
+<span id="825">825</span>
+<span id="826">826</span>
+<span id="827">827</span>
+<span id="828">828</span>
+<span id="829">829</span>
+<span id="830">830</span>
+<span id="831">831</span>
+<span id="832">832</span>
+<span id="833">833</span>
+<span id="834">834</span>
+<span id="835">835</span>
+<span id="836">836</span>
+<span id="837">837</span>
+<span id="838">838</span>
+<span id="839">839</span>
+<span id="840">840</span>
+<span id="841">841</span>
+<span id="842">842</span>
+<span id="843">843</span>
+<span id="844">844</span>
+<span id="845">845</span>
+<span id="846">846</span>
+<span id="847">847</span>
+<span id="848">848</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -909,11 +964,23 @@
         }
         <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;import (&quot;</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">serialization</span> <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="self">Self</span>::<span class="ident">has_enum</span>(<span class="ident">registry</span>) {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">serialization</span>
+            <span class="kw-2">&amp;</span><span class="op">&amp;</span> (<span class="self">Self</span>::<span class="ident">has_enum</span>(<span class="ident">registry</span>) <span class="op">|</span><span class="op">|</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">encodings</span>.<span class="ident">is_empty</span>())
+        {
             <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\&quot;fmt\&quot;&quot;</span>)<span class="question-mark">?</span>;
         }
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">serialization</span> <span class="op">|</span><span class="op">|</span> <span class="self">Self</span>::<span class="ident">has_int128</span>(<span class="ident">registry</span>) {
             <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\&quot;{}/serde\&quot;&quot;</span>, <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">serde_module_path</span>)<span class="question-mark">?</span>;
+        }
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">serialization</span> {
+            <span class="kw">for</span> <span class="ident">encoding</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">encodings</span> {
+                <span class="macro">writeln</span><span class="macro">!</span>(
+                    <span class="self">self</span>.<span class="ident">out</span>,
+                    <span class="string">&quot;\&quot;{}/{}\&quot;&quot;</span>,
+                    <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">serde_module_path</span>,
+                    <span class="ident">encoding</span>.<span class="ident">name</span>()
+                )<span class="question-mark">?</span>;
+            }
         }
         <span class="kw">for</span> <span class="ident">path</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">external_definitions</span>.<span class="ident">keys</span>() {
             <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\&quot;{}\&quot;&quot;</span>, <span class="ident">path</span>)<span class="question-mark">?</span>;
@@ -1393,13 +1460,28 @@ return obj, nil
             }
             <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;return nil&quot;</span>)<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
+
+            <span class="kw">for</span> <span class="ident">encoding</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">encodings</span> {
+                <span class="macro">writeln</span><span class="macro">!</span>(
+                    <span class="self">self</span>.<span class="ident">out</span>,
+                    <span class="string">r#&quot;
+func (obj *{0}) {2}Serialize() ([]byte, error) {{
+	serializer := {1}.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil {{ return nil, err }}
+	return serializer.GetBytes(), nil
+}}&quot;#</span>,
+                    <span class="ident">full_name</span>,
+                    <span class="ident">encoding</span>.<span class="ident">name</span>(),
+                    <span class="ident">encoding</span>.<span class="ident">name</span>().<span class="ident">to_camel_case</span>()
+                )<span class="question-mark">?</span>;
+            }
         }
         <span class="comment">// Deserialize (struct) or Load (variant)</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">serialization</span> {
             <span class="macro">writeln</span><span class="macro">!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
-                <span class="string">&quot;func {0}{1}(deserializer serde.Deserializer) ({1}, error) {{&quot;</span>,
+                <span class="string">&quot;\nfunc {0}{1}(deserializer serde.Deserializer) ({1}, error) {{&quot;</span>,
                 <span class="kw">if</span> <span class="ident">variant_base</span>.<span class="ident">is_none</span>() {
                     <span class="string">&quot;Deserialize&quot;</span>
                 } <span class="kw">else</span> {
@@ -1418,7 +1500,27 @@ return obj, nil
             }
             <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;return obj, nil&quot;</span>)<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
+
+            <span class="kw">if</span> <span class="ident">variant_base</span>.<span class="ident">is_none</span>() {
+                <span class="kw">for</span> <span class="ident">encoding</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">encodings</span> {
+                    <span class="macro">writeln</span><span class="macro">!</span>(
+                        <span class="self">self</span>.<span class="ident">out</span>,
+                        <span class="string">r#&quot;
+func {2}Deserialize{0}(input []byte) ({0}, error) {{
+	deserializer := {1}.NewDeserializer(input);
+	obj, err := Deserialize{0}(deserializer)
+	if deserializer.GetBufferOffset() &lt; uint64(len(input)) {{
+		return obj, fmt.Errorf(&quot;Some input bytes were not read&quot;)
+	}}
+	return obj, err
+}}&quot;#</span>,
+                        <span class="ident">full_name</span>,
+                        <span class="ident">encoding</span>.<span class="ident">name</span>(),
+                        <span class="ident">encoding</span>.<span class="ident">name</span>().<span class="ident">to_camel_case</span>()
+                    )<span class="question-mark">?</span>;
+                }
+            }
         }
         <span class="prelude-val">Ok</span>(())
     }
@@ -1544,11 +1646,19 @@ switch index {{&quot;#</span>,
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">runtimes_installation_not_required</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Err</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Error</span>::<span class="ident">new</span>(
-            <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">ErrorKind</span>::<span class="ident">Other</span>,
-            <span class="string">&quot;Runtime is installed by `go get`, no source code installation required&quot;</span>,
-        )))
+    <span class="kw">fn</span> <span class="ident">runtime_installation_message</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="macro">eprintln</span><span class="macro">!</span>(
+            <span class="string">&quot;Not installing sources for published package {}{}&quot;</span>,
+            <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">serde_module_path</span> {
+                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">String</span>::<span class="ident">new</span>(),
+                <span class="prelude-val">Some</span>(<span class="ident">path</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}/&quot;</span>, <span class="ident">path</span>),
+            },
+            <span class="ident">name</span>
+        );
+        <span class="prelude-val">Ok</span>(())
     }
 }
 
@@ -1574,15 +1684,15 @@ switch index {{&quot;#</span>,
     }
 
     <span class="kw">fn</span> <span class="ident">install_serde_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="self">Self</span>::<span class="ident">runtimes_installation_not_required</span>()
+        <span class="self">self</span>.<span class="ident">runtime_installation_message</span>(<span class="string">&quot;serde&quot;</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">install_bincode_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="self">Self</span>::<span class="ident">runtimes_installation_not_required</span>()
+        <span class="self">self</span>.<span class="ident">runtime_installation_message</span>(<span class="string">&quot;bincode&quot;</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">install_lcs_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="self">Self</span>::<span class="ident">runtimes_installation_not_required</span>()
+        <span class="self">self</span>.<span class="ident">runtime_installation_message</span>(<span class="string">&quot;lcs&quot;</span>)
     }
 }
 </pre></div>

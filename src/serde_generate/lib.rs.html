@@ -131,14 +131,6 @@
 <span id="131">131</span>
 <span id="132">132</span>
 <span id="133">133</span>
-<span id="134">134</span>
-<span id="135">135</span>
-<span id="136">136</span>
-<span id="137">137</span>
-<span id="138">138</span>
-<span id="139">139</span>
-<span id="140">140</span>
-<span id="141">141</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -190,34 +182,26 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // Create Python class definitions.</span>
 <span class="doccomment">//! let mut source = Vec::new();</span>
-<span class="doccomment">//! let inner = serde_generate::CodeGeneratorConfig::new(&quot;testing&quot;.to_string());</span>
-<span class="doccomment">//! let config = serde_generate::python3::CodeGenerator::new(&amp;inner);</span>
-<span class="doccomment">//! config.output(&amp;mut source, &amp;registry)?;</span>
+<span class="doccomment">//! let config = serde_generate::CodeGeneratorConfig::new(&quot;testing&quot;.to_string())</span>
+<span class="doccomment">//!     .with_encodings(vec![serde_generate::Encoding::Bincode]);</span>
+<span class="doccomment">//! let generator = serde_generate::python3::CodeGenerator::new(&amp;config);</span>
+<span class="doccomment">//! generator.output(&amp;mut source, &amp;registry)?;</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! assert_eq!(</span>
-<span class="doccomment">//! #  &quot;\n&quot;.to_string() + &amp;</span>
-<span class="doccomment">//!     String::from_utf8_lossy(&amp;source),</span>
+<span class="doccomment">//! assert!(</span>
+<span class="doccomment">//!     String::from_utf8_lossy(&amp;source).contains(</span>
 <span class="doccomment">//!     r#&quot;</span>
-<span class="doccomment">//! ## pyre-strict</span>
-<span class="doccomment">//! from dataclasses import dataclass</span>
-<span class="doccomment">//! import typing</span>
-<span class="doccomment">//! import serde_types as st</span>
-<span class="doccomment">//!</span>
 <span class="doccomment">//! @dataclass</span>
 <span class="doccomment">//! class Test:</span>
 <span class="doccomment">//!     a: typing.Sequence[st.uint64]</span>
 <span class="doccomment">//!     b: typing.Tuple[st.uint32, st.uint32]</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! &quot;#.to_string());</span>
+<span class="doccomment">//! &quot;#));</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // Append some test code to demonstrate Bincode deserialization</span>
 <span class="doccomment">//! // using the runtime in `serde_generate/runtime/python/bincode`.</span>
 <span class="doccomment">//! writeln!(</span>
 <span class="doccomment">//!     source,</span>
 <span class="doccomment">//!     r#&quot;</span>
-<span class="doccomment">//! import bincode</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! value, _ = bincode.deserialize(bytes.fromhex(&quot;{}&quot;), Test)</span>
+<span class="doccomment">//! value = Test.bincode_deserialize(bytes.fromhex(&quot;{}&quot;))</span>
 <span class="doccomment">//! assert value == Test(a=[4, 6], b=(3, 5))</span>
 <span class="doccomment">//! &quot;#,</span>
 <span class="doccomment">//!     hex::encode(&amp;bincode::serialize(&amp;Test { a: vec![4, 6], b: (3, 5) }).unwrap()),</span>

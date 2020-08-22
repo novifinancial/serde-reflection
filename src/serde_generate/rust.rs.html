@@ -846,11 +846,11 @@
         <span class="ident">Installer</span> { <span class="ident">install_dir</span> }
     }
 
-    <span class="kw">fn</span> <span class="ident">runtimes_not_implemented</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Err</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Error</span>::<span class="ident">new</span>(
-            <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">ErrorKind</span>::<span class="ident">Other</span>,
-            <span class="string">&quot;Installing runtimes is not implemented: use cargo instead&quot;</span>,
-        )))
+    <span class="kw">fn</span> <span class="ident">runtime_installation_message</span>(
+        <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="macro">eprintln</span><span class="macro">!</span>(<span class="string">&quot;Not installing sources for published crate {}&quot;</span>, <span class="ident">name</span>);
+        <span class="prelude-val">Ok</span>(())
     }
 }
 
@@ -894,15 +894,15 @@ serde_bytes = &quot;0.11&quot;
     }
 
     <span class="kw">fn</span> <span class="ident">install_serde_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="self">Self</span>::<span class="ident">runtimes_not_implemented</span>()
+        <span class="self">Self</span>::<span class="ident">runtime_installation_message</span>(<span class="string">&quot;serde&quot;</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">install_bincode_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="self">Self</span>::<span class="ident">runtimes_not_implemented</span>()
+        <span class="self">Self</span>::<span class="ident">runtime_installation_message</span>(<span class="string">&quot;bincode&quot;</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">install_lcs_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="self">Self</span>::<span class="ident">runtimes_not_implemented</span>()
+        <span class="self">Self</span>::<span class="ident">runtime_installation_message</span>(<span class="string">&quot;libra-canonical-serialization&quot;</span>)
     }
 }
 </pre></div>

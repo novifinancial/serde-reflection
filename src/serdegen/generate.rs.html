@@ -142,6 +142,26 @@
 <span id="142">142</span>
 <span id="143">143</span>
 <span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -152,7 +172,9 @@
 <span class="doccomment">//! cargo run --bin serdegen -- --help</span>
 <span class="doccomment">//! &#39;&#39;&#39;</span>
 
-<span class="kw">use</span> <span class="ident">serde_generate</span>::{<span class="ident">cpp</span>, <span class="ident">golang</span>, <span class="ident">java</span>, <span class="ident">python3</span>, <span class="ident">rust</span>, <span class="ident">CodeGeneratorConfig</span>, <span class="ident">SourceInstaller</span>};
+<span class="kw">use</span> <span class="ident">serde_generate</span>::{
+    <span class="ident">cpp</span>, <span class="ident">golang</span>, <span class="ident">java</span>, <span class="ident">python3</span>, <span class="ident">rust</span>, <span class="ident">CodeGeneratorConfig</span>, <span class="ident">Encoding</span>, <span class="ident">SourceInstaller</span>,
+};
 <span class="kw">use</span> <span class="ident">serde_reflection</span>::<span class="ident">Registry</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">path</span>::<span class="ident">PathBuf</span>;
 <span class="kw">use</span> <span class="ident">structopt</span>::{<span class="ident">clap</span>::<span class="ident">arg_enum</span>, <span class="ident">StructOpt</span>};
@@ -173,7 +195,7 @@
 <span class="kw">enum</span> <span class="ident">Runtime</span> {
     <span class="ident">Serde</span>,
     <span class="ident">Bincode</span>,
-    <span class="ident">LCS</span>,
+    <span class="ident">Lcs</span>,
 }
 }
 
@@ -195,7 +217,8 @@
     <span class="attribute">#[<span class="ident">structopt</span>(<span class="ident">long</span>)]</span>
     <span class="ident">target_source_dir</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
 
-    <span class="doccomment">/// Optional runtimes to install in the `target_source_dir`.</span>
+    <span class="doccomment">/// Optional runtimes to install in the `target_source_dir` (if applicable).</span>
+    <span class="doccomment">/// Also triggers the generation of specialized methods for each runtime.</span>
     <span class="attribute">#[<span class="ident">structopt</span>(<span class="ident">long</span>, <span class="ident">possible_values</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">Runtime</span>::<span class="ident">variants</span>(), <span class="ident">case_insensitive</span> <span class="op">=</span> <span class="bool-val">true</span>)]</span>
     <span class="ident">with_runtimes</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span>,
 
@@ -208,6 +231,25 @@
     <span class="doccomment">/// Optional package name (Python) or module path (Go) where to find Serde runtime dependencies.</span>
     <span class="attribute">#[<span class="ident">structopt</span>(<span class="ident">long</span>)]</span>
     <span class="ident">serde_package_name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+}
+
+<span class="kw">fn</span> <span class="ident">get_codegen_config</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">name</span>: <span class="ident">String</span>, <span class="ident">runtimes</span>: <span class="ident">I</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CodeGeneratorConfig</span>
+<span class="kw">where</span>
+    <span class="ident">I</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Runtime</span><span class="op">&gt;</span>,
+{
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">encodings</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">new</span>();
+    <span class="kw">for</span> <span class="ident">runtime</span> <span class="kw">in</span> <span class="ident">runtimes</span> {
+        <span class="kw">match</span> <span class="ident">runtime</span> {
+            <span class="ident">Runtime</span>::<span class="ident">Bincode</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">encodings</span>.<span class="ident">push</span>(<span class="ident">Encoding</span>::<span class="ident">Bincode</span>);
+            }
+            <span class="ident">Runtime</span>::<span class="ident">Lcs</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">encodings</span>.<span class="ident">push</span>(<span class="ident">Encoding</span>::<span class="ident">Lcs</span>);
+            }
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> (),
+        }
+    }
+    <span class="ident">CodeGeneratorConfig</span>::<span class="ident">new</span>(<span class="ident">name</span>).<span class="ident">with_encodings</span>(<span class="ident">encodings</span>)
 }
 
 <span class="kw">fn</span> <span class="ident">main</span>() {
@@ -228,11 +270,12 @@
             <span class="prelude-val">Some</span>((<span class="ident">registry</span>, <span class="ident">name</span>))
         }
     };
+    <span class="kw">let</span> <span class="ident">runtimes</span>: <span class="ident">std</span>::<span class="ident">collections</span>::<span class="ident">BTreeSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">options</span>.<span class="ident">with_runtimes</span>.<span class="ident">into_iter</span>().<span class="ident">collect</span>();
 
     <span class="kw">match</span> <span class="ident">options</span>.<span class="ident">target_source_dir</span> {
         <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">registry</span>, <span class="ident">name</span>)) <span class="op">=</span> <span class="ident">named_registry_opt</span> {
-                <span class="kw">let</span> <span class="ident">config</span> <span class="op">=</span> <span class="ident">CodeGeneratorConfig</span>::<span class="ident">new</span>(<span class="ident">name</span>);
+                <span class="kw">let</span> <span class="ident">config</span> <span class="op">=</span> <span class="ident">get_codegen_config</span>(<span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">runtimes</span>);
 
                 <span class="kw">let</span> <span class="ident">stdout</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">stdout</span>();
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">out</span> <span class="op">=</span> <span class="ident">stdout</span>.<span class="ident">lock</span>();
@@ -270,18 +313,15 @@
                 };
 
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">registry</span>, <span class="ident">name</span>)) <span class="op">=</span> <span class="ident">named_registry_opt</span> {
-                <span class="kw">let</span> <span class="ident">config</span> <span class="op">=</span> <span class="ident">CodeGeneratorConfig</span>::<span class="ident">new</span>(<span class="ident">name</span>);
+                <span class="kw">let</span> <span class="ident">config</span> <span class="op">=</span> <span class="ident">get_codegen_config</span>(<span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">runtimes</span>);
                 <span class="ident">installer</span>.<span class="ident">install_module</span>(<span class="kw-2">&amp;</span><span class="ident">config</span>, <span class="kw-2">&amp;</span><span class="ident">registry</span>).<span class="ident">unwrap</span>();
             }
-
-            <span class="kw">let</span> <span class="ident">runtimes</span>: <span class="ident">std</span>::<span class="ident">collections</span>::<span class="ident">BTreeSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span>
-                <span class="ident">options</span>.<span class="ident">with_runtimes</span>.<span class="ident">into_iter</span>().<span class="ident">collect</span>();
 
             <span class="kw">for</span> <span class="ident">runtime</span> <span class="kw">in</span> <span class="ident">runtimes</span> {
                 <span class="kw">match</span> <span class="ident">runtime</span> {
                     <span class="ident">Runtime</span>::<span class="ident">Serde</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">installer</span>.<span class="ident">install_serde_runtime</span>().<span class="ident">unwrap</span>(),
                     <span class="ident">Runtime</span>::<span class="ident">Bincode</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">installer</span>.<span class="ident">install_bincode_runtime</span>().<span class="ident">unwrap</span>(),
-                    <span class="ident">Runtime</span>::<span class="ident">LCS</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">installer</span>.<span class="ident">install_lcs_runtime</span>().<span class="ident">unwrap</span>(),
+                    <span class="ident">Runtime</span>::<span class="ident">Lcs</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">installer</span>.<span class="ident">install_lcs_runtime</span>().<span class="ident">unwrap</span>(),
                 }
             }
         }

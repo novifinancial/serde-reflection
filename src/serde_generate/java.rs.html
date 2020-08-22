@@ -906,6 +906,62 @@
 <span id="906">906</span>
 <span id="907">907</span>
 <span id="908">908</span>
+<span id="909">909</span>
+<span id="910">910</span>
+<span id="911">911</span>
+<span id="912">912</span>
+<span id="913">913</span>
+<span id="914">914</span>
+<span id="915">915</span>
+<span id="916">916</span>
+<span id="917">917</span>
+<span id="918">918</span>
+<span id="919">919</span>
+<span id="920">920</span>
+<span id="921">921</span>
+<span id="922">922</span>
+<span id="923">923</span>
+<span id="924">924</span>
+<span id="925">925</span>
+<span id="926">926</span>
+<span id="927">927</span>
+<span id="928">928</span>
+<span id="929">929</span>
+<span id="930">930</span>
+<span id="931">931</span>
+<span id="932">932</span>
+<span id="933">933</span>
+<span id="934">934</span>
+<span id="935">935</span>
+<span id="936">936</span>
+<span id="937">937</span>
+<span id="938">938</span>
+<span id="939">939</span>
+<span id="940">940</span>
+<span id="941">941</span>
+<span id="942">942</span>
+<span id="943">943</span>
+<span id="944">944</span>
+<span id="945">945</span>
+<span id="946">946</span>
+<span id="947">947</span>
+<span id="948">948</span>
+<span id="949">949</span>
+<span id="950">950</span>
+<span id="951">951</span>
+<span id="952">952</span>
+<span id="953">953</span>
+<span id="954">954</span>
+<span id="955">955</span>
+<span id="956">956</span>
+<span id="957">957</span>
+<span id="958">958</span>
+<span id="959">959</span>
+<span id="960">960</span>
+<span id="961">961</span>
+<span id="962">962</span>
+<span id="963">963</span>
+<span id="964">964</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -913,8 +969,9 @@
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">common</span>,
     <span class="ident">indent</span>::{<span class="ident">IndentConfig</span>, <span class="ident">IndentedWriter</span>},
-    <span class="ident">CodeGeneratorConfig</span>,
+    <span class="ident">CodeGeneratorConfig</span>, <span class="ident">Encoding</span>,
 };
+<span class="kw">use</span> <span class="ident">heck</span>::<span class="ident">CamelCase</span>;
 <span class="kw">use</span> <span class="ident">include_dir</span>::<span class="ident">include_dir</span> <span class="kw">as</span> <span class="ident">include_directory</span>;
 <span class="kw">use</span> <span class="ident">serde_reflection</span>::{<span class="ident">ContainerFormat</span>, <span class="ident">Format</span>, <span class="ident">FormatHolder</span>, <span class="ident">Named</span>, <span class="ident">Registry</span>, <span class="ident">VariantFormat</span>};
 <span class="kw">use</span> <span class="ident">std</span>::{
@@ -1498,8 +1555,8 @@ return obj;
         <span class="ident">fields</span>: <span class="kw-2">&amp;</span>[<span class="ident">Named</span><span class="op">&lt;</span><span class="ident">Format</span><span class="op">&gt;</span>],
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="comment">// Beginning of class</span>
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">base</span>) <span class="op">=</span> <span class="ident">variant_base</span> {
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">output_comment</span>(<span class="ident">name</span>)<span class="question-mark">?</span>;
             <span class="macro">writeln</span><span class="macro">!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
@@ -1544,12 +1601,12 @@ return obj;
             <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;this.{} = {};&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>)<span class="question-mark">?</span>;
         }
         <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
         <span class="comment">// Serialize</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">serialization</span> {
             <span class="macro">writeln</span><span class="macro">!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
-                <span class="string">&quot;public void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception {{&quot;</span>,
+                <span class="string">&quot;\npublic void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception {{&quot;</span>,
             )<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">index</span>) <span class="op">=</span> <span class="ident">variant_index</span> {
@@ -1563,20 +1620,26 @@ return obj;
                 )<span class="question-mark">?</span>;
             }
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
+
+            <span class="kw">if</span> <span class="ident">variant_index</span>.<span class="ident">is_none</span>() {
+                <span class="kw">for</span> <span class="ident">encoding</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">encodings</span> {
+                    <span class="self">self</span>.<span class="ident">output_class_serialize_for_encoding</span>(<span class="kw-2">*</span><span class="ident">encoding</span>)<span class="question-mark">?</span>;
+                }
+            }
         }
         <span class="comment">// Deserialize (struct) or Load (variant)</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">serialization</span> {
             <span class="kw">if</span> <span class="ident">variant_index</span>.<span class="ident">is_none</span>() {
                 <span class="macro">writeln</span><span class="macro">!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
-                    <span class="string">&quot;public static {} deserialize(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{&quot;</span>,
+                    <span class="string">&quot;\npublic static {} deserialize(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{&quot;</span>,
                     <span class="ident">name</span>,
                 )<span class="question-mark">?</span>;
             } <span class="kw">else</span> {
                 <span class="macro">writeln</span><span class="macro">!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
-                    <span class="string">&quot;static {} load(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{&quot;</span>,
+                    <span class="string">&quot;\nstatic {} load(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{&quot;</span>,
                     <span class="ident">name</span>,
                 )<span class="question-mark">?</span>;
             }
@@ -1592,10 +1655,16 @@ return obj;
             }
             <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;return builder.build();&quot;</span>)<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
+
+            <span class="kw">if</span> <span class="ident">variant_index</span>.<span class="ident">is_none</span>() {
+                <span class="kw">for</span> <span class="ident">encoding</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">encodings</span> {
+                    <span class="self">self</span>.<span class="ident">output_class_deserialize_for_encoding</span>(<span class="ident">name</span>, <span class="kw-2">*</span><span class="ident">encoding</span>)<span class="question-mark">?</span>;
+                }
+            }
         }
         <span class="comment">// Equality</span>
-        <span class="macro">write</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;public boolean equals(Object obj) {{&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">write</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\npublic boolean equals(Object obj) {{&quot;</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
         <span class="macro">writeln</span><span class="macro">!</span>(
             <span class="self">self</span>.<span class="ident">out</span>,
@@ -1615,9 +1684,9 @@ if (getClass() != obj.getClass()) return false;
         }
         <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;return true;&quot;</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
         <span class="comment">// Hashing</span>
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;public int hashCode() {{&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\npublic int hashCode() {{&quot;</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
         <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;int value = 7;&quot;</span>,)<span class="question-mark">?</span>;
         <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
@@ -1683,6 +1752,7 @@ if (getClass() != obj.getClass()) return false;
         <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
         <span class="ident">variants</span>: <span class="kw-2">&amp;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Named</span><span class="op">&lt;</span><span class="ident">VariantFormat</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">output_comment</span>(<span class="ident">name</span>)<span class="question-mark">?</span>;
         <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;public abstract class {} {{&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">reserved_names</span> <span class="op">=</span> <span class="ident">variants</span>
@@ -1693,11 +1763,11 @@ if (getClass() != obj.getClass()) return false;
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">serialization</span> {
             <span class="macro">writeln</span><span class="macro">!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
-                <span class="string">&quot;abstract public void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception;\n&quot;</span>
+                <span class="string">&quot;\nabstract public void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception;&quot;</span>
             )<span class="question-mark">?</span>;
             <span class="macro">write</span><span class="macro">!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
-                <span class="string">&quot;public static {} deserialize(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{&quot;</span>,
+                <span class="string">&quot;\npublic static {} deserialize(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{&quot;</span>,
                 <span class="ident">name</span>
             )<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
@@ -1724,10 +1794,52 @@ switch (index) {{&quot;#</span>,
             <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
             <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
+
+            <span class="kw">for</span> <span class="ident">encoding</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">encodings</span> {
+                <span class="self">self</span>.<span class="ident">output_class_serialize_for_encoding</span>(<span class="kw-2">*</span><span class="ident">encoding</span>)<span class="question-mark">?</span>;
+                <span class="self">self</span>.<span class="ident">output_class_deserialize_for_encoding</span>(<span class="ident">name</span>, <span class="kw-2">*</span><span class="ident">encoding</span>)<span class="question-mark">?</span>;
+            }
         }
+
         <span class="self">self</span>.<span class="ident">output_variants</span>(<span class="ident">name</span>, <span class="ident">variants</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">leave_class</span>(<span class="kw-2">&amp;</span><span class="ident">reserved_names</span>);
         <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">output_class_serialize_for_encoding</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">encoding</span>: <span class="ident">Encoding</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="self">self</span>.<span class="ident">out</span>,
+            <span class="string">r#&quot;
+public byte[] {0}Serialize() throws java.lang.Exception {{
+    com.facebook.serde.Serializer serializer = new com.facebook.{0}.{1}Serializer();
+    serialize(serializer);
+    return serializer.get_bytes();
+}}&quot;#</span>,
+            <span class="ident">encoding</span>.<span class="ident">name</span>(),
+            <span class="ident">encoding</span>.<span class="ident">name</span>().<span class="ident">to_camel_case</span>()
+        )
+    }
+
+    <span class="kw">fn</span> <span class="ident">output_class_deserialize_for_encoding</span>(
+        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+        <span class="ident">encoding</span>: <span class="ident">Encoding</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="self">self</span>.<span class="ident">out</span>,
+            <span class="string">r#&quot;
+public static {0} {1}Deserialize(byte[] input) throws java.lang.Exception {{
+    com.facebook.serde.Deserializer deserializer = new com.facebook.{1}.{2}Deserializer(input);
+    {0} value = deserialize(deserializer);
+    if (deserializer.get_buffer_offset() &lt; input.length) {{
+         throw new Exception(&quot;Some input bytes were not read&quot;);
+    }}
+    return value;
+}}&quot;#</span>,
+            <span class="ident">name</span>,
+            <span class="ident">encoding</span>.<span class="ident">name</span>(),
+            <span class="ident">encoding</span>.<span class="ident">name</span>().<span class="ident">to_camel_case</span>()
+        )
     }
 
     <span class="kw">fn</span> <span class="ident">output_container</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">ContainerFormat</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
