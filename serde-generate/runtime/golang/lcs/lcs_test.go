@@ -720,3 +720,25 @@ func TestGetBufferOffset(t *testing.T) {
 	d.DeserializeU64()
 	assert.Equal(t, uint64(8), d.GetBufferOffset())
 }
+
+func TestCheckThatKeySlicesAreIncreasing(t *testing.T) {
+	d := lcs.NewDeserializer([]byte{0, 1, 2, 0, 2})
+	// Offsets are taken from the input bytes.
+	d.DeserializeU32()
+	require.NoError(t, d.CheckThatKeySlicesAreIncreasing(serde.Slice{0, 3}, serde.Slice{3, 5}))
+	require.Error(t, d.CheckThatKeySlicesAreIncreasing(serde.Slice{0, 3}, serde.Slice{0, 3}))
+	require.Error(t, d.CheckThatKeySlicesAreIncreasing(serde.Slice{1, 3}, serde.Slice{3, 5}))
+}
+
+func TestSortMapEntries(t *testing.T) {
+	s := lcs.NewSerializer()
+	s.SerializeU8(255)
+	s.SerializeU32(1)
+	s.SerializeU32(1)
+	s.SerializeU32(2)
+	assert.Equal(t, s.GetBytes(), []byte{255 /**/, 1 /**/, 0, 0 /**/, 0, 1, 0 /**/, 0 /**/, 0 /**/, 2, 0, 0, 0})
+
+	offsets := []uint64{1, 2, 4, 7, 8, 9}
+	s.SortMapEntries(offsets)
+	assert.Equal(t, s.GetBytes(), []byte{255 /**/, 0 /**/, 0 /**/, 0, 0 /**/, 0, 1, 0 /**/, 1 /**/, 2, 0, 0, 0})
+}

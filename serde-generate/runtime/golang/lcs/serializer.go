@@ -6,6 +6,7 @@ package lcs
 import (
 	"bytes"
 	"errors"
+	"sort"
 
 	"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/serde"
 )
@@ -144,9 +145,29 @@ func (s *Serializer) GetBufferOffset() uint64 {
 	return uint64(s.buf.Len())
 }
 
-// SortMapEntries is unimplemented.
 func (s *Serializer) SortMapEntries(offsets []uint64) {
-	panic("unimplemented")
+	if len(offsets) <= 1 {
+		return
+	}
+	data := s.GetBytes()
+	slices := make([]serde.Slice, len(offsets))
+	for i, v := range offsets {
+		var w uint64
+		if i + 1 < len(offsets) {
+			w = offsets[i+1]
+		} else {
+			w = uint64(len(data))
+		}
+		slices[i] = serde.Slice{Start: v, End: w}
+	}
+	entries := map_entries{data, slices}
+	sort.Sort(entries)
+	buffer := make([]byte, len(data)-int(offsets[0]))
+	current := buffer[0:0]
+	for _, slice := range entries.slices {
+		current = append(current, data[slice.Start:slice.End]...)
+	}
+	copy(data[offsets[0]:], current)
 }
 
 func (s *Serializer) serializeU32AsUleb128(value uint32) {
@@ -157,3 +178,18 @@ func (s *Serializer) serializeU32AsUleb128(value uint32) {
 	}
 	_ = s.buf.WriteByte(byte(value))
 }
+
+type map_entries struct {
+	data   []byte
+	slices []serde.Slice
+}
+
+func (a map_entries) Len() int { return len(a.slices) }
+
+func (a map_entries) Less(i, j int) bool {
+	slice_i := a.data[a.slices[i].Start:a.slices[i].End]
+	slice_j := a.data[a.slices[j].Start:a.slices[j].End]
+	return bytes.Compare(slice_i, slice_j) < 0
+}
+
+func (a map_entries) Swap(i, j int) { a.slices[i], a.slices[j] = a.slices[j], a.slices[i] }
