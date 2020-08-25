@@ -108,6 +108,13 @@ fn test_that_golang_code_compiles_with_lcs() {
 }
 
 #[test]
+fn test_that_golang_code_compiles_with_bincode() {
+    let config =
+        CodeGeneratorConfig::new("main".to_string()).with_encodings(vec![Encoding::Bincode]);
+    test_that_golang_code_compiles_with_config(&config);
+}
+
+#[test]
 fn test_that_golang_code_compiles_with_comments() {
     let comments = vec![
         (
