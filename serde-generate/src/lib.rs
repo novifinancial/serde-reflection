@@ -12,8 +12,6 @@
 //! * Java 8
 //! * Python 3
 //! * Rust 2018
-//!
-//! In progress:
 //! * Go >= 1.13
 //!
 //! ## Supported Encodings
