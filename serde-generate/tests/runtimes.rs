@@ -808,3 +808,97 @@ func main() {{
         .unwrap();
     assert!(status.success());
 }
+
+#[test]
+fn test_golang_lcs_runtime_on_supported_types() {
+    test_golang_runtime_on_supported_types(Runtime::Lcs);
+}
+
+fn test_golang_runtime_on_supported_types(runtime: Runtime) {
+    let registry = test_utils::get_registry().unwrap();
+    let dir = tempdir().unwrap();
+    let source_path = dir.path().join("test.go");
+    let mut source = File::create(&source_path).unwrap();
+
+    let config = CodeGeneratorConfig::new("main".to_string())
+        .with_encodings(vec![runtime.into()])
+        .with_external_definitions(
+            vec![("github.com/google/go-cmp/cmp".to_string(), vec![])]
+                .into_iter()
+                .collect(),
+        );
+    let generator = golang::CodeGenerator::new(&config);
+    generator.output(&mut source, &registry).unwrap();
+
+    let values = test_utils::get_sample_values();
+    let encodings = values
+        .iter()
+        .map(|v| {
+            let bytes = runtime.serialize(&v);
+            format!(
+                "{{{}}}",
+                bytes
+                    .iter()
+                    .map(|x| format!("{}", x))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            )
+        })
+        .collect::<Vec<_>>()
+        .join(", ");
+
+    writeln!(
+        source,
+        r#"
+func main() {{
+	inputs := [][]byte{{{0}}}
+
+	for _, input := range(inputs) {{
+		test, err := {1}DeserializeSerdeData(input)
+		if err != nil {{ panic(fmt.Sprintf("failed to deserialize: %v", err)) }}
+		output, err := test.{1}Serialize()
+		if err != nil {{ panic(fmt.Sprintf("failed to serialize: %v", err)) }}
+		if !cmp.Equal(input, output) {{ panic(fmt.Sprintf("input != output:\n  %v\n  %v", input, output)) }}
+	}}
+}}
+"#,
+        encodings,
+        runtime.name().to_camel_case(),
+    )
+    .unwrap();
+
+    let status = Command::new("go")
+        .current_dir(dir.path())
+        .arg("mod")
+        .arg("init")
+        .arg("testing")
+        .status()
+        .unwrap();
+    assert!(status.success());
+
+    let runtime_mod_path = std::env::current_exe()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .join("../../../serde-generate/runtime/golang");
+    let status = Command::new("go")
+        .current_dir(dir.path())
+        .arg("mod")
+        .arg("edit")
+        .arg("-replace")
+        .arg(format!(
+            "github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang={}",
+            runtime_mod_path.to_str().unwrap()
+        ))
+        .status()
+        .unwrap();
+    assert!(status.success());
+
+    let status = Command::new("go")
+        .current_dir(dir.path())
+        .arg("run")
+        .arg(source_path)
+        .status()
+        .unwrap();
+    assert!(status.success());
+}

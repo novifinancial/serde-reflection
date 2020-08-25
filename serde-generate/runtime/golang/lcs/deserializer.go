@@ -18,16 +18,14 @@ const maxUint32 = uint64(^uint32(0))
 
 // Deserializer implements `serde.Deserializer` interface for deserializing LCS serialized bytes.
 type Deserializer struct {
-	initial_size uint64
 	buf *bytes.Buffer
+	// Underlying bytes in `buf`.
+	input []byte
 }
 
 // NewDeserializer creates a new `serde.Deserializer`.
 func NewDeserializer(input []byte) serde.Deserializer {
-	return &Deserializer{
-		initial_size: uint64(len(input)),
-		buf: bytes.NewBuffer(input),
-	}
+	return &Deserializer{buf: bytes.NewBuffer(input), input: input}
 }
 
 func (d *Deserializer) DeserializeBytes() ([]byte, error) {
@@ -181,12 +179,14 @@ func (d *Deserializer) DeserializeOptionTag() (bool, error) {
 }
 
 func (d *Deserializer) GetBufferOffset() uint64 {
-	return d.initial_size - uint64(d.buf.Len())
+	return uint64(len(d.input)) - uint64(d.buf.Len())
 }
 
-// CheckThatKeySlicesAreIncreasing is unimplemented.
 func (d *Deserializer) CheckThatKeySlicesAreIncreasing(key1, key2 serde.Slice) error {
-	panic("unimplemented")
+	if bytes.Compare(d.input[key1.Start:key1.End], d.input[key2.Start:key2.End]) >= 0 {
+		return errors.New("Error while decoding map: keys are not serialized in the expected order")
+	}
+	return nil
 }
 
 func (d *Deserializer) deserializeUleb128AsU32() (uint32, error) {
