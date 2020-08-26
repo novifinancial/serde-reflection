@@ -26,7 +26,7 @@ struct uint128_t {
 };
 
 inline bool operator==(const uint128_t &lhs, const uint128_t &rhs) {
-    return lhs.high == rhs.high && lhs.low == lhs.low;
+    return lhs.high == rhs.high && lhs.low == rhs.low;
 }
 
 // 128-bit signed integers.
@@ -38,7 +38,7 @@ struct int128_t {
 };
 
 inline bool operator==(const int128_t &lhs, const int128_t &rhs) {
-    return lhs.high == rhs.high && lhs.low == lhs.low;
+    return lhs.high == rhs.high && lhs.low == rhs.low;
 }
 
 // Trait to enable serialization of values of type T.
