@@ -1,11 +1,11 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-package com.facebook.lcs;
+package com.novi.lcs;
 
 import java.lang.Exception;
-import com.facebook.serde.Slice;
-import com.facebook.serde.BinaryDeserializer;
+import com.novi.serde.Slice;
+import com.novi.serde.BinaryDeserializer;
 
 public class LcsDeserializer extends BinaryDeserializer {
     public LcsDeserializer(byte[] input) {

@@ -495,8 +495,8 @@ fn test_java_runtime_on_simple_data(runtime: Runtime) {
         r#"
 import java.util.List;
 import java.util.Arrays;
-import com.facebook.serde.Unsigned;
-import com.facebook.serde.Tuple2;
+import com.novi.serde.Unsigned;
+import com.novi.serde.Tuple2;
 import testing.Choice;
 import testing.Test;
 
@@ -537,10 +537,8 @@ public class Main {{
     .unwrap();
 
     let paths = std::iter::empty()
-        .chain(std::fs::read_dir("runtime/java/com/facebook/serde").unwrap())
-        .chain(
-            std::fs::read_dir("runtime/java/com/facebook/".to_string() + runtime.name()).unwrap(),
-        )
+        .chain(std::fs::read_dir("runtime/java/com/novi/serde").unwrap())
+        .chain(std::fs::read_dir("runtime/java/com/novi/".to_string() + runtime.name()).unwrap())
         .chain(std::fs::read_dir(dir.path().join("testing")).unwrap())
         .map(|e| e.unwrap().path());
     let status = Command::new("javac")
@@ -617,8 +615,8 @@ fn test_java_runtime_on_supported_types(runtime: Runtime) {
         r#"
 import java.util.List;
 import java.util.Arrays;
-import com.facebook.serde.Unsigned;
-import com.facebook.serde.Tuple2;
+import com.novi.serde.Unsigned;
+import com.novi.serde.Tuple2;
 import testing.SerdeData;
 
 public class Main {{
@@ -641,10 +639,8 @@ public class Main {{
     .unwrap();
 
     let paths = std::iter::empty()
-        .chain(std::fs::read_dir("runtime/java/com/facebook/serde").unwrap())
-        .chain(
-            std::fs::read_dir("runtime/java/com/facebook/".to_string() + runtime.name()).unwrap(),
-        )
+        .chain(std::fs::read_dir("runtime/java/com/novi/serde").unwrap())
+        .chain(std::fs::read_dir("runtime/java/com/novi/".to_string() + runtime.name()).unwrap())
         .chain(std::fs::read_dir(dir.path().join("testing")).unwrap())
         .map(|e| e.unwrap().path());
     let status = Command::new("javac")
@@ -681,8 +677,8 @@ public class Main {{
 fn test_java_lcs_runtime_autotest() {
     let dir = tempdir().unwrap();
     let paths = std::iter::empty()
-        .chain(std::fs::read_dir("runtime/java/com/facebook/serde").unwrap())
-        .chain(std::fs::read_dir("runtime/java/com/facebook/lcs").unwrap())
+        .chain(std::fs::read_dir("runtime/java/com/novi/serde").unwrap())
+        .chain(std::fs::read_dir("runtime/java/com/novi/lcs").unwrap())
         .map(|e| e.unwrap().path());
     let status = Command::new("javac")
         .arg("-Xlint")
@@ -697,7 +693,7 @@ fn test_java_lcs_runtime_autotest() {
         .arg("-enableassertions")
         .arg("-cp")
         .arg(dir.path())
-        .arg("com.facebook.lcs.LcsTest")
+        .arg("com.novi.lcs.LcsTest")
         .status()
         .unwrap();
     assert!(status.success());

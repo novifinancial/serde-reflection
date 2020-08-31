@@ -19,7 +19,7 @@ use std::{
 pub struct CodeGenerator<'a> {
     /// Language-independent configuration.
     config: &'a CodeGeneratorConfig,
-    /// Mapping from external type names to fully-qualified class names (e.g. "MyClass" -> "com.facebook.my_package.MyClass").
+    /// Mapping from external type names to fully-qualified class names (e.g. "MyClass" -> "com.my_org.my_package.MyClass").
     /// Derived from `config.external_definitions`.
     external_qualified_names: HashMap<String, String>,
 }
@@ -30,7 +30,7 @@ struct JavaEmitter<'a, T> {
     out: IndentedWriter<T>,
     /// Generator.
     generator: &'a CodeGenerator<'a>,
-    /// Current namespace (e.g. vec!["com", "facebook", "my_package", "MyClass"])
+    /// Current namespace (e.g. vec!["com", "my_org", "my_package", "MyClass"])
     current_namespace: Vec<String>,
     /// Current (non-qualified) generated class names that could clash with names in the registry
     /// (e.g. "Builder" or variant classes).
@@ -178,23 +178,23 @@ where
         use Format::*;
         match format {
             TypeName(x) => self.quote_qualified_name(x),
-            Unit => "com.facebook.serde.Unit".into(),
+            Unit => "com.novi.serde.Unit".into(),
             Bool => "Boolean".into(),
             I8 => "Byte".into(),
             I16 => "Short".into(),
             I32 => "Integer".into(),
             I64 => "Long".into(),
-            I128 => "@com.facebook.serde.Int128 BigInteger".into(),
-            U8 => "@com.facebook.serde.Unsigned Byte".into(),
-            U16 => "@com.facebook.serde.Unsigned Short".into(),
-            U32 => "@com.facebook.serde.Unsigned Integer".into(),
-            U64 => "@com.facebook.serde.Unsigned Long".into(),
-            U128 => "@com.facebook.serde.Unsigned @com.facebook.serde.Int128 BigInteger".into(),
+            I128 => "@com.novi.serde.Int128 BigInteger".into(),
+            U8 => "@com.novi.serde.Unsigned Byte".into(),
+            U16 => "@com.novi.serde.Unsigned Short".into(),
+            U32 => "@com.novi.serde.Unsigned Integer".into(),
+            U64 => "@com.novi.serde.Unsigned Long".into(),
+            U128 => "@com.novi.serde.Unsigned @com.novi.serde.Int128 BigInteger".into(),
             F32 => "Float".into(),
             F64 => "Double".into(),
             Char => "Character".into(),
             Str => "String".into(),
-            Bytes => "com.facebook.serde.Bytes".into(),
+            Bytes => "com.novi.serde.Bytes".into(),
 
             Option(format) => format!("java.util.Optional<{}>", self.quote_type(format)),
             Seq(format) => format!("java.util.List<{}>", self.quote_type(format)),
@@ -204,12 +204,12 @@ where
                 self.quote_type(value)
             ),
             Tuple(formats) => format!(
-                "com.facebook.serde.Tuple{}<{}>",
+                "com.novi.serde.Tuple{}<{}>",
                 formats.len(),
                 self.quote_types(formats)
             ),
             TupleArray { content, size } => format!(
-                "{} @com.facebook.serde.ArrayLen(length={}) []",
+                "{} @com.novi.serde.ArrayLen(length={}) []",
                 self.quote_type(content),
                 size
             ),
@@ -347,7 +347,7 @@ where
 
         write!(
             self.out,
-            "static void serialize_{}({} value, com.facebook.serde.Serializer serializer) throws java.lang.Exception {{",
+            "static void serialize_{}({} value, com.novi.serde.Serializer serializer) throws java.lang.Exception {{",
             name,
             self.quote_type(format0)
         )?;
@@ -437,7 +437,7 @@ for ({} item : value) {{
 
         write!(
         self.out,
-        "static {} deserialize_{}(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{",
+        "static {} deserialize_{}(com.novi.serde.Deserializer deserializer) throws java.lang.Exception {{",
         self.quote_type(format0),
         name,
     )?;
@@ -488,8 +488,8 @@ for (long i = 0; i < length; i++) {{
     int key_end = deserializer.get_buffer_offset();
     if (i > 0) {{
         deserializer.check_that_key_slices_are_increasing(
-            new com.facebook.serde.Slice(previous_key_start, previous_key_end),
-            new com.facebook.serde.Slice(key_start, key_end));
+            new com.novi.serde.Slice(previous_key_start, previous_key_end),
+            new com.novi.serde.Slice(key_start, key_end));
     }}
     previous_key_start = key_start;
     previous_key_end = key_end;
@@ -641,7 +641,7 @@ return obj;
         if self.generator.config.serialization {
             writeln!(
                 self.out,
-                "\npublic void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception {{",
+                "\npublic void serialize(com.novi.serde.Serializer serializer) throws java.lang.Exception {{",
             )?;
             self.out.indent();
             if let Some(index) = variant_index {
@@ -668,13 +668,13 @@ return obj;
             if variant_index.is_none() {
                 writeln!(
                     self.out,
-                    "\npublic static {} deserialize(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{",
+                    "\npublic static {} deserialize(com.novi.serde.Deserializer deserializer) throws java.lang.Exception {{",
                     name,
                 )?;
             } else {
                 writeln!(
                     self.out,
-                    "\nstatic {} load(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{",
+                    "\nstatic {} load(com.novi.serde.Deserializer deserializer) throws java.lang.Exception {{",
                     name,
                 )?;
             }
@@ -798,11 +798,11 @@ if (getClass() != obj.getClass()) return false;
         if self.generator.config.serialization {
             writeln!(
                 self.out,
-                "\nabstract public void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception;"
+                "\nabstract public void serialize(com.novi.serde.Serializer serializer) throws java.lang.Exception;"
             )?;
             write!(
                 self.out,
-                "\npublic static {} deserialize(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{",
+                "\npublic static {} deserialize(com.novi.serde.Deserializer deserializer) throws java.lang.Exception {{",
                 name
             )?;
             self.out.indent();
@@ -846,7 +846,7 @@ switch (index) {{"#,
             self.out,
             r#"
 public byte[] {0}Serialize() throws java.lang.Exception {{
-    com.facebook.serde.Serializer serializer = new com.facebook.{0}.{1}Serializer();
+    com.novi.serde.Serializer serializer = new com.novi.{0}.{1}Serializer();
     serialize(serializer);
     return serializer.get_bytes();
 }}"#,
@@ -864,7 +864,7 @@ public byte[] {0}Serialize() throws java.lang.Exception {{
             self.out,
             r#"
 public static {0} {1}Deserialize(byte[] input) throws java.lang.Exception {{
-    com.facebook.serde.Deserializer deserializer = new com.facebook.{1}.{2}Deserializer(input);
+    com.novi.serde.Deserializer deserializer = new com.novi.{1}.{2}Deserializer(input);
     {0} value = deserialize(deserializer);
     if (deserializer.get_buffer_offset() < input.length) {{
          throw new Exception("Some input bytes were not read");
@@ -943,22 +943,22 @@ impl crate::SourceInstaller for Installer {
 
     fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {
         self.install_runtime(
-            include_directory!("runtime/java/com/facebook/serde"),
-            "com/facebook/serde",
+            include_directory!("runtime/java/com/novi/serde"),
+            "com/novi/serde",
         )
     }
 
     fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error> {
         self.install_runtime(
-            include_directory!("runtime/java/com/facebook/bincode"),
-            "com/facebook/bincode",
+            include_directory!("runtime/java/com/novi/bincode"),
+            "com/novi/bincode",
         )
     }
 
     fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
         self.install_runtime(
-            include_directory!("runtime/java/com/facebook/lcs"),
-            "com/facebook/lcs",
+            include_directory!("runtime/java/com/novi/lcs"),
+            "com/novi/lcs",
         )
     }
 }

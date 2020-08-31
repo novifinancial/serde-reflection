@@ -21,7 +21,7 @@ pub struct CodeGenerator<'a> {
     /// Module path where to find the serde runtime packages (serde, lcs, bincode).
     /// Default: "github.com/novifinancial/serde-reflection/serde-generate/runtime/golang".
     serde_module_path: String,
-    /// Mapping from external type names to fully-qualified class names (e.g. "MyClass" -> "com.facebook.my_package.MyClass").
+    /// Mapping from external type names to fully-qualified class names (e.g. "MyClass" -> "com.my_org.my_package.MyClass").
     /// Derived from `config.external_definitions`.
     external_qualified_names: HashMap<String, String>,
 }
@@ -32,7 +32,7 @@ struct GoEmitter<'a, T> {
     out: IndentedWriter<T>,
     /// Generator.
     generator: &'a CodeGenerator<'a>,
-    /// Current namespace (e.g. vec!["com", "facebook", "my_package", "MyClass"])
+    /// Current namespace (e.g. vec!["com", "my_org", "my_package", "MyClass"])
     current_namespace: Vec<String>,
 }
 
