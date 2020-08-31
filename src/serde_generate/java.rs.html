@@ -984,7 +984,7 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CodeGenerator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Language-independent configuration.</span>
     <span class="ident">config</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">CodeGeneratorConfig</span>,
-    <span class="doccomment">/// Mapping from external type names to fully-qualified class names (e.g. &quot;MyClass&quot; -&gt; &quot;com.facebook.my_package.MyClass&quot;).</span>
+    <span class="doccomment">/// Mapping from external type names to fully-qualified class names (e.g. &quot;MyClass&quot; -&gt; &quot;com.my_org.my_package.MyClass&quot;).</span>
     <span class="doccomment">/// Derived from `config.external_definitions`.</span>
     <span class="ident">external_qualified_names</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">String</span><span class="op">&gt;</span>,
 }
@@ -995,7 +995,7 @@
     <span class="ident">out</span>: <span class="ident">IndentedWriter</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Generator.</span>
     <span class="ident">generator</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">CodeGenerator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
-    <span class="doccomment">/// Current namespace (e.g. vec![&quot;com&quot;, &quot;facebook&quot;, &quot;my_package&quot;, &quot;MyClass&quot;])</span>
+    <span class="doccomment">/// Current namespace (e.g. vec![&quot;com&quot;, &quot;my_org&quot;, &quot;my_package&quot;, &quot;MyClass&quot;])</span>
     <span class="ident">current_namespace</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Current (non-qualified) generated class names that could clash with names in the registry</span>
     <span class="doccomment">/// (e.g. &quot;Builder&quot; or variant classes).</span>
@@ -1143,23 +1143,23 @@
         <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
         <span class="kw">match</span> <span class="ident">format</span> {
             <span class="ident">TypeName</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">quote_qualified_name</span>(<span class="ident">x</span>),
-            <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;com.facebook.serde.Unit&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;com.novi.serde.Unit&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">Bool</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Boolean&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">I8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Byte&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">I16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Short&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">I32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Integer&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">I64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Long&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">I128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@com.facebook.serde.Int128 BigInteger&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">U8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@com.facebook.serde.Unsigned Byte&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">U16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@com.facebook.serde.Unsigned Short&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">U32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@com.facebook.serde.Unsigned Integer&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">U64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@com.facebook.serde.Unsigned Long&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">U128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@com.facebook.serde.Unsigned @com.facebook.serde.Int128 BigInteger&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">I128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@com.novi.serde.Int128 BigInteger&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">U8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@com.novi.serde.Unsigned Byte&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">U16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@com.novi.serde.Unsigned Short&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">U32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@com.novi.serde.Unsigned Integer&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">U64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@com.novi.serde.Unsigned Long&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">U128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;@com.novi.serde.Unsigned @com.novi.serde.Int128 BigInteger&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">F32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Float&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">F64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Double&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">Char</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Character&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">Str</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;String&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">Bytes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;com.facebook.serde.Bytes&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">Bytes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;com.novi.serde.Bytes&quot;</span>.<span class="ident">into</span>(),
 
             <span class="prelude-ty">Option</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;java.util.Optional&lt;{}&gt;&quot;</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format</span>)),
             <span class="ident">Seq</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;java.util.List&lt;{}&gt;&quot;</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format</span>)),
@@ -1169,12 +1169,12 @@
                 <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">value</span>)
             ),
             <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
-                <span class="string">&quot;com.facebook.serde.Tuple{}&lt;{}&gt;&quot;</span>,
+                <span class="string">&quot;com.novi.serde.Tuple{}&lt;{}&gt;&quot;</span>,
                 <span class="ident">formats</span>.<span class="ident">len</span>(),
                 <span class="self">self</span>.<span class="ident">quote_types</span>(<span class="ident">formats</span>)
             ),
             <span class="ident">TupleArray</span> { <span class="ident">content</span>, <span class="ident">size</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
-                <span class="string">&quot;{} @com.facebook.serde.ArrayLen(length={}) []&quot;</span>,
+                <span class="string">&quot;{} @com.novi.serde.ArrayLen(length={}) []&quot;</span>,
                 <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">content</span>),
                 <span class="ident">size</span>
             ),
@@ -1312,7 +1312,7 @@
 
         <span class="macro">write</span><span class="macro">!</span>(
             <span class="self">self</span>.<span class="ident">out</span>,
-            <span class="string">&quot;static void serialize_{}({} value, com.facebook.serde.Serializer serializer) throws java.lang.Exception {{&quot;</span>,
+            <span class="string">&quot;static void serialize_{}({} value, com.novi.serde.Serializer serializer) throws java.lang.Exception {{&quot;</span>,
             <span class="ident">name</span>,
             <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format0</span>)
         )<span class="question-mark">?</span>;
@@ -1402,7 +1402,7 @@ for ({} item : value) {{
 
         <span class="macro">write</span><span class="macro">!</span>(
         <span class="self">self</span>.<span class="ident">out</span>,
-        <span class="string">&quot;static {} deserialize_{}(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{&quot;</span>,
+        <span class="string">&quot;static {} deserialize_{}(com.novi.serde.Deserializer deserializer) throws java.lang.Exception {{&quot;</span>,
         <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format0</span>),
         <span class="ident">name</span>,
     )<span class="question-mark">?</span>;
@@ -1453,8 +1453,8 @@ for (long i = 0; i &lt; length; i++) {{
     int key_end = deserializer.get_buffer_offset();
     if (i &gt; 0) {{
         deserializer.check_that_key_slices_are_increasing(
-            new com.facebook.serde.Slice(previous_key_start, previous_key_end),
-            new com.facebook.serde.Slice(key_start, key_end));
+            new com.novi.serde.Slice(previous_key_start, previous_key_end),
+            new com.novi.serde.Slice(key_start, key_end));
     }}
     previous_key_start = key_start;
     previous_key_end = key_end;
@@ -1606,7 +1606,7 @@ return obj;
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">serialization</span> {
             <span class="macro">writeln</span><span class="macro">!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
-                <span class="string">&quot;\npublic void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception {{&quot;</span>,
+                <span class="string">&quot;\npublic void serialize(com.novi.serde.Serializer serializer) throws java.lang.Exception {{&quot;</span>,
             )<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">index</span>) <span class="op">=</span> <span class="ident">variant_index</span> {
@@ -1633,13 +1633,13 @@ return obj;
             <span class="kw">if</span> <span class="ident">variant_index</span>.<span class="ident">is_none</span>() {
                 <span class="macro">writeln</span><span class="macro">!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
-                    <span class="string">&quot;\npublic static {} deserialize(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{&quot;</span>,
+                    <span class="string">&quot;\npublic static {} deserialize(com.novi.serde.Deserializer deserializer) throws java.lang.Exception {{&quot;</span>,
                     <span class="ident">name</span>,
                 )<span class="question-mark">?</span>;
             } <span class="kw">else</span> {
                 <span class="macro">writeln</span><span class="macro">!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
-                    <span class="string">&quot;\nstatic {} load(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{&quot;</span>,
+                    <span class="string">&quot;\nstatic {} load(com.novi.serde.Deserializer deserializer) throws java.lang.Exception {{&quot;</span>,
                     <span class="ident">name</span>,
                 )<span class="question-mark">?</span>;
             }
@@ -1763,11 +1763,11 @@ if (getClass() != obj.getClass()) return false;
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">serialization</span> {
             <span class="macro">writeln</span><span class="macro">!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
-                <span class="string">&quot;\nabstract public void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception;&quot;</span>
+                <span class="string">&quot;\nabstract public void serialize(com.novi.serde.Serializer serializer) throws java.lang.Exception;&quot;</span>
             )<span class="question-mark">?</span>;
             <span class="macro">write</span><span class="macro">!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
-                <span class="string">&quot;\npublic static {} deserialize(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{&quot;</span>,
+                <span class="string">&quot;\npublic static {} deserialize(com.novi.serde.Deserializer deserializer) throws java.lang.Exception {{&quot;</span>,
                 <span class="ident">name</span>
             )<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
@@ -1811,7 +1811,7 @@ switch (index) {{&quot;#</span>,
             <span class="self">self</span>.<span class="ident">out</span>,
             <span class="string">r#&quot;
 public byte[] {0}Serialize() throws java.lang.Exception {{
-    com.facebook.serde.Serializer serializer = new com.facebook.{0}.{1}Serializer();
+    com.novi.serde.Serializer serializer = new com.novi.{0}.{1}Serializer();
     serialize(serializer);
     return serializer.get_bytes();
 }}&quot;#</span>,
@@ -1829,7 +1829,7 @@ public byte[] {0}Serialize() throws java.lang.Exception {{
             <span class="self">self</span>.<span class="ident">out</span>,
             <span class="string">r#&quot;
 public static {0} {1}Deserialize(byte[] input) throws java.lang.Exception {{
-    com.facebook.serde.Deserializer deserializer = new com.facebook.{1}.{2}Deserializer(input);
+    com.novi.serde.Deserializer deserializer = new com.novi.{1}.{2}Deserializer(input);
     {0} value = deserialize(deserializer);
     if (deserializer.get_buffer_offset() &lt; input.length) {{
          throw new Exception(&quot;Some input bytes were not read&quot;);
@@ -1908,22 +1908,22 @@ public static {0} {1}Deserialize(byte[] input) throws java.lang.Exception {{
 
     <span class="kw">fn</span> <span class="ident">install_serde_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">install_runtime</span>(
-            <span class="macro">include_directory</span><span class="macro">!</span>(<span class="string">&quot;runtime/java/com/facebook/serde&quot;</span>),
-            <span class="string">&quot;com/facebook/serde&quot;</span>,
+            <span class="macro">include_directory</span><span class="macro">!</span>(<span class="string">&quot;runtime/java/com/novi/serde&quot;</span>),
+            <span class="string">&quot;com/novi/serde&quot;</span>,
         )
     }
 
     <span class="kw">fn</span> <span class="ident">install_bincode_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">install_runtime</span>(
-            <span class="macro">include_directory</span><span class="macro">!</span>(<span class="string">&quot;runtime/java/com/facebook/bincode&quot;</span>),
-            <span class="string">&quot;com/facebook/bincode&quot;</span>,
+            <span class="macro">include_directory</span><span class="macro">!</span>(<span class="string">&quot;runtime/java/com/novi/bincode&quot;</span>),
+            <span class="string">&quot;com/novi/bincode&quot;</span>,
         )
     }
 
     <span class="kw">fn</span> <span class="ident">install_lcs_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">install_runtime</span>(
-            <span class="macro">include_directory</span><span class="macro">!</span>(<span class="string">&quot;runtime/java/com/facebook/lcs&quot;</span>),
-            <span class="string">&quot;com/facebook/lcs&quot;</span>,
+            <span class="macro">include_directory</span><span class="macro">!</span>(<span class="string">&quot;runtime/java/com/novi/lcs&quot;</span>),
+            <span class="string">&quot;com/novi/lcs&quot;</span>,
         )
     }
 }

@@ -1003,7 +1003,7 @@
     <span class="doccomment">/// Module path where to find the serde runtime packages (serde, lcs, bincode).</span>
     <span class="doccomment">/// Default: &quot;github.com/novifinancial/serde-reflection/serde-generate/runtime/golang&quot;.</span>
     <span class="ident">serde_module_path</span>: <span class="ident">String</span>,
-    <span class="doccomment">/// Mapping from external type names to fully-qualified class names (e.g. &quot;MyClass&quot; -&gt; &quot;com.facebook.my_package.MyClass&quot;).</span>
+    <span class="doccomment">/// Mapping from external type names to fully-qualified class names (e.g. &quot;MyClass&quot; -&gt; &quot;com.my_org.my_package.MyClass&quot;).</span>
     <span class="doccomment">/// Derived from `config.external_definitions`.</span>
     <span class="ident">external_qualified_names</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">String</span><span class="op">&gt;</span>,
 }
@@ -1014,7 +1014,7 @@
     <span class="ident">out</span>: <span class="ident">IndentedWriter</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Generator.</span>
     <span class="ident">generator</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">CodeGenerator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
-    <span class="doccomment">/// Current namespace (e.g. vec![&quot;com&quot;, &quot;facebook&quot;, &quot;my_package&quot;, &quot;MyClass&quot;])</span>
+    <span class="doccomment">/// Current namespace (e.g. vec![&quot;com&quot;, &quot;my_org&quot;, &quot;my_package&quot;, &quot;MyClass&quot;])</span>
     <span class="ident">current_namespace</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
 }
 
