@@ -199,7 +199,7 @@ fn test_that_installed_java_code_compiles() {
         .unwrap();
     assert!(status.success());
 
-    let paths = std::fs::read_dir(dir.path().join("com/facebook/serde"))
+    let paths = std::fs::read_dir(dir.path().join("com/novi/serde"))
         .unwrap()
         .map(|e| e.unwrap().path());
     let status = Command::new("javac")
