@@ -1,3 +1,0 @@
-name: starcoin_lib
-dependencies:
-  test: '1.15.3'
