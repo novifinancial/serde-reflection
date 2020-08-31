@@ -8,7 +8,7 @@
 //! '''
 
 use serde_generate::{
-    cpp, golang, java, python3, rust, CodeGeneratorConfig, Encoding, SourceInstaller,dart,
+    cpp, dart, golang, java, python3, rust, CodeGeneratorConfig, Encoding, SourceInstaller,
 };
 use serde_reflection::Registry;
 use std::path::PathBuf;

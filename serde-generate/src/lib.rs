@@ -108,6 +108,8 @@
 pub mod analyzer;
 /// Support for code-generation in C++
 pub mod cpp;
+/// Support for code-generation in Dart
+pub mod dart;
 /// Utility function to generate indented text
 pub mod golang;
 /// Support for code-generation in Go
@@ -118,8 +120,6 @@ pub mod java;
 pub mod python3;
 /// Support for code-generation in Rust
 pub mod rust;
-/// Support for code-generation in Dart
-pub mod dart;
 
 #[doc(hidden)]
 /// Utility functions to help testing code generators.

@@ -1,14 +1,14 @@
-use crate::{CodeGeneratorConfig, common, Encoding};
-use serde_reflection::{Registry, Format, FormatHolder, ContainerFormat, Named, VariantFormat};
+use crate::indent::{IndentConfig, IndentedWriter};
+use crate::{common, CodeGeneratorConfig, Encoding};
+use heck::CamelCase;
+use include_dir::include_dir as include_directory;
+use serde_reflection::{ContainerFormat, Format, FormatHolder, Named, Registry, VariantFormat};
+use std::collections::BTreeMap;
 use std::{
-    collections::{ HashMap},
+    collections::HashMap,
     io::{Result, Write},
     path::PathBuf,
 };
-use crate::indent::{IndentedWriter, IndentConfig};
-use std::collections::BTreeMap;
-use include_dir::include_dir as include_directory;
-use heck::CamelCase;
 
 /// Main configuration object for code-generation in Dart.
 pub struct CodeGenerator<'a> {
@@ -36,14 +36,11 @@ impl<'a> CodeGenerator<'a> {
                     .insert(name.to_string(), format!("{}.{}", namespace, name));
             }
         }
-        Self {
-            config,
-        }
+        Self { config }
     }
 
     /// Output class definitions for `registry`.
-    pub fn output(&self,         install_dir: std::path::PathBuf,
-                   registry: &Registry) -> Result<()> {
+    pub fn output(&self, install_dir: std::path::PathBuf, registry: &Registry) -> Result<()> {
         let current_namespace = self
             .config
             .module_name
@@ -63,29 +60,38 @@ impl<'a> CodeGenerator<'a> {
         for (name, format) in registry {
             self.write_container_class(&dir_path, current_namespace.clone(), name, format)?;
         }
-        self.write_helper_class(&dir_path,current_namespace.clone(),registry)?;
-        self.write_library(&dir_path,current_namespace,registry)?;
+        self.write_helper_class(&dir_path, current_namespace.clone(), registry)?;
+        self.write_library(&dir_path, current_namespace, registry)?;
         Ok(())
     }
 
-    fn write_package(&self,install_dir: &std::path::PathBuf)->Result<()> {
-        let mut file = std::fs::File::create(install_dir.join( "pubspec.yaml"))?;
+    fn write_package(&self, install_dir: &std::path::PathBuf) -> Result<()> {
+        let mut file = std::fs::File::create(install_dir.join("pubspec.yaml"))?;
         let mut out = IndentedWriter::new(&mut file, IndentConfig::Space(4));
         writeln!(
             &mut out,
             r#"name: {}
 dependencies:
-  test: '1.15.3'
   optional: '5.0.0'
+dev_dependencies:
+  mockito: '>=4.0.0 <5.0.0'
+  test: '>=0.12.0 <2.0.0'
+  pedantic: '^1.0.0'
+  test_coverage: '^0.4.0'
             "#,
             self.config.module_name
         )?;
         Ok(())
     }
 
-    fn write_library(&self,install_dir: &std::path::PathBuf,        current_namespace: Vec<String>,
-                     registry: &Registry)->Result<()>{
-        let mut file = std::fs::File::create(install_dir.join(self.config.module_name.clone() + ".dart"))?;
+    fn write_library(
+        &self,
+        install_dir: &std::path::PathBuf,
+        current_namespace: Vec<String>,
+        registry: &Registry,
+    ) -> Result<()> {
+        let mut file =
+            std::fs::File::create(install_dir.join(self.config.module_name.clone() + ".dart"))?;
         let mut emitter = DartEmitter {
             out: IndentedWriter::new(&mut file, IndentConfig::Space(4)),
             generator: self,
@@ -109,13 +115,9 @@ import 'package:optional/optional.dart';
             self.config.module_name
         )?;
 
-        writeln!(&mut emitter.out,"part 'TraitHelpers.dart';")?;
+        writeln!(&mut emitter.out, "part 'TraitHelpers.dart';")?;
         for (name, _format) in registry {
-            writeln!(
-                &mut emitter.out,
-                "part '{}.dart';",
-               name
-            )?;
+            writeln!(&mut emitter.out, "part '{}.dart';", name)?;
         }
 
         Ok(())
@@ -155,16 +157,13 @@ import 'package:optional/optional.dart';
         emitter.output_preamble()?;
         emitter.output_trait_helpers(registry)
     }
-
 }
 
-
 impl<'a, T> DartEmitter<'a, T>
-    where
-        T: Write,
+where
+    T: Write,
 {
-
-    fn output_preamble(&mut self, ) -> Result<()> {
+    fn output_preamble(&mut self) -> Result<()> {
         writeln!(
             self.out,
             "part of {}_types;\n\n",
@@ -175,7 +174,7 @@ impl<'a, T> DartEmitter<'a, T>
     }
 
     fn quote_qualified_name(&self, name: &str) -> String {
-        return name.to_string()
+        return name.to_string();
     }
 
     fn quote_type(&self, format: &Format) -> String {
@@ -188,7 +187,7 @@ impl<'a, T> DartEmitter<'a, T>
             I16 => "int".into(),
             I32 => "int".into(),
             I64 => "int".into(),
-            I128 => "org.starcoin.serde.Unit".into(),
+            I128 => "Unit".into(),
             U8 => "int".into(),
             U16 => "int".into(),
             U32 => "int".into(),
@@ -202,17 +201,11 @@ impl<'a, T> DartEmitter<'a, T>
 
             Option(format) => format!("Optional<{}>", self.quote_type(format)),
             Seq(format) => format!("List<{}>", self.quote_type(format)),
-            Map { key, value } => format!(
-                "Map<{}, {}>",
-                self.quote_type(key),
-                self.quote_type(value)
-            ),
-            Tuple(formats) => format!(
-                "Tuple{}<{}>",
-                formats.len(),
-                self.quote_types(formats)
-            ),
-            TupleArray { content, size:_ } => format!("List<{}>", self.quote_type(content)),
+            Map { key, value } => {
+                format!("Map<{}, {}>", self.quote_type(key), self.quote_type(value))
+            }
+            Tuple(formats) => format!("Tuple{}<{}>", formats.len(), self.quote_types(formats)),
+            TupleArray { content, size: _ } => format!("List<{}>", self.quote_type(content)),
             Variable(_) => panic!("unexpected value"),
         }
     }
@@ -372,7 +365,7 @@ for ({} item in value) {{
                     self.out,
                     r#"
 serializer.serialize_len(value.length);
-List<int> offsets = new List<int>;
+List<int> offsets = new List<int>();
 int count = 0;
 for (Map.Entry<{}, {}> entry : value.entrySet()) {{
     offsets[count++] = serializer.get_buffer_offset();
@@ -510,7 +503,7 @@ return new {}({}
                 write!(
                     self.out,
                     r#"
-List<{0}> obj = new List<{0}>();
+List<{0}> obj = new List<{0}>.filled({1}, 0);
 for (int i = 0; i < {1}; i++) {{
     obj[i] = {2};
 }}
@@ -564,11 +557,7 @@ return obj;
         writeln!(self.out)?;
         if let Some(base) = variant_base {
             //self.output_comment(name)?;
-            writeln!(
-                self.out,
-                "class {} extends {} {{",
-                name, base
-            )?;
+            writeln!(self.out, "class {} extends {} {{", name, base)?;
         } else {
             //self.output_comment(name)?;
             writeln!(self.out, " class {} {{", name)?;
@@ -610,10 +599,7 @@ return obj;
 
         // Serialize
         if self.generator.config.serialization {
-            writeln!(
-                self.out,
-                "\nvoid serialize(BinarySerializer serializer){{",
-            )?;
+            writeln!(self.out, "\nvoid serialize(BinarySerializer serializer){{",)?;
             self.out.indent();
             if let Some(index) = variant_index {
                 writeln!(self.out, "serializer.serialize_variant_index({});", index)?;
@@ -658,13 +644,17 @@ return obj;
                     field.name,
                     self.quote_deserialize(&field.value)
                 )?;
-
             }
-            writeln!(self.out, "return new {}({});",name,fields
-                .iter()
-                .map(|f|  f.name.to_string())
-                .collect::<Vec<_>>()
-                .join(","))?;
+            writeln!(
+                self.out,
+                "return new {}({});",
+                name,
+                fields
+                    .iter()
+                    .map(|f| f.name.to_string())
+                    .collect::<Vec<_>>()
+                    .join(",")
+            )?;
 
             self.out.unindent();
             writeln!(self.out, "}}")?;
@@ -677,7 +667,7 @@ return obj;
         }
         // Equality
         write!(self.out, "\n@override")?;
-        write!(self.out, "\nbool operator ==(covariant {0} other) {{",name)?;
+        write!(self.out, "\nbool operator ==(covariant {0} other) {{", name)?;
         self.out.indent();
         writeln!(
             self.out,
@@ -689,24 +679,25 @@ if (other == null) return false;"#,
         if fields_num > 0 {
             write!(self.out, "\nif (")?;
 
-            for (index,field) in fields.iter().enumerate() {
-            if index < fields_num-1{
-                writeln!(
-                    self.out,
-                    " this.{0} == other.{0} &&",
-                    &field.name,
-                )?;
-            }else {
-                writeln!(
-                    self.out,
-                    " this.{0} == other.{0} ) {{",
-                    &field.name,
-                )?;
-            }
+            for (index, field) in fields.iter().enumerate() {
+                let stmt = match &field.value {
+                    Format::Seq(_) => format!(" isListsEqual(this.{0} , other.{0}) ", &field.name),
+                    Format::TupleArray {
+                        content: _,
+                        size: _,
+                    } => format!(" isListsEqual(this.{0} , other.{0}) ", &field.name),
+                    _ => format!(" this.{0} == other.{0} ", &field.name),
+                };
+
+                if index < fields_num - 1 {
+                    writeln!(self.out, " {} &&", stmt,)?;
+                } else {
+                    writeln!(self.out, " {} ){{", stmt,)?;
+                }
             }
             writeln!(self.out, "return true;}}")?;
             writeln!(self.out, "else return false;")?;
-        }else {
+        } else {
             writeln!(self.out, "return true;")?;
         }
 
@@ -778,10 +769,7 @@ if (other == null) return false;"#,
         writeln!(self.out, "abstract class {} {{", name)?;
         self.enter_class(name);
         if self.generator.config.serialization {
-            writeln!(
-                self.out,
-                "\nvoid serialize(BinarySerializer serializer);"
-            )?;
+            writeln!(self.out, "\nvoid serialize(BinarySerializer serializer);")?;
             write!(
                 self.out,
                 "\nstatic {} deserialize(BinaryDeserializer deserializer) {{",
@@ -799,7 +787,7 @@ switch (index) {{"#,
                 writeln!(
                     self.out,
                     "case {}: return {}{}Item.load(deserializer);",
-                    index,name ,variant.name,
+                    index, name, variant.name,
                 )?;
             }
             writeln!(
@@ -831,7 +819,12 @@ switch (index) {{"#,
         variants: &BTreeMap<u32, Named<VariantFormat>>,
     ) -> Result<()> {
         for (index, variant) in variants {
-            self.output_variant(base, *index, &format!("{}{}Item",base,&variant.name), &variant.value)?;
+            self.output_variant(
+                base,
+                *index,
+                &format!("{}{}Item", base, &variant.name),
+                &variant.value,
+            )?;
         }
         Ok(())
     }
@@ -863,7 +856,6 @@ switch (index) {{"#,
         };
         self.output_struct_or_variant_container(Some(base), Some(index), name, &fields)
     }
-
 }
 
 /// Installer for generated source files in Go.
@@ -873,9 +865,7 @@ pub struct Installer {
 
 impl Installer {
     pub fn new(install_dir: PathBuf) -> Self {
-        Installer {
-            install_dir,
-        }
+        Installer { install_dir }
     }
 
     fn install_runtime(
@@ -891,7 +881,6 @@ impl Installer {
         }
         Ok(())
     }
-
 }
 
 impl crate::SourceInstaller for Installer {
@@ -908,23 +897,14 @@ impl crate::SourceInstaller for Installer {
     }
 
     fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.install_runtime(
-            include_directory!("runtime/dart/serde"),
-            "lib/serde",
-        )
+        self.install_runtime(include_directory!("runtime/dart/serde"), "lib/serde")
     }
 
     fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.install_runtime(
-            include_directory!("runtime/dart/bincode"),
-            "lib/bincode",
-        )
+        self.install_runtime(include_directory!("runtime/dart/bincode"), "lib/bincode")
     }
 
     fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.install_runtime(
-            include_directory!("runtime/dart/lcs"),
-            "lib/lcs",
-        )
+        self.install_runtime(include_directory!("runtime/dart/lcs"), "lib/lcs")
     }
 }

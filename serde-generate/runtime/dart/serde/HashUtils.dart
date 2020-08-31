@@ -14,3 +14,17 @@ int $jf(int hash) {
   hash = hash ^ (hash >> 11);
   return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
 }
+
+bool isListsEqual<T>(List<T> list1, List<T> list2) {
+  if (list1.length != list2.length) {
+    return false;
+  }
+
+  for (int i = 0; i < list1.length; i++) {
+    if (list1[i] != list2[i]) {
+      return false;
+    }
+  }
+
+  return true;
+}
