@@ -1001,7 +1001,7 @@
     <span class="doccomment">/// Language-independent configuration.</span>
     <span class="ident">config</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">CodeGeneratorConfig</span>,
     <span class="doccomment">/// Module path where to find the serde runtime packages (serde, lcs, bincode).</span>
-    <span class="doccomment">/// Default: &quot;github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang&quot;.</span>
+    <span class="doccomment">/// Default: &quot;github.com/novifinancial/serde-reflection/serde-generate/runtime/golang&quot;.</span>
     <span class="ident">serde_module_path</span>: <span class="ident">String</span>,
     <span class="doccomment">/// Mapping from external type names to fully-qualified class names (e.g. &quot;MyClass&quot; -&gt; &quot;com.facebook.my_package.MyClass&quot;).</span>
     <span class="doccomment">/// Derived from `config.external_definitions`.</span>
@@ -1039,7 +1039,7 @@
         <span class="self">Self</span> {
             <span class="ident">config</span>,
             <span class="ident">serde_module_path</span>:
-                <span class="string">&quot;github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang&quot;</span>
+                <span class="string">&quot;github.com/novifinancial/serde-reflection/serde-generate/runtime/golang&quot;</span>
                     .<span class="ident">to_string</span>(),
             <span class="ident">external_qualified_names</span>,
         }
