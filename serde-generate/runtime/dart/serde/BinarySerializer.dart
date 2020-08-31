@@ -1,5 +1,4 @@
-import 'dart:typed_data';
-import 'Unit.dart';
+part of serde;
 
 class BinarySerializer {
   List<int> output;
@@ -8,7 +7,7 @@ class BinarySerializer {
     output = new List<int>();
   }
 
-  Uint8List getBytes() {
+  Uint8List get_bytes() {
     return Uint8List.fromList(this.output);
   }
 
@@ -66,6 +65,22 @@ class BinarySerializer {
   }
 
   void serialize_unit(Unit value) {}
+
+  void serialize_variant_index(int index) {
+    serialize_u32(index);
+  }
+
+  void serialize_str(String str){
+
+  }
+
+  void serialize_len(int len){
+
+  }
+
+  void serialize_u128(int value) {
+
+  }
 
   int get_buffer_offset() {
     return output.length;

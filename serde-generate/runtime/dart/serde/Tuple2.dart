@@ -1,4 +1,4 @@
-import 'HashUtils.dart';
+part of serde;
 
 class Tuple2<T0, T1> {
   T0 field0;

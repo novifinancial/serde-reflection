@@ -1,8 +1,6 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
-import 'dart:typed_data';
-
-import '../serde/BinarySerializer.dart';
+part of lcs;
 
 class LcsSerializer extends BinarySerializer {
   void serialize_u32_as_uleb128(int value) {

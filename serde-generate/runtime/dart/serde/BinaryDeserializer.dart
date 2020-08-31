@@ -1,5 +1,5 @@
-import 'dart:typed_data';
-import 'Unit.dart';
+part of serde;
+
 
 class BinaryDeserializer {
   ByteData input;
@@ -50,12 +50,32 @@ class BinaryDeserializer {
     return result;
   }
 
+  Uint8List deserialize_bytes() {
+    return null;
+  }
+
   bool deserialize_option_tag() {
     return deserialize_bool();
   }
 
+  int deserialize_variant_index(){
+    return 0;
+  }
+
+  String deserialize_str(){
+    return null;
+  }
+
   int get_buffer_offset() {
     return offset;
+  }
+
+  int deserialize_len(){
+    return 0;
+  }
+
+  int deserialize_u128(){
+    return 0;
   }
 
   int getUint8() {

@@ -713,7 +713,10 @@ func TestSerializeDeserializeOptionTag(t *testing.T) {
 func TestGetBufferOffset(t *testing.T) {
 	s := new(lcs.Serializer)
 	s.SerializeU64(0)
-	assert.Equal(t, s.GetBufferOffset(), uint64(8))
+	assert.Equal(t, uint64(8), s.GetBufferOffset())
+
 	d := lcs.NewDeserializer([]byte{0, 0, 0, 0, 0, 0, 0, 0})
-	assert.Equal(t, d.GetBufferOffset(), uint64(8))
+	assert.Equal(t, uint64(0), d.GetBufferOffset())
+	d.DeserializeU64()
+	assert.Equal(t, uint64(8), d.GetBufferOffset())
 }

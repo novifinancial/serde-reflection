@@ -1,4 +1,4 @@
-import 'HashUtils.dart';
+part of serde;
 
 class Int128 {
   int high;

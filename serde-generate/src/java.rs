@@ -4,8 +4,9 @@
 use crate::{
     common,
     indent::{IndentConfig, IndentedWriter},
-    CodeGeneratorConfig,
+    CodeGeneratorConfig, Encoding,
 };
+use heck::CamelCase;
 use include_dir::include_dir as include_directory;
 use serde_reflection::{ContainerFormat, Format, FormatHolder, Named, Registry, VariantFormat};
 use std::{
@@ -589,8 +590,8 @@ return obj;
         fields: &[Named<Format>],
     ) -> Result<()> {
         // Beginning of class
+        writeln!(self.out)?;
         if let Some(base) = variant_base {
-            writeln!(self.out)?;
             self.output_comment(name)?;
             writeln!(
                 self.out,
@@ -635,12 +636,12 @@ return obj;
             writeln!(self.out, "this.{} = {};", &field.name, &field.name)?;
         }
         self.out.unindent();
-        writeln!(self.out, "}}\n")?;
+        writeln!(self.out, "}}")?;
         // Serialize
         if self.generator.config.serialization {
             writeln!(
                 self.out,
-                "public void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception {{",
+                "\npublic void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception {{",
             )?;
             self.out.indent();
             if let Some(index) = variant_index {
@@ -654,20 +655,26 @@ return obj;
                 )?;
             }
             self.out.unindent();
-            writeln!(self.out, "}}\n")?;
+            writeln!(self.out, "}}")?;
+
+            if variant_index.is_none() {
+                for encoding in &self.generator.config.encodings {
+                    self.output_class_serialize_for_encoding(*encoding)?;
+                }
+            }
         }
         // Deserialize (struct) or Load (variant)
         if self.generator.config.serialization {
             if variant_index.is_none() {
                 writeln!(
                     self.out,
-                    "public static {} deserialize(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{",
+                    "\npublic static {} deserialize(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{",
                     name,
                 )?;
             } else {
                 writeln!(
                     self.out,
-                    "static {} load(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{",
+                    "\nstatic {} load(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{",
                     name,
                 )?;
             }
@@ -683,10 +690,16 @@ return obj;
             }
             writeln!(self.out, "return builder.build();")?;
             self.out.unindent();
-            writeln!(self.out, "}}\n")?;
+            writeln!(self.out, "}}")?;
+
+            if variant_index.is_none() {
+                for encoding in &self.generator.config.encodings {
+                    self.output_class_deserialize_for_encoding(name, *encoding)?;
+                }
+            }
         }
         // Equality
-        write!(self.out, "public boolean equals(Object obj) {{")?;
+        write!(self.out, "\npublic boolean equals(Object obj) {{")?;
         self.out.indent();
         writeln!(
             self.out,
@@ -706,9 +719,9 @@ if (getClass() != obj.getClass()) return false;
         }
         writeln!(self.out, "return true;")?;
         self.out.unindent();
-        writeln!(self.out, "}}\n")?;
+        writeln!(self.out, "}}")?;
         // Hashing
-        writeln!(self.out, "public int hashCode() {{")?;
+        writeln!(self.out, "\npublic int hashCode() {{")?;
         self.out.indent();
         writeln!(self.out, "int value = 7;",)?;
         for field in fields {
@@ -774,6 +787,7 @@ if (getClass() != obj.getClass()) return false;
         name: &str,
         variants: &BTreeMap<u32, Named<VariantFormat>>,
     ) -> Result<()> {
+        writeln!(self.out)?;
         self.output_comment(name)?;
         writeln!(self.out, "public abstract class {} {{", name)?;
         let reserved_names = variants
@@ -784,11 +798,11 @@ if (getClass() != obj.getClass()) return false;
         if self.generator.config.serialization {
             writeln!(
                 self.out,
-                "abstract public void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception;\n"
+                "\nabstract public void serialize(com.facebook.serde.Serializer serializer) throws java.lang.Exception;"
             )?;
             write!(
                 self.out,
-                "public static {} deserialize(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{",
+                "\npublic static {} deserialize(com.facebook.serde.Deserializer deserializer) throws java.lang.Exception {{",
                 name
             )?;
             self.out.indent();
@@ -815,10 +829,52 @@ switch (index) {{"#,
             writeln!(self.out, "}}")?;
             self.out.unindent();
             writeln!(self.out, "}}")?;
+
+            for encoding in &self.generator.config.encodings {
+                self.output_class_serialize_for_encoding(*encoding)?;
+                self.output_class_deserialize_for_encoding(name, *encoding)?;
+            }
         }
+
         self.output_variants(name, variants)?;
         self.leave_class(&reserved_names);
         writeln!(self.out, "}}\n")
+    }
+
+    fn output_class_serialize_for_encoding(&mut self, encoding: Encoding) -> Result<()> {
+        writeln!(
+            self.out,
+            r#"
+public byte[] {0}Serialize() throws java.lang.Exception {{
+    com.facebook.serde.Serializer serializer = new com.facebook.{0}.{1}Serializer();
+    serialize(serializer);
+    return serializer.get_bytes();
+}}"#,
+            encoding.name(),
+            encoding.name().to_camel_case()
+        )
+    }
+
+    fn output_class_deserialize_for_encoding(
+        &mut self,
+        name: &str,
+        encoding: Encoding,
+    ) -> Result<()> {
+        writeln!(
+            self.out,
+            r#"
+public static {0} {1}Deserialize(byte[] input) throws java.lang.Exception {{
+    com.facebook.serde.Deserializer deserializer = new com.facebook.{1}.{2}Deserializer(input);
+    {0} value = deserialize(deserializer);
+    if (deserializer.get_buffer_offset() < input.length) {{
+         throw new Exception("Some input bytes were not read");
+    }}
+    return value;
+}}"#,
+            name,
+            encoding.name(),
+            encoding.name().to_camel_case()
+        )
     }
 
     fn output_container(&mut self, name: &str, format: &ContainerFormat) -> Result<()> {

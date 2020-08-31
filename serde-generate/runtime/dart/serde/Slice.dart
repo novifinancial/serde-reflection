@@ -1,4 +1,4 @@
-import 'dart:typed_data';
+part of serde;
 
 class Slice {
   int start;

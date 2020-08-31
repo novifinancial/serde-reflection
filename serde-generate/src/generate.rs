@@ -7,7 +7,9 @@
 //! cargo run --bin serdegen -- --help
 //! '''
 
-use serde_generate::{cpp, golang, java, python3, rust, CodeGeneratorConfig, SourceInstaller};
+use serde_generate::{
+    cpp, golang, java, python3, rust, CodeGeneratorConfig, Encoding, SourceInstaller,dart,
+};
 use serde_reflection::Registry;
 use std::path::PathBuf;
 use structopt::{clap::arg_enum, StructOpt};
@@ -20,6 +22,7 @@ enum Language {
     Rust,
     Java,
     Go,
+    Dart,
 }
 }
 
@@ -28,7 +31,7 @@ arg_enum! {
 enum Runtime {
     Serde,
     Bincode,
-    LCS,
+    Lcs,
 }
 }
 
@@ -50,7 +53,8 @@ struct Options {
     #[structopt(long)]
     target_source_dir: Option<PathBuf>,
 
-    /// Optional runtimes to install in the `target_source_dir`.
+    /// Optional runtimes to install in the `target_source_dir` (if applicable).
+    /// Also triggers the generation of specialized methods for each runtime.
     #[structopt(long, possible_values = &Runtime::variants(), case_insensitive = true)]
     with_runtimes: Vec<Runtime>,
 
@@ -63,6 +67,25 @@ struct Options {
     /// Optional package name (Python) or module path (Go) where to find Serde runtime dependencies.
     #[structopt(long)]
     serde_package_name: Option<String>,
+}
+
+fn get_codegen_config<'a, I>(name: String, runtimes: I) -> CodeGeneratorConfig
+where
+    I: IntoIterator<Item = &'a Runtime>,
+{
+    let mut encodings = Vec::new();
+    for runtime in runtimes {
+        match runtime {
+            Runtime::Bincode => {
+                encodings.push(Encoding::Bincode);
+            }
+            Runtime::Lcs => {
+                encodings.push(Encoding::Lcs);
+            }
+            _ => (),
+        }
+    }
+    CodeGeneratorConfig::new(name).with_encodings(encodings)
 }
 
 fn main() {
@@ -83,11 +106,12 @@ fn main() {
             Some((registry, name))
         }
     };
+    let runtimes: std::collections::BTreeSet<_> = options.with_runtimes.into_iter().collect();
 
     match options.target_source_dir {
         None => {
             if let Some((registry, name)) = named_registry_opt {
-                let config = CodeGeneratorConfig::new(name);
+                let config = get_codegen_config(name, &runtimes);
 
                 let stdout = std::io::stdout();
                 let mut out = stdout.lock();
@@ -106,6 +130,7 @@ fn main() {
                         .output(&mut out, &registry)
                         .unwrap(),
                     Language::Java => panic!("Code generation in Java requires `--install-dir`"),
+                    Language::Dart => panic!("Code generation in Dart requires `--install-dir`"),
                 }
             }
         }
@@ -122,21 +147,19 @@ fn main() {
                     Language::Go => {
                         Box::new(golang::Installer::new(install_dir, serde_package_name_opt))
                     }
+                    Language::Dart => Box::new(dart::Installer::new(install_dir)),
                 };
 
             if let Some((registry, name)) = named_registry_opt {
-                let config = CodeGeneratorConfig::new(name);
+                let config = get_codegen_config(name, &runtimes);
                 installer.install_module(&config, &registry).unwrap();
             }
-
-            let runtimes: std::collections::BTreeSet<_> =
-                options.with_runtimes.into_iter().collect();
 
             for runtime in runtimes {
                 match runtime {
                     Runtime::Serde => installer.install_serde_runtime().unwrap(),
                     Runtime::Bincode => installer.install_bincode_runtime().unwrap(),
-                    Runtime::LCS => installer.install_lcs_runtime().unwrap(),
+                    Runtime::Lcs => installer.install_lcs_runtime().unwrap(),
                 }
             }
         }

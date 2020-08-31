@@ -4,7 +4,7 @@
 use heck::CamelCase;
 use libra_canonical_serialization as lcs;
 use serde::{Deserialize, Serialize};
-use serde_generate::{cpp, java, python3, rust, test_utils, CodeGeneratorConfig};
+use serde_generate::{cpp, golang, java, python3, rust, test_utils, CodeGeneratorConfig, Encoding};
 use serde_reflection::{Registry, Result, Samples, Tracer, TracerConfig};
 use std::fs::File;
 use std::io::Write;
@@ -39,12 +39,18 @@ enum Runtime {
     Bincode,
 }
 
+impl std::convert::Into<Encoding> for Runtime {
+    fn into(self) -> Encoding {
+        match self {
+            Runtime::Lcs => Encoding::Lcs,
+            Runtime::Bincode => Encoding::Bincode,
+        }
+    }
+}
+
 impl Runtime {
     fn name(self) -> &'static str {
-        match self {
-            Self::Lcs => "lcs",
-            Self::Bincode => "bincode",
-        }
+        <Self as std::convert::Into<Encoding>>::into(self).name()
     }
 
     fn rust_package(self) -> &'static str {
@@ -95,7 +101,8 @@ fn test_python_runtime_on_simple_data(runtime: Runtime) {
     let source_path = dir.path().join("test.py");
     let mut source = File::create(&source_path).unwrap();
 
-    let config = CodeGeneratorConfig::new("testing".to_string());
+    let config =
+        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![runtime.into()]);
     let generator = python3::CodeGenerator::new(&config);
     generator.output(&mut source, &registry).unwrap();
 
@@ -107,22 +114,26 @@ fn test_python_runtime_on_simple_data(runtime: Runtime) {
     writeln!(
         source,
         r#"
-import {0}
-
 value = Test([4, 6], (3, 5), Choice__C(7))
 
-s = {0}.serialize(value, Test)
+s = value.{0}_serialize()
 assert s == bytes.fromhex("{1}")
 
-v, buffer = {0}.deserialize(s, Test)
-assert len(buffer) == 0
+v = Test.{0}_deserialize(s)
 assert v == value
 assert v.c.x == 7
 
 v.b = (3, 0)
-t = {0}.serialize(v, Test)
+t = v.{0}_serialize()
 assert len(t) == len(s)
 assert t != s
+
+seen_error = False
+try:
+    Test.{0}_deserialize(bytes.fromhex("{1}") + bytes([0]))
+except ValueError:
+    seen_error = True
+assert seen_error
 "#,
         runtime.name(),
         hex::encode(&reference),
@@ -154,7 +165,8 @@ fn test_python_runtime_on_all_supported_types(runtime: Runtime) {
     let source_path = dir.path().join("test.py");
     let mut source = File::create(&source_path).unwrap();
 
-    let config = CodeGeneratorConfig::new("testing".to_string());
+    let config =
+        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![runtime.into()]);
     let generator = python3::CodeGenerator::new(&config);
     generator.output(&mut source, &registry).unwrap();
 
@@ -167,15 +179,11 @@ fn test_python_runtime_on_all_supported_types(runtime: Runtime) {
     writeln!(
         source,
         r#"
-import {0}
-
 encodings = [bytes.fromhex(s) for s in [{1}]]
 
 for encoding in encodings:
-    v, buffer = {0}.deserialize(encoding, SerdeData)
-    assert len(buffer) == 0
-
-    s = {0}.serialize(v, SerdeData)
+    v = SerdeData.{0}_deserialize(encoding)
+    s = v.{0}_serialize()
     assert s == encoding
 "#,
         runtime.name(),
@@ -292,7 +300,8 @@ fn test_cpp_runtime_on_simple_date(runtime: Runtime) {
     let header_path = dir.path().join("test.hpp");
     let mut header = File::create(&header_path).unwrap();
 
-    let config = CodeGeneratorConfig::new("testing".to_string());
+    let config =
+        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![runtime.into()]);
     let generator = cpp::CodeGenerator::new(&config);
     generator.output(&mut header, &registry).unwrap();
 
@@ -308,17 +317,13 @@ fn test_cpp_runtime_on_simple_date(runtime: Runtime) {
         source,
         r#"
 #include <cassert>
-#include "{1}.hpp"
 #include "test.hpp"
 
-using namespace serde;
 using namespace testing;
 
 int main() {{
     std::vector<uint8_t> input = {{{0}}};
-
-    auto deserializer = {2}Deserializer(input);
-    auto test = Deserializable<Test>::deserialize(deserializer);
+    auto test = Test::{1}Deserialize(input);
 
     auto a = std::vector<uint32_t> {{4, 6}};
     auto b = std::tuple<int64_t, uint64_t> {{-3, 5}};
@@ -327,13 +332,17 @@ int main() {{
 
     assert(test == test2);
 
-    auto serializer = {2}Serializer();
-    Serializable<Test>::serialize(test2, serializer);
-    auto output = std::move(serializer).bytes();
+    auto output = test2.{1}Serialize();
 
     assert(input == output);
 
-    return 0;
+    input.push_back(1);
+    try {{
+        Test::{1}Deserialize(input);
+    }} catch (...) {{
+        return 0;
+    }}
+    return 1;
 }}
 "#,
         reference
@@ -342,7 +351,6 @@ int main() {{
             .collect::<Vec<_>>()
             .join(", "),
         runtime.name(),
-        runtime.name().to_camel_case(),
     )
     .unwrap();
 
@@ -377,7 +385,8 @@ fn test_cpp_runtime_on_supported_types(runtime: Runtime) {
     let header_path = dir.path().join("test.hpp");
     let mut header = File::create(&header_path).unwrap();
 
-    let config = CodeGeneratorConfig::new("testing".to_string());
+    let config =
+        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![runtime.into()]);
     let generator = cpp::CodeGenerator::new(&config);
     generator.output(&mut header, &registry).unwrap();
 
@@ -405,10 +414,8 @@ fn test_cpp_runtime_on_supported_types(runtime: Runtime) {
         r#"
 #include <iostream>
 #include <cassert>
-#include "{1}.hpp"
 #include "test.hpp"
 
-using namespace serde;
 using namespace testing;
 
 int main() {{
@@ -416,13 +423,8 @@ int main() {{
         std::vector<std::vector<uint8_t>> inputs = {{{0}}};
 
         for (auto input: inputs) {{
-            auto deserializer = {2}Deserializer(input);
-            auto test = Deserializable<SerdeData>::deserialize(deserializer);
-
-            auto serializer = {2}Serializer();
-            Serializable<SerdeData>::serialize(test, serializer);
-            auto output = std::move(serializer).bytes();
-
+            auto test = SerdeData::{1}Deserialize(input);
+            auto output = test.{1}Serialize();
             assert(input == output);
         }}
         return 0;
@@ -434,7 +436,6 @@ int main() {{
 "#,
         encodings,
         runtime.name(),
-        runtime.name().to_camel_case(),
     )
     .unwrap();
 
@@ -468,7 +469,8 @@ fn test_java_runtime_on_simple_data(runtime: Runtime) {
     let registry = get_local_registry().unwrap();
     let dir = tempdir().unwrap();
 
-    let config = CodeGeneratorConfig::new("testing".to_string());
+    let config =
+        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![runtime.into()]);
     let generator = java::CodeGenerator::new(&config);
     generator
         .write_source_files(dir.path().to_path_buf(), &registry)
@@ -486,12 +488,8 @@ fn test_java_runtime_on_simple_data(runtime: Runtime) {
         r#"
 import java.util.List;
 import java.util.Arrays;
-import com.facebook.serde.Deserializer;
-import com.facebook.serde.Serializer;
 import com.facebook.serde.Unsigned;
 import com.facebook.serde.Tuple2;
-import com.facebook.{1}.{2}Deserializer;
-import com.facebook.{1}.{2}Serializer;
 import testing.Choice;
 import testing.Test;
 
@@ -499,8 +497,7 @@ public class Main {{
     public static void main(String[] args) throws java.lang.Exception {{
         byte[] input = new byte[] {{{0}}};
 
-        Deserializer deserializer = new {2}Deserializer(input);
-        Test test = Test.deserialize(deserializer);
+        Test test = Test.{1}Deserialize(input);
 
         List<@Unsigned Integer> a = Arrays.asList(4, 6);
         Tuple2<Long, @Unsigned Long> b = new Tuple2<>(Long.valueOf(-3), Long.valueOf(5));
@@ -509,11 +506,17 @@ public class Main {{
 
         assert test.equals(test2);
 
-        Serializer serializer = new {2}Serializer();
-        test2.serialize(serializer);
-        byte[] output = serializer.get_bytes();
+        byte[] output = test2.{1}Serialize();
 
         assert java.util.Arrays.equals(input, output);
+
+        byte[] input2 = new byte[] {{{0}, 1}};
+        try {{
+            Test.{1}Deserialize(input2);
+        }} catch (Exception e) {{
+            return;
+        }}
+        assert false;
     }}
 }}
 "#,
@@ -523,7 +526,6 @@ public class Main {{
             .collect::<Vec<_>>()
             .join(", "),
         runtime.name(),
-        runtime.name().to_camel_case(),
     )
     .unwrap();
 
@@ -578,7 +580,8 @@ fn test_java_runtime_on_supported_types(runtime: Runtime) {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
 
-    let config = CodeGeneratorConfig::new("testing".to_string());
+    let config =
+        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![runtime.into()]);
     let generator = java::CodeGenerator::new(&config);
     generator
         .write_source_files(dir.path().to_path_buf(), &registry)
@@ -607,12 +610,8 @@ fn test_java_runtime_on_supported_types(runtime: Runtime) {
         r#"
 import java.util.List;
 import java.util.Arrays;
-import com.facebook.serde.Deserializer;
-import com.facebook.serde.Serializer;
 import com.facebook.serde.Unsigned;
 import com.facebook.serde.Tuple2;
-import com.facebook.{1}.{2}Deserializer;
-import com.facebook.{1}.{2}Serializer;
 import testing.SerdeData;
 
 public class Main {{
@@ -620,12 +619,9 @@ public class Main {{
         byte[][] inputs = new byte[][] {{{0}}};
 
         for (int i = 0; i < inputs.length; i++) {{
-            Deserializer deserializer = new {2}Deserializer(inputs[i]);
-            SerdeData test = SerdeData.deserialize(deserializer);
+            SerdeData test = SerdeData.{1}Deserialize(inputs[i]);
 
-            Serializer serializer = new {2}Serializer();
-            test.serialize(serializer);
-            byte[] output = serializer.get_bytes();
+            byte[] output = test.{1}Serialize();
 
             assert java.util.Arrays.equals(inputs[i], output);
         }}
@@ -634,7 +630,6 @@ public class Main {{
 "#,
         encodings,
         runtime.name(),
-        runtime.name().to_camel_case(),
     )
     .unwrap();
 
@@ -702,7 +697,7 @@ fn test_java_lcs_runtime_autotest() {
 }
 
 #[test]
-fn test_golang_runtime_tests() {
+fn test_golang_runtime_autotests() {
     let runtime_mod_path = std::env::current_exe()
         .unwrap()
         .parent()
@@ -713,6 +708,102 @@ fn test_golang_runtime_tests() {
         .current_dir(runtime_mod_path.to_str().unwrap())
         .arg("test")
         .arg("./...")
+        .status()
+        .unwrap();
+    assert!(status.success());
+}
+
+#[test]
+fn test_golang_lcs_runtime_on_simple_data() {
+    test_golang_runtime_on_simple_data(Runtime::Lcs);
+}
+
+fn test_golang_runtime_on_simple_data(runtime: Runtime) {
+    let registry = get_local_registry().unwrap();
+    let dir = tempdir().unwrap();
+    let source_path = dir.path().join("test.go");
+    let mut source = File::create(&source_path).unwrap();
+
+    let config = CodeGeneratorConfig::new("main".to_string())
+        .with_encodings(vec![runtime.into()])
+        .with_external_definitions(
+            vec![("github.com/google/go-cmp/cmp".to_string(), vec![])]
+                .into_iter()
+                .collect(),
+        );
+    let generator = golang::CodeGenerator::new(&config);
+    generator.output(&mut source, &registry).unwrap();
+
+    let reference = runtime.serialize(&Test {
+        a: vec![4, 6],
+        b: (-3, 5),
+        c: Choice::C { x: 7 },
+    });
+
+    writeln!(
+        source,
+        r#"
+func main() {{
+	input := []byte{{{0}}}
+	test, err := {1}DeserializeTest(input)
+	if err != nil {{ panic("failed to deserialize") }}
+
+        test2 := Test {{
+		A: []uint32{{ 4, 6 }},
+		B: struct {{ Field0 int64; Field1 uint64 }} {{ -3, 5 }},
+		C: &Choice__C {{ X: 7 }},
+	}}
+	if !cmp.Equal(test, test2) {{ panic("test != test2") }}
+
+	output, err := test2.{1}Serialize()
+	if err != nil {{ panic("failed to serialize") }}
+	if !cmp.Equal(input, output) {{ panic("input != output") }}
+
+	input2 := []byte{{{0}, 1}}
+	test2, err2 := {1}DeserializeTest(input2)
+	if err2 == nil {{ panic("was expecting an error") }}
+}}
+"#,
+        reference
+            .iter()
+            .map(|x| format!("{}", x))
+            .collect::<Vec<_>>()
+            .join(", "),
+        runtime.name().to_camel_case(),
+    )
+    .unwrap();
+
+    let status = Command::new("go")
+        .current_dir(dir.path())
+        .arg("mod")
+        .arg("init")
+        .arg("testing")
+        .status()
+        .unwrap();
+    assert!(status.success());
+
+    let runtime_mod_path = std::env::current_exe()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .join("../../../serde-generate/runtime/golang");
+    let status = Command::new("go")
+        .current_dir(dir.path())
+        .arg("mod")
+        .arg("edit")
+        .arg("-replace")
+        .arg(format!(
+            "github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang={}",
+            runtime_mod_path.to_str().unwrap()
+        ))
+        .status()
+        .unwrap();
+    assert!(status.success());
+
+    let status = Command::new("go")
+        .current_dir(dir.path())
+        .arg("run")
+        .arg(source_path.clone())
         .status()
         .unwrap();
     assert!(status.success());

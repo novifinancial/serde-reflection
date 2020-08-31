@@ -392,11 +392,11 @@ impl Installer {
         Installer { install_dir }
     }
 
-    fn runtimes_not_implemented() -> std::result::Result<(), Box<dyn std::error::Error>> {
-        Err(Box::new(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            "Installing runtimes is not implemented: use cargo instead",
-        )))
+    fn runtime_installation_message(
+        name: &str,
+    ) -> std::result::Result<(), Box<dyn std::error::Error>> {
+        eprintln!("Not installing sources for published crate {}", name);
+        Ok(())
     }
 }
 
@@ -440,14 +440,14 @@ serde_bytes = "0.11"
     }
 
     fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {
-        Self::runtimes_not_implemented()
+        Self::runtime_installation_message("serde")
     }
 
     fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error> {
-        Self::runtimes_not_implemented()
+        Self::runtime_installation_message("bincode")
     }
 
     fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        Self::runtimes_not_implemented()
+        Self::runtime_installation_message("libra-canonical-serialization")
     }
 }

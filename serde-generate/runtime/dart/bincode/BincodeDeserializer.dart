@@ -1,9 +1,6 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
-
-import '../serde/BinaryDeserializer.dart';
-import '../serde/Slice.dart';
-import 'dart:typed_data';
+part of bincode;
 
 class BincodeDeserializer extends BinaryDeserializer {
   BincodeDeserializer(Uint8List input) : super(input) {}

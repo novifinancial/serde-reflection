@@ -2,15 +2,14 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 import "package:test/test.dart";
-import 'LcsDeserializer.dart';
-import 'LcsSerializer.dart';
 import 'dart:typed_data';
+import 'lcs.dart';
 
 void main() {
   test('serializer u32 work', () {
     LcsSerializer serializer = new LcsSerializer();
     serializer.serialize_u32(1);
-    expect(serializer.getBytes(), Uint8List.fromList([1, 0, 0, 0]));
+    expect(serializer.get_bytes(), Uint8List.fromList([1, 0, 0, 0]));
   });
 
   test('deserializer u32 work', () {
@@ -27,7 +26,7 @@ void main() {
     serializer.serialize_u32(1);
     serializer.serialize_u32(2);
     expect(
-        serializer.getBytes(),
+        serializer.get_bytes(),
         Uint8List.fromList([
           -1,
           /**/ 1,

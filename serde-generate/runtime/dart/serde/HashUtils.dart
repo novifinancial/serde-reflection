@@ -1,3 +1,5 @@
+part of serde;
+
 int $jc(int hash, int value) {
   // Jenkins hash "combine".
   hash = 0x1fffffff & (hash + value);

@@ -1,9 +1,6 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
-import 'dart:typed_data';
-
-import '../serde//BinaryDeserializer.dart';
-import '../serde/Slice.dart';
+part of lcs;
 
 const int maxInt = 4294967296;
 
