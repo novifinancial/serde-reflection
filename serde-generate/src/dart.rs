@@ -798,7 +798,7 @@ switch (index) {{"#,
             for (index, variant) in variants {
                 writeln!(
                     self.out,
-                    "case {}: return {}{}.load(deserializer);",
+                    "case {}: return {}{}Item.load(deserializer);",
                     index,name ,variant.name,
                 )?;
             }
@@ -831,7 +831,7 @@ switch (index) {{"#,
         variants: &BTreeMap<u32, Named<VariantFormat>>,
     ) -> Result<()> {
         for (index, variant) in variants {
-            self.output_variant(base, *index, &format!("{}{}",base,&variant.name), &variant.value)?;
+            self.output_variant(base, *index, &format!("{}{}Item",base,&variant.name), &variant.value)?;
         }
         Ok(())
     }
