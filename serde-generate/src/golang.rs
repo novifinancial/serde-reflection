@@ -4,7 +4,7 @@
 use crate::{
     common,
     indent::{IndentConfig, IndentedWriter},
-    CodeGeneratorConfig,
+    CodeGeneratorConfig, Encoding,
 };
 use heck::CamelCase;
 use serde_reflection::{ContainerFormat, Format, FormatHolder, Named, Registry, VariantFormat};
@@ -343,7 +343,7 @@ where
                 write!(
                     self.out,
                     r#"
-if (value != nil) {{
+if value != nil {{
 	if err := serializer.SerializeOptionTag(true); err != nil {{ return err }}
 	{}
 }} else {{
@@ -431,11 +431,13 @@ for _, item := range(value) {{
                     r#"
 tag, err := deserializer.DeserializeOptionTag()
 if err != nil {{ return nil, err }}
-var value *{}
-if (tag) {{
+if tag {{
+	value := new({})
 	{}
+        return value, nil
+}} else {{
+	return nil, nil
 }}
-return value, nil
 "#,
                     self.quote_type(format),
                     self.quote_deserialize(format, "*value", "nil"),
@@ -473,7 +475,7 @@ for i := 0; i < int(length); i++ {{
 	var key {0}
 	{2}
 	slice.End = deserializer.GetBufferOffset()
-	if (i > 0) {{
+	if i > 0 {{
 		err := deserializer.CheckThatKeySlicesAreIncreasing(previous_slice, slice)
 		if err != nil {{ return nil, err }}
 	}}
@@ -539,10 +541,25 @@ return obj, nil
         use VariantFormat::*;
         let fields = match variant {
             Unit => Vec::new(),
-            NewType(format) => vec![Named {
-                name: "Value".to_string(),
-                value: format.as_ref().clone(),
-            }],
+            NewType(format) => match format.as_ref() {
+                // We cannot define a "new type" (e.g. `type Foo Bar`) here because the underlying name (`Bar`)
+                // could point to a Go interface. This would make `Foo` an interface as well. Interfaces can't be used
+                // as structs (e.g. they cannot have methods).
+                Format::TypeName(_) => vec![Named {
+                    name: "Value".to_string(),
+                    value: format.as_ref().clone(),
+                }],
+                // Other cases are fine.
+                _ => {
+                    self.output_struct_or_variant_new_type_container(
+                        Some(base),
+                        Some(index),
+                        name,
+                        format,
+                    )?;
+                    return Ok(());
+                }
+            },
             Tuple(formats) => formats
                 .iter()
                 .enumerate()
@@ -614,18 +631,7 @@ return obj, nil
             writeln!(self.out, "}}")?;
 
             for encoding in &self.generator.config.encodings {
-                writeln!(
-                    self.out,
-                    r#"
-func (obj *{0}) {2}Serialize() ([]byte, error) {{
-	serializer := {1}.NewSerializer();
-	if err := obj.Serialize(serializer); err != nil {{ return nil, err }}
-	return serializer.GetBytes(), nil
-}}"#,
-                    full_name,
-                    encoding.name(),
-                    encoding.name().to_camel_case()
-                )?;
+                self.output_struct_serialize_for_encoding(&full_name, *encoding)?;
             }
         }
         // Deserialize (struct) or Load (variant)
@@ -655,9 +661,122 @@ func (obj *{0}) {2}Serialize() ([]byte, error) {{
 
             if variant_base.is_none() {
                 for encoding in &self.generator.config.encodings {
-                    writeln!(
-                        self.out,
-                        r#"
+                    self.output_struct_deserialize_for_encoding(&full_name, *encoding)?;
+                }
+            }
+        }
+        Ok(())
+    }
+
+    // Same as output_struct_or_variant_container but we map the container with a single anonymous field
+    // to a new type in Go.
+    fn output_struct_or_variant_new_type_container(
+        &mut self,
+        variant_base: Option<&str>,
+        variant_index: Option<u32>,
+        name: &str,
+        format: &Format,
+    ) -> Result<()> {
+        let full_name = match variant_base {
+            None => name.to_string(),
+            Some(base) => format!("{}__{}", base, name),
+        };
+        // Struct
+        writeln!(self.out)?;
+        self.output_comment(name)?;
+        writeln!(self.out, "type {} {}", full_name, self.quote_type(format))?;
+
+        // Link to base interface.
+        if let Some(base) = variant_base {
+            writeln!(self.out, "\nfunc (*{}) is{}() {{}}", full_name, base)?;
+        }
+
+        // Serialize
+        if self.generator.config.serialization {
+            writeln!(
+                self.out,
+                "\nfunc (obj *{}) Serialize(serializer serde.Serializer) error {{",
+                full_name
+            )?;
+            self.out.indent();
+            if let Some(index) = variant_index {
+                writeln!(self.out, "serializer.SerializeVariantIndex({})", index)?;
+            }
+            writeln!(
+                self.out,
+                "{}",
+                self.quote_serialize_value(
+                    &format!("(({})(*obj))", self.quote_type(format)),
+                    format
+                )
+            )?;
+            writeln!(self.out, "return nil")?;
+            self.out.unindent();
+            writeln!(self.out, "}}")?;
+
+            for encoding in &self.generator.config.encodings {
+                self.output_struct_serialize_for_encoding(&full_name, *encoding)?;
+            }
+        }
+        // Deserialize (struct) or Load (variant)
+        if self.generator.config.serialization {
+            writeln!(
+                self.out,
+                "\nfunc {0}{1}(deserializer serde.Deserializer) ({1}, error) {{",
+                if variant_base.is_none() {
+                    "Deserialize"
+                } else {
+                    "load_"
+                },
+                full_name,
+            )?;
+            self.out.indent();
+            writeln!(self.out, "var obj {}", self.quote_type(format))?;
+            writeln!(
+                self.out,
+                "{}",
+                self.quote_deserialize(format, "obj", &format!("(({})(obj))", full_name))
+            )?;
+            writeln!(self.out, "return ({})(obj), nil", full_name)?;
+            self.out.unindent();
+            writeln!(self.out, "}}")?;
+
+            if variant_base.is_none() {
+                for encoding in &self.generator.config.encodings {
+                    self.output_struct_deserialize_for_encoding(&full_name, *encoding)?;
+                }
+            }
+        }
+        Ok(())
+    }
+
+    fn output_struct_serialize_for_encoding(
+        &mut self,
+        name: &str,
+        encoding: Encoding,
+    ) -> Result<()> {
+        writeln!(
+            self.out,
+            r#"
+func (obj *{0}) {2}Serialize() ([]byte, error) {{
+	serializer := {1}.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil {{ return nil, err }}
+	return serializer.GetBytes(), nil
+}}"#,
+            name,
+            encoding.name(),
+            encoding.name().to_camel_case()
+        )
+    }
+
+    fn output_struct_deserialize_for_encoding(
+        &mut self,
+        name: &str,
+        encoding: Encoding,
+    ) -> Result<()> {
+        writeln!(
+            self.out,
+            r#"
 func {2}Deserialize{0}(input []byte) ({0}, error) {{
 	deserializer := {1}.NewDeserializer(input);
 	obj, err := Deserialize{0}(deserializer)
@@ -666,14 +785,10 @@ func {2}Deserialize{0}(input []byte) ({0}, error) {{
 	}}
 	return obj, err
 }}"#,
-                        full_name,
-                        encoding.name(),
-                        encoding.name().to_camel_case()
-                    )?;
-                }
-            }
-        }
-        Ok(())
+            name,
+            encoding.name(),
+            encoding.name().to_camel_case()
+        )
     }
 
     fn output_enum_container(
@@ -689,6 +804,13 @@ func {2}Deserialize{0}(input []byte) ({0}, error) {{
         writeln!(self.out, "is{}()", name)?;
         if self.generator.config.serialization {
             writeln!(self.out, "Serialize(serializer serde.Serializer) error")?;
+            for encoding in &self.generator.config.encodings {
+                writeln!(
+                    self.out,
+                    "{}Serialize() ([]byte, error)",
+                    encoding.name().to_camel_case()
+                )?;
+            }
         }
         self.out.unindent();
         writeln!(self.out, "}}")?;
@@ -730,6 +852,10 @@ switch index {{"#,
             writeln!(self.out, "}}")?;
             self.out.unindent();
             writeln!(self.out, "}}")?;
+
+            for encoding in &self.generator.config.encodings {
+                self.output_struct_deserialize_for_encoding(name, *encoding)?;
+            }
         }
 
         for (index, variant) in variants {
@@ -743,10 +869,17 @@ switch index {{"#,
         use ContainerFormat::*;
         let fields = match format {
             UnitStruct => Vec::new(),
-            NewTypeStruct(format) => vec![Named {
-                name: "Value".to_string(),
-                value: format.as_ref().clone(),
-            }],
+            NewTypeStruct(format) => match format.as_ref() {
+                // See comment in `output_variant`.
+                Format::TypeName(_) => vec![Named {
+                    name: "Value".to_string(),
+                    value: format.as_ref().clone(),
+                }],
+                _ => {
+                    self.output_struct_or_variant_new_type_container(None, None, name, format)?;
+                    return Ok(());
+                }
+            },
             TupleStruct(formats) => formats
                 .iter()
                 .enumerate()

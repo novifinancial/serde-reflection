@@ -30,7 +30,7 @@ func TestSerializeDeserializeBytes(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := new(lcs.Serializer)
+			s := lcs.NewSerializer()
 			d := lcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeBytes(tc.target)
@@ -67,7 +67,7 @@ func TestSerializeDeserializeStr(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.target, func(t *testing.T) {
-			s := new(lcs.Serializer)
+			s := lcs.NewSerializer()
 			d := lcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeStr(tc.target)
@@ -104,7 +104,7 @@ func TestSerializeDeserializeBool(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := new(lcs.Serializer)
+			s := lcs.NewSerializer()
 			d := lcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeBool(tc.target)
@@ -144,7 +144,7 @@ func TestSerializeDeserializeUnit(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := new(lcs.Serializer)
+			s := lcs.NewSerializer()
 			d := lcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeUnit(tc.target)
@@ -176,7 +176,7 @@ func TestSerializeDeserializeU8(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := new(lcs.Serializer)
+			s := lcs.NewSerializer()
 			d := lcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeU8(tc.target)
@@ -218,7 +218,7 @@ func TestSerializeDeserializeU16(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := new(lcs.Serializer)
+			s := lcs.NewSerializer()
 			d := lcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeU16(tc.target)
@@ -263,7 +263,7 @@ func TestSerializeDeserializeU32(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := new(lcs.Serializer)
+			s := lcs.NewSerializer()
 			d := lcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeU32(tc.target)
@@ -312,7 +312,7 @@ func TestSerializeDeserializeU64(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := new(lcs.Serializer)
+			s := lcs.NewSerializer()
 			d := lcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeU64(tc.target)
@@ -374,7 +374,7 @@ func TestSerializeDeserializeU128(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := new(lcs.Serializer)
+			s := lcs.NewSerializer()
 			d := lcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeU128(tc.target)
@@ -411,7 +411,7 @@ func TestSerializeDeserializeI8(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := new(lcs.Serializer)
+			s := lcs.NewSerializer()
 			d := lcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeI8(tc.target)
@@ -452,7 +452,7 @@ func TestSerializeDeserializeI16(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := new(lcs.Serializer)
+			s := lcs.NewSerializer()
 			d := lcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeI16(tc.target)
@@ -493,7 +493,7 @@ func TestSerializeDeserializeI32(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := new(lcs.Serializer)
+			s := lcs.NewSerializer()
 			d := lcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeI32(tc.target)
@@ -537,7 +537,7 @@ func TestSerializeDeserializeI64(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := new(lcs.Serializer)
+			s := lcs.NewSerializer()
 			d := lcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeI64(tc.target)
@@ -589,7 +589,7 @@ func TestSerializeDeserializeI128(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := new(lcs.Serializer)
+			s := lcs.NewSerializer()
 			d := lcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeI128(tc.target)
@@ -622,7 +622,7 @@ func TestSerializeDeserializeVariantIndex(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := new(lcs.Serializer)
+			s := lcs.NewSerializer()
 			d := lcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeVariantIndex(tc.target)
@@ -643,13 +643,13 @@ func TestSerializeDeserializeVariantIndex(t *testing.T) {
 
 func TestSerializeDeserializeLenLimit(t *testing.T) {
 	t.Run("SerializeLen: length is too large", func(t *testing.T) {
-		s := new(lcs.Serializer)
+		s := lcs.NewSerializer()
 		err := s.SerializeLen(^uint64(0))
 		assert.Error(t, err)
 		assert.Equal(t, "length is too large", err.Error())
 	})
 	t.Run("DeserializeLen: length is too large", func(t *testing.T) {
-		s := new(lcs.Serializer)
+		s := lcs.NewSerializer()
 		err := s.SerializeVariantIndex(^uint32(0))
 		assert.NoError(t, err)
 
@@ -691,7 +691,7 @@ func TestSerializeDeserializeOptionTag(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := new(lcs.Serializer)
+			s := lcs.NewSerializer()
 			d := lcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeOptionTag(tc.target)
@@ -711,7 +711,7 @@ func TestSerializeDeserializeOptionTag(t *testing.T) {
 }
 
 func TestGetBufferOffset(t *testing.T) {
-	s := new(lcs.Serializer)
+	s := lcs.NewSerializer()
 	s.SerializeU64(0)
 	assert.Equal(t, uint64(8), s.GetBufferOffset())
 
@@ -719,4 +719,26 @@ func TestGetBufferOffset(t *testing.T) {
 	assert.Equal(t, uint64(0), d.GetBufferOffset())
 	d.DeserializeU64()
 	assert.Equal(t, uint64(8), d.GetBufferOffset())
+}
+
+func TestCheckThatKeySlicesAreIncreasing(t *testing.T) {
+	d := lcs.NewDeserializer([]byte{0, 1, 2, 0, 2})
+	// Offsets are taken from the input bytes.
+	d.DeserializeU32()
+	require.NoError(t, d.CheckThatKeySlicesAreIncreasing(serde.Slice{0, 3}, serde.Slice{3, 5}))
+	require.Error(t, d.CheckThatKeySlicesAreIncreasing(serde.Slice{0, 3}, serde.Slice{0, 3}))
+	require.Error(t, d.CheckThatKeySlicesAreIncreasing(serde.Slice{1, 3}, serde.Slice{3, 5}))
+}
+
+func TestSortMapEntries(t *testing.T) {
+	s := lcs.NewSerializer()
+	s.SerializeU8(255)
+	s.SerializeU32(1)
+	s.SerializeU32(1)
+	s.SerializeU32(2)
+	assert.Equal(t, s.GetBytes(), []byte{255 /**/, 1 /**/, 0, 0 /**/, 0, 1, 0 /**/, 0 /**/, 0 /**/, 2, 0, 0, 0})
+
+	offsets := []uint64{1, 2, 4, 7, 8, 9}
+	s.SortMapEntries(offsets)
+	assert.Equal(t, s.GetBytes(), []byte{255 /**/, 0 /**/, 0 /**/, 0, 0 /**/, 0, 1, 0 /**/, 1 /**/, 2, 0, 0, 0})
 }
