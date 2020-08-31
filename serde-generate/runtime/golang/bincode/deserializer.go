@@ -4,7 +4,7 @@
 package bincode
 
 import (
-	"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/serde"
+	"github.com/novifinancial/serde-reflection/serde-generate/runtime/golang/serde"
 )
 
 // `deserializer` extends `serde.BinaryDeserializer` to implement `serde.Deserializer`.
