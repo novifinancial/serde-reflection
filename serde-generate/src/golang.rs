@@ -759,6 +759,9 @@ return obj, nil
             self.out,
             r#"
 func (obj *{0}) {2}Serialize() ([]byte, error) {{
+	if obj == nil {{
+		return nil, fmt.Errorf("Cannot serialize null object")
+	}}
 	serializer := {1}.NewSerializer();
 	if err := obj.Serialize(serializer); err != nil {{ return nil, err }}
 	return serializer.GetBytes(), nil
@@ -778,6 +781,10 @@ func (obj *{0}) {2}Serialize() ([]byte, error) {{
             self.out,
             r#"
 func {2}Deserialize{0}(input []byte) ({0}, error) {{
+	if input == nil {{
+		var obj {0}
+		return obj, fmt.Errorf("Cannot deserialize null array")
+	}}
 	deserializer := {1}.NewDeserializer(input);
 	obj, err := Deserialize{0}(deserializer)
 	if deserializer.GetBufferOffset() < uint64(len(input)) {{
@@ -787,7 +794,7 @@ func {2}Deserialize{0}(input []byte) ({0}, error) {{
 }}"#,
             name,
             encoding.name(),
-            encoding.name().to_camel_case()
+            encoding.name().to_camel_case(),
         )
     }
 

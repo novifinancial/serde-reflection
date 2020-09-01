@@ -864,6 +864,9 @@ public byte[] {0}Serialize() throws java.lang.Exception {{
             self.out,
             r#"
 public static {0} {1}Deserialize(byte[] input) throws java.lang.Exception {{
+    if (input == null) {{
+         throw new Exception("Cannot deserialize null array");
+    }}
     com.novi.serde.Deserializer deserializer = new com.novi.{1}.{2}Deserializer(input);
     {0} value = deserialize(deserializer);
     if (deserializer.get_buffer_offset() < input.length) {{
