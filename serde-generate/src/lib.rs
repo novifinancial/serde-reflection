@@ -118,6 +118,8 @@ pub mod java;
 pub mod python3;
 /// Support for code-generation in Rust
 pub mod rust;
+/// Support for code-generation in TypeScript/JavaScript
+pub mod ts;
 
 #[doc(hidden)]
 /// Utility functions to help testing code generators.
