@@ -1,6 +1,6 @@
 [package]
 name = "serde-name"
-version = "0.1.0"
+version = "0.1.1"
 description = "Extract the Serde name of structs and enums"
 documentation = "https://docs.rs/serde-name"
 repository = "https://github.com/novifinancial/serde-reflection"
