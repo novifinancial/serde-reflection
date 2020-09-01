@@ -962,6 +962,9 @@
 <span id="962">962</span>
 <span id="963">963</span>
 <span id="964">964</span>
+<span id="965">965</span>
+<span id="966">966</span>
+<span id="967">967</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -1829,6 +1832,9 @@ public byte[] {0}Serialize() throws java.lang.Exception {{
             <span class="self">self</span>.<span class="ident">out</span>,
             <span class="string">r#&quot;
 public static {0} {1}Deserialize(byte[] input) throws java.lang.Exception {{
+    if (input == null) {{
+         throw new Exception(&quot;Cannot deserialize null array&quot;);
+    }}
     com.novi.serde.Deserializer deserializer = new com.novi.{1}.{2}Deserializer(input);
     {0} value = deserialize(deserializer);
     if (deserializer.get_buffer_offset() &lt; input.length) {{

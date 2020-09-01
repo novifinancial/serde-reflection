@@ -979,6 +979,13 @@
 <span id="979">979</span>
 <span id="980">980</span>
 <span id="981">981</span>
+<span id="982">982</span>
+<span id="983">983</span>
+<span id="984">984</span>
+<span id="985">985</span>
+<span id="986">986</span>
+<span id="987">987</span>
+<span id="988">988</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -1741,6 +1748,9 @@ return obj, nil
             <span class="self">self</span>.<span class="ident">out</span>,
             <span class="string">r#&quot;
 func (obj *{0}) {2}Serialize() ([]byte, error) {{
+	if obj == nil {{
+		return nil, fmt.Errorf(&quot;Cannot serialize null object&quot;)
+	}}
 	serializer := {1}.NewSerializer();
 	if err := obj.Serialize(serializer); err != nil {{ return nil, err }}
 	return serializer.GetBytes(), nil
@@ -1760,6 +1770,10 @@ func (obj *{0}) {2}Serialize() ([]byte, error) {{
             <span class="self">self</span>.<span class="ident">out</span>,
             <span class="string">r#&quot;
 func {2}Deserialize{0}(input []byte) ({0}, error) {{
+	if input == nil {{
+		var obj {0}
+		return obj, fmt.Errorf(&quot;Cannot deserialize null array&quot;)
+	}}
 	deserializer := {1}.NewDeserializer(input);
 	obj, err := Deserialize{0}(deserializer)
 	if deserializer.GetBufferOffset() &lt; uint64(len(input)) {{
@@ -1769,7 +1783,7 @@ func {2}Deserialize{0}(input []byte) ({0}, error) {{
 }}&quot;#</span>,
             <span class="ident">name</span>,
             <span class="ident">encoding</span>.<span class="ident">name</span>(),
-            <span class="ident">encoding</span>.<span class="ident">name</span>().<span class="ident">to_camel_case</span>()
+            <span class="ident">encoding</span>.<span class="ident">name</span>().<span class="ident">to_camel_case</span>(),
         )
     }
 
