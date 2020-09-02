@@ -443,7 +443,7 @@ if (!tag) {{
 int length = deserializer.deserialize_len();
 List<{0}> obj = new List<{0}>(length);
 for (int i = 0; i < length; i++) {{
-    obj.add({1});
+    obj[i]={1};
 }}
 return obj;
 "#,
