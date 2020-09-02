@@ -96,24 +96,44 @@ dev_dependencies:
 
 import 'package:test/test.dart';
 import 'dart:typed_data';
-import 'package:{0}/lcs/lcs.dart';
-import 'package:{0}/bincode/bincode.dart';
 import 'package:{0}/starcoin/starcoin.dart';
-import 'package:{0}/serde/serde.dart';
-
-part 'src/serde_test.dart';
-part 'src/lcs_test.dart';
-part 'src/bincode_test.dart';
-part 'src/starcoin_test.dart';
-
-void main() {{
-  group('Serde', runSerdeTests);
-  group('Lcs', runLcsTests);
-  group('Bincode', runBincodeTests);
-  group('starcoin', runStarcoinTests);
-}}"#,
+import 'package:{0}/serde/serde.dart';"#,
             self.config.module_name
         )?;
+
+        for encoding in &self.config.encodings {
+            writeln!(
+                &mut out,
+                "import 'package:{0}/{1}/{1}.dart';",
+                self.config.module_name,
+                encoding.name()
+            )?;
+        }
+
+        writeln!(
+            &mut out,
+            r#"part 'src/serde_test.dart';
+part 'src/starcoin_test.dart';"#
+        )?;
+        for encoding in &self.config.encodings {
+            writeln!(&mut out, "part 'src/{}_test.dart';", encoding.name())?;
+        }
+
+        writeln!(
+            &mut out,
+            r#"void main() {{
+  group('Serde', runSerdeTests);
+  group('starcoin', runStarcoinTests);"#,
+        )?;
+        for encoding in &self.config.encodings {
+            writeln!(
+                &mut out,
+                "\tgroup('{0}', run{0}Tests);",
+                encoding.name().to_camel_case()
+            )?;
+        }
+
+        writeln!(&mut out, "}}")?;
         Ok(())
     }
 
@@ -136,19 +156,21 @@ void main() {{
             r#"library {}_types;
 
 import 'dart:typed_data';
-import 'package:{}/lcs/lcs.dart';
-import 'package:{}/serde/serde.dart';
-import 'package:{}/bincode/bincode.dart';
 import 'package:optional/optional.dart';
-
-            "#,
-            self.config.module_name,
-            self.config.module_name,
-            self.config.module_name,
-            self.config.module_name
+import 'package:{}/serde/serde.dart';"#,
+            self.config.module_name, self.config.module_name,
         )?;
 
-        writeln!(&mut emitter.out, "part 'TraitHelpers.dart';")?;
+        for encoding in &self.config.encodings {
+            writeln!(
+                &mut emitter.out,
+                "import 'package:{0}/{1}/{1}.dart';",
+                self.config.module_name,
+                encoding.name()
+            )?;
+        }
+
+        writeln!(&mut emitter.out, "\npart 'TraitHelpers.dart';")?;
         for name in registry.keys() {
             writeln!(&mut emitter.out, "part '{}.dart';", name)?;
         }
