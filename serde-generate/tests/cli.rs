@@ -80,7 +80,7 @@ fn test_that_installed_python_code_with_package_parses() {
     std::fs::write(
         dir.path().join("my_package").join("__init__.py"),
         r#"
-__all__ = ["lcs", "serde", "bincode", "test_types"]
+__all__ = ["lcs", "serde_types", "serde_binary", "bincode", "test_types"]
 "#,
     )
     .unwrap();

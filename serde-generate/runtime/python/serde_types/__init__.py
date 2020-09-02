@@ -5,6 +5,7 @@ import numpy as np
 from dataclasses import dataclass
 import typing
 
+
 @dataclass(init=False)
 class uint128:
     high: np.uint64
