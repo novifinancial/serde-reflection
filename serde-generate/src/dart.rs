@@ -149,7 +149,7 @@ import 'package:optional/optional.dart';
         )?;
 
         writeln!(&mut emitter.out, "part 'TraitHelpers.dart';")?;
-        for (name, _format) in registry {
+        for name in registry.keys() {
             writeln!(&mut emitter.out, "part '{}.dart';", name)?;
         }
 
@@ -207,7 +207,7 @@ where
     }
 
     fn quote_qualified_name(&self, name: &str) -> String {
-        return name.to_string();
+        name.to_string()
     }
 
     fn quote_type(&self, format: &Format) -> String {
