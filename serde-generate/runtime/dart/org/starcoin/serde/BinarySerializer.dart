@@ -1,22 +1,28 @@
-import 'dart:typed_data';
-import 'Unit.dart';
+part of serde;
 
-class BinarySerializer {
+abstract class BinarySerializer {
   List<int> output;
 
-  BinarySerializer() {
-    output = new List<int>();
-  }
+  BinarySerializer() : output = List<int>.filled(0, 0, growable: true);
 
-  Uint8List getBytes() {
+  Uint8List get_bytes() {
     return Uint8List.fromList(this.output);
   }
 
-  void serialize_bytes(Uint8List val) {
-    var bdata = new ByteData(4);
-    bdata.setUint32(0, val.length, Endian.little);
-    this.output.addAll(bdata.buffer.asUint8List());
+  void serialize_uint8list(Uint8List val) {
+    //var bdata = new ByteData(4);
+    //bdata.setUint32(0, val.length, Endian.little);
+    //this.output.addAll(bdata.buffer.asUint8List());
+    this.serialize_len(val.length);
     this.output.addAll(val);
+  }
+
+  void serialize_bytes(Bytes val) {
+    //var bdata = new ByteData(4);
+    //bdata.setUint32(0, val.length, Endian.little);
+    //this.output.addAll(bdata.buffer.asUint8List());
+    this.serialize_len(val.content.length);
+    this.output.addAll(val.content);
   }
 
   void serialize_bool(bool val) {
@@ -66,6 +72,19 @@ class BinarySerializer {
   }
 
   void serialize_unit(Unit value) {}
+
+  void serialize_variant_index(int index);
+
+  void serialize_str(String str) {
+    serialize_uint8list(Uint8List.fromList(str.codeUnits));
+  }
+
+  void serialize_len(int len);
+
+  void serialize_u128(Int128 value) {
+    serialize_u64(value.low);
+    serialize_u64(value.high);
+  }
 
   int get_buffer_offset() {
     return output.length;

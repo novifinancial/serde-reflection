@@ -5,8 +5,6 @@ import 'dart:typed_data';
 import '../serde//BinaryDeserializer.dart';
 import '../serde/Slice.dart';
 
-const int maxInt = 4294967296;
-
 class LcsDeserializer extends BinaryDeserializer {
   LcsDeserializer(Uint8List input) : super(input) {}
 

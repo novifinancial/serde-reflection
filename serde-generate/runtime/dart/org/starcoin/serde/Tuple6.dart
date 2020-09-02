@@ -25,7 +25,6 @@ class Tuple6<T0, T1, T2, T3, T4, T5> {
 
   @override
   bool operator ==(covariant Tuple6 other) {
-    if (this == other) return true;
     if (other == null) return false;
     if (this.field0 == other.field0 &&
         this.field1 == other.field1 &&
