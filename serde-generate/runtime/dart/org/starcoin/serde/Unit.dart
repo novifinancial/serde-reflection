@@ -6,7 +6,6 @@ class Unit {
 
   @override
   bool operator ==(covariant Unit other) {
-    if (this == other) return true;
     if (other == null) return false;
     return true;
   }
