@@ -67,7 +67,7 @@ impl<'a> CodeGenerator<'a> {
 
     fn write_package(&self, install_dir: &std::path::PathBuf) -> Result<()> {
         let mut file = std::fs::File::create(install_dir.join("pubspec.yaml"))?;
-        let mut out = IndentedWriter::new(&mut file, IndentConfig::Space(4));
+        let mut out = IndentedWriter::new(&mut file, IndentConfig::Space(2));
         writeln!(
             &mut out,
             r#"name: {}
@@ -84,6 +84,39 @@ dev_dependencies:
         Ok(())
     }
 
+    fn output_test(&self, install_dir: &std::path::PathBuf) -> Result<()> {
+        let test_dir_path = install_dir.join("test");
+        std::fs::create_dir_all(&test_dir_path)?;
+
+        let mut file = std::fs::File::create(test_dir_path.join("all_test.dart"))?;
+        let mut out = IndentedWriter::new(&mut file, IndentConfig::Space(2));
+        writeln!(
+            &mut out,
+            r#"library lcs_test;
+
+import 'package:test/test.dart';
+import 'dart:typed_data';
+import 'package:{0}/lcs/lcs.dart';
+import 'package:{0}/bincode/bincode.dart';
+import 'package:{0}/starcoin/starcoin.dart';
+import 'package:{0}/serde/serde.dart';
+
+part 'src/serde_test.dart';
+part 'src/lcs_test.dart';
+part 'src/bincode_test.dart';
+part 'src/starcoin_test.dart';
+
+void main() {{
+  group('Serde', runSerdeTests);
+  group('Lcs', runLcsTests);
+  group('Bincode', runBincodeTests);
+  group('starcoin', runStarcoinTests);
+}}"#,
+            self.config.module_name
+        )?;
+        Ok(())
+    }
+
     fn write_library(
         &self,
         install_dir: &std::path::PathBuf,
@@ -93,7 +126,7 @@ dev_dependencies:
         let mut file =
             std::fs::File::create(install_dir.join(self.config.module_name.clone() + ".dart"))?;
         let mut emitter = DartEmitter {
-            out: IndentedWriter::new(&mut file, IndentConfig::Space(4)),
+            out: IndentedWriter::new(&mut file, IndentConfig::Space(2)),
             generator: self,
             current_namespace,
         };
@@ -132,7 +165,7 @@ import 'package:optional/optional.dart';
     ) -> Result<()> {
         let mut file = std::fs::File::create(dir_path.join(name.to_string() + ".dart"))?;
         let mut emitter = DartEmitter {
-            out: IndentedWriter::new(&mut file, IndentConfig::Space(4)),
+            out: IndentedWriter::new(&mut file, IndentConfig::Space(2)),
             generator: self,
             current_namespace,
         };
@@ -149,7 +182,7 @@ import 'package:optional/optional.dart';
     ) -> Result<()> {
         let mut file = std::fs::File::create(dir_path.join("TraitHelpers.dart"))?;
         let mut emitter = DartEmitter {
-            out: IndentedWriter::new(&mut file, IndentConfig::Space(4)),
+            out: IndentedWriter::new(&mut file, IndentConfig::Space(2)),
             generator: self,
             current_namespace,
         };
@@ -166,7 +199,7 @@ where
     fn output_preamble(&mut self) -> Result<()> {
         writeln!(
             self.out,
-            "part of {}_types;\n\n",
+            "part of {}_types;",
             self.generator.config.module_name
         )?;
 
@@ -560,7 +593,7 @@ return obj;
             writeln!(self.out, "class {} extends {} {{", name, base)?;
         } else {
             //self.output_comment(name)?;
-            writeln!(self.out, " class {} {{", name)?;
+            writeln!(self.out, "class {} {{", name)?;
         }
         self.enter_class(name);
         // Fields
@@ -727,7 +760,7 @@ if (other == null) return false;"#,
         writeln!(
             self.out,
             r#"
-  Uint8List {0}Serialize() {{
+Uint8List {0}Serialize() {{
     var serializer = new {1}Serializer();
     serialize(serializer);
     return serializer.get_bytes();
@@ -745,7 +778,7 @@ if (other == null) return false;"#,
         writeln!(
             self.out,
             r#"
- static {0} {1}Deserialize(Uint8List input)  {{
+static {0} {1}Deserialize(Uint8List input)  {{
    var deserializer = new {2}Deserializer(input);
     {0} value = deserialize(deserializer);
     if (deserializer.get_buffer_offset() < input.length) {{
@@ -805,6 +838,8 @@ switch (index) {{"#,
                 self.output_class_deserialize_for_encoding(name, *encoding)?;
             }
         }
+        self.out.unindent();
+        self.out.unindent();
 
         writeln!(self.out, "}}\n")?;
 
@@ -893,6 +928,8 @@ impl crate::SourceInstaller for Installer {
     ) -> std::result::Result<(), Self::Error> {
         let generator = CodeGenerator::new(config);
         generator.output(self.install_dir.clone(), registry)?;
+        generator.output_test(&self.install_dir)?;
+        self.install_runtime(include_directory!("runtime/dart/test"), "test/src")?;
         Ok(())
     }
 
