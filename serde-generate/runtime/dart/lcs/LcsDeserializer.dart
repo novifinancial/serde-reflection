@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 part of lcs;
 
-const int maxInt = 4294967296;
-
 class LcsDeserializer extends BinaryDeserializer {
   LcsDeserializer(Uint8List input) : super(input) {}
 

@@ -1,7 +1,6 @@
 part of serde;
 
-
-class BinaryDeserializer {
+abstract class BinaryDeserializer {
   ByteData input;
   int offset = 0;
 
@@ -50,32 +49,44 @@ class BinaryDeserializer {
     return result;
   }
 
-  Uint8List deserialize_bytes() {
-    return null;
+  Bytes deserialize_bytes() {
+    return new Bytes(deserialize_uint8list());
+  }
+
+  Uint8List deserialize_uint8list() {
+    int len = deserialize_len();
+    if (len < 0 || len > maxInt) {
+      throw new Exception("The length of a array cannot exceed MAXINT");
+    }
+    Uint8List content = new Uint8List(len);
+    for (int i = 0; i < len; i++) {
+      content[i] = this.input.getUint8(offset);
+      this.offset++;
+    }
+    return content;
   }
 
   bool deserialize_option_tag() {
     return deserialize_bool();
   }
 
-  int deserialize_variant_index(){
-    return 0;
-  }
+  int deserialize_variant_index();
 
-  String deserialize_str(){
-    return null;
+  String deserialize_str() {
+    Uint8List value = deserialize_uint8list();
+    return new String.fromCharCodes(value);
   }
 
   int get_buffer_offset() {
     return offset;
   }
 
-  int deserialize_len(){
-    return 0;
-  }
+  int deserialize_len();
 
-  int deserialize_u128(){
-    return 0;
+  Int128 deserialize_u128() {
+    var high = this.deserialize_u64();
+    var low = this.deserialize_u64();
+    return Int128(high,low);
   }
 
   int getUint8() {

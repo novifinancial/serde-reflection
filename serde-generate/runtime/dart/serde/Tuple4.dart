@@ -19,7 +19,6 @@ class Tuple4<T0, T1, T2, T3> {
 
   @override
   bool operator ==(covariant Tuple4 other) {
-    if (this == other) return true;
     if (other == null) return false;
     if (this.field0 == other.field0 &&
         this.field1 == other.field1 &&

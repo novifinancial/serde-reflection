@@ -21,11 +21,11 @@ class Bytes {
 
   @override
   bool operator ==(covariant Bytes other) {
-    if (this == other) return true;
     if (other == null) return false;
-    return this.content == other.content;
+    return isUint8ListsEqual(this.content, other.content);
   }
 
   @override
   int get hashCode => this.content.hashCode;
 }
+
