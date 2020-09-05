@@ -85,10 +85,7 @@ class DeserializationConfig:
         self.decode_variant_index = decode_variant_index
         self.check_that_key_slices_are_increasing = check_that_key_slices_are_increasing
         self.primitive_decode_map = {
-            st.bool: lambda content: (
-                st.bool(int.from_bytes(content[:1], byteorder="little", signed=False)),
-                content[1:],
-            ),
+            st.bool: _decode_bool,
             st.uint8: lambda content: (
                 st.uint8(int.from_bytes(content[:1], byteorder="little", signed=False)),
                 content[1:],
@@ -154,6 +151,18 @@ def _encode_bytes(encode_length: EncodeInteger, value: bytes) -> bytes:
 
 def _encode_str(encode_length: EncodeInteger, value: str) -> bytes:
     return encode_length(len(value)) + value.encode()
+
+
+def _decode_bool(content: bytes) -> typing.Tuple[st.bool, bytes]:
+    b = int.from_bytes(content[:1], byteorder="little", signed=False)
+    content = content[1:]
+    if b == 0:
+        val = False
+    elif b == 1:
+        val = True
+    else:
+        raise ValueError("Unexpected byte value for Bool:", b)
+    return val, content
 
 
 def _decode_bytes(
