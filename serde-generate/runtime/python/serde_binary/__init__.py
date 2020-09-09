@@ -1,6 +1,12 @@
 # Copyright (c) Facebook, Inc. and its affiliates
 # SPDX-License-Identifier: MIT OR Apache-2.0
 
+"""
+Module describing the "binary" serialization formats.
+
+Note: This internal module is currently only meant to share code between the LCS and bincode formats. Internal APIs could change in the future.
+"""
+
 import dataclasses
 import collections
 import typing
@@ -87,52 +93,52 @@ class DeserializationConfig:
         self.primitive_decode_map = {
             st.bool: _decode_bool,
             st.uint8: lambda content: (
-                st.uint8(int.from_bytes(content[:1], byteorder="little", signed=False)),
+                st.uint8(int.from_bytes(peek(content, 1), byteorder="little", signed=False)),
                 content[1:],
             ),
             st.uint16: lambda content: (
                 st.uint16(
-                    int.from_bytes(content[:2], byteorder="little", signed=False)
+                    int.from_bytes(peek(content, 2), byteorder="little", signed=False)
                 ),
                 content[2:],
             ),
             st.uint32: lambda content: (
                 st.uint32(
-                    int.from_bytes(content[:4], byteorder="little", signed=False)
+                    int.from_bytes(peek(content, 4), byteorder="little", signed=False)
                 ),
                 content[4:],
             ),
             st.uint64: lambda content: (
                 st.uint64(
-                    int.from_bytes(content[:8], byteorder="little", signed=False)
+                    int.from_bytes(peek(content, 8), byteorder="little", signed=False)
                 ),
                 content[8:],
             ),
             st.uint128: lambda content: (
                 st.uint128(
-                    int.from_bytes(content[:16], byteorder="little", signed=False)
+                    int.from_bytes(peek(content, 16), byteorder="little", signed=False)
                 ),
                 content[16:],
             ),
             st.int8: lambda content: (
-                st.int8(int.from_bytes(content[:1], byteorder="little", signed=True)),
+                st.int8(int.from_bytes(peek(content, 1), byteorder="little", signed=True)),
                 content[1:],
             ),
             st.int16: lambda content: (
-                st.int16(int.from_bytes(content[:2], byteorder="little", signed=True)),
+                st.int16(int.from_bytes(peek(content, 2), byteorder="little", signed=True)),
                 content[2:],
             ),
             st.int32: lambda content: (
-                st.int32(int.from_bytes(content[:4], byteorder="little", signed=True)),
+                st.int32(int.from_bytes(peek(content, 4), byteorder="little", signed=True)),
                 content[4:],
             ),
             st.int64: lambda content: (
-                st.int64(int.from_bytes(content[:8], byteorder="little", signed=True)),
+                st.int64(int.from_bytes(peek(content, 8), byteorder="little", signed=True)),
                 content[8:],
             ),
             st.int128: lambda content: (
                 st.int128(
-                    int.from_bytes(content[:16], byteorder="little", signed=True)
+                    int.from_bytes(peek(content, 16), byteorder="little", signed=True)
                 ),
                 content[16:],
             ),
@@ -145,6 +151,12 @@ class DeserializationConfig:
         }
 
 
+def peek(content: bytes, size: int) -> bytes:
+    if len(content) < size:
+        raise ValueError("Input is too short")
+    return content[:size]
+
+
 def _encode_bytes(encode_length: EncodeInteger, value: bytes) -> bytes:
     return encode_length(len(value)) + value
 
@@ -154,14 +166,14 @@ def _encode_str(encode_length: EncodeInteger, value: str) -> bytes:
 
 
 def _decode_bool(content: bytes) -> typing.Tuple[st.bool, bytes]:
-    b = int.from_bytes(content[:1], byteorder="little", signed=False)
+    b = int.from_bytes(peek(content, 1), byteorder="little", signed=False)
     content = content[1:]
     if b == 0:
         val = False
     elif b == 1:
         val = True
     else:
-        raise ValueError("Unexpected byte value for Bool:", b)
+        raise ValueError("Unexpected boolean value:", b)
     return val, content
 
 
@@ -169,7 +181,7 @@ def _decode_bytes(
     decode_length: DecodeInteger, content: bytes
 ) -> typing.Tuple[bytes, bytes]:
     len, content = decode_length(content)
-    val, content = content[:len], content[len:]
+    val, content = peek(content, len), content[len:]
     return val, content
 
 
@@ -177,7 +189,7 @@ def _decode_str(
     decode_length: DecodeInteger, content: bytes
 ) -> typing.Tuple[str, bytes]:
     strlen, content = decode_length(content)
-    val, content = content[0:strlen].decode(), content[strlen:]
+    val, content = peek(content, strlen).decode(), content[strlen:]
     return val, content
 
 
@@ -287,7 +299,7 @@ def deserialize_with_config(
 
         elif getattr(obj_type, "__origin__") == typing.Union:  # Option
             assert len(types) == 2 and types[1] == type(None)
-            tag = int.from_bytes(content[:1], byteorder="little", signed=False)
+            tag = int.from_bytes(peek(content, 1), byteorder="little", signed=False)
             content = content[1:]
             if tag == 0:
                 return None, content

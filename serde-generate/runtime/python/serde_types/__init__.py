@@ -41,6 +41,9 @@ class char:
             raise ValueError("`char` expects a single unicode character")
         self.value = s
 
+    def __str__(self):
+        return self.value
+
 
 unit = typing.Type[None]
 
