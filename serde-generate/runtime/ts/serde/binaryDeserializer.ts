@@ -24,6 +24,11 @@ export abstract class BinaryDeserializer implements Deserializer {
 
   abstract deserializeVariantIndex(): number;
 
+  abstract checkThatKeySlicesAreIncreasing(
+      key1: [number, number],
+      key2: [number, number]
+  ): void;
+
   public deserializeStr(): string {
     const value = this.deserializeBytes();
     return String.fromCharCode.apply(null, Array.from(value));

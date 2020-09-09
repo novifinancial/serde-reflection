@@ -31,6 +31,6 @@ export class LcsDeserializer extends BinaryDeserializer {
   }
 
   public checkThatKeySlicesAreIncreasing(key1:[number, number], key2:[number, number]): void {
-
+    return;
   }
 }
