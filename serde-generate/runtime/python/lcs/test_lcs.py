@@ -73,35 +73,45 @@ class LcsTestCase(unittest.TestCase):
         self.assertEqual(lcs.deserialize(b"\xff" * 16, st.int128), (st.int128(-1), b""))
 
     def test_encode_u32_as_uleb128(self):
-        self.assertEqual(lcs.encode_u32_as_uleb128(0), b"\x00")
-        self.assertEqual(lcs.encode_u32_as_uleb128(3), b"\x03")
-        self.assertEqual(lcs.encode_u32_as_uleb128(0x7f), b"\x7f")
-        self.assertEqual(lcs.encode_u32_as_uleb128(0x3f01), b"\x81\x7e")
-        self.assertEqual(lcs.encode_u32_as_uleb128(0x8001), b"\x81\x80\x02")
-        self.assertEqual(lcs.encode_u32_as_uleb128(lcs.LCS_MAX_U32), b"\xff\xff\xff\xff\x0f")
+        self.assertEqual(lcs._encode_u32_as_uleb128(0), b"\x00")
+        self.assertEqual(lcs._encode_u32_as_uleb128(3), b"\x03")
+        self.assertEqual(lcs._encode_u32_as_uleb128(0x7F), b"\x7f")
+        self.assertEqual(lcs._encode_u32_as_uleb128(0x3F01), b"\x81\x7e")
+        self.assertEqual(lcs._encode_u32_as_uleb128(0x8001), b"\x81\x80\x02")
+        self.assertEqual(
+            lcs._encode_u32_as_uleb128(lcs.LCS_MAX_U32), b"\xff\xff\xff\xff\x0f"
+        )
 
-        self.assertEqual(lcs.decode_uleb128_as_u32(b"\x00"), (0, b""))
-        self.assertEqual(lcs.decode_uleb128_as_u32(b"\x03"), (3, b""))
-        self.assertEqual(lcs.decode_uleb128_as_u32(b"\x7f"), (0x7f, b""))
-        self.assertEqual(lcs.decode_uleb128_as_u32(b"\x81\x7e"), (0x3f01, b""))
-        self.assertEqual(lcs.decode_uleb128_as_u32(b"\x80\x80\x01"), (0x4000, b""))
-        self.assertEqual(lcs.decode_uleb128_as_u32(b"\x80\x80\x01\x00"), (0x4000, b"\x00"))
-        self.assertEqual(lcs.decode_uleb128_as_u32(b"\x81\x80\x02"), (0x8001, b""))
-        self.assertEqual(lcs.decode_uleb128_as_u32(b"\xff\xff\xff\xff\x0f"), (lcs.LCS_MAX_U32, b""))
+        self.assertEqual(lcs._decode_uleb128_as_u32(b"\x00"), (0, b""))
+        self.assertEqual(lcs._decode_uleb128_as_u32(b"\x03"), (3, b""))
+        self.assertEqual(lcs._decode_uleb128_as_u32(b"\x7f"), (0x7F, b""))
+        self.assertEqual(lcs._decode_uleb128_as_u32(b"\x81\x7e"), (0x3F01, b""))
+        self.assertEqual(lcs._decode_uleb128_as_u32(b"\x80\x80\x01"), (0x4000, b""))
+        self.assertEqual(
+            lcs._decode_uleb128_as_u32(b"\x80\x80\x01\x00"), (0x4000, b"\x00")
+        )
+        self.assertEqual(lcs._decode_uleb128_as_u32(b"\x81\x80\x02"), (0x8001, b""))
+        self.assertEqual(
+            lcs._decode_uleb128_as_u32(b"\xff\xff\xff\xff\x0f"), (lcs.LCS_MAX_U32, b"")
+        )
         with self.assertRaises(ValueError):
-            lcs.decode_uleb128_as_u32(b"\x80\x00")
+            lcs._decode_uleb128_as_u32(b"\x80\x00")
         with self.assertRaises(ValueError):
-            lcs.decode_uleb128_as_u32(b"\xff\xff\xff\xff\x10")
+            lcs._decode_uleb128_as_u32(b"\xff\xff\xff\xff\x10")
 
     def test_encode_length(self):
-        self.assertEqual(lcs.encode_length(lcs.LCS_MAX_LENGTH), b"\x80\x80\x80\x80\x08")
+        self.assertEqual(
+            lcs._encode_length(lcs.LCS_MAX_LENGTH), b"\x80\x80\x80\x80\x08"
+        )
         with self.assertRaises(ValueError):
-            lcs.decode_length(b"\x80\x80\x80\x80\x09")
+            lcs._decode_length(b"\x80\x80\x80\x80\x09")
 
     def test_serialize_bytes(self):
         self.assertEqual(lcs.serialize(b"", bytes), b"\x00")
         self.assertEqual(lcs.serialize(b"\x00\x00", bytes), b"\x02\x00\x00")
-        self.assertEqual(lcs.serialize(b"\x00" * 128, bytes), b"\x80\x01" + b"\x00" * 128)
+        self.assertEqual(
+            lcs.serialize(b"\x00" * 128, bytes), b"\x80\x01" + b"\x00" * 128
+        )
 
         self.assertEqual(lcs.deserialize(b"\x00", bytes), (b"", b""))
 
@@ -114,7 +124,9 @@ class LcsTestCase(unittest.TestCase):
         Seq = typing.Sequence[st.uint16]
         self.assertEqual(lcs.serialize([], Seq), b"\x00")
         self.assertEqual(lcs.serialize([0, 1], Seq), b"\x02\x00\x00\x01\x00")
-        self.assertEqual(lcs.serialize([256] * 128, Seq), b"\x80\x01" + b"\x00\x01" * 128)
+        self.assertEqual(
+            lcs.serialize([256] * 128, Seq), b"\x80\x01" + b"\x00\x01" * 128
+        )
         self.assertEqual(lcs.deserialize(b"\x01\x03\x00", Seq), ([3], b""))
 
     def test_serialize_str(self):
@@ -128,7 +140,9 @@ class LcsTestCase(unittest.TestCase):
         m = {256: 3, 1: 5}
         e = lcs.serialize(m, Map)
         self.assertEqual(e, b"\x02\x00\x01\x03\x01\x00\x05")
-        self.assertEqual((m, b""), lcs.deserialize(b"\x02\x00\x01\x03\x01\x00\x05", Map))
+        self.assertEqual(
+            (m, b""), lcs.deserialize(b"\x02\x00\x01\x03\x01\x00\x05", Map)
+        )
         with self.assertRaises(ValueError):
             # Must enforce canonical encoding.
             lcs.deserialize(b"\x02\x01\x00\x05\x00\x01\x03", Map)

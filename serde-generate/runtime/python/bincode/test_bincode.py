@@ -35,15 +35,20 @@ class BincodeTestCase(unittest.TestCase):
             bincode.serialize(0x0102030405060708, st.uint64),
             b"\x08\x07\x06\x05\x04\x03\x02\x01",
         )
-        self.assertEqual(bincode.deserialize(b"\xff" * 8, st.uint64), ((1 << 64) - 1, b""))
+        self.assertEqual(
+            bincode.deserialize(b"\xff" * 8, st.uint64), ((1 << 64) - 1, b"")
+        )
 
     def test_bincode_u128(self):
         self.assertEqual(
-            bincode.serialize(st.uint128(0x0102030405060708090A0B0C0D0E0F10), st.uint128),
+            bincode.serialize(
+                st.uint128(0x0102030405060708090A0B0C0D0E0F10), st.uint128
+            ),
             b"\x10\x0f\x0e\r\x0c\x0b\n\t\x08\x07\x06\x05\x04\x03\x02\x01",
         )
         self.assertEqual(
-            bincode.deserialize(b"\xff" * 16, st.uint128), (st.uint128((1 << 128) - 1), b"")
+            bincode.deserialize(b"\xff" * 16, st.uint128),
+            (st.uint128((1 << 128) - 1), b""),
         )
 
     def test_bincode_i8(self):
@@ -71,12 +76,20 @@ class BincodeTestCase(unittest.TestCase):
             bincode.serialize(st.int128(0x0102030405060708090A0B0C0D0E0F10), st.int128),
             b"\x10\x0f\x0e\r\x0c\x0b\n\t\x08\x07\x06\x05\x04\x03\x02\x01",
         )
-        self.assertEqual(bincode.deserialize(b"\xff" * 16, st.int128), (st.int128(-1), b""))
+        self.assertEqual(
+            bincode.deserialize(b"\xff" * 16, st.int128), (st.int128(-1), b"")
+        )
 
     def test_serialize_bytes(self):
         self.assertEqual(bincode.serialize(b"", bytes), b"\x00" * 8)
-        self.assertEqual(bincode.serialize(b"\x00\x00", bytes), b"\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00")
-        self.assertEqual(bincode.serialize(b"\x00" * 128, bytes), b"\x80\x00\x00\x00\x00\x00\x00\x00" + b"\x00" * 128)
+        self.assertEqual(
+            bincode.serialize(b"\x00\x00", bytes),
+            b"\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00",
+        )
+        self.assertEqual(
+            bincode.serialize(b"\x00" * 128, bytes),
+            b"\x80\x00\x00\x00\x00\x00\x00\x00" + b"\x00" * 128,
+        )
 
         self.assertEqual(bincode.deserialize(b"\x00" * 8, bytes), (b"", b""))
 
@@ -87,14 +100,30 @@ class BincodeTestCase(unittest.TestCase):
 
     def test_serialize_sequence(self):
         Seq = typing.Sequence[st.uint16]
-        self.assertEqual(bincode.serialize([], Seq), b"\x00\x00\x00\x00\x00\x00\x00\x00")
-        self.assertEqual(bincode.serialize([0, 1], Seq), b"\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00")
-        self.assertEqual(bincode.serialize([256] * 256, Seq), b"\x00\x01\x00\x00\x00\x00\x00\x00" + b"\x00\x01" * 256)
-        self.assertEqual(bincode.deserialize(b"\x01\x00\x00\x00\x00\x00\x00\x00\x03\x00", Seq), ([3], b""))
+        self.assertEqual(
+            bincode.serialize([], Seq), b"\x00\x00\x00\x00\x00\x00\x00\x00"
+        )
+        self.assertEqual(
+            bincode.serialize([0, 1], Seq),
+            b"\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00",
+        )
+        self.assertEqual(
+            bincode.serialize([256] * 256, Seq),
+            b"\x00\x01\x00\x00\x00\x00\x00\x00" + b"\x00\x01" * 256,
+        )
+        self.assertEqual(
+            bincode.deserialize(b"\x01\x00\x00\x00\x00\x00\x00\x00\x03\x00", Seq),
+            ([3], b""),
+        )
 
     def test_serialize_str(self):
-        self.assertEqual(bincode.serialize("ABC", str), b"\x03\x00\x00\x00\x00\x00\x00\x00ABC")
-        self.assertEqual(bincode.deserialize(b"\x03\x00\x00\x00\x00\x00\x00\x00ABC", str), ("ABC", b""))
+        self.assertEqual(
+            bincode.serialize("ABC", str), b"\x03\x00\x00\x00\x00\x00\x00\x00ABC"
+        )
+        self.assertEqual(
+            bincode.deserialize(b"\x03\x00\x00\x00\x00\x00\x00\x00ABC", str),
+            ("ABC", b""),
+        )
         with self.assertRaises(ValueError):
             bincode.deserialize(b"\x03AB", str)
 
@@ -103,5 +132,15 @@ class BincodeTestCase(unittest.TestCase):
         m = OrderedDict([(256, 3), (1, 5)])
         e = bincode.serialize(m, Map)
         self.assertEqual(e, b"\x02\x00\x00\x00\x00\x00\x00\x00\x00\x01\x03\x01\x00\x05")
-        self.assertEqual((m, b""), bincode.deserialize(b"\x02\x00\x00\x00\x00\x00\x00\x00\x00\x01\x03\x01\x00\x05", Map))
-        self.assertEqual((m, b""), bincode.deserialize(b"\x02\x00\x00\x00\x00\x00\x00\x00\x01\x00\x05\x00\x01\x03", Map))
+        self.assertEqual(
+            (m, b""),
+            bincode.deserialize(
+                b"\x02\x00\x00\x00\x00\x00\x00\x00\x00\x01\x03\x01\x00\x05", Map
+            ),
+        )
+        self.assertEqual(
+            (m, b""),
+            bincode.deserialize(
+                b"\x02\x00\x00\x00\x00\x00\x00\x00\x01\x00\x05\x00\x01\x03", Map
+            ),
+        )

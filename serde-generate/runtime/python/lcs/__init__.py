@@ -14,7 +14,7 @@ LCS_MAX_LENGTH = 1 << 31
 LCS_MAX_U32 = (1 << 32) - 1
 
 
-def encode_u32_as_uleb128(value: int) -> bytes:
+def _encode_u32_as_uleb128(value: int) -> bytes:
     res = b""
     while value >= 0x80:
         res += ((value & 0x7F) | 0x80).to_bytes(1, "little", signed=False)
@@ -23,19 +23,19 @@ def encode_u32_as_uleb128(value: int) -> bytes:
     return res
 
 
-def encode_length(value: int) -> bytes:
+def _encode_length(value: int) -> bytes:
     if value > LCS_MAX_LENGTH:
         raise ValueError("Length exceeds the maximum supported value.")
-    return encode_u32_as_uleb128(value)
+    return _encode_u32_as_uleb128(value)
 
 
-def encode_variant_index(value: int) -> bytes:
+def _encode_variant_index(value: int) -> bytes:
     if value > LCS_MAX_U32:
         raise ValueError("Variant index exceeds the maximum supported value.")
-    return encode_u32_as_uleb128(value)
+    return _encode_u32_as_uleb128(value)
 
 
-def decode_uleb128_as_u32(content: bytes) -> typing.Tuple[int, bytes]:
+def _decode_uleb128_as_u32(content: bytes) -> typing.Tuple[int, bytes]:
     value = 0
     for shift in range(0, 32, 7):
         byte = int.from_bytes(sb.peek(content, 1), "little", signed=False)
@@ -52,41 +52,41 @@ def decode_uleb128_as_u32(content: bytes) -> typing.Tuple[int, bytes]:
     raise ValueError("Overflow while parsing uleb128-encoded uint32 value")
 
 
-def decode_length(content: bytes) -> typing.Tuple[int, bytes]:
-    value, content = decode_uleb128_as_u32(content)
+def _decode_length(content: bytes) -> typing.Tuple[int, bytes]:
+    value, content = _decode_uleb128_as_u32(content)
     if value > LCS_MAX_LENGTH:
         raise ValueError("Length exceeds the maximum supported value.")
     return value, content
 
 
-def decode_variant_index(content: bytes) -> typing.Tuple[int, bytes]:
-    return decode_uleb128_as_u32(content)
+def _decode_variant_index(content: bytes) -> typing.Tuple[int, bytes]:
+    return _decode_uleb128_as_u32(content)
 
 
-def check_that_key_slices_are_increasing(key1: bytes, key2: bytes):
+def _check_that_key_slices_are_increasing(key1: bytes, key2: bytes):
     if key1 >= key2:
         raise ValueError(
             "Serialized keys in a map must be ordered by increasing lexicographic order"
         )
 
 
-lcs_serialization_config = sb.SerializationConfig(
-    encode_length=encode_length,
-    encode_variant_index=encode_variant_index,
+_lcs_serialization_config = sb.SerializationConfig(
+    encode_length=_encode_length,
+    encode_variant_index=_encode_variant_index,
     sort_map_entries=lambda entries: sorted(entries),
 )
 
 
-lcs_deserialization_config = sb.DeserializationConfig(
-    decode_length=decode_length,
-    decode_variant_index=decode_variant_index,
-    check_that_key_slices_are_increasing=check_that_key_slices_are_increasing,
+_lcs_deserialization_config = sb.DeserializationConfig(
+    decode_length=_decode_length,
+    decode_variant_index=_decode_variant_index,
+    check_that_key_slices_are_increasing=_check_that_key_slices_are_increasing,
 )
 
 
 def serialize(obj: typing.Any, obj_type) -> bytes:
-    return sb.serialize_with_config(lcs_serialization_config, obj, obj_type)
+    return sb.serialize_with_config(_lcs_serialization_config, obj, obj_type)
 
 
 def deserialize(content: bytes, obj_type) -> typing.Tuple[typing.Any, bytes]:
-    return sb.deserialize_with_config(lcs_deserialization_config, content, obj_type)
+    return sb.deserialize_with_config(_lcs_deserialization_config, content, obj_type)

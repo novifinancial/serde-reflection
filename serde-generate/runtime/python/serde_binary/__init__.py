@@ -93,7 +93,9 @@ class DeserializationConfig:
         self.primitive_decode_map = {
             st.bool: _decode_bool,
             st.uint8: lambda content: (
-                st.uint8(int.from_bytes(peek(content, 1), byteorder="little", signed=False)),
+                st.uint8(
+                    int.from_bytes(peek(content, 1), byteorder="little", signed=False)
+                ),
                 content[1:],
             ),
             st.uint16: lambda content: (
@@ -121,19 +123,27 @@ class DeserializationConfig:
                 content[16:],
             ),
             st.int8: lambda content: (
-                st.int8(int.from_bytes(peek(content, 1), byteorder="little", signed=True)),
+                st.int8(
+                    int.from_bytes(peek(content, 1), byteorder="little", signed=True)
+                ),
                 content[1:],
             ),
             st.int16: lambda content: (
-                st.int16(int.from_bytes(peek(content, 2), byteorder="little", signed=True)),
+                st.int16(
+                    int.from_bytes(peek(content, 2), byteorder="little", signed=True)
+                ),
                 content[2:],
             ),
             st.int32: lambda content: (
-                st.int32(int.from_bytes(peek(content, 4), byteorder="little", signed=True)),
+                st.int32(
+                    int.from_bytes(peek(content, 4), byteorder="little", signed=True)
+                ),
                 content[4:],
             ),
             st.int64: lambda content: (
-                st.int64(int.from_bytes(peek(content, 8), byteorder="little", signed=True)),
+                st.int64(
+                    int.from_bytes(peek(content, 8), byteorder="little", signed=True)
+                ),
                 content[8:],
             ),
             st.int128: lambda content: (
