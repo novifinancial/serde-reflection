@@ -46,9 +46,9 @@ impl<'a> CodeGenerator<'a> {
     /// Create a TypeScript code generator for the given config.
     pub fn new(config: &'a CodeGeneratorConfig, import_trait_helpers: bool) -> Self {
         let mut external_qualified_names = HashMap::new();
-        for (_, names) in &config.external_definitions {
+        for names in config.external_definitions.values() {
             for name in names {
-                external_qualified_names.insert(name.to_string(), format!("{}", name));
+                external_qualified_names.insert(name.to_string(), name.to_string());
             }
         }
         Self {
@@ -171,13 +171,12 @@ where
     /// name `self.qualified_names[name]` with the current namespace and try to use the
     /// short string `name` if possible.
     fn quote_qualified_name(&self, name: &str) -> String {
-        let qname = self
+        self
             .generator
             .external_qualified_names
             .get(name)
             .cloned()
-            .unwrap_or_else(|| format!("{}", name));
-        qname
+            .unwrap_or_else(|| name.to_string())
     }
 
     fn output_comment(&mut self, name: &str) -> std::io::Result<()> {
@@ -193,13 +192,10 @@ where
     fn quote_leading_path(&self, format: &Format) -> String {
         use Format::*;
         let mut ret: String = ".".into();
-        match format {
-            TypeName(x) => {
-                if self.generator.external_qualified_names.contains_key(x) {
-                    ret = "../libraTypes".into()
-                }
+        if let TypeName(x) = format {
+            if self.generator.external_qualified_names.contains_key(x) {
+                ret = "../libraTypes".into()
             }
-            _ => {}
         }
         ret
     }
@@ -284,7 +280,7 @@ where
         }
 
         let mut imported = Vec::new();
-        for (_mangled_name, subtype) in &subtypes {
+        for subtype in subtypes.values() {
             self.output_typedef_helper(subtype, &mut imported)?;
         }
 
@@ -712,7 +708,7 @@ return list;
                     " = [{}",
                     formats
                         .iter()
-                        .map(|f| format!("{}", self.quote_type(f)))
+                        .map(|f| self.quote_type(f))
                         .collect::<Vec<_>>()
                         .join(", ")
                 )?;
@@ -940,7 +936,7 @@ return list;
                 name,
                 fields
                     .iter()
-                    .map(|f| format!("{}", f.name))
+                    .map(|f| f.name.to_string())
                     .collect::<Vec<_>>()
                     .join(",")
             )?;
