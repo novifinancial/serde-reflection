@@ -46,9 +46,13 @@ jobs:
             sudo apt-get update && sudo apt-get upgrade -y
             sudo apt-get install python3-all-dev python3-pip python3-numpy clang llvm default-jdk
             python3 -m pip install pyre-check
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+            export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+            nvm install v12.18.0
       - run:
           name: Version Information
-          command: rustc --version; cargo --version; rustup --version; python3 --version; clang++ --version; javac -version; go version
+          command: rustc --version; cargo --version; rustup --version; python3 --version; clang++ --version; javac -version; go version; echo "node $(node -v)"; echo "npm $(npm -v)"
       - run:
           name: Setup Env
           command: |

@@ -12,6 +12,8 @@ export abstract class BinarySerializer implements Serializer {
 
     abstract serializeVariantIndex(value: number): void;
 
+    abstract sortMapEntries(offsets: number[]): void;
+
     public serializeStr(value: string): void {
         const stringUTF8Bytes = Buffer.from(value, 'utf8');
         this.serializeBytes(stringUTF8Bytes);
