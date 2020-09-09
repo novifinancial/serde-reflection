@@ -171,8 +171,7 @@ where
     /// name `self.qualified_names[name]` with the current namespace and try to use the
     /// short string `name` if possible.
     fn quote_qualified_name(&self, name: &str) -> String {
-        self
-            .generator
+        self.generator
             .external_qualified_names
             .get(name)
             .cloned()
