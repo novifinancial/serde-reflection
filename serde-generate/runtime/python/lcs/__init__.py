@@ -25,13 +25,15 @@ def _encode_u32_as_uleb128(value: int) -> bytes:
 
 def _encode_length(value: int) -> bytes:
     if value > LCS_MAX_LENGTH:
-        raise ValueError("Length exceeds the maximum supported value.")
+        raise st.SerializationError("Length exceeds the maximum supported value.")
     return _encode_u32_as_uleb128(value)
 
 
 def _encode_variant_index(value: int) -> bytes:
     if value > LCS_MAX_U32:
-        raise ValueError("Variant index exceeds the maximum supported value.")
+        raise st.SerializationError(
+            "Variant index exceeds the maximum supported value."
+        )
     return _encode_u32_as_uleb128(value)
 
 
@@ -43,19 +45,23 @@ def _decode_uleb128_as_u32(content: bytes) -> typing.Tuple[int, bytes]:
         digit = byte & 0x7F
         value |= digit << shift
         if value > LCS_MAX_U32:
-            raise ValueError("Overflow while parsing uleb128-encoded uint32 value")
+            raise st.DeserializationError(
+                "Overflow while parsing uleb128-encoded uint32 value"
+            )
         if digit == byte:
             if shift > 0 and digit == 0:
-                raise ValueError("Invalid uleb128 number (unexpected zero digit)")
+                raise st.DeserializationError(
+                    "Invalid uleb128 number (unexpected zero digit)"
+                )
             return value, content
 
-    raise ValueError("Overflow while parsing uleb128-encoded uint32 value")
+    raise st.DeserializationError("Overflow while parsing uleb128-encoded uint32 value")
 
 
 def _decode_length(content: bytes) -> typing.Tuple[int, bytes]:
     value, content = _decode_uleb128_as_u32(content)
     if value > LCS_MAX_LENGTH:
-        raise ValueError("Length exceeds the maximum supported value.")
+        raise st.DeserializationError("Length exceeds the maximum supported value.")
     return value, content
 
 
@@ -65,7 +71,7 @@ def _decode_variant_index(content: bytes) -> typing.Tuple[int, bytes]:
 
 def _check_that_key_slices_are_increasing(key1: bytes, key2: bytes):
     if key1 >= key2:
-        raise ValueError(
+        raise st.DeserializationError(
             "Serialized keys in a map must be ordered by increasing lexicographic order"
         )
 

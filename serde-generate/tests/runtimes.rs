@@ -138,7 +138,7 @@ assert t != s
 seen_error = False
 try:
     Test.{0}_deserialize(bytes.fromhex("{1}") + bytes([0]))
-except ValueError:
+except st.DeserializationError:
     seen_error = True
 assert seen_error
 "#,
