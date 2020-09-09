@@ -130,7 +130,9 @@ fn main() {
                         .output(&mut out, &registry)
                         .unwrap(),
                     Language::Java => panic!("Code generation in Java requires `--install-dir`"),
-                    Language::TypeScript => panic!("Code generation in TypeScript requires `--install-dir`"),
+                    Language::TypeScript => {
+                        panic!("Code generation in TypeScript requires `--install-dir`")
+                    }
                 }
             }
         }
@@ -146,8 +148,8 @@ fn main() {
                     Language::Java => Box::new(java::Installer::new(install_dir)),
                     Language::Go => {
                         Box::new(golang::Installer::new(install_dir, serde_package_name_opt))
-                    },
-                    Language::TypeScript => {Box::new(ts::Installer::new(install_dir))},
+                    }
+                    Language::TypeScript => Box::new(ts::Installer::new(install_dir)),
                 };
 
             if let Some((registry, name)) = named_registry_opt {
