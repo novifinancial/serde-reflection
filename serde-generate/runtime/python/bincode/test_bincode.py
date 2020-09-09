@@ -11,9 +11,9 @@ class BincodeTestCase(unittest.TestCase):
         self.assertEqual(bincode.serialize(True, st.bool), b"\x01")
         self.assertEqual(bincode.deserialize(b"\x00", st.bool), (False, b""))
         self.assertEqual(bincode.deserialize(b"\x01", st.bool), (True, b""))
-        with self.assertRaises(ValueError):
+        with self.assertRaises(st.DeserializationError):
             bincode.deserialize(b"\x02", st.bool)
-        with self.assertRaises(ValueError):
+        with self.assertRaises(st.DeserializationError):
             bincode.deserialize(b"", st.bool)
 
     def test_bincode_u8(self):
@@ -124,7 +124,7 @@ class BincodeTestCase(unittest.TestCase):
             bincode.deserialize(b"\x03\x00\x00\x00\x00\x00\x00\x00ABC", str),
             ("ABC", b""),
         )
-        with self.assertRaises(ValueError):
+        with self.assertRaises(st.DeserializationError):
             bincode.deserialize(b"\x03AB", str)
 
     def test_serialize_map(self):

@@ -312,7 +312,7 @@ def {0}_serialize(self) -> bytes:
 def {0}_deserialize(input: bytes) -> '{1}':
     v, buffer = {0}.deserialize(input, {1})
     if buffer:
-        raise ValueError("Some input bytes were not read");
+        raise st.DeserializationError("Some input bytes were not read");
     return v"#,
             encoding.name(),
             name

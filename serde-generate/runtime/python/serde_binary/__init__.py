@@ -163,7 +163,7 @@ class DeserializationConfig:
 
 def peek(content: bytes, size: int) -> bytes:
     if len(content) < size:
-        raise ValueError("Input is too short")
+        raise st.DeserializationError("Input is too short")
     return content[:size]
 
 
@@ -183,7 +183,7 @@ def _decode_bool(content: bytes) -> typing.Tuple[st.bool, bytes]:
     elif b == 1:
         val = True
     else:
-        raise ValueError("Unexpected boolean value:", b)
+        raise st.DeserializationError("Unexpected boolean value:", b)
     return val, content
 
 
@@ -250,23 +250,23 @@ def serialize_with_config(
                 result += s
 
         else:
-            raise ValueError("Unexpected type", obj_type)
+            raise st.SerializationError("Unexpected type", obj_type)
 
     else:
         if not dataclasses.is_dataclass(obj_type):  # Enum
             if not hasattr(obj_type, "VARIANTS"):
-                raise ValueError("Unexpected type", obj_type)
+                raise st.SerializationError("Unexpected type", obj_type)
             if not hasattr(obj, "INDEX"):
-                raise ValueError("Wrong Value for the type", obj, obj_type)
+                raise st.SerializationError("Wrong Value for the type", obj, obj_type)
             result += config.encode_variant_index(obj.__class__.INDEX)
             # Proceed to variant
             obj_type = obj_type.VARIANTS[obj.__class__.INDEX]
             if not dataclasses.is_dataclass(obj_type):
-                raise ValueError("Unexpected type", obj_type)
+                raise st.SerializationError("Unexpected type", obj_type)
 
         # pyre-ignore
         if not isinstance(obj, obj_type):
-            raise ValueError("Wrong Value for the type", obj, obj_type)
+            raise st.SerializationError("Wrong Value for the type", obj, obj_type)
 
         # Content of struct or variant
         fields = dataclasses.fields(obj_type)
@@ -316,7 +316,7 @@ def deserialize_with_config(
             elif tag == 1:
                 return deserialize_with_config(config, content, types[0])
             else:
-                raise ValueError("Wrong tag for Option value")
+                raise st.DeserializationError("Wrong tag for Option value")
 
         elif getattr(obj_type, "__origin__") == dict:  # Map
             assert len(types) == 2
@@ -340,7 +340,7 @@ def deserialize_with_config(
             return res, content
 
         else:
-            raise ValueError("Unexpected type", obj_type)
+            raise st.DeserializationError("Unexpected type", obj_type)
 
     else:
         # handle structs
@@ -366,4 +366,4 @@ def deserialize_with_config(
             return res, content
 
         else:
-            raise ValueError("Unexpected type", obj_type)
+            raise st.DeserializationError("Unexpected type", obj_type)

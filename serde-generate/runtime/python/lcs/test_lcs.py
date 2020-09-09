@@ -10,9 +10,9 @@ class LcsTestCase(unittest.TestCase):
         self.assertEqual(lcs.serialize(True, st.bool), b"\x01")
         self.assertEqual(lcs.deserialize(b"\x00", st.bool), (False, b""))
         self.assertEqual(lcs.deserialize(b"\x01", st.bool), (True, b""))
-        with self.assertRaises(ValueError):
+        with self.assertRaises(st.DeserializationError):
             lcs.deserialize(b"\x02", st.bool)
-        with self.assertRaises(ValueError):
+        with self.assertRaises(st.DeserializationError):
             lcs.deserialize(b"", st.bool)
 
     def test_lcs_u8(self):
@@ -94,16 +94,18 @@ class LcsTestCase(unittest.TestCase):
         self.assertEqual(
             lcs._decode_uleb128_as_u32(b"\xff\xff\xff\xff\x0f"), (lcs.LCS_MAX_U32, b"")
         )
-        with self.assertRaises(ValueError):
+        with self.assertRaises(st.DeserializationError):
             lcs._decode_uleb128_as_u32(b"\x80\x00")
-        with self.assertRaises(ValueError):
+        with self.assertRaises(st.DeserializationError):
             lcs._decode_uleb128_as_u32(b"\xff\xff\xff\xff\x10")
 
     def test_encode_length(self):
         self.assertEqual(
             lcs._encode_length(lcs.LCS_MAX_LENGTH), b"\x80\x80\x80\x80\x08"
         )
-        with self.assertRaises(ValueError):
+        with self.assertRaises(st.SerializationError):
+            lcs._encode_length(lcs.LCS_MAX_LENGTH + 1)
+        with self.assertRaises(st.DeserializationError):
             lcs._decode_length(b"\x80\x80\x80\x80\x09")
 
     def test_serialize_bytes(self):
@@ -132,7 +134,7 @@ class LcsTestCase(unittest.TestCase):
     def test_serialize_str(self):
         self.assertEqual(lcs.serialize("ABC", str), b"\x03ABC")
         self.assertEqual(lcs.deserialize(b"\x03ABC", str), ("ABC", b""))
-        with self.assertRaises(ValueError):
+        with self.assertRaises(st.DeserializationError):
             lcs.deserialize(b"\x03AB", str)
 
     def test_serialize_map(self):
@@ -143,6 +145,6 @@ class LcsTestCase(unittest.TestCase):
         self.assertEqual(
             (m, b""), lcs.deserialize(b"\x02\x00\x01\x03\x01\x00\x05", Map)
         )
-        with self.assertRaises(ValueError):
+        with self.assertRaises(st.DeserializationError):
             # Must enforce canonical encoding.
             lcs.deserialize(b"\x02\x01\x00\x05\x00\x01\x03", Map)

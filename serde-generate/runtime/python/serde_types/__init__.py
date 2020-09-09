@@ -6,6 +6,18 @@ from dataclasses import dataclass
 import typing
 
 
+class SerializationError(ValueError):
+    """Error raised during Serialization"""
+
+    pass
+
+
+class DeserializationError(ValueError):
+    """Error raised during Deserialization"""
+
+    pass
+
+
 @dataclass(init=False)
 class uint128:
     high: np.uint64
