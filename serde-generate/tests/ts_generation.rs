@@ -1,15 +1,16 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use serde_generate::{ts, test_utils, CodeGeneratorConfig, Encoding, SourceInstaller};
+use serde_generate::{test_utils, ts, CodeGeneratorConfig, Encoding, SourceInstaller};
+use std::io::{Result, Write};
 use std::process::Command;
 use tempfile::{tempdir, TempDir};
-use std::io::{Write, Result};
-
 
 fn write_package_tsconfig_json_for_test_build(path: std::path::PathBuf) -> Result<()> {
     let mut package_json = std::fs::File::create(path.join("package.json"))?;
-    writeln!(package_json, r#"
+    writeln!(
+        package_json,
+        r#"
 {{
   "name": "tmpCode",
   "version": "1.0.0",
@@ -29,9 +30,12 @@ fn write_package_tsconfig_json_for_test_build(path: std::path::PathBuf) -> Resul
     "typescript": "^3.9.6"
   }}
 }}
-"#)?;
+"#
+    )?;
     let mut tsconfig_json = std::fs::File::create(path.join("tsconfig.json"))?;
-    writeln!(tsconfig_json, r#"
+    writeln!(
+        tsconfig_json,
+        r#"
 {{
   "compilerOptions": {{
     "target": "es6",
@@ -45,7 +49,8 @@ fn write_package_tsconfig_json_for_test_build(path: std::path::PathBuf) -> Resul
   }},
   "include": ["testing/*.ts"]
 }}
-"#)?;
+"#
+    )?;
     Ok(())
 }
 
@@ -105,8 +110,8 @@ fn test_that_ts_code_compiles_with_comments() {
         vec!["testing".to_string(), "SerdeData".to_string()],
         "Some\ncomments".to_string(),
     )]
-        .into_iter()
-        .collect();
+    .into_iter()
+    .collect();
     let config = CodeGeneratorConfig::new("testing".to_string()).with_comments(comments);
 
     let (_dir, path) = test_that_ts_code_compiles_with_config(&config);

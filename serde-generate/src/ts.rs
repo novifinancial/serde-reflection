@@ -12,8 +12,8 @@ use include_dir::include_dir as include_directory;
 use serde_reflection::{ContainerFormat, Format, FormatHolder, Named, Registry, VariantFormat};
 
 use crate::{
-    CodeGeneratorConfig,
     indent::{IndentConfig, IndentedWriter},
+    CodeGeneratorConfig,
 };
 
 /// Main configuration object for code-generation in TypeScript.
@@ -24,7 +24,7 @@ pub struct CodeGenerator<'a> {
     /// Derived from `config.external_definitions`.
     external_qualified_names: HashMap<String, String>,
     /// Should include TraitHelpers preamble?
-    import_trait_helpers: bool
+    import_trait_helpers: bool,
 }
 
 /// Shared state for the code generation of a TypeScript source file.
@@ -48,14 +48,13 @@ impl<'a> CodeGenerator<'a> {
         let mut external_qualified_names = HashMap::new();
         for (_, names) in &config.external_definitions {
             for name in names {
-                external_qualified_names
-                    .insert(name.to_string(), format!("{}", name));
+                external_qualified_names.insert(name.to_string(), format!("{}", name));
             }
         }
         Self {
             config,
             external_qualified_names,
-            import_trait_helpers
+            import_trait_helpers,
         }
     }
 
@@ -129,25 +128,38 @@ impl<'a> CodeGenerator<'a> {
 }
 
 impl<'a, T> TypeScriptEmitter<'a, T>
-    where
-        T: Write,
+where
+    T: Write,
 {
     fn output_preamble(&mut self, name: &str) -> Result<()> {
-        writeln!(self.out, "import {{BigNumber}} from '@ethersproject/bignumber';")?;
-        writeln!(self.out, "import {{Int64LE, Uint64LE}} from 'int64-buffer';\n")?;
+        writeln!(
+            self.out,
+            "import {{BigNumber}} from '@ethersproject/bignumber';"
+        )?;
+        writeln!(
+            self.out,
+            "import {{Int64LE, Uint64LE}} from 'int64-buffer';\n"
+        )?;
         writeln!(self.out, "import bytes from '@ethersproject/bytes';\n")?;
-        writeln!(self.out, "import {{ Serializer }} from '../serde/serializer';\n")?;
-        writeln!(self.out, "import {{ Deserializer }} from '../serde/deserializer';\n")?;
+        writeln!(
+            self.out,
+            "import {{ Serializer }} from '../serde/serializer';\n"
+        )?;
+        writeln!(
+            self.out,
+            "import {{ Deserializer }} from '../serde/deserializer';\n"
+        )?;
         if self.generator.import_trait_helpers && !name.starts_with("traitHelpers") {
             writeln!(self.out, "import {{ TraitHelpers }} from './traitHelpers';")?;
         } else {
-            writeln!(self.out, "{}\n",
-                     self
-                         .generator
-                         .external_qualified_names
-                         .iter()
-                         .map(|(_, name)| format!("import {{ {0} }} from '../libraTypes/{0}';\n", name))
-                         .collect::<String>()
+            writeln!(
+                self.out,
+                "{}\n",
+                self.generator
+                    .external_qualified_names
+                    .iter()
+                    .map(|(_, name)| format!("import {{ {0} }} from '../libraTypes/{0}';\n", name))
+                    .collect::<String>()
             )?;
         }
 
@@ -216,19 +228,12 @@ impl<'a, T> TypeScriptEmitter<'a, T>
 
             Option(format) => format!("Optional{}", self.quote_type(format)),
             Seq(format) => format!("List{}", self.quote_type(format)),
-            Map { key, value } => format!(
-                "Map{}{}",
-                self.quote_type(key),
-                self.quote_type(value)
-            ),
-            Tuple(formats) => format!(
-                "Tuple{}",
-                self.quote_types(formats)
-            ),
-            TupleArray { content, size: _size } => format!(
-                "ListTuple{}",
-                self.quote_type(content),
-            ),
+            Map { key, value } => format!("Map{}{}", self.quote_type(key), self.quote_type(value)),
+            Tuple(formats) => format!("Tuple{}", self.quote_types(formats)),
+            TupleArray {
+                content,
+                size: _size,
+            } => format!("ListTuple{}", self.quote_type(content),),
             Variable(_) => panic!("unexpected value"),
         }
     }
@@ -318,11 +323,9 @@ impl<'a, T> TypeScriptEmitter<'a, T>
 
             Option(format) => format!("Optional{}", Self::mangle_type(format)),
             Seq(format) => format!("List{}", Self::mangle_type(format)),
-            Map { key, value } => format!(
-                "Map{}{}",
-                Self::mangle_type(key),
-                Self::mangle_type(value)
-            ),
+            Map { key, value } => {
+                format!("Map{}{}", Self::mangle_type(key), Self::mangle_type(value))
+            }
             Tuple(formats) => format!(
                 "Tuple{}",
                 formats
@@ -331,9 +334,10 @@ impl<'a, T> TypeScriptEmitter<'a, T>
                     .collect::<Vec<_>>()
                     .join("")
             ),
-            TupleArray { content, size: _size } => {
-                format!("ListTuple{}", Self::mangle_type(content))
-            }
+            TupleArray {
+                content,
+                size: _size,
+            } => format!("ListTuple{}", Self::mangle_type(content)),
             Variable(_) => panic!("unexpected value"),
         }
     }
@@ -483,11 +487,18 @@ serializer.sortMapEntries(offsets);
                 writeln!(self.out)?;
                 for (index, format) in formats.iter().enumerate() {
                     let expr = format!("value[{}]", index);
-                    writeln!(self.out, "{}", self.quote_serialize_value(&expr, format, false))?;
+                    writeln!(
+                        self.out,
+                        "{}",
+                        self.quote_serialize_value(&expr, format, false)
+                    )?;
                 }
             }
 
-            TupleArray { content, size: _size } => {
+            TupleArray {
+                content,
+                size: _size,
+            } => {
                 write!(
                     self.out,
                     r#"
@@ -615,42 +626,79 @@ return list;
         writeln!(self.out, "}}\n")
     }
 
-    fn output_typedef_helper(&mut self, format0: &Format, imported: &mut Vec<String>) -> Result<()> {
+    fn output_typedef_helper(
+        &mut self,
+        format0: &Format,
+        imported: &mut Vec<String>,
+    ) -> Result<()> {
         use Format::*;
 
         match format0 {
             Option(format) => {
-                if Self::needs_import(format) && !imported.contains(&self.quote_type(format)){
-                    writeln!(self.out, "import {{{0}}} from './{0}';", self.quote_type(format))?;
+                if Self::needs_import(format) && !imported.contains(&self.quote_type(format)) {
+                    writeln!(
+                        self.out,
+                        "import {{{0}}} from './{0}';",
+                        self.quote_type(format)
+                    )?;
                     imported.push(self.quote_type(format));
                 }
-                writeln!(self.out, "export type Optional{0} = {0} | null;", self.quote_type(format))?;
+                writeln!(
+                    self.out,
+                    "export type Optional{0} = {0} | null;",
+                    self.quote_type(format)
+                )?;
             }
 
             Seq(format) => {
-                if Self::needs_import(format) && !imported.contains(&self.quote_type(format)){
-                    writeln!(self.out, "import {{{0}}} from './{0}';", self.quote_type(format))?;
+                if Self::needs_import(format) && !imported.contains(&self.quote_type(format)) {
+                    writeln!(
+                        self.out,
+                        "import {{{0}}} from './{0}';",
+                        self.quote_type(format)
+                    )?;
                     imported.push(self.quote_type(format));
                 }
-                writeln!(self.out, "export type List{0} = {0}[];", self.quote_type(format))?;
+                writeln!(
+                    self.out,
+                    "export type List{0} = {0}[];",
+                    self.quote_type(format)
+                )?;
             }
 
             Map { key, value } => {
-                if Self::needs_import(key) && !imported.contains(&self.quote_type(key)){
-                    writeln!(self.out, "import {{{0}}} from './{0}';", self.quote_type(key))?;
+                if Self::needs_import(key) && !imported.contains(&self.quote_type(key)) {
+                    writeln!(
+                        self.out,
+                        "import {{{0}}} from './{0}';",
+                        self.quote_type(key)
+                    )?;
                     imported.push(self.quote_type(key));
                 }
-                if Self::needs_import(value) && !imported.contains(&self.quote_type(value)){
-                    writeln!(self.out, "import {{{0}}} from './{0}';", self.quote_type(value))?;
+                if Self::needs_import(value) && !imported.contains(&self.quote_type(value)) {
+                    writeln!(
+                        self.out,
+                        "import {{{0}}} from './{0}';",
+                        self.quote_type(value)
+                    )?;
                     imported.push(self.quote_type(value));
                 }
-                writeln!(self.out, "export type Map{0}{1} = Record<{0}, {1}>;", self.quote_type(key), self.quote_type(value))?;
+                writeln!(
+                    self.out,
+                    "export type Map{0}{1} = Record<{0}, {1}>;",
+                    self.quote_type(key),
+                    self.quote_type(value)
+                )?;
             }
 
             Tuple(formats) => {
                 for (_index, format) in formats.iter().enumerate() {
-                    if Self::needs_import(format) && !imported.contains(&self.quote_type(format)){
-                        writeln!(self.out, "import {{{0}}} from './{0}';", self.quote_type(format))?;
+                    if Self::needs_import(format) && !imported.contains(&self.quote_type(format)) {
+                        writeln!(
+                            self.out,
+                            "import {{{0}}} from './{0}';",
+                            self.quote_type(format)
+                        )?;
                         imported.push(self.quote_type(format));
                     }
                 }
@@ -659,18 +707,29 @@ return list;
                 for (_index, format) in formats.iter().enumerate() {
                     write!(self.out, "{}", self.quote_type(format))?;
                 }
-                write!(self.out, " = [{}",
-                       formats
-                           .iter()
-                           .map(|f| format!("{}", self.quote_type(f)))
-                           .collect::<Vec<_>>()
-                           .join(", "))?;
+                write!(
+                    self.out,
+                    " = [{}",
+                    formats
+                        .iter()
+                        .map(|f| format!("{}", self.quote_type(f)))
+                        .collect::<Vec<_>>()
+                        .join(", ")
+                )?;
                 writeln!(self.out, "];")?;
             }
 
-            TupleArray { content, size: _size } => {
+            TupleArray {
+                content,
+                size: _size,
+            } => {
                 // discover if import needed (key, value) might be primitives
-                writeln!(self.out, "export type ListTuple{} = {}[];", self.quote_type(content), self.quote_type(content))?;
+                writeln!(
+                    self.out,
+                    "export type ListTuple{} = {}[];",
+                    self.quote_type(content),
+                    self.quote_type(content)
+                )?;
             }
 
             _ => panic!("unexpected case"),
@@ -730,7 +789,8 @@ return list;
             for field in fields {
                 let field_type = &field.value;
                 if let Some(base) = variant_base {
-                    if base.eq(&self.quote_type(&field.value)) { // no need to import myself
+                    if base.eq(&self.quote_type(&field.value)) {
+                        // no need to import myself
                         continue;
                     }
                 }
@@ -740,22 +800,53 @@ return list;
                 imported_types.push(self.quote_type(field_type));
                 match &field.value {
                     Format::TypeName(_) => {
-                        writeln!(self.out, "import {{{0}}} from '{1}/{0}';", self.quote_type(&field.value), self.quote_leading_path(&field.value))?;
+                        writeln!(
+                            self.out,
+                            "import {{{0}}} from '{1}/{0}';",
+                            self.quote_type(&field.value),
+                            self.quote_leading_path(&field.value)
+                        )?;
                     }
                     Format::Tuple(_) => {
-                        writeln!(self.out, "import {{{0}}} from './traitHelpers';", self.quote_type(&field.value))?;
+                        writeln!(
+                            self.out,
+                            "import {{{0}}} from './traitHelpers';",
+                            self.quote_type(&field.value)
+                        )?;
                     }
                     Format::Option(_) => {
-                        writeln!(self.out, "import {{{0}}} from './traitHelpers';", self.quote_type(&field.value))?;
+                        writeln!(
+                            self.out,
+                            "import {{{0}}} from './traitHelpers';",
+                            self.quote_type(&field.value)
+                        )?;
                     }
                     Format::Seq(_) => {
-                        writeln!(self.out, "import {{{0}}} from './traitHelpers';", self.quote_type(&field.value))?;
+                        writeln!(
+                            self.out,
+                            "import {{{0}}} from './traitHelpers';",
+                            self.quote_type(&field.value)
+                        )?;
                     }
-                    Format::TupleArray { content: _content, size: _size } => {
-                        writeln!(self.out, "import {{{0}}} from './traitHelpers';", self.quote_type(&field.value))?;
+                    Format::TupleArray {
+                        content: _content,
+                        size: _size,
+                    } => {
+                        writeln!(
+                            self.out,
+                            "import {{{0}}} from './traitHelpers';",
+                            self.quote_type(&field.value)
+                        )?;
                     }
-                    Format::Map { key: _key, value: _value } => {
-                        writeln!(self.out, "import {{{0}}} from './traitHelpers';", self.quote_type(&field.value))?;
+                    Format::Map {
+                        key: _key,
+                        value: _value,
+                    } => {
+                        writeln!(
+                            self.out,
+                            "import {{{0}}} from './traitHelpers';",
+                            self.quote_type(&field.value)
+                        )?;
                     }
                     _ => {}
                 }
@@ -830,8 +921,7 @@ return list;
                 writeln!(
                     self.out,
                     "static load(deserializer: Deserializer): {}{} {{",
-                    variant_base_name,
-                    name,
+                    variant_base_name, name,
                 )?;
             }
             self.out.indent();
@@ -981,23 +1071,14 @@ impl crate::SourceInstaller for Installer {
     }
 
     fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.install_runtime(
-            include_directory!("runtime/ts/serde"),
-            "serde",
-        )
+        self.install_runtime(include_directory!("runtime/ts/serde"), "serde")
     }
 
     fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.install_runtime(
-            include_directory!("runtime/ts/bincode"),
-            "bincode",
-        )
+        self.install_runtime(include_directory!("runtime/ts/bincode"), "bincode")
     }
 
     fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.install_runtime(
-            include_directory!("runtime/ts/lcs"),
-            "lcs",
-        )
+        self.install_runtime(include_directory!("runtime/ts/lcs"), "lcs")
     }
 }
