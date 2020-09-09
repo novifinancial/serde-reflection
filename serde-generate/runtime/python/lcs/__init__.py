@@ -11,7 +11,7 @@ import serde_binary as sb
 
 
 LCS_MAX_LENGTH = 1 << 31
-LCS_MAX_U32 = 1 << 32 - 1
+LCS_MAX_U32 = (1 << 32) - 1
 
 
 def encode_u32_as_uleb128(value: int) -> bytes:
@@ -30,13 +30,15 @@ def encode_length(value: int) -> bytes:
 
 
 def encode_variant_index(value: int) -> bytes:
+    if value > LCS_MAX_U32:
+        raise ValueError("Variant index exceeds the maximum supported value.")
     return encode_u32_as_uleb128(value)
 
 
 def decode_uleb128_as_u32(content: bytes) -> typing.Tuple[int, bytes]:
     value = 0
     for shift in range(0, 32, 7):
-        byte = int.from_bytes(content[0:1], "little", signed=False)
+        byte = int.from_bytes(sb.peek(content, 1), "little", signed=False)
         content = content[1:]
         digit = byte & 0x7F
         value |= digit << shift

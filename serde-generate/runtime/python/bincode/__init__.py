@@ -19,11 +19,11 @@ bincode_serialization_config = sb.SerializationConfig(
 
 bincode_deserialization_config = sb.DeserializationConfig(
     decode_length=lambda content: (
-        int.from_bytes(content[:8], byteorder="little", signed=False),
+        int.from_bytes(sb.peek(content, 8), byteorder="little", signed=False),
         content[8:],
     ),
     decode_variant_index=lambda content: (
-        int.from_bytes(content[:4], byteorder="little", signed=False),
+        int.from_bytes(sb.peek(content, 4), byteorder="little", signed=False),
         content[4:],
     ),
     check_that_key_slices_are_increasing=lambda key1, key2: None,
