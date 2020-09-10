@@ -38,8 +38,8 @@ pub struct PrimitiveTypes {
     f_i32: i32,
     f_i64: i64,
     f_i128: i128,
-    // The following types are not supported by our bincode runtime(s), therefore
-    // we won't populate them for testing.
+    // The following types are not supported by our bincode and LCS runtimes, therefore
+    // we don't populate them for testing.
     f_f32: Option<f32>,
     f_f64: Option<f64>,
     f_char: Option<char>,
