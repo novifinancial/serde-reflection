@@ -11,6 +11,7 @@ import serde_binary as sb
 
 MAX_LENGTH = 1 << 31
 MAX_U32 = (1 << 32) - 1
+MAX_CONTAINER_DEPTH = 500
 
 
 def _encode_u32_as_uleb128(value: int) -> bytes:
@@ -79,6 +80,7 @@ _lcs_serialization_config = sb.SerializationConfig(
     encode_length=_encode_length,
     encode_variant_index=_encode_variant_index,
     sort_map_entries=lambda entries: sorted(entries),
+    max_container_depth=MAX_CONTAINER_DEPTH,
 )
 
 
@@ -86,12 +88,13 @@ _lcs_deserialization_config = sb.DeserializationConfig(
     decode_length=_decode_length,
     decode_variant_index=_decode_variant_index,
     check_that_key_slices_are_increasing=_check_that_key_slices_are_increasing,
+    max_container_depth=MAX_CONTAINER_DEPTH,
 )
 
 
 def serialize(obj: typing.Any, obj_type) -> bytes:
-    return sb.serialize_with_config(_lcs_serialization_config, obj, obj_type)
+    return sb.serialize_with_config(_lcs_serialization_config, obj, obj_type, 0)
 
 
 def deserialize(content: bytes, obj_type) -> typing.Tuple[typing.Any, bytes]:
-    return sb.deserialize_with_config(_lcs_deserialization_config, content, obj_type)
+    return sb.deserialize_with_config(_lcs_deserialization_config, content, obj_type, 0)

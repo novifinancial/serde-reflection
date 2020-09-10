@@ -134,6 +134,23 @@ fn test_that_installed_python_code_passes_pyre_check() {
     installer.install_bincode_runtime().unwrap();
     installer.install_lcs_runtime().unwrap();
 
+    // Copy test files manually to type-check them as well.
+    // This should go away when python runtimes are properly packaged.
+    let status = Command::new("cp")
+        .arg("-r")
+        .arg("runtime/python/lcs/test_lcs.py")
+        .arg(dir.path().join("src/lcs"))
+        .status()
+        .unwrap();
+    assert!(status.success());
+    let status = Command::new("cp")
+        .arg("-r")
+        .arg("runtime/python/bincode/test_bincode.py")
+        .arg(dir.path().join("src/bincode"))
+        .status()
+        .unwrap();
+    assert!(status.success());
+
     // Sadly, we have to manage numpy typeshed manually for now until the next release of numpy.
     let status = Command::new("cp")
         .arg("-r")

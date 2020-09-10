@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from dataclasses import dataclass
 import unittest
 import serde_types as st
 import bincode
@@ -143,4 +144,40 @@ class BincodeTestCase(unittest.TestCase):
             bincode.deserialize(
                 b"\x02\x00\x00\x00\x00\x00\x00\x00\x01\x00\x05\x00\x01\x03", Map
             ),
+        )
+
+    @dataclass
+    class Foo:
+        x: st.uint8
+        y: st.uint16
+
+    def test_struct(self):
+        self.assertEqual(
+            bincode.serialize(BincodeTestCase.Foo(x=0, y=1), BincodeTestCase.Foo),
+            b"\x00\x01\x00",
+        )
+        self.assertEqual(
+            bincode.deserialize(b"\x02\x01\x00", BincodeTestCase.Foo),
+            (BincodeTestCase.Foo(x=2, y=1), b""),
+        )
+
+    class Bar:
+        VARIANTS = [None, None, None]
+
+    @dataclass
+    class Bar1(Bar):
+        INDEX = 1
+        x: st.uint8
+        y: st.uint16
+
+    Bar.VARIANTS[1] = Bar1
+
+    def test_enum(self):
+        self.assertEqual(
+            bincode.serialize(BincodeTestCase.Bar1(x=0, y=1), BincodeTestCase.Bar),
+            b"\x01\x00\x00\x00\x00\x01\x00",
+        )
+        self.assertEqual(
+            bincode.deserialize(b"\x01\x00\x00\x00\x02\x01\x00", BincodeTestCase.Bar),
+            (BincodeTestCase.Bar1(x=2, y=1), b""),
         )
