@@ -2,6 +2,8 @@ import unittest
 import serde_types as st
 import lcs
 import typing
+import sys
+from dataclasses import dataclass
 
 
 class LcsTestCase(unittest.TestCase):
@@ -146,3 +148,98 @@ class LcsTestCase(unittest.TestCase):
         with self.assertRaises(st.DeserializationError):
             # Must enforce canonical encoding.
             lcs.deserialize(b"\x02\x01\x00\x05\x00\x01\x03", Map)
+
+    @dataclass
+    class Foo:
+        x: st.uint8
+        y: st.uint16
+
+    def test_struct(self):
+        self.assertEqual(
+            lcs.serialize(LcsTestCase.Foo(x=0, y=1), LcsTestCase.Foo), b"\x00\x01\x00"
+        )
+        self.assertEqual(
+            lcs.deserialize(b"\x02\x01\x00", LcsTestCase.Foo),
+            (LcsTestCase.Foo(x=2, y=1), b""),
+        )
+
+    class Bar:
+        VARIANTS = [None, None, None]
+
+    @dataclass
+    class Bar1(Bar):
+        INDEX = 1
+        x: st.uint8
+        y: st.uint16
+
+    Bar.VARIANTS[1] = Bar1
+
+    def test_enum(self):
+        self.assertEqual(
+            lcs.serialize(LcsTestCase.Bar1(x=0, y=1), LcsTestCase.Bar),
+            b"\x01\x00\x01\x00",
+        )
+        self.assertEqual(
+            lcs.deserialize(b"\x01\x02\x01\x00", LcsTestCase.Bar),
+            (LcsTestCase.Bar1(x=2, y=1), b""),
+        )
+
+    @dataclass
+    class List:
+        next: typing.Optional[typing.Tuple[st.uint64, "LcsTestCase.List"]]
+
+        @staticmethod
+        def empty() -> "LcsTestCase.List":
+            return LcsTestCase.List(next=None)
+
+        @staticmethod
+        def cons(value: st.uint64, tail: "LcsTestCase.List") -> "LcsTestCase.List":
+            return LcsTestCase.List(next=(value, tail))
+
+        @staticmethod
+        def integers(size: int) -> "LcsTestCase.List":
+            if size == 0:
+                return LcsTestCase.List.empty()
+            else:
+                return LcsTestCase.List.cons(
+                    st.uint64(size - 1), LcsTestCase.List.integers(size - 1)
+                )
+
+    def test_max_container_depth(self):
+        # Required to avoid RecursionError's in python.
+        sys.setrecursionlimit(lcs.MAX_CONTAINER_DEPTH * 5)
+
+        l1 = LcsTestCase.List.integers(4)
+        b1 = lcs.serialize(l1, LcsTestCase.List)
+        self.assertEqual(
+            b1,
+            bytes(
+                [
+                    # fmt: off
+                    1, 3, 0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                ]
+            ),
+        )
+        self.assertEqual(lcs.deserialize(b1, LcsTestCase.List), (l1, b""))
+
+        l2 = LcsTestCase.List.integers(lcs.MAX_CONTAINER_DEPTH - 1)
+        b2 = lcs.serialize(l2, LcsTestCase.List)
+        self.assertEqual(lcs.deserialize(b2, LcsTestCase.List), (l2, b""))
+
+        l3 = LcsTestCase.List.integers(lcs.MAX_CONTAINER_DEPTH)
+        with self.assertRaises(st.SerializationError):
+            lcs.serialize(l3, LcsTestCase.List)
+
+        b3 = bytes([1, 243, 1, 0, 0, 0, 0, 0, 0]) + b2
+        with self.assertRaisesRegex(
+            st.DeserializationError, "Exceeded maximum container depth.*"
+        ):
+            self.assertEqual(lcs.deserialize(b3, LcsTestCase.List))
+
+        # Pairs don't count in "container depth".
+        P = typing.Tuple[LcsTestCase.List, LcsTestCase.List]
+        self.assertEqual(lcs.deserialize(b2 + b2, P), ((l2, l2), b""))
+        with self.assertRaisesRegex(
+            st.DeserializationError, "Exceeded maximum container depth.*"
+        ):
+            lcs.deserialize(b2 + b3, P)
