@@ -99,6 +99,15 @@ class BincodeTestCase(unittest.TestCase):
         self.assertEqual(bincode.serialize((0, 1), T), b"\x00\x01\x00")
         self.assertEqual(bincode.deserialize(b"\x02\x01\x00", T), ((2, 1), b""))
 
+    def test_serialize_option(self):
+        T = typing.Optional[st.uint16]
+        self.assertEqual(bincode.serialize(None, T), b"\x00")
+        self.assertEqual(bincode.serialize(6, T), b"\x01\x06\x00")
+        self.assertEqual(bincode.deserialize(b"\x00", T), (None, b""))
+        self.assertEqual(bincode.deserialize(b"\x01\x02\x00", T), (2, b""))
+        with self.assertRaisesRegex(st.DeserializationError, "Wrong tag.*"):
+            bincode.deserialize(b"\x02\x06\x00", T)
+
     def test_serialize_sequence(self):
         Seq = typing.Sequence[st.uint16]
         self.assertEqual(
