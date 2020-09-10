@@ -9,9 +9,8 @@ from typing import get_type_hints
 import serde_types as st
 import serde_binary as sb
 
-
-LCS_MAX_LENGTH = 1 << 31
-LCS_MAX_U32 = (1 << 32) - 1
+MAX_LENGTH = 1 << 31
+MAX_U32 = (1 << 32) - 1
 
 
 def _encode_u32_as_uleb128(value: int) -> bytes:
@@ -24,13 +23,13 @@ def _encode_u32_as_uleb128(value: int) -> bytes:
 
 
 def _encode_length(value: int) -> bytes:
-    if value > LCS_MAX_LENGTH:
+    if value > MAX_LENGTH:
         raise st.SerializationError("Length exceeds the maximum supported value.")
     return _encode_u32_as_uleb128(value)
 
 
 def _encode_variant_index(value: int) -> bytes:
-    if value > LCS_MAX_U32:
+    if value > MAX_U32:
         raise st.SerializationError(
             "Variant index exceeds the maximum supported value."
         )
@@ -44,7 +43,7 @@ def _decode_uleb128_as_u32(content: bytes) -> typing.Tuple[int, bytes]:
         content = content[1:]
         digit = byte & 0x7F
         value |= digit << shift
-        if value > LCS_MAX_U32:
+        if value > MAX_U32:
             raise st.DeserializationError(
                 "Overflow while parsing uleb128-encoded uint32 value"
             )
@@ -60,7 +59,7 @@ def _decode_uleb128_as_u32(content: bytes) -> typing.Tuple[int, bytes]:
 
 def _decode_length(content: bytes) -> typing.Tuple[int, bytes]:
     value, content = _decode_uleb128_as_u32(content)
-    if value > LCS_MAX_LENGTH:
+    if value > MAX_LENGTH:
         raise st.DeserializationError("Length exceeds the maximum supported value.")
     return value, content
 

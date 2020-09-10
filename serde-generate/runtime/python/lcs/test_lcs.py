@@ -79,7 +79,7 @@ class LcsTestCase(unittest.TestCase):
         self.assertEqual(lcs._encode_u32_as_uleb128(0x3F01), b"\x81\x7e")
         self.assertEqual(lcs._encode_u32_as_uleb128(0x8001), b"\x81\x80\x02")
         self.assertEqual(
-            lcs._encode_u32_as_uleb128(lcs.LCS_MAX_U32), b"\xff\xff\xff\xff\x0f"
+            lcs._encode_u32_as_uleb128(lcs.MAX_U32), b"\xff\xff\xff\xff\x0f"
         )
 
         self.assertEqual(lcs._decode_uleb128_as_u32(b"\x00"), (0, b""))
@@ -92,7 +92,7 @@ class LcsTestCase(unittest.TestCase):
         )
         self.assertEqual(lcs._decode_uleb128_as_u32(b"\x81\x80\x02"), (0x8001, b""))
         self.assertEqual(
-            lcs._decode_uleb128_as_u32(b"\xff\xff\xff\xff\x0f"), (lcs.LCS_MAX_U32, b"")
+            lcs._decode_uleb128_as_u32(b"\xff\xff\xff\xff\x0f"), (lcs.MAX_U32, b"")
         )
         with self.assertRaises(st.DeserializationError):
             lcs._decode_uleb128_as_u32(b"\x80\x00")
@@ -100,11 +100,9 @@ class LcsTestCase(unittest.TestCase):
             lcs._decode_uleb128_as_u32(b"\xff\xff\xff\xff\x10")
 
     def test_encode_length(self):
-        self.assertEqual(
-            lcs._encode_length(lcs.LCS_MAX_LENGTH), b"\x80\x80\x80\x80\x08"
-        )
+        self.assertEqual(lcs._encode_length(lcs.MAX_LENGTH), b"\x80\x80\x80\x80\x08")
         with self.assertRaises(st.SerializationError):
-            lcs._encode_length(lcs.LCS_MAX_LENGTH + 1)
+            lcs._encode_length(lcs.MAX_LENGTH + 1)
         with self.assertRaises(st.DeserializationError):
             lcs._decode_length(b"\x80\x80\x80\x80\x09")
 
