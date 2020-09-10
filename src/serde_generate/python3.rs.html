@@ -430,6 +430,17 @@
 <span id="430">430</span>
 <span id="431">431</span>
 <span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -745,7 +756,7 @@ def {0}_serialize(self) -&gt; bytes:
 def {0}_deserialize(input: bytes) -&gt; &#39;{1}&#39;:
     v, buffer = {0}.deserialize(input, {1})
     if buffer:
-        raise ValueError(&quot;Some input bytes were not read&quot;);
+        raise st.DeserializationError(&quot;Some input bytes were not read&quot;);
     return v&quot;#</span>,
             <span class="ident">encoding</span>.<span class="ident">name</span>(),
             <span class="ident">name</span>
@@ -810,10 +821,15 @@ def {0}_deserialize(input: bytes) -&gt; &#39;{1}&#39;:
     <span class="kw">fn</span> <span class="ident">fix_serde_package</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">content</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
         <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">serde_package_name</span> {
             <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">content</span>.<span class="ident">into</span>(),
-            <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">content</span>.<span class="ident">replace</span>(
-                <span class="string">&quot;import serde_types&quot;</span>,
-                <span class="kw-2">&amp;</span><span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;from {} import serde_types&quot;</span>, <span class="ident">name</span>),
-            ),
+            <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">content</span>
+                .<span class="ident">replace</span>(
+                    <span class="string">&quot;import serde_types&quot;</span>,
+                    <span class="kw-2">&amp;</span><span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;from {} import serde_types&quot;</span>, <span class="ident">name</span>),
+                )
+                .<span class="ident">replace</span>(
+                    <span class="string">&quot;import serde_binary&quot;</span>,
+                    <span class="kw-2">&amp;</span><span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;from {} import serde_binary&quot;</span>, <span class="ident">name</span>),
+                ),
         }
     }
 }
@@ -839,6 +855,12 @@ def {0}_deserialize(input: bytes) -&gt; &#39;{1}&#39;:
             <span class="ident">file</span>,
             <span class="string">&quot;{}&quot;</span>,
             <span class="self">self</span>.<span class="ident">fix_serde_package</span>(<span class="macro">include_str</span><span class="macro">!</span>(<span class="string">&quot;../runtime/python/serde_types/__init__.py&quot;</span>))
+        )<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">create_module_init_file</span>(<span class="string">&quot;serde_binary&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">write</span><span class="macro">!</span>(
+            <span class="ident">file</span>,
+            <span class="string">&quot;{}&quot;</span>,
+            <span class="self">self</span>.<span class="ident">fix_serde_package</span>(<span class="macro">include_str</span><span class="macro">!</span>(<span class="string">&quot;../runtime/python/serde_binary/__init__.py&quot;</span>))
         )<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
