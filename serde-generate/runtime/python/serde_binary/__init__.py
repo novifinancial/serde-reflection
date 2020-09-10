@@ -205,7 +205,10 @@ def _decode_str(
     decode_length: DecodeInteger, content: bytes
 ) -> typing.Tuple[str, bytes]:
     strlen, content = decode_length(content)
-    val, content = peek(content, strlen).decode(), content[strlen:]
+    try:
+        val, content = peek(content, strlen).decode(), content[strlen:]
+    except UnicodeDecodeError:
+        raise st.DeserializationError("Invalid unicode string:", content)
     return val, content
 
 
@@ -401,6 +404,8 @@ def deserialize_with_config(
         # handle variant
         elif hasattr(obj_type, "VARIANTS"):
             variant_index, content = config.decode_variant_index(content)
+            if variant_index not in range(len(obj_type.VARIANTS)):
+                raise st.DeserializationError("Unexpected variant index", variant_index)
             new_type = obj_type.VARIANTS[variant_index]
             res, content = deserialize_with_config(
                 config, content, new_type, current_container_depth + 1

@@ -186,12 +186,23 @@ fn test_python_runtime_on_all_supported_types(runtime: Runtime) {
     writeln!(
         source,
         r#"
+from copy import copy
+import serde_types as st
 encodings = [bytes.fromhex(s) for s in [{1}]]
 
 for encoding in encodings:
     v = SerdeData.{0}_deserialize(encoding)
     s = v.{0}_serialize()
     assert s == encoding
+
+    for i in range(len(encoding)):
+        encoding2 = bytearray(encoding)
+        encoding2[i] ^= 0x80
+        try:
+            v2 = SerdeData.{0}_deserialize(encoding2)
+            assert v2 != v
+        except st.DeserializationError:
+            pass
 "#,
         runtime.name(),
         hex_encodings.join(", ")
