@@ -452,9 +452,11 @@ int main() {{
                 try {{
                     auto test2 = SerdeData::{1}Deserialize(input2);
                     assert(!(test2 == test));
-                }} catch (char const* e) {{
+                }} catch (serde::deserialization_error e) {{
                     // All good
                 }} catch (std::bad_alloc const &e) {{
+                    // All good
+                }} catch (std::length_error const &e) {{
                     // All good
                 }}
             }}
@@ -483,6 +485,7 @@ int main() {{
         .unwrap();
     assert!(status.success());
 
+    // Use `.status()` instead of `.output()` to debug error outputs.
     let output = Command::new(dir.path().join("test")).output().unwrap();
     assert!(output.status.success());
 }

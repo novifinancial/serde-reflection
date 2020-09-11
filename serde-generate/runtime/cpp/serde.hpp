@@ -17,6 +17,22 @@
 
 namespace serde {
 
+class serialization_error : public std::invalid_argument {
+  public:
+    explicit serialization_error(const std::string &what_arg)
+        : std::invalid_argument(what_arg) {}
+    explicit serialization_error(const char *what_arg)
+        : std::invalid_argument(what_arg) {}
+};
+
+class deserialization_error : public std::invalid_argument {
+  public:
+    explicit deserialization_error(const std::string &what_arg)
+        : std::invalid_argument(what_arg) {}
+    explicit deserialization_error(const char *what_arg)
+        : std::invalid_argument(what_arg) {}
+};
+
 // Basic implementation for 128-bit unsigned integers.
 struct uint128_t {
     uint64_t high;
@@ -578,7 +594,7 @@ struct Deserializable<std::variant<Types...>> {
         // Read the variant index and execute the corresponding case.
         auto index = deserializer.deserialize_variant_index();
         if (index > cases.size()) {
-            throw "Unknown variant index for enum";
+            throw deserialization_error("Unknown variant index for enum");
         }
         return cases.at(index)(deserializer);
     }

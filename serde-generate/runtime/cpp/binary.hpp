@@ -96,17 +96,17 @@ void BinarySerializer<S>::serialize_unit() {}
 
 template <class S>
 void BinarySerializer<S>::serialize_f32(float) {
-    throw "not implemented";
+    throw serde::serialization_error("not implemented");
 }
 
 template <class S>
 void BinarySerializer<S>::serialize_f64(double) {
-    throw "not implemented";
+    throw serde::serialization_error("not implemented");
 }
 
 template <class S>
 void BinarySerializer<S>::serialize_char(char32_t) {
-    throw "not implemented";
+    throw serde::serialization_error("not implemented");
 }
 
 template <class S>
@@ -190,7 +190,7 @@ size_t BinarySerializer<S>::get_buffer_offset() {
 template <class D>
 uint8_t BinaryDeserializer<D>::read_byte() {
     if (pos_ >= bytes_.size()) {
-        throw "Input is not large enough";
+        throw serde::deserialization_error("Input is not large enough");
     }
     return bytes_.at(pos_++);
 }
@@ -211,17 +211,17 @@ void BinaryDeserializer<D>::deserialize_unit() {}
 
 template <class D>
 float BinaryDeserializer<D>::deserialize_f32() {
-    throw "not implemented";
+    throw serde::deserialization_error("not implemented");
 }
 
 template <class D>
 double BinaryDeserializer<D>::deserialize_f64() {
-    throw "not implemented";
+    throw serde::deserialization_error("not implemented");
 }
 
 template <class D>
 char32_t BinaryDeserializer<D>::deserialize_char() {
-    throw "not implemented";
+    throw serde::deserialization_error("not implemented");
 }
 
 template <class D>
@@ -232,7 +232,7 @@ bool BinaryDeserializer<D>::deserialize_bool() {
     case 1:
         return true;
     default:
-        throw "Invalid boolean value";
+        throw serde::deserialization_error("Invalid boolean value");
     }
 }
 

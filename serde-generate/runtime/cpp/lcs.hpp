@@ -55,7 +55,7 @@ inline void LcsSerializer::serialize_u32_as_uleb128(uint32_t value) {
 
 inline void LcsSerializer::serialize_len(size_t value) {
     if (value > LCS_MAX_LENGTH) {
-        throw "Length is too large";
+        throw serde::serialization_error("Length is too large");
     }
     serialize_u32_as_uleb128((uint32_t)value);
 }
@@ -96,22 +96,25 @@ inline uint32_t LcsDeserializer::deserialize_uleb128_as_u32() {
         auto digit = byte & 0x7F;
         value |= digit << shift;
         if (value > std::numeric_limits<uint32_t>::max()) {
-            throw "Overflow while parsing uleb128-encoded uint32 value";
+            throw serde::deserialization_error(
+                "Overflow while parsing uleb128-encoded uint32 value");
         }
         if (digit == byte) {
             if (shift > 0 && digit == 0) {
-                throw "Invalid uleb128 number (unexpected zero digit)";
+                throw serde::deserialization_error(
+                    "Invalid uleb128 number (unexpected zero digit)");
             }
             return (uint32_t)value;
         }
     }
-    throw "Overflow while parsing uleb128-encoded uint32 value";
+    throw serde::deserialization_error(
+        "Overflow while parsing uleb128-encoded uint32 value");
 }
 
 inline size_t LcsDeserializer::deserialize_len() {
     auto value = deserialize_uleb128_as_u32();
     if (value > LCS_MAX_LENGTH) {
-        throw "Length is too large";
+        throw serde::deserialization_error("Length is too large");
     }
     return (size_t)value;
 }
@@ -126,8 +129,9 @@ inline void LcsDeserializer::check_that_key_slices_are_increasing(
                                       bytes_.cbegin() + std::get<1>(key1),
                                       bytes_.cbegin() + std::get<0>(key2),
                                       bytes_.cbegin() + std::get<1>(key2))) {
-        throw "Error while decoding map: keys are not serialized in the "
-              "expected order";
+        throw serde::deserialization_error(
+            "Error while decoding map: keys are not serialized in the "
+            "expected order");
     }
 }
 
