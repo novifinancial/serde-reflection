@@ -15,6 +15,9 @@ exclude = [
     "README.tpl",
 ]
 
+[features]
+runtime-testing = ["libra-canonical-serialization", "bincode"]
+
 [dependencies]
 heck = "0.3.1"
 include_dir = "0.6"
@@ -27,11 +30,13 @@ textwrap = "0.12.1"
 
 serde-reflection = { path = "../serde-reflection", version = "0.3.0" }
 
+bincode = { version = "1.2", optional = true }
+libra-canonical-serialization = { git = "https://github.com/libra/libra.git", branch = "testnet", optional = true }
+
 [dev-dependencies]
+bincode = { version = "1.2" }
 tempfile = "3.1"
-bincode = "1.2"
 hex = "0.4.2"
-libra-canonical-serialization = { git = "https://github.com/libra/libra.git", branch = "testnet" }
 
 [[bin]]
 name = "serdegen"
