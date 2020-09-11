@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "serde.hpp"
 #include "binary.hpp"
+#include "serde.hpp"
 
 namespace serde {
 
@@ -24,7 +24,8 @@ class BincodeDeserializer : public BinaryDeserializer<BincodeDeserializer> {
     using Parent = BinaryDeserializer<BincodeDeserializer>;
 
   public:
-    BincodeDeserializer(std::vector<uint8_t> bytes) : Parent(std::move(bytes)) {}
+    BincodeDeserializer(std::vector<uint8_t> bytes)
+        : Parent(std::move(bytes)) {}
 
     size_t deserialize_len();
     uint32_t deserialize_variant_index();

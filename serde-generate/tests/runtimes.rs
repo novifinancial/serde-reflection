@@ -444,6 +444,20 @@ int main() {{
             auto test = SerdeData::{1}Deserialize(input);
             auto output = test.{1}Serialize();
             assert(input == output);
+
+            // Test simple mutations of the input.
+            for (int i = 0; i < input.size(); i++) {{
+                auto input2 = input;
+                input2[i] ^= 0x80;
+                try {{
+                    auto test2 = SerdeData::{1}Deserialize(input2);
+                    assert(!(test2 == test));
+                }} catch (char const* e) {{
+                    // All good
+                }} catch (std::bad_alloc const &e) {{
+                    // All good
+                }}
+            }}
         }}
         return 0;
     }} catch (char const* e) {{
@@ -469,8 +483,8 @@ int main() {{
         .unwrap();
     assert!(status.success());
 
-    let status = Command::new(dir.path().join("test")).status().unwrap();
-    assert!(status.success());
+    let output = Command::new(dir.path().join("test")).output().unwrap();
+    assert!(output.status.success());
 }
 
 #[test]
