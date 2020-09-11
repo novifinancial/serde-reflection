@@ -15,9 +15,11 @@ template <class S>
 class BinarySerializer {
   protected:
     std::vector<uint8_t> bytes_;
+    size_t container_depth_budget_;
 
   public:
-    BinarySerializer() {}
+    BinarySerializer(size_t max_container_depth)
+        : container_depth_budget_(max_container_depth) {}
 
     void serialize_str(const std::string &value);
 
@@ -41,6 +43,8 @@ class BinarySerializer {
     void serialize_option_tag(bool value);
 
     size_t get_buffer_offset();
+    void increase_container_depth();
+    void decrease_container_depth();
 
     std::vector<uint8_t> bytes() && { return std::move(bytes_); }
 };
@@ -48,16 +52,16 @@ class BinarySerializer {
 template <class D>
 class BinaryDeserializer {
     size_t pos_;
+    size_t container_depth_budget_;
 
   protected:
     std::vector<uint8_t> bytes_;
     uint8_t read_byte();
 
   public:
-    BinaryDeserializer(std::vector<uint8_t> bytes) {
-        bytes_ = std::move(bytes);
-        pos_ = 0;
-    }
+    BinaryDeserializer(std::vector<uint8_t> bytes, size_t max_container_depth)
+        : pos_(0), container_depth_budget_(max_container_depth),
+          bytes_(std::move(bytes)) {}
 
     std::string deserialize_str();
 
@@ -82,6 +86,8 @@ class BinaryDeserializer {
     bool deserialize_option_tag();
 
     size_t get_buffer_offset();
+    void increase_container_depth();
+    void decrease_container_depth();
 };
 
 template <class S>
@@ -186,6 +192,19 @@ void BinarySerializer<S>::serialize_option_tag(bool value) {
 template <class S>
 size_t BinarySerializer<S>::get_buffer_offset() {
     return bytes_.size();
+}
+
+template <class S>
+void BinarySerializer<S>::increase_container_depth() {
+    if (container_depth_budget_ == 0) {
+        throw serialization_error("Too many nested containers");
+    }
+    container_depth_budget_--;
+}
+
+template <class S>
+void BinarySerializer<S>::decrease_container_depth() {
+    container_depth_budget_++;
 }
 
 template <class D>
@@ -320,6 +339,19 @@ bool BinaryDeserializer<D>::deserialize_option_tag() {
 template <class D>
 size_t BinaryDeserializer<D>::get_buffer_offset() {
     return pos_;
+}
+
+template <class S>
+void BinaryDeserializer<S>::increase_container_depth() {
+    if (container_depth_budget_ == 0) {
+        throw deserialization_error("Too many nested containers");
+    }
+    container_depth_budget_--;
+}
+
+template <class S>
+void BinaryDeserializer<S>::decrease_container_depth() {
+    container_depth_budget_++;
 }
 
 } // end of namespace serde
