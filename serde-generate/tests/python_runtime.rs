@@ -97,7 +97,7 @@ fn test_python_runtime_on_all_supported_types(runtime: Runtime) {
     let generator = python3::CodeGenerator::new(&config);
     generator.output(&mut source, &registry).unwrap();
 
-    let values = test_utils::get_sample_values();
+    let values = test_utils::get_sample_values(runtime.has_canonical_maps());
     let hex_encodings: Vec<_> = values
         .iter()
         .map(|v| format!("'{}'", hex::encode(&runtime.serialize(&v))))

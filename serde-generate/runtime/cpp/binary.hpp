@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <variant>
 
 #include "serde.hpp"
 
@@ -61,7 +62,7 @@ class BinaryDeserializer {
     std::string deserialize_str();
 
     bool deserialize_bool();
-    void deserialize_unit();
+    std::monostate deserialize_unit();
     char32_t deserialize_char();
     float deserialize_f32();
     double deserialize_f64();
@@ -207,7 +208,9 @@ std::string BinaryDeserializer<D>::deserialize_str() {
 }
 
 template <class D>
-void BinaryDeserializer<D>::deserialize_unit() {}
+std::monostate BinaryDeserializer<D>::deserialize_unit() {
+    return {};
+}
 
 template <class D>
 float BinaryDeserializer<D>::deserialize_f32() {

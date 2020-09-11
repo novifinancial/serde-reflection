@@ -6,13 +6,14 @@
 #include <algorithm>
 #include <cassert>
 
-#include "binary.hpp"
 #include "serde.hpp"
+#include "binary.hpp"
+
 
 namespace serde {
 
 // Maximum length supported for LCS sequences and maps.
-constexpr size_t LCS_MAX_LENGTH = 1ull << 31;
+constexpr size_t LCS_MAX_LENGTH = (1ull << 31) - 1;
 
 class LcsSerializer : public BinarySerializer<LcsSerializer> {
     using Parent = BinarySerializer<LcsSerializer>;

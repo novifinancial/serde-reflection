@@ -102,11 +102,11 @@ class LcsTestCase(unittest.TestCase):
             lcs._decode_uleb128_as_u32(b"\xff\xff\xff\xff\x10")
 
     def test_encode_length(self):
-        self.assertEqual(lcs._encode_length(lcs.MAX_LENGTH), b"\x80\x80\x80\x80\x08")
+        self.assertEqual(lcs._encode_length(lcs.MAX_LENGTH), b"\xff\xff\xff\xff\x07")
         with self.assertRaises(st.SerializationError):
             lcs._encode_length(lcs.MAX_LENGTH + 1)
         with self.assertRaises(st.DeserializationError):
-            lcs._decode_length(b"\x80\x80\x80\x80\x09")
+            lcs._decode_length(b"\xff\xff\xff\xff\x08")
 
     def test_serialize_bytes(self):
         self.assertEqual(lcs.serialize(b"", bytes), b"\x00")
@@ -142,10 +142,12 @@ class LcsTestCase(unittest.TestCase):
         self.assertEqual(lcs.deserialize(b"\x01\x03\x00", Seq), ([3], b""))
 
     def test_serialize_str(self):
-        self.assertEqual(lcs.serialize("ABC", str), b"\x03ABC")
-        self.assertEqual(lcs.deserialize(b"\x03ABC", str), ("ABC", b""))
+        self.assertEqual(lcs.serialize("ABC\u0394", str), b"\x05ABC\xce\x94")
+        self.assertEqual(lcs.deserialize(b"\x05ABC\xce\x94A", str), ("ABC\u0394", b"A"))
         with self.assertRaises(st.DeserializationError):
             lcs.deserialize(b"\x03AB", str)
+        with self.assertRaises(st.DeserializationError):
+            lcs.deserialize(b"\x03\x80ab", str)
 
     def test_serialize_map(self):
         Map = typing.Dict[st.uint16, st.uint8]
@@ -158,6 +160,16 @@ class LcsTestCase(unittest.TestCase):
         with self.assertRaises(st.DeserializationError):
             # Must enforce canonical encoding.
             lcs.deserialize(b"\x02\x01\x00\x05\x00\x01\x03", Map)
+
+    def test_serialize_set(self):
+        Set = typing.Dict[st.uint16, st.unit]
+        m = {256: None, 1: None}
+        e = lcs.serialize(m, Set)
+        self.assertEqual(e, b"\x02\x00\x01\x01\x00")
+        self.assertEqual((m, b""), lcs.deserialize(b"\x02\x00\x01\x01\x00", Set))
+        with self.assertRaises(st.DeserializationError):
+            # Must enforce canonical encoding.
+            lcs.deserialize(b"\x02\x01\x00\x00\x01", Set)
 
     @dataclass
     class Foo:

@@ -50,7 +50,7 @@ serde_bytes = "0.11"
     let mut source = File::create(&source_path).unwrap();
     generator.output(&mut source, &registry).unwrap();
 
-    let values = test_utils::get_sample_values();
+    let values = test_utils::get_sample_values(runtime.has_canonical_maps());
     let hex_encodings: Vec<_> = values
         .iter()
         .map(|v| format!("\"{}\"", hex::encode(&runtime.serialize(&v))))
