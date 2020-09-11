@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 #include "serde.hpp"
 #include "binary.hpp"
 
@@ -15,7 +17,7 @@ class BincodeSerializer : public BinarySerializer<BincodeSerializer> {
     using Parent = BinarySerializer<BincodeSerializer>;
 
   public:
-    BincodeSerializer() : Parent() {}
+    BincodeSerializer() : Parent(SIZE_MAX) {}
 
     void serialize_len(size_t value);
     void serialize_variant_index(uint32_t value);
@@ -28,7 +30,7 @@ class BincodeDeserializer : public BinaryDeserializer<BincodeDeserializer> {
 
   public:
     BincodeDeserializer(std::vector<uint8_t> bytes)
-        : Parent(std::move(bytes)) {}
+        : Parent(std::move(bytes), SIZE_MAX) {}
 
     size_t deserialize_len();
     uint32_t deserialize_variant_index();

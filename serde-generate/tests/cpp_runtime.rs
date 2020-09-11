@@ -118,11 +118,10 @@ fn test_cpp_runtime_on_supported_types(runtime: Runtime) {
     let generator = cpp::CodeGenerator::new(&config);
     generator.output(&mut header, &registry).unwrap();
 
-    let values = test_utils::get_sample_values(runtime.has_canonical_maps());
-    let encodings = values
+    let encodings = runtime
+        .get_positive_samples()
         .iter()
-        .map(|v| {
-            let bytes = runtime.serialize(&v);
+        .map(|bytes| {
             format!(
                 "std::vector<uint8_t>{{{}}}",
                 bytes
@@ -140,6 +139,7 @@ fn test_cpp_runtime_on_supported_types(runtime: Runtime) {
     writeln!(
         source,
         r#"
+#include <algorithm>
 #include <exception>
 #include <iostream>
 #include <cassert>
@@ -157,9 +157,9 @@ int main() {{
             assert(input == output);
 
             // Test simple mutations of the input.
-            for (int i = 0; i < input.size(); i++) {{
+            for (int i = 0; i < std::min(input.size(), 20ul); i++) {{
                 auto input2 = input;
-                input2[i] ^= 0x80;
+                input2[i] ^= 0x81;
                 try {{
                     auto test2 = SerdeData::{1}Deserialize(input2);
                     assert(!(test2 == test));
@@ -187,6 +187,7 @@ int main() {{
     let status = Command::new("clang++")
         .arg("--std=c++17")
         .arg("-g")
+        .arg("-O3")
         .arg("-o")
         .arg(dir.path().join("test"))
         .arg("-I")
@@ -196,7 +197,6 @@ int main() {{
         .unwrap();
     assert!(status.success());
 
-    // Use `.status()` instead of `.output()` to debug error outputs.
-    let output = Command::new(dir.path().join("test")).output().unwrap();
-    assert!(output.status.success());
+    let status = Command::new(dir.path().join("test")).status().unwrap();
+    assert!(status.success());
 }
