@@ -6,8 +6,8 @@
 #include <algorithm>
 #include <cassert>
 
-#include "serde.hpp"
 #include "binary.hpp"
+#include "serde.hpp"
 
 namespace serde {
 

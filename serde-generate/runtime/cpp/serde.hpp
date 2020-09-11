@@ -577,6 +577,9 @@ struct Deserializable<std::variant<Types...>> {
 
         // Read the variant index and execute the corresponding case.
         auto index = deserializer.deserialize_variant_index();
+        if (index > cases.size()) {
+            throw "Unknown variant index for enum";
+        }
         return cases.at(index)(deserializer);
     }
 };
