@@ -178,7 +178,8 @@ def _encode_bytes(encode_length: EncodeInteger, value: bytes) -> bytes:
 
 
 def _encode_str(encode_length: EncodeInteger, value: str) -> bytes:
-    return encode_length(len(value)) + value.encode()
+    b = value.encode()
+    return encode_length(len(b)) + b
 
 
 def _decode_bool(content: bytes) -> typing.Tuple[st.bool, bytes]:
@@ -369,7 +370,10 @@ def deserialize_with_config(
                 key, content = deserialize_with_config(
                     config, previous_content, types[0], current_container_depth
                 )
-                serialized_key = previous_content[: -len(content)]
+                if content:
+                    serialized_key = previous_content[: -len(content)]
+                else:
+                    serialized_key = previous_content
                 value, content = deserialize_with_config(
                     config, content, types[1], current_container_depth
                 )

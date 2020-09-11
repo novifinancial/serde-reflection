@@ -342,8 +342,7 @@ template <>
 struct Deserializable<std::monostate> {
     template <typename Deserializer>
     static std::monostate deserialize(Deserializer &deserializer) {
-        deserializer.deserialize_unit();
-        return {};
+        return deserializer.deserialize_unit();
     }
 };
 

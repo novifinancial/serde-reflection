@@ -157,7 +157,7 @@ fn test_golang_runtime_on_supported_types(runtime: Runtime) {
     let generator = golang::CodeGenerator::new(&config);
     generator.output(&mut source, &registry).unwrap();
 
-    let values = test_utils::get_sample_values();
+    let values = test_utils::get_sample_values(runtime.has_canonical_maps());
     let encodings = values
         .iter()
         .map(|v| {
@@ -185,7 +185,7 @@ func main() {{
 		if err != nil {{ panic(fmt.Sprintf("failed to deserialize input: %v", err)) }}
 		output, err := test.{1}Serialize()
 		if err != nil {{ panic(fmt.Sprintf("failed to serialize: %v", err)) }}
-		if {2} && !cmp.Equal(input, output) {{ panic(fmt.Sprintf("input != output:\n  %v\n  %v", input, output)) }}
+		if !cmp.Equal(input, output) {{ panic(fmt.Sprintf("input != output:\n  %v\n  %v", input, output)) }}
 		test2, err := {1}DeserializeSerdeData(output)
 		if err != nil {{ panic(fmt.Sprintf("failed to deserialize output: %v", err)) }}
 		if !cmp.Equal(test, test2) {{ panic(fmt.Sprintf("test != test2:\n  %v\n  %v", test, test2)) }}
@@ -194,7 +194,6 @@ func main() {{
 "#,
         encodings,
         runtime.name().to_camel_case(),
-        if runtime.is_canonical() { "true" } else { "false" },
     )
     .unwrap();
 

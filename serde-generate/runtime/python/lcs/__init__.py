@@ -9,7 +9,7 @@ from typing import get_type_hints
 import serde_types as st
 import serde_binary as sb
 
-MAX_LENGTH = 1 << 31
+MAX_LENGTH = (1 << 31) - 1
 MAX_U32 = (1 << 32) - 1
 MAX_CONTAINER_DEPTH = 500
 

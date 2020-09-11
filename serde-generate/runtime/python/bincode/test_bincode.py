@@ -128,14 +128,17 @@ class BincodeTestCase(unittest.TestCase):
 
     def test_serialize_str(self):
         self.assertEqual(
-            bincode.serialize("ABC", str), b"\x03\x00\x00\x00\x00\x00\x00\x00ABC"
+            bincode.serialize("ABC\u0394", str),
+            b"\x05\x00\x00\x00\x00\x00\x00\x00ABC\xce\x94",
         )
         self.assertEqual(
-            bincode.deserialize(b"\x03\x00\x00\x00\x00\x00\x00\x00ABC", str),
-            ("ABC", b""),
+            bincode.deserialize(b"\x05\x00\x00\x00\x00\x00\x00\x00ABC\xce\x94A", str),
+            ("ABC\u0394", b"A"),
         )
         with self.assertRaises(st.DeserializationError):
-            bincode.deserialize(b"\x03AB", str)
+            bincode.deserialize(b"\x03\x00\x00\x00\x00\x00\x00\x00AB", str)
+        with self.assertRaises(st.DeserializationError):
+            bincode.deserialize(b"\x03\x00\x00\x00\x00\x00\x00\x00\x80ab", str)
 
     def test_serialize_map(self):
         Map = typing.Dict[st.uint16, st.uint8]
@@ -152,6 +155,24 @@ class BincodeTestCase(unittest.TestCase):
             (m, b""),
             bincode.deserialize(
                 b"\x02\x00\x00\x00\x00\x00\x00\x00\x01\x00\x05\x00\x01\x03", Map
+            ),
+        )
+
+    def test_serialize_set(self):
+        Set = typing.Dict[st.uint16, st.unit]
+        m = {256: None, 1: None}
+        e = bincode.serialize(m, Set)
+        self.assertEqual(e, b"\x02\x00\x00\x00\x00\x00\x00\x00\x00\x01\x01\x00")
+        self.assertEqual(
+            (m, b""),
+            bincode.deserialize(
+                b"\x02\x00\x00\x00\x00\x00\x00\x00\x00\x01\x01\x00", Set
+            ),
+        )
+        self.assertEqual(
+            (m, b""),
+            bincode.deserialize(
+                b"\x02\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x01", Set
             ),
         )
 
