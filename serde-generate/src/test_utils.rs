@@ -1,11 +1,34 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+use crate::Encoding;
 use maplit::btreemap;
 use serde::{Deserialize, Serialize};
 use serde_bytes::ByteBuf;
 use serde_reflection::{Registry, Result, Samples, Tracer, TracerConfig};
 use std::collections::BTreeMap;
+
+#[derive(Serialize, Deserialize)]
+pub struct Test {
+    pub a: Vec<u32>,
+    pub b: (i64, u64),
+    pub c: Choice,
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum Choice {
+    A,
+    B(u64),
+    C { x: u8 },
+}
+
+pub fn get_simple_registry() -> Result<Registry> {
+    let mut tracer = Tracer::new(TracerConfig::default());
+    let samples = Samples::new();
+    tracer.trace_type::<Test>(&samples)?;
+    tracer.trace_type::<Choice>(&samples)?;
+    Ok(tracer.registry()?)
+}
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub enum SerdeData {
@@ -336,4 +359,64 @@ UnitStruct: UNITSTRUCT
 "#
         .to_string()
     );
+}
+
+#[derive(Copy, Clone)]
+pub enum Runtime {
+    Lcs,
+    Bincode,
+}
+
+impl std::convert::Into<Encoding> for Runtime {
+    fn into(self) -> Encoding {
+        match self {
+            Runtime::Lcs => Encoding::Lcs,
+            Runtime::Bincode => Encoding::Bincode,
+        }
+    }
+}
+
+impl Runtime {
+    pub fn name(self) -> &'static str {
+        <Self as std::convert::Into<Encoding>>::into(self).name()
+    }
+
+    pub fn rust_package(self) -> &'static str {
+        match self {
+            Self::Lcs => "lcs = { git = \"https://github.com/libra/libra.git\", branch = \"testnet\", package = \"libra-canonical-serialization\" }",
+            Self::Bincode => "bincode = \"1.2\"",
+        }
+    }
+
+    #[cfg(feature = "runtime-testing")]
+    pub fn serialize<T>(self, value: &T) -> Vec<u8>
+    where
+        T: serde::Serialize,
+    {
+        match self {
+            Self::Lcs => libra_canonical_serialization::to_bytes(value).unwrap(),
+            Self::Bincode => bincode::serialize(value).unwrap(),
+        }
+    }
+
+    pub fn quote_serialize(self) -> &'static str {
+        match self {
+            Self::Lcs => "lcs::to_bytes",
+            Self::Bincode => "bincode::serialize",
+        }
+    }
+
+    pub fn quote_deserialize(self) -> &'static str {
+        match self {
+            Self::Lcs => "lcs::from_bytes",
+            Self::Bincode => "bincode::deserialize",
+        }
+    }
+
+    pub fn is_canonical(self) -> bool {
+        match self {
+            Self::Lcs => true,
+            Self::Bincode => false,
+        }
+    }
 }

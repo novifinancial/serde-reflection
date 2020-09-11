@@ -57,6 +57,8 @@ jobs:
           name: Build and Test
           # Build all targets to ensure examples are built as well.
           command: |
+            cargo build --all-targets
+            cargo test
             cargo build --all-targets --all-features
             cargo test --all-features
 
