@@ -185,10 +185,17 @@ func main() {{
 		if err != nil {{ panic(fmt.Sprintf("failed to deserialize input: %v", err)) }}
 		output, err := test.{1}Serialize()
 		if err != nil {{ panic(fmt.Sprintf("failed to serialize: %v", err)) }}
+
 		if !cmp.Equal(input, output) {{ panic(fmt.Sprintf("input != output:\n  %v\n  %v", input, output)) }}
-		test2, err := {1}DeserializeSerdeData(output)
-		if err != nil {{ panic(fmt.Sprintf("failed to deserialize output: %v", err)) }}
-		if !cmp.Equal(test, test2) {{ panic(fmt.Sprintf("test != test2:\n  %v\n  %v", test, test2)) }}
+
+		for i := 0; i < len(input); i++ {{
+			input2 := make([]byte, len(input))
+			copy(input2, input)
+			input2[i] ^= 0x80
+			test2, err := {1}DeserializeSerdeData(input2)
+			if err != nil {{ continue }}
+			if cmp.Equal(test, test2) {{ panic("Modified input should give a different value.") }}
+		}}
 	}}
 }}
 "#,
