@@ -140,6 +140,7 @@ fn test_cpp_runtime_on_supported_types(runtime: Runtime) {
     writeln!(
         source,
         r#"
+#include <exception>
 #include <iostream>
 #include <cassert>
 #include "test.hpp"
@@ -172,9 +173,9 @@ int main() {{
             }}
         }}
         return 0;
-    }} catch (char const* e) {{
-        std::cout << "Error: " << e << '\n';
-        return -1;
+    }} catch (std::exception& e) {{
+        std::cout << "Error: " << e.what() << '\n';
+        return 1;
     }}
 }}
 "#,
