@@ -1315,7 +1315,7 @@
 
         <span class="macro">write</span><span class="macro">!</span>(
             <span class="self">self</span>.<span class="ident">out</span>,
-            <span class="string">&quot;static void serialize_{}({} value, com.novi.serde.Serializer serializer) throws java.lang.Exception {{&quot;</span>,
+            <span class="string">&quot;static void serialize_{}({} value, com.novi.serde.Serializer serializer) throws com.novi.serde.SerializationError {{&quot;</span>,
             <span class="ident">name</span>,
             <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format0</span>)
         )<span class="question-mark">?</span>;
@@ -1405,7 +1405,7 @@ for ({} item : value) {{
 
         <span class="macro">write</span><span class="macro">!</span>(
         <span class="self">self</span>.<span class="ident">out</span>,
-        <span class="string">&quot;static {} deserialize_{}(com.novi.serde.Deserializer deserializer) throws java.lang.Exception {{&quot;</span>,
+        <span class="string">&quot;static {} deserialize_{}(com.novi.serde.Deserializer deserializer) throws com.novi.serde.DeserializationError {{&quot;</span>,
         <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format0</span>),
         <span class="ident">name</span>,
     )<span class="question-mark">?</span>;
@@ -1609,7 +1609,7 @@ return obj;
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">serialization</span> {
             <span class="macro">writeln</span><span class="macro">!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
-                <span class="string">&quot;\npublic void serialize(com.novi.serde.Serializer serializer) throws java.lang.Exception {{&quot;</span>,
+                <span class="string">&quot;\npublic void serialize(com.novi.serde.Serializer serializer) throws com.novi.serde.SerializationError {{&quot;</span>,
             )<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">index</span>) <span class="op">=</span> <span class="ident">variant_index</span> {
@@ -1636,13 +1636,13 @@ return obj;
             <span class="kw">if</span> <span class="ident">variant_index</span>.<span class="ident">is_none</span>() {
                 <span class="macro">writeln</span><span class="macro">!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
-                    <span class="string">&quot;\npublic static {} deserialize(com.novi.serde.Deserializer deserializer) throws java.lang.Exception {{&quot;</span>,
+                    <span class="string">&quot;\npublic static {} deserialize(com.novi.serde.Deserializer deserializer) throws com.novi.serde.DeserializationError {{&quot;</span>,
                     <span class="ident">name</span>,
                 )<span class="question-mark">?</span>;
             } <span class="kw">else</span> {
                 <span class="macro">writeln</span><span class="macro">!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
-                    <span class="string">&quot;\nstatic {} load(com.novi.serde.Deserializer deserializer) throws java.lang.Exception {{&quot;</span>,
+                    <span class="string">&quot;\nstatic {} load(com.novi.serde.Deserializer deserializer) throws com.novi.serde.DeserializationError {{&quot;</span>,
                     <span class="ident">name</span>,
                 )<span class="question-mark">?</span>;
             }
@@ -1766,11 +1766,11 @@ if (getClass() != obj.getClass()) return false;
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">serialization</span> {
             <span class="macro">writeln</span><span class="macro">!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
-                <span class="string">&quot;\nabstract public void serialize(com.novi.serde.Serializer serializer) throws java.lang.Exception;&quot;</span>
+                <span class="string">&quot;\nabstract public void serialize(com.novi.serde.Serializer serializer) throws com.novi.serde.SerializationError;&quot;</span>
             )<span class="question-mark">?</span>;
             <span class="macro">write</span><span class="macro">!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
-                <span class="string">&quot;\npublic static {} deserialize(com.novi.serde.Deserializer deserializer) throws java.lang.Exception {{&quot;</span>,
+                <span class="string">&quot;\npublic static {} deserialize(com.novi.serde.Deserializer deserializer) throws com.novi.serde.DeserializationError {{&quot;</span>,
                 <span class="ident">name</span>
             )<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
@@ -1790,7 +1790,7 @@ switch (index) {{&quot;#</span>,
             }
             <span class="macro">writeln</span><span class="macro">!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
-                <span class="string">&quot;default: throw new java.lang.Exception(\&quot;Unknown variant index for {}: \&quot; + index);&quot;</span>,
+                <span class="string">&quot;default: throw new com.novi.serde.DeserializationError(\&quot;Unknown variant index for {}: \&quot; + index);&quot;</span>,
                 <span class="ident">name</span>,
             )<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
@@ -1813,7 +1813,7 @@ switch (index) {{&quot;#</span>,
         <span class="macro">writeln</span><span class="macro">!</span>(
             <span class="self">self</span>.<span class="ident">out</span>,
             <span class="string">r#&quot;
-public byte[] {0}Serialize() throws java.lang.Exception {{
+public byte[] {0}Serialize() throws com.novi.serde.SerializationError {{
     com.novi.serde.Serializer serializer = new com.novi.{0}.{1}Serializer();
     serialize(serializer);
     return serializer.get_bytes();
@@ -1831,14 +1831,14 @@ public byte[] {0}Serialize() throws java.lang.Exception {{
         <span class="macro">writeln</span><span class="macro">!</span>(
             <span class="self">self</span>.<span class="ident">out</span>,
             <span class="string">r#&quot;
-public static {0} {1}Deserialize(byte[] input) throws java.lang.Exception {{
+public static {0} {1}Deserialize(byte[] input) throws com.novi.serde.DeserializationError {{
     if (input == null) {{
-         throw new Exception(&quot;Cannot deserialize null array&quot;);
+         throw new com.novi.serde.DeserializationError(&quot;Cannot deserialize null array&quot;);
     }}
     com.novi.serde.Deserializer deserializer = new com.novi.{1}.{2}Deserializer(input);
     {0} value = deserialize(deserializer);
     if (deserializer.get_buffer_offset() &lt; input.length) {{
-         throw new Exception(&quot;Some input bytes were not read&quot;);
+         throw new com.novi.serde.DeserializationError(&quot;Some input bytes were not read&quot;);
     }}
     return value;
 }}&quot;#</span>,

@@ -1,4 +1,6 @@
 (function() {var implementors = {};
+implementors["bincode"] = [{"text":"impl <a class=\"trait\" href=\"serde/de/trait.Error.html\" title=\"trait serde::de::Error\">Error</a> for <a class=\"type\" href=\"bincode/type.Error.html\" title=\"type bincode::Error\">Error</a>","synthetic":false,"types":["bincode::error::Error"]}];
+implementors["libra_canonical_serialization"] = [{"text":"impl <a class=\"trait\" href=\"serde/de/trait.Error.html\" title=\"trait serde::de::Error\">Error</a> for <a class=\"enum\" href=\"libra_canonical_serialization/enum.Error.html\" title=\"enum libra_canonical_serialization::Error\">Error</a>","synthetic":false,"types":["libra_canonical_serialization::error::Error"]}];
 implementors["serde"] = [];
 implementors["serde_reflection"] = [{"text":"impl <a class=\"trait\" href=\"serde/de/trait.Error.html\" title=\"trait serde::de::Error\">Error</a> for <a class=\"enum\" href=\"serde_reflection/enum.Error.html\" title=\"enum serde_reflection::Error\">Error</a>","synthetic":false,"types":["serde_reflection::error::Error"]}];
 implementors["serde_yaml"] = [{"text":"impl <a class=\"trait\" href=\"serde/de/trait.Error.html\" title=\"trait serde::de::Error\">Error</a> for <a class=\"struct\" href=\"serde_yaml/struct.Error.html\" title=\"struct serde_yaml::Error\">Error</a>","synthetic":false,"types":["serde_yaml::error::Error"]}];

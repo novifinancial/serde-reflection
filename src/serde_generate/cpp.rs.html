@@ -968,7 +968,7 @@ inline {} {}::{}Deserialize(std::vector&lt;uint8_t&gt; input) {{
     auto deserializer = serde::{}Deserializer(input);
     auto value = serde::Deserializable&lt;{}&gt;::deserialize(deserializer);
     if (deserializer.get_buffer_offset() &lt; input.size()) {{
-        throw &quot;Some input bytes were not read&quot;;
+        throw serde::deserialization_error(&quot;Some input bytes were not read&quot;);
     }}
     return value;
 }}&quot;#</span>,
