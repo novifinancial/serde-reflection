@@ -347,7 +347,7 @@ where
 
         write!(
             self.out,
-            "static void serialize_{}({} value, com.novi.serde.Serializer serializer) throws java.lang.Exception {{",
+            "static void serialize_{}({} value, com.novi.serde.Serializer serializer) throws com.novi.serde.SerializationError {{",
             name,
             self.quote_type(format0)
         )?;
@@ -437,7 +437,7 @@ for ({} item : value) {{
 
         write!(
         self.out,
-        "static {} deserialize_{}(com.novi.serde.Deserializer deserializer) throws java.lang.Exception {{",
+        "static {} deserialize_{}(com.novi.serde.Deserializer deserializer) throws com.novi.serde.DeserializationError {{",
         self.quote_type(format0),
         name,
     )?;
@@ -641,7 +641,7 @@ return obj;
         if self.generator.config.serialization {
             writeln!(
                 self.out,
-                "\npublic void serialize(com.novi.serde.Serializer serializer) throws java.lang.Exception {{",
+                "\npublic void serialize(com.novi.serde.Serializer serializer) throws com.novi.serde.SerializationError {{",
             )?;
             self.out.indent();
             if let Some(index) = variant_index {
@@ -668,13 +668,13 @@ return obj;
             if variant_index.is_none() {
                 writeln!(
                     self.out,
-                    "\npublic static {} deserialize(com.novi.serde.Deserializer deserializer) throws java.lang.Exception {{",
+                    "\npublic static {} deserialize(com.novi.serde.Deserializer deserializer) throws com.novi.serde.DeserializationError {{",
                     name,
                 )?;
             } else {
                 writeln!(
                     self.out,
-                    "\nstatic {} load(com.novi.serde.Deserializer deserializer) throws java.lang.Exception {{",
+                    "\nstatic {} load(com.novi.serde.Deserializer deserializer) throws com.novi.serde.DeserializationError {{",
                     name,
                 )?;
             }
@@ -798,11 +798,11 @@ if (getClass() != obj.getClass()) return false;
         if self.generator.config.serialization {
             writeln!(
                 self.out,
-                "\nabstract public void serialize(com.novi.serde.Serializer serializer) throws java.lang.Exception;"
+                "\nabstract public void serialize(com.novi.serde.Serializer serializer) throws com.novi.serde.SerializationError;"
             )?;
             write!(
                 self.out,
-                "\npublic static {} deserialize(com.novi.serde.Deserializer deserializer) throws java.lang.Exception {{",
+                "\npublic static {} deserialize(com.novi.serde.Deserializer deserializer) throws com.novi.serde.DeserializationError {{",
                 name
             )?;
             self.out.indent();
@@ -822,7 +822,7 @@ switch (index) {{"#,
             }
             writeln!(
                 self.out,
-                "default: throw new java.lang.Exception(\"Unknown variant index for {}: \" + index);",
+                "default: throw new com.novi.serde.DeserializationError(\"Unknown variant index for {}: \" + index);",
                 name,
             )?;
             self.out.unindent();
@@ -845,7 +845,7 @@ switch (index) {{"#,
         writeln!(
             self.out,
             r#"
-public byte[] {0}Serialize() throws java.lang.Exception {{
+public byte[] {0}Serialize() throws com.novi.serde.SerializationError {{
     com.novi.serde.Serializer serializer = new com.novi.{0}.{1}Serializer();
     serialize(serializer);
     return serializer.get_bytes();
@@ -863,14 +863,14 @@ public byte[] {0}Serialize() throws java.lang.Exception {{
         writeln!(
             self.out,
             r#"
-public static {0} {1}Deserialize(byte[] input) throws java.lang.Exception {{
+public static {0} {1}Deserialize(byte[] input) throws com.novi.serde.DeserializationError {{
     if (input == null) {{
-         throw new Exception("Cannot deserialize null array");
+         throw new com.novi.serde.DeserializationError("Cannot deserialize null array");
     }}
     com.novi.serde.Deserializer deserializer = new com.novi.{1}.{2}Deserializer(input);
     {0} value = deserialize(deserializer);
     if (deserializer.get_buffer_offset() < input.length) {{
-         throw new Exception("Some input bytes were not read");
+         throw new com.novi.serde.DeserializationError("Some input bytes were not read");
     }}
     return value;
 }}"#,

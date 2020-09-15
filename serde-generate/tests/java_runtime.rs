@@ -45,6 +45,7 @@ fn test_java_runtime_on_simple_data(runtime: Runtime) {
         r#"
 import java.util.List;
 import java.util.Arrays;
+import com.novi.serde.DeserializationError;
 import com.novi.serde.Unsigned;
 import com.novi.serde.Tuple2;
 import testing.Choice;
@@ -70,7 +71,7 @@ public class Main {{
         byte[] input2 = new byte[] {{{0}, 1}};
         try {{
             Test.{1}Deserialize(input2);
-        }} catch (Exception e) {{
+        }} catch (DeserializationError e) {{
             return;
         }}
         assert false;
@@ -165,6 +166,7 @@ fn test_java_runtime_on_supported_types(runtime: Runtime) {
         r#"
 import java.util.List;
 import java.util.Arrays;
+import com.novi.serde.DeserializationError;
 import com.novi.serde.Unsigned;
 import com.novi.serde.Tuple2;
 import testing.SerdeData;
@@ -173,12 +175,24 @@ public class Main {{
     public static void main(String[] args) throws java.lang.Exception {{
         byte[][] inputs = new byte[][] {{{0}}};
 
-        for (int i = 0; i < inputs.length; i++) {{
-            SerdeData test = SerdeData.{1}Deserialize(inputs[i]);
-
+        for (byte[] input : inputs) {{
+            SerdeData test = SerdeData.{1}Deserialize(input);
             byte[] output = test.{1}Serialize();
 
-            assert java.util.Arrays.equals(inputs[i], output);
+            assert java.util.Arrays.equals(input, output);
+
+            // Test simple mutations of the input.
+            for (int i = 0; i < input.length; i++) {{
+                byte[] input2 = input.clone();
+                input2[i] ^= 0x80;
+                try {{
+                    SerdeData test2 = SerdeData.{1}Deserialize(input2);
+                    assert test2 != test;
+                }} catch (DeserializationError e) {{
+                    // All good
+                }}
+            }}
+
         }}
     }}
 }}

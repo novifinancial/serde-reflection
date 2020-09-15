@@ -3,51 +3,50 @@
 
 package com.novi.serde;
 
-import java.lang.Exception;
 import java.math.BigInteger;
 
 public interface Deserializer {
-    String deserialize_str() throws Exception;
+    String deserialize_str() throws DeserializationError;
 
-    Bytes deserialize_bytes() throws Exception;
+    Bytes deserialize_bytes() throws DeserializationError;
 
-    Boolean deserialize_bool() throws Exception;
+    Boolean deserialize_bool() throws DeserializationError;
 
-    Unit deserialize_unit() throws Exception;
+    Unit deserialize_unit() throws DeserializationError;
 
-    Character deserialize_char() throws Exception;
+    Character deserialize_char() throws DeserializationError;
 
-    Float deserialize_f32() throws Exception;
+    Float deserialize_f32() throws DeserializationError;
 
-    Double deserialize_f64() throws Exception;
+    Double deserialize_f64() throws DeserializationError;
 
-    @Unsigned Byte deserialize_u8() throws Exception;
+    @Unsigned Byte deserialize_u8() throws DeserializationError;
 
-    @Unsigned Short deserialize_u16() throws Exception;
+    @Unsigned Short deserialize_u16() throws DeserializationError;
 
-    @Unsigned Integer deserialize_u32() throws Exception;
+    @Unsigned Integer deserialize_u32() throws DeserializationError;
 
-    @Unsigned Long deserialize_u64() throws Exception;
+    @Unsigned Long deserialize_u64() throws DeserializationError;
 
-    @Unsigned @Int128 BigInteger deserialize_u128() throws Exception;
+    @Unsigned @Int128 BigInteger deserialize_u128() throws DeserializationError;
 
-    Byte deserialize_i8() throws Exception;
+    Byte deserialize_i8() throws DeserializationError;
 
-    Short deserialize_i16() throws Exception;
+    Short deserialize_i16() throws DeserializationError;
 
-    Integer deserialize_i32() throws Exception;
+    Integer deserialize_i32() throws DeserializationError;
 
-    Long deserialize_i64() throws Exception;
+    Long deserialize_i64() throws DeserializationError;
 
-    @Int128 BigInteger deserialize_i128() throws Exception;
+    @Int128 BigInteger deserialize_i128() throws DeserializationError;
 
-    long deserialize_len() throws Exception;
+    long deserialize_len() throws DeserializationError;
 
-    int deserialize_variant_index() throws Exception;
+    int deserialize_variant_index() throws DeserializationError;
 
-    boolean deserialize_option_tag() throws Exception;
+    boolean deserialize_option_tag() throws DeserializationError;
 
     int get_buffer_offset();
 
-    void check_that_key_slices_are_increasing(Slice key1, Slice key2) throws Exception;
+    void check_that_key_slices_are_increasing(Slice key1, Slice key2) throws DeserializationError;
 }
