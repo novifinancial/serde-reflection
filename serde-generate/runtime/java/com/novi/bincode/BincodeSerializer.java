@@ -3,15 +3,15 @@
 
 package com.novi.bincode;
 
-import java.lang.Exception;
+import com.novi.serde.SerializationError;
 import com.novi.serde.BinarySerializer;
 
 public class BincodeSerializer extends BinarySerializer {
-    public void serialize_len(long value) throws Exception {
+    public void serialize_len(long value) throws SerializationError {
         serialize_u64(value);
     }
 
-    public void serialize_variant_index(int value) throws Exception {
+    public void serialize_variant_index(int value) throws SerializationError {
         serialize_u32(value);
     }
 
