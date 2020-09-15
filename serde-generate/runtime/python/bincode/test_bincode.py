@@ -192,7 +192,7 @@ class BincodeTestCase(unittest.TestCase):
         )
 
     class Bar:
-        VARIANTS = [None, None, None]
+        VARIANTS = []  # type: typing.Sequence[typing.Type['Bar']]
 
     @dataclass
     class Bar1(Bar):
@@ -200,7 +200,7 @@ class BincodeTestCase(unittest.TestCase):
         x: st.uint8
         y: st.uint16
 
-    Bar.VARIANTS[1] = Bar1
+    Bar.VARIANTS = [None, Bar1, None]
 
     def test_enum(self):
         self.assertEqual(
