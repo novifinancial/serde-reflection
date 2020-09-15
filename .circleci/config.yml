@@ -59,8 +59,8 @@ jobs:
           command: |
             cargo build --all-targets
             cargo test
-            cargo build --all-targets --all-features
-            cargo test --all-features
+            cargo build --release --all-targets --all-features
+            cargo test --release --all-features
 
   # docs-build and docs-deploy are adapted from
   # https://circleci.com/blog/deploying-documentation-to-github-pages-with-continuous-integration/.

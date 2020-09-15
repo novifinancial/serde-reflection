@@ -49,6 +49,7 @@ pub enum SerdeData {
     TreeWithMutualRecursion(Tree<Box<SerdeData>>),
     TupleArray([u32; 3]),
     UnitVector(Vec<()>),
+    SimpleList(SimpleList),
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -110,6 +111,9 @@ pub struct Tree<T> {
     children: Vec<Tree<T>>,
 }
 
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
+pub struct SimpleList(Option<Box<SimpleList>>);
+
 /// The registry corresponding to the test data structures above .
 pub fn get_registry() -> Result<Registry> {
     let mut tracer = Tracer::new(TracerConfig::default());
@@ -158,7 +162,7 @@ pub fn get_sample_values(has_canonical_maps: bool) -> Vec<SerdeData> {
     });
 
     let v2 = SerdeData::OtherTypes(OtherTypes {
-        f_string: "testing...\u{00a2}\u{0939}\u{20ac}\u{d55c}\u{10348}...".to_string(),
+        f_string: "test.\u{10348}.\u{00a2}\u{0939}\u{20ac}\u{d55c}..".to_string(),
         f_bytes: ByteBuf::from(b"bytes".to_vec()),
         f_option: Some(Struct { x: 2, y: 3 }),
         f_unit: (),
@@ -263,7 +267,46 @@ pub fn get_sample_values(has_canonical_maps: bool) -> Vec<SerdeData> {
 
     let v10 = SerdeData::UnitVector(vec![(); 1000]);
 
-    vec![v0, v1, v2, v2bis, v2ter, v3, v4, v5, v6, v7, v8, v9, v10]
+    let v11 = SerdeData::SimpleList(SimpleList(Some(Box::new(SimpleList(None)))));
+
+    vec![
+        v0, v1, v2, v2bis, v2ter, v3, v4, v5, v6, v7, v8, v9, v10, v11,
+    ]
+}
+
+#[cfg(test)]
+#[cfg(feature = "runtime-testing")]
+// Used to test limits on "container depth".
+fn get_sample_value_with_container_depth(depth: usize) -> Option<SerdeData> {
+    if depth < 2 {
+        return None;
+    }
+    let mut list = List::Empty;
+    for _ in 2..depth {
+        list = List::Node(Box::new(SerdeData::UnitVariant), Box::new(list));
+    }
+    Some(SerdeData::ListWithMutualRecursion(list))
+}
+
+#[cfg(test)]
+#[cfg(feature = "runtime-testing")]
+// Used to test limits on "container depth".
+fn get_alternate_sample_value_with_container_depth(depth: usize) -> Option<SerdeData> {
+    if depth < 2 {
+        return None;
+    }
+    let mut list = SimpleList(None);
+    for _ in 2..depth {
+        list = SimpleList(Some(Box::new(list)));
+    }
+    Some(SerdeData::SimpleList(list))
+}
+
+#[cfg(test)]
+#[cfg(feature = "runtime-testing")]
+// Used to test limits on sequence lengths and container depth.
+fn get_sample_value_with_long_sequence(length: usize) -> SerdeData {
+    SerdeData::UnitVector(vec![(); length])
 }
 
 /// Structure used to factorize code in runtime tests.
@@ -305,6 +348,63 @@ impl Runtime {
         }
     }
 
+    #[cfg(feature = "runtime-testing")]
+    pub fn deserialize<T>(self, bytes: &[u8]) -> Option<T>
+    where
+        T: serde::de::DeserializeOwned,
+    {
+        match self {
+            Self::Lcs => libra_canonical_serialization::from_bytes(bytes).ok(),
+            Self::Bincode => bincode::deserialize(bytes).ok(),
+        }
+    }
+
+    /// Serialize a value then add noise to the serialized bits repeatedly. Additionally return
+    /// `true` if the deserialization of each modified bitstring should succeed.
+    #[cfg(feature = "runtime-testing")]
+    pub fn serialize_with_noise_and_deserialize<T>(self, value: &T) -> Vec<(Vec<u8>, bool)>
+    where
+        T: serde::Serialize + serde::de::DeserializeOwned,
+    {
+        let mut results = Vec::new();
+        let s = self.serialize(value);
+        results.push((s.clone(), true));
+
+        if let Runtime::Bincode = self {
+            // Unfortunately, the current Rust implementation of bincode does not take fuzzing of
+            // `Vec<()>` values well at all.
+            return results;
+        }
+
+        // For each byte position < 20 in the serialization of `value`:
+        for i in 0..std::cmp::min(s.len(), 20) {
+            // Flip the highest bit
+            {
+                let mut s2 = s.clone();
+                s2[i] ^= 0x80;
+                let is_valid = self.deserialize::<T>(&s2).is_some();
+                results.push((s2, is_valid));
+            }
+
+            // See if we can turn an (apparent) 4-byte UTF-8 codepoint into an invalid
+            // 5-byte codepoint.
+            if (i + 4 < s.len())
+                && (s[i] ^ 0xf0 < 0x08)
+                && (s[i + 1] ^ 0x80 < 0x40)
+                && (s[i + 2] ^ 0x80 < 0x40)
+                && (s[i + 3] ^ 0x80 < 0x40)
+                && (s[i + 4] < 0x40)
+            {
+                let mut s2 = s.clone();
+                s2[i] ^= 0x08;
+                s2[i + 4] ^= 0x80;
+                let is_valid = self.deserialize::<T>(&s2).is_some();
+                results.push((s2, is_valid));
+            }
+        }
+        results
+    }
+
     pub fn quote_serialize(self) -> &'static str {
         match self {
             Self::Lcs => "lcs::to_bytes",
@@ -328,19 +428,153 @@ impl Runtime {
         }
     }
 
+    #[cfg(feature = "runtime-testing")]
     pub fn maximum_length(self) -> Option<usize> {
         match self {
-            Self::Lcs => Some(1 << 31),
+            Self::Lcs => Some(libra_canonical_serialization::MAX_SEQUENCE_LENGTH),
             Self::Bincode => None,
         }
     }
 
+    #[cfg(feature = "runtime-testing")]
     pub fn maximum_container_depth(self) -> Option<usize> {
         match self {
-            Self::Lcs => Some(500),
+            Self::Lcs => Some(libra_canonical_serialization::MAX_CONTAINER_DEPTH),
             Self::Bincode => None,
         }
     }
+
+    #[cfg(feature = "runtime-testing")]
+    pub fn get_positive_samples_quick(self) -> Vec<Vec<u8>> {
+        let values = get_sample_values(self.has_canonical_maps());
+        let mut positive_samples = Vec::new();
+        for value in values {
+            for (sample, result) in self.serialize_with_noise_and_deserialize(&value) {
+                if result {
+                    positive_samples.push(sample);
+                }
+            }
+        }
+        if let Some(depth) = self.maximum_container_depth() {
+            positive_samples.push(
+                self.get_sample_with_container_depth(depth)
+                    .expect("depth should be large enough"),
+            );
+            positive_samples.push(
+                self.get_alternate_sample_with_container_depth(depth)
+                    .expect("depth should be large enough"),
+            );
+        }
+        positive_samples
+    }
+
+    #[cfg(feature = "runtime-testing")]
+    pub fn get_positive_samples(self) -> Vec<Vec<u8>> {
+        let mut positive_samples = self.get_positive_samples_quick();
+        if let Some(length) = self.maximum_length() {
+            positive_samples.push(self.get_sample_with_long_sequence(length));
+        }
+        positive_samples
+    }
+
+    #[cfg(feature = "runtime-testing")]
+    pub fn get_negative_samples(self) -> Vec<Vec<u8>> {
+        let values = get_sample_values(self.has_canonical_maps());
+        let mut negative_samples = Vec::new();
+        for value in values {
+            for (sample, result) in self.serialize_with_noise_and_deserialize(&value) {
+                if !result {
+                    negative_samples.push(sample);
+                }
+            }
+        }
+        if let Some(length) = self.maximum_length() {
+            negative_samples.push(self.get_sample_with_long_sequence(length + 1));
+        }
+        if let Some(depth) = self.maximum_container_depth() {
+            negative_samples.push(self.get_sample_with_container_depth(depth + 1).unwrap());
+            negative_samples.push(
+                self.get_alternate_sample_with_container_depth(depth + 1)
+                    .unwrap(),
+            );
+        }
+        negative_samples
+    }
+
+    // Used to test limits on "container depth".
+    // Here we construct the serialized bytes directly to allow examples outside the limit.
+    #[cfg(feature = "runtime-testing")]
+    pub fn get_sample_with_container_depth(self, depth: usize) -> Option<Vec<u8>> {
+        if depth < 2 {
+            return None;
+        }
+        let e = self.serialize::<List<SerdeData>>(&List::Empty);
+
+        let f0 = self.serialize(&List::Node(
+            Box::new(SerdeData::UnitVariant),
+            Box::new(List::Empty),
+        ));
+        let f = f0[..f0.len() - e.len()].to_vec();
+
+        let h0 = self.serialize(&SerdeData::ListWithMutualRecursion(List::Empty));
+        let mut result = h0[..h0.len() - e.len()].to_vec();
+
+        for _ in 2..depth {
+            result.append(&mut f.clone());
+        }
+        result.append(&mut e.clone());
+        Some(result)
+    }
+
+    // Used to test limits on "container depth".
+    // Here we construct the serialized bytes directly to allow examples outside the limit.
+    #[cfg(feature = "runtime-testing")]
+    pub fn get_alternate_sample_with_container_depth(self, depth: usize) -> Option<Vec<u8>> {
+        if depth < 2 {
+            return None;
+        }
+        let e = self.serialize::<SimpleList>(&SimpleList(None));
+
+        let f0 = self.serialize(&SimpleList(Some(Box::new(SimpleList(None)))));
+        let f = f0[..f0.len() - e.len()].to_vec();
+
+        let h0 = self.serialize(&SerdeData::SimpleList(SimpleList(None)));
+        let mut result = h0[..h0.len() - e.len()].to_vec();
+
+        for _ in 2..depth {
+            result.append(&mut f.clone());
+        }
+        result.append(&mut e.clone());
+        Some(result)
+    }
+
+    // Used to test limits on sequence lengths and container depth.
+    // Here we construct the serialized bytes directly to allow examples outside the limit.
+    #[cfg(feature = "runtime-testing")]
+    pub fn get_sample_with_long_sequence(self, length: usize) -> Vec<u8> {
+        let e = self.serialize::<Vec<()>>(&Vec::new());
+        let f0 = self.serialize(&SerdeData::UnitVector(Vec::new()));
+        let mut result = f0[..f0.len() - e.len()].to_vec();
+        match self {
+            Runtime::Bincode => result.append(&mut self.serialize(&(length as u64))),
+            Runtime::Lcs => {
+                // ULEB-128 encoding of the length.
+                let mut value = length;
+                while value >= 0x80 {
+                    let byte = (value & 0x7f) as u8;
+                    result.push(byte | 0x80);
+                    value >>= 7;
+                }
+                result.push(value as u8);
+            }
+        }
+        result
+    }
+}
+
+#[test]
+fn test_get_sample_values() {
+    assert_eq!(get_sample_values(false).len(), 14);
 }
 
 #[test]
@@ -482,6 +716,14 @@ SerdeData:
       UnitVector:
         NEWTYPE:
           SEQ: UNIT
+    10:
+      SimpleList:
+        NEWTYPE:
+          TYPENAME: SimpleList
+SimpleList:
+  NEWTYPESTRUCT:
+    OPTION:
+      TYPENAME: SimpleList
 Struct:
   STRUCT:
     - x: U32
@@ -501,4 +743,170 @@ UnitStruct: UNITSTRUCT
 "#
         .to_string()
     );
+}
+
+#[test]
+#[cfg(feature = "runtime-testing")]
+fn test_bincode_get_sample_with_long_sequence() {
+    test_get_sample_with_long_sequence(Runtime::Bincode);
+}
+
+#[test]
+#[cfg(feature = "runtime-testing")]
+fn test_lcs_get_sample_with_long_sequence() {
+    test_get_sample_with_long_sequence(Runtime::Lcs);
+}
+
+// Make sure the direct computation of the serialization of these test values
+// agrees with the usual serialization.
+#[cfg(test)]
+#[cfg(feature = "runtime-testing")]
+fn test_get_sample_with_long_sequence(runtime: Runtime) {
+    let value = get_sample_value_with_long_sequence(0);
+    assert_eq!(
+        runtime.serialize(&value),
+        runtime.get_sample_with_long_sequence(0)
+    );
+
+    let value = get_sample_value_with_long_sequence(20);
+    assert_eq!(
+        runtime.serialize(&value),
+        runtime.get_sample_with_long_sequence(20)
+    );
+
+    let value = get_sample_value_with_long_sequence(200);
+    assert_eq!(
+        runtime.serialize(&value),
+        runtime.get_sample_with_long_sequence(200)
+    );
+}
+
+#[test]
+#[cfg(feature = "runtime-testing")]
+fn test_bincode_samples_with_container_depth() {
+    test_get_sample_with_container_depth(Runtime::Bincode);
+    test_get_alternate_sample_with_container_depth(Runtime::Bincode);
+}
+
+#[test]
+#[cfg(feature = "runtime-testing")]
+fn test_lcs_samples_with_container_depth() {
+    test_get_sample_with_container_depth(Runtime::Lcs);
+    test_get_alternate_sample_with_container_depth(Runtime::Lcs);
+}
+
+// Make sure the direct computation of the serialization of these test values
+// agrees with the usual serialization.
+#[cfg(test)]
+#[cfg(feature = "runtime-testing")]
+fn test_get_sample_with_container_depth(runtime: Runtime) {
+    let value = get_sample_value_with_container_depth(2).unwrap();
+    assert_eq!(
+        runtime.serialize(&value),
+        runtime.get_sample_with_container_depth(2).unwrap()
+    );
+
+    let value = get_sample_value_with_container_depth(20).unwrap();
+    assert_eq!(
+        runtime.serialize(&value),
+        runtime.get_sample_with_container_depth(20).unwrap()
+    );
+
+    let value = get_sample_value_with_container_depth(200).unwrap();
+    assert_eq!(
+        runtime.serialize(&value),
+        runtime.get_sample_with_container_depth(200).unwrap()
+    );
+}
+
+// Make sure the direct computation of the serialization of these test values
+// agrees with the usual serialization.
+#[cfg(test)]
+#[cfg(feature = "runtime-testing")]
+fn test_get_alternate_sample_with_container_depth(runtime: Runtime) {
+    let value = get_alternate_sample_value_with_container_depth(2).unwrap();
+    assert_eq!(
+        runtime.serialize(&value),
+        runtime
+            .get_alternate_sample_with_container_depth(2)
+            .unwrap()
+    );
+
+    let value = get_alternate_sample_value_with_container_depth(20).unwrap();
+    assert_eq!(
+        runtime.serialize(&value),
+        runtime
+            .get_alternate_sample_with_container_depth(20)
+            .unwrap()
+    );
+
+    let value = get_alternate_sample_value_with_container_depth(200).unwrap();
+    assert_eq!(
+        runtime.serialize(&value),
+        runtime
+            .get_alternate_sample_with_container_depth(200)
+            .unwrap()
+    );
+}
+
+#[test]
+#[cfg(feature = "runtime-testing")]
+fn test_bincode_get_positive_samples() {
+    assert_eq!(test_get_positive_samples(Runtime::Bincode), 14);
+}
+
+#[test]
+// This test requires --release because of deserialization of long (unit) vectors.
+#[cfg(not(debug_assertions))]
+#[cfg(feature = "runtime-testing")]
+fn test_lcs_get_positive_samples() {
+    assert_eq!(test_get_positive_samples(Runtime::Lcs), 125);
+}
+
+// Make sure all the "positive" samples successfully deserialize with the reference Rust
+// implementation.
+#[cfg(test)]
+#[cfg(feature = "runtime-testing")]
+fn test_get_positive_samples(runtime: Runtime) -> usize {
+    let samples = runtime.get_positive_samples();
+    let length = samples.len();
+    for sample in samples {
+        assert!(runtime.deserialize::<SerdeData>(&sample).is_some());
+    }
+    length
+}
+
+#[test]
+#[cfg(feature = "runtime-testing")]
+fn test_bincode_get_negative_samples() {
+    assert_eq!(test_get_negative_samples(Runtime::Bincode), 0);
+}
+
+#[test]
+// This test requires --release because of deserialization of long (unit) vectors.
+#[cfg(not(debug_assertions))]
+#[cfg(feature = "runtime-testing")]
+fn test_lcs_get_negative_samples() {
+    assert_eq!(test_get_negative_samples(Runtime::Lcs), 76);
+}
+
+// Make sure all the "negative" samples fail to deserialize with the reference Rust
+// implementation.
+#[cfg(test)]
+#[cfg(feature = "runtime-testing")]
+fn test_get_negative_samples(runtime: Runtime) -> usize {
+    let samples = runtime.get_negative_samples();
+    let length = samples.len();
+    for sample in samples {
+        assert!(runtime.deserialize::<SerdeData>(&sample).is_none());
+    }
+    length
+}
+
+#[test]
+#[cfg(feature = "runtime-testing")]
+fn test_lcs_serialize_with_noise_and_deserialize() {
+    let value = "test.\u{10348}.".to_string();
+    let samples = Runtime::Lcs.serialize_with_noise_and_deserialize(&value);
+    assert_eq!(samples.len(), 13);
 }
