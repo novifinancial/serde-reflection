@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <variant>
 
 #include "serde.hpp"
 
@@ -61,7 +62,7 @@ class BinaryDeserializer {
     std::string deserialize_str();
 
     bool deserialize_bool();
-    void deserialize_unit();
+    std::monostate deserialize_unit();
     char32_t deserialize_char();
     float deserialize_f32();
     double deserialize_f64();
@@ -85,7 +86,7 @@ class BinaryDeserializer {
 
 template <class S>
 void BinarySerializer<S>::serialize_str(const std::string &value) {
-    static_cast<S*>(this)->serialize_len(value.size());
+    static_cast<S *>(this)->serialize_len(value.size());
     for (auto c : value) {
         bytes_.push_back(c);
     }
@@ -95,13 +96,19 @@ template <class S>
 void BinarySerializer<S>::serialize_unit() {}
 
 template <class S>
-void BinarySerializer<S>::serialize_f32(float) { throw "not implemented"; }
+void BinarySerializer<S>::serialize_f32(float) {
+    throw serde::serialization_error("not implemented");
+}
 
 template <class S>
-void BinarySerializer<S>::serialize_f64(double) { throw "not implemented"; }
+void BinarySerializer<S>::serialize_f64(double) {
+    throw serde::serialization_error("not implemented");
+}
 
 template <class S>
-void BinarySerializer<S>::serialize_char(char32_t) { throw "not implemented"; }
+void BinarySerializer<S>::serialize_char(char32_t) {
+    throw serde::serialization_error("not implemented");
+}
 
 template <class S>
 void BinarySerializer<S>::serialize_bool(bool value) {
@@ -177,14 +184,21 @@ void BinarySerializer<S>::serialize_option_tag(bool value) {
 }
 
 template <class S>
-size_t BinarySerializer<S>::get_buffer_offset() { return bytes_.size(); }
+size_t BinarySerializer<S>::get_buffer_offset() {
+    return bytes_.size();
+}
 
 template <class D>
-uint8_t BinaryDeserializer<D>::read_byte() { return bytes_.at(pos_++); }
+uint8_t BinaryDeserializer<D>::read_byte() {
+    if (pos_ >= bytes_.size()) {
+        throw serde::deserialization_error("Input is not large enough");
+    }
+    return bytes_.at(pos_++);
+}
 
 template <class D>
 std::string BinaryDeserializer<D>::deserialize_str() {
-    auto len = static_cast<D*>(this)->deserialize_len();
+    auto len = static_cast<D *>(this)->deserialize_len();
     std::string result;
     result.reserve(len);
     for (size_t i = 0; i < len; i++) {
@@ -194,22 +208,41 @@ std::string BinaryDeserializer<D>::deserialize_str() {
 }
 
 template <class D>
-void BinaryDeserializer<D>::deserialize_unit() {}
+std::monostate BinaryDeserializer<D>::deserialize_unit() {
+    return {};
+}
 
 template <class D>
-float BinaryDeserializer<D>::deserialize_f32() { throw "not implemented"; }
+float BinaryDeserializer<D>::deserialize_f32() {
+    throw serde::deserialization_error("not implemented");
+}
 
 template <class D>
-double BinaryDeserializer<D>::deserialize_f64() { throw "not implemented"; }
+double BinaryDeserializer<D>::deserialize_f64() {
+    throw serde::deserialization_error("not implemented");
+}
 
 template <class D>
-char32_t BinaryDeserializer<D>::deserialize_char() { throw "not implemented"; }
+char32_t BinaryDeserializer<D>::deserialize_char() {
+    throw serde::deserialization_error("not implemented");
+}
 
 template <class D>
-bool BinaryDeserializer<D>::deserialize_bool() { return (bool)read_byte(); }
+bool BinaryDeserializer<D>::deserialize_bool() {
+    switch (read_byte()) {
+    case 0:
+        return false;
+    case 1:
+        return true;
+    default:
+        throw serde::deserialization_error("Invalid boolean value");
+    }
+}
 
 template <class D>
-uint8_t BinaryDeserializer<D>::deserialize_u8() { return read_byte(); }
+uint8_t BinaryDeserializer<D>::deserialize_u8() {
+    return read_byte();
+}
 
 template <class D>
 uint16_t BinaryDeserializer<D>::deserialize_u16() {
@@ -285,6 +318,8 @@ bool BinaryDeserializer<D>::deserialize_option_tag() {
 }
 
 template <class D>
-size_t BinaryDeserializer<D>::get_buffer_offset() { return pos_; }
+size_t BinaryDeserializer<D>::get_buffer_offset() {
+    return pos_;
+}
 
 } // end of namespace serde

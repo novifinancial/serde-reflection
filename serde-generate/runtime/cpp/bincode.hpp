@@ -6,6 +6,9 @@
 #include "serde.hpp"
 #include "binary.hpp"
 
+// Maximum length supported in practice (e.g. Java).
+constexpr size_t BINCODE_MAX_LENGTH = (1ull << 31) - 1;
+
 namespace serde {
 
 class BincodeSerializer : public BinarySerializer<BincodeSerializer> {
@@ -24,7 +27,8 @@ class BincodeDeserializer : public BinaryDeserializer<BincodeDeserializer> {
     using Parent = BinaryDeserializer<BincodeDeserializer>;
 
   public:
-    BincodeDeserializer(std::vector<uint8_t> bytes) : Parent(std::move(bytes)) {}
+    BincodeDeserializer(std::vector<uint8_t> bytes)
+        : Parent(std::move(bytes)) {}
 
     size_t deserialize_len();
     uint32_t deserialize_variant_index();
@@ -33,6 +37,9 @@ class BincodeDeserializer : public BinaryDeserializer<BincodeDeserializer> {
 };
 
 inline void BincodeSerializer::serialize_len(size_t value) {
+    if (value > BINCODE_MAX_LENGTH) {
+        throw serde::serialization_error("Length is too large");
+    }
     Parent::serialize_u64((uint64_t)value);
 }
 
@@ -41,7 +48,11 @@ inline void BincodeSerializer::serialize_variant_index(uint32_t value) {
 }
 
 inline size_t BincodeDeserializer::deserialize_len() {
-    return (size_t)Parent::deserialize_u64();
+    auto value = (size_t)Parent::deserialize_u64();
+    if (value > BINCODE_MAX_LENGTH) {
+        throw serde::deserialization_error("Length is too large");
+    }
+    return (size_t)value;
 }
 
 inline uint32_t BincodeDeserializer::deserialize_variant_index() {

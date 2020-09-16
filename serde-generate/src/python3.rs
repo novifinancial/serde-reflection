@@ -312,7 +312,7 @@ def {0}_serialize(self) -> bytes:
 def {0}_deserialize(input: bytes) -> '{1}':
     v, buffer = {0}.deserialize(input, {1})
     if buffer:
-        raise ValueError("Some input bytes were not read");
+        raise st.DeserializationError("Some input bytes were not read");
     return v"#,
             encoding.name(),
             name
@@ -377,10 +377,15 @@ impl Installer {
     fn fix_serde_package(&self, content: &str) -> String {
         match &self.serde_package_name {
             None => content.into(),
-            Some(name) => content.replace(
-                "import serde_types",
-                &format!("from {} import serde_types", name),
-            ),
+            Some(name) => content
+                .replace(
+                    "import serde_types",
+                    &format!("from {} import serde_types", name),
+                )
+                .replace(
+                    "import serde_binary",
+                    &format!("from {} import serde_binary", name),
+                ),
         }
     }
 }
@@ -406,6 +411,12 @@ impl crate::SourceInstaller for Installer {
             file,
             "{}",
             self.fix_serde_package(include_str!("../runtime/python/serde_types/__init__.py"))
+        )?;
+        let mut file = self.create_module_init_file("serde_binary")?;
+        write!(
+            file,
+            "{}",
+            self.fix_serde_package(include_str!("../runtime/python/serde_binary/__init__.py"))
         )?;
         Ok(())
     }

@@ -1,13 +1,15 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-package com.facebook.lcs;
+package com.novi.lcs;
 
-import java.lang.Exception;
-import com.facebook.serde.Slice;
-import com.facebook.serde.BinarySerializer;
+import com.novi.serde.SerializationError;
+import com.novi.serde.Slice;
+import com.novi.serde.BinarySerializer;
 
 public class LcsSerializer extends BinarySerializer {
+    public static final long MAX_LENGTH = Integer.MAX_VALUE;
+
     private void serialize_u32_as_uleb128(int value) {
         while ((value >>> 7) != 0) {
             output.write((value & 0x7f) | 0x80);
@@ -16,11 +18,14 @@ public class LcsSerializer extends BinarySerializer {
         output.write(value);
     }
 
-    public void serialize_len(long value) throws Exception {
+    public void serialize_len(long value) throws SerializationError {
+        if ((value < 0) || (value > MAX_LENGTH)) {
+            throw new SerializationError("Incorrect length value");
+        }
         serialize_u32_as_uleb128((int) value);
     }
 
-    public void serialize_variant_index(int value) throws Exception {
+    public void serialize_variant_index(int value) throws SerializationError {
         serialize_u32_as_uleb128(value);
     }
 

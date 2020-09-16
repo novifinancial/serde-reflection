@@ -19,9 +19,9 @@ pub struct CodeGenerator<'a> {
     /// Language-independent configuration.
     config: &'a CodeGeneratorConfig,
     /// Module path where to find the serde runtime packages (serde, lcs, bincode).
-    /// Default: "github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang".
+    /// Default: "github.com/novifinancial/serde-reflection/serde-generate/runtime/golang".
     serde_module_path: String,
-    /// Mapping from external type names to fully-qualified class names (e.g. "MyClass" -> "com.facebook.my_package.MyClass").
+    /// Mapping from external type names to fully-qualified class names (e.g. "MyClass" -> "com.my_org.my_package.MyClass").
     /// Derived from `config.external_definitions`.
     external_qualified_names: HashMap<String, String>,
 }
@@ -32,7 +32,7 @@ struct GoEmitter<'a, T> {
     out: IndentedWriter<T>,
     /// Generator.
     generator: &'a CodeGenerator<'a>,
-    /// Current namespace (e.g. vec!["com", "facebook", "my_package", "MyClass"])
+    /// Current namespace (e.g. vec!["com", "my_org", "my_package", "MyClass"])
     current_namespace: Vec<String>,
 }
 
@@ -57,7 +57,7 @@ impl<'a> CodeGenerator<'a> {
         Self {
             config,
             serde_module_path:
-                "github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang"
+                "github.com/novifinancial/serde-reflection/serde-generate/runtime/golang"
                     .to_string(),
             external_qualified_names,
         }
@@ -759,6 +759,9 @@ return obj, nil
             self.out,
             r#"
 func (obj *{0}) {2}Serialize() ([]byte, error) {{
+	if obj == nil {{
+		return nil, fmt.Errorf("Cannot serialize null object")
+	}}
 	serializer := {1}.NewSerializer();
 	if err := obj.Serialize(serializer); err != nil {{ return nil, err }}
 	return serializer.GetBytes(), nil
@@ -778,6 +781,10 @@ func (obj *{0}) {2}Serialize() ([]byte, error) {{
             self.out,
             r#"
 func {2}Deserialize{0}(input []byte) ({0}, error) {{
+	if input == nil {{
+		var obj {0}
+		return obj, fmt.Errorf("Cannot deserialize null array")
+	}}
 	deserializer := {1}.NewDeserializer(input);
 	obj, err := Deserialize{0}(deserializer)
 	if deserializer.GetBufferOffset() < uint64(len(input)) {{
@@ -787,7 +794,7 @@ func {2}Deserialize{0}(input []byte) ({0}, error) {{
 }}"#,
             name,
             encoding.name(),
-            encoding.name().to_camel_case()
+            encoding.name().to_camel_case(),
         )
     }
 

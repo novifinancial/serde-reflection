@@ -18,9 +18,9 @@ fn test_that_java_code_compiles_with_config(
         .unwrap();
 
     let paths = std::iter::empty()
-        .chain(std::fs::read_dir("runtime/java/com/facebook/serde").unwrap())
-        .chain(std::fs::read_dir("runtime/java/com/facebook/bincode").unwrap())
-        .chain(std::fs::read_dir("runtime/java/com/facebook/lcs").unwrap())
+        .chain(std::fs::read_dir("runtime/java/com/novi/serde").unwrap())
+        .chain(std::fs::read_dir("runtime/java/com/novi/bincode").unwrap())
+        .chain(std::fs::read_dir("runtime/java/com/novi/lcs").unwrap())
         .chain(std::fs::read_dir(dir.path().join("testing")).unwrap())
         .map(|e| e.unwrap().path());
     let status = Command::new("javac")

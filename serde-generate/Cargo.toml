@@ -1,9 +1,9 @@
 [package]
 name = "serde-generate"
-version = "0.13.0"
+version = "0.14.0"
 description = "Generate (de)serialization code in multiple languages"
 documentation = "https://docs.rs/serde-generate"
-repository = "https://github.com/facebookincubator/serde-reflection"
+repository = "https://github.com/novifinancial/serde-reflection"
 authors = ["Mathieu Baudet <mathieubaudet@calibra.com>", "Brandon Williams <bmwill@calibra.com>"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
@@ -14,6 +14,9 @@ exclude = [
     # Readme template that doesn't need to be included.
     "README.tpl",
 ]
+
+[features]
+runtime-testing = ["libra-canonical-serialization", "bincode"]
 
 [dependencies]
 heck = "0.3.1"
@@ -27,11 +30,14 @@ textwrap = "0.12.1"
 
 serde-reflection = { path = "../serde-reflection", version = "0.3.0" }
 
+bincode = { version = "1.2", optional = true }
+libra-canonical-serialization = { git = "https://github.com/libra/libra.git", branch = "testnet", optional = true }
+
 [dev-dependencies]
+bincode = { version = "1.2" }
 tempfile = "3.1"
-bincode = "1.2"
 hex = "0.4.2"
-libra-canonical-serialization = { git = "https://github.com/libra/libra.git", branch = "testnet" }
+which = "4.0.2"
 
 [[bin]]
 name = "serdegen"

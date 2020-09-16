@@ -1,9 +1,8 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-package com.facebook.serde;
+package com.novi.serde;
 
-import java.lang.Exception;
 import java.math.BigInteger;
 
 public abstract class BinarySerializer implements Serializer {
@@ -13,46 +12,46 @@ public abstract class BinarySerializer implements Serializer {
         output = new BinarySerializer.MyByteArrayOutputStream();
     }
 
-    public void serialize_str(String value) throws Exception {
+    public void serialize_str(String value) throws SerializationError {
         serialize_bytes(new Bytes(value.getBytes()));
     }
 
-    public void serialize_bytes(Bytes value) throws Exception {
+    public void serialize_bytes(Bytes value) throws SerializationError {
         byte[] content = value.content();
         serialize_len(content.length);
         output.write(content, 0, content.length);
     }
 
-    public void serialize_bool(Boolean value) throws Exception {
+    public void serialize_bool(Boolean value) throws SerializationError {
         output.write((value.booleanValue() ? 1 : 0));
     }
 
-    public void serialize_unit(Unit value) throws Exception {
+    public void serialize_unit(Unit value) throws SerializationError {
     }
 
-    public void serialize_char(Character value) throws Exception {
-        throw new Exception("Not implemented: serialize_char");
+    public void serialize_char(Character value) throws SerializationError {
+        throw new SerializationError("Not implemented: serialize_char");
     }
 
-    public void serialize_f32(Float value) throws Exception {
-        throw new Exception("Not implemented: serialize_f32");
+    public void serialize_f32(Float value) throws SerializationError {
+        throw new SerializationError("Not implemented: serialize_f32");
     }
 
-    public void serialize_f64(Double value) throws Exception {
-        throw new Exception("Not implemented: serialize_f64");
+    public void serialize_f64(Double value) throws SerializationError {
+        throw new SerializationError("Not implemented: serialize_f64");
     }
 
-    public void serialize_u8(@Unsigned Byte value) throws Exception {
+    public void serialize_u8(@Unsigned Byte value) throws SerializationError {
         output.write(value.byteValue());
     }
 
-    public void serialize_u16(@Unsigned Short value) throws Exception {
+    public void serialize_u16(@Unsigned Short value) throws SerializationError {
         short val = value.shortValue();
         output.write((byte) (val >>> 0));
         output.write((byte) (val >>> 8));
     }
 
-    public void serialize_u32(@Unsigned Integer value) throws Exception {
+    public void serialize_u32(@Unsigned Integer value) throws SerializationError {
         int val = value.intValue();
         output.write((byte) (val >>> 0));
         output.write((byte) (val >>> 8));
@@ -60,7 +59,7 @@ public abstract class BinarySerializer implements Serializer {
         output.write((byte) (val >>> 24));
     }
 
-    public void serialize_u64(@Unsigned Long value) throws Exception {
+    public void serialize_u64(@Unsigned Long value) throws SerializationError {
         long val = value.longValue();
         output.write((byte) (val >>> 0));
         output.write((byte) (val >>> 8));
@@ -72,7 +71,7 @@ public abstract class BinarySerializer implements Serializer {
         output.write((byte) (val >>> 56));
     }
 
-    public void serialize_u128(@Unsigned @Int128 BigInteger value) throws Exception {
+    public void serialize_u128(@Unsigned @Int128 BigInteger value) throws SerializationError {
         assert value.compareTo(BigInteger.ZERO) >= 0;
         assert value.shiftRight(128).equals(BigInteger.ZERO);
         byte[] content = value.toByteArray();
@@ -90,23 +89,23 @@ public abstract class BinarySerializer implements Serializer {
         }
     }
 
-    public void serialize_i8(Byte value) throws Exception {
+    public void serialize_i8(Byte value) throws SerializationError {
         serialize_u8(value);
     }
 
-    public void serialize_i16(Short value) throws Exception {
+    public void serialize_i16(Short value) throws SerializationError {
         serialize_u16(value);
     }
 
-    public void serialize_i32(Integer value) throws Exception {
+    public void serialize_i32(Integer value) throws SerializationError {
         serialize_u32(value);
     }
 
-    public void serialize_i64(Long value) throws Exception {
+    public void serialize_i64(Long value) throws SerializationError {
         serialize_u64(value);
     }
 
-    public void serialize_i128(@Int128 BigInteger value) throws Exception {
+    public void serialize_i128(@Int128 BigInteger value) throws SerializationError {
         if (value.compareTo(BigInteger.ZERO) >= 0) {
             serialize_u128(value);
         } else {
@@ -114,7 +113,7 @@ public abstract class BinarySerializer implements Serializer {
         }
     }
 
-    public void serialize_option_tag(boolean value) throws Exception {
+    public void serialize_option_tag(boolean value) throws SerializationError {
         output.write((value ? (byte) 1 : (byte) 0));
     }
 

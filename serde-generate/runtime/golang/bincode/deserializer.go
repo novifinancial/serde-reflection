@@ -4,8 +4,13 @@
 package bincode
 
 import (
-	"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/serde"
+	"errors"
+
+	"github.com/novifinancial/serde-reflection/serde-generate/runtime/golang/serde"
 )
+
+// MaxSequenceLength is max length supported in practice (e.g. in Java).
+const MaxSequenceLength = (1 << 31) - 1
 
 // `deserializer` extends `serde.BinaryDeserializer` to implement `serde.Deserializer`.
 type deserializer struct {
@@ -25,7 +30,11 @@ func (d *deserializer) DeserializeStr() (string, error) {
 }
 
 func (d *deserializer) DeserializeLen() (uint64, error) {
-	return d.DeserializeU64()
+	ret, err := d.DeserializeU64()
+	if ret > MaxSequenceLength {
+		return 0, errors.New("length is too large")
+	}
+	return uint64(ret), err
 }
 
 func (d *deserializer) DeserializeVariantIndex() (uint32, error) {

@@ -134,6 +134,23 @@ fn test_that_installed_python_code_passes_pyre_check() {
     installer.install_bincode_runtime().unwrap();
     installer.install_lcs_runtime().unwrap();
 
+    // Copy test files manually to type-check them as well.
+    // This should go away when python runtimes are properly packaged.
+    let status = Command::new("cp")
+        .arg("-r")
+        .arg("runtime/python/lcs/test_lcs.py")
+        .arg(dir.path().join("src/lcs"))
+        .status()
+        .unwrap();
+    assert!(status.success());
+    let status = Command::new("cp")
+        .arg("-r")
+        .arg("runtime/python/bincode/test_bincode.py")
+        .arg(dir.path().join("src/bincode"))
+        .status()
+        .unwrap();
+    assert!(status.success());
+
     // Sadly, we have to manage numpy typeshed manually for now until the next release of numpy.
     let status = Command::new("cp")
         .arg("-r")
@@ -159,8 +176,31 @@ fn test_that_installed_python_code_passes_pyre_check() {
 
     let status = Command::new("pyre")
         .current_dir(dir.path())
+        // Work around configuration issue with Pyre 0.0.53
+        .arg("--typeshed")
+        .arg(
+            which::which("pyre")
+                .unwrap()
+                .parent()
+                .unwrap()
+                .join("../lib/pyre_check/typeshed"),
+        )
         .arg("check")
         .status()
         .unwrap();
     assert!(status.success());
+}
+
+#[test]
+fn test_python_autotest() -> std::io::Result<()> {
+    let status = Command::new("python3")
+        .arg("-m")
+        .arg("unittest")
+        .arg("discover")
+        .arg("-s")
+        .arg("runtime/python")
+        .status()
+        .unwrap();
+    assert!(status.success());
+    Ok(())
 }
