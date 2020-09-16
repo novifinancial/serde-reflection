@@ -73,6 +73,7 @@ impl<'a> CodeGenerator<'a> {
             r#"name: {}
 dependencies:
   optional: '5.0.0'
+  tuple: '1.0.3'  
 dev_dependencies:
   mockito: '>=4.0.0 <5.0.0'
   test: '>=0.12.0 <2.0.0'
@@ -96,7 +97,7 @@ dev_dependencies:
 
 import 'package:test/test.dart';
 import 'dart:typed_data';
-import 'package:{0}/starcoin/starcoin.dart';
+import 'package:{0}/{0}/{0}.dart';
 import 'package:{0}/serde/serde.dart';"#,
             self.config.module_name
         )?;
@@ -157,6 +158,7 @@ part 'src/starcoin_test.dart';"#
 
 import 'dart:typed_data';
 import 'package:optional/optional.dart';
+import 'package:tuple/tuple.dart';
 import 'package:{}/serde/serde.dart';"#,
             self.config.module_name, self.config.module_name,
         )?;
@@ -439,7 +441,7 @@ serializer.sort_map_entries(offsets);
             Tuple(formats) => {
                 writeln!(self.out)?;
                 for (index, format) in formats.iter().enumerate() {
-                    let expr = format!("value.field{}", index);
+                    let expr = format!("value.item{}", index + 1);
                     writeln!(self.out, "{}", self.quote_serialize_value(&expr, format))?;
                 }
             }

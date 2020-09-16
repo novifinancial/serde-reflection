@@ -9,6 +9,12 @@ class Int128 {
     this.low = low;
   }
 
+  Int128 fromBigInt(BigInt num) {
+    high = (num >> 64).toInt();
+    low = (num & BigInt.from(0xFFFFFFFFFFFFFFFF)).toInt();
+    return Int128(high, low);
+  }
+
   @override
   bool operator ==(covariant Int128 other) {
     if (other == null) return false;
@@ -21,4 +27,9 @@ class Int128 {
 
   @override
   int get hashCode => $jf($jc(this.high.hashCode, this.low));
+
+  @override
+  String toString() {
+    return "$high$low";
+  }
 }
