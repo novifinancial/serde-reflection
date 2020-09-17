@@ -4,6 +4,7 @@
 import dataclasses
 import collections
 import typing
+from copy import copy
 from typing import get_type_hints
 
 import serde_types as st
@@ -93,8 +94,10 @@ _lcs_deserialization_config = sb.DeserializationConfig(
 
 
 def serialize(obj: typing.Any, obj_type) -> bytes:
-    return sb.serialize_with_config(_lcs_serialization_config, obj, obj_type, 0)
+    return sb.serialize_with_config(copy(_lcs_serialization_config), obj, obj_type)
 
 
 def deserialize(content: bytes, obj_type) -> typing.Tuple[typing.Any, bytes]:
-    return sb.deserialize_with_config(_lcs_deserialization_config, content, obj_type, 0)
+    return sb.deserialize_with_config(
+        copy(_lcs_deserialization_config), content, obj_type
+    )
