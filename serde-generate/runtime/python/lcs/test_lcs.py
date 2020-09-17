@@ -220,12 +220,10 @@ class LcsTestCase(unittest.TestCase):
 
         @staticmethod
         def integers(size: int) -> "LcsTestCase.List":
-            if size == 0:
-                return LcsTestCase.List.empty()
-            else:
-                return LcsTestCase.List.cons(
-                    st.uint64(size - 1), LcsTestCase.List.integers(size - 1)
-                )
+            result = LcsTestCase.List.empty()
+            for i in range(size):
+                result = LcsTestCase.List.cons(st.uint64(i), result)
+            return result
 
     def test_max_container_depth(self):
         # Required to avoid RecursionError's in python.
