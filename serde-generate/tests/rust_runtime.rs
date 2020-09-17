@@ -32,7 +32,7 @@ edition = "2018"
 
 [dependencies]
 hex = "0.4.2"
-serde = {{ version = "1.0.112", features = ["derive"] }}
+serde = {{ version = "1.0", features = ["derive"] }}
 serde_bytes = "0.11"
 {}
 
