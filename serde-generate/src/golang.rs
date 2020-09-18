@@ -542,10 +542,13 @@ return obj, nil
         let fields = match variant {
             Unit => Vec::new(),
             NewType(format) => match format.as_ref() {
-                // We cannot define a "new type" (e.g. `type Foo Bar`) here because the underlying name (`Bar`)
+                // We cannot define a "new type" (e.g. `type Foo Bar`) out of a typename `Bar` because `Bar`
                 // could point to a Go interface. This would make `Foo` an interface as well. Interfaces can't be used
                 // as structs (e.g. they cannot have methods).
-                Format::TypeName(_) => vec![Named {
+                //
+                // Similarly, option types are compiled as pointers but `type Foo *Bar` would prevent `Foo` from being a
+                // valid pointer receiver.
+                Format::TypeName(_) | Format::Option(_) => vec![Named {
                     name: "Value".to_string(),
                     value: format.as_ref().clone(),
                 }],
@@ -878,7 +881,7 @@ switch index {{"#,
             UnitStruct => Vec::new(),
             NewTypeStruct(format) => match format.as_ref() {
                 // See comment in `output_variant`.
-                Format::TypeName(_) => vec![Named {
+                Format::TypeName(_) | Format::Option(_) => vec![Named {
                     name: "Value".to_string(),
                     value: format.as_ref().clone(),
                 }],
