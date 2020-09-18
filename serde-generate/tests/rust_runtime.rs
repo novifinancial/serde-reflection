@@ -31,7 +31,6 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-hex = "0.4.2"
 serde = {{ version = "1.0", features = ["derive"] }}
 serde_bytes = "0.11"
 {}
@@ -50,28 +49,24 @@ serde_bytes = "0.11"
     let mut source = File::create(&source_path).unwrap();
     generator.output(&mut source, &registry).unwrap();
 
-    let values = test_utils::get_sample_values(runtime.has_canonical_maps());
-    let hex_encodings: Vec<_> = values
+    let encodings: Vec<_> = runtime
+        .get_positive_samples()
         .iter()
-        .map(|v| format!("\"{}\"", hex::encode(&runtime.serialize(&v))))
+        .map(|bytes| format!("vec!{:?}", bytes))
         .collect();
 
     writeln!(
         source,
         r#"
 fn main() {{
-    let hex_encodings = vec![{}];
-
-    for hex_encoding in hex_encodings {{
-        let encoding = hex::decode(hex_encoding).unwrap();
+    for encoding in vec![{}] {{
         let value = {}::<SerdeData>(&encoding).unwrap();
-
         let s = {}(&value).unwrap();
         assert_eq!(s, encoding);
     }}
 }}
 "#,
-        hex_encodings.join(", "),
+        encodings.join(", "),
         runtime.quote_deserialize(),
         runtime.quote_serialize(),
     )

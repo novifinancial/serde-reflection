@@ -332,7 +332,7 @@ impl Runtime {
 
     pub fn rust_package(self) -> &'static str {
         match self {
-            Self::Lcs => "lcs = { git = \"https://github.com/libra/libra.git\", branch = \"testnet\", package = \"libra-canonical-serialization\" }",
+            Self::Lcs => "lcs = { git = \"https://github.com/libra/libra.git\", branch = \"auto\", package = \"libra-canonical-serialization\" }",
             Self::Bincode => "bincode = \"1.3\"",
         }
     }
