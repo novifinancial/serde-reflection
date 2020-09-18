@@ -644,6 +644,7 @@ return obj;
                 "\npublic void serialize(com.novi.serde.Serializer serializer) throws com.novi.serde.SerializationError {{",
             )?;
             self.out.indent();
+            writeln!(self.out, "serializer.increase_container_depth();")?;
             if let Some(index) = variant_index {
                 writeln!(self.out, "serializer.serialize_variant_index({});", index)?;
             }
@@ -654,6 +655,7 @@ return obj;
                     self.quote_serialize_value(&field.name, &field.value)
                 )?;
             }
+            writeln!(self.out, "serializer.decrease_container_depth();")?;
             self.out.unindent();
             writeln!(self.out, "}}")?;
 
@@ -679,6 +681,7 @@ return obj;
                 )?;
             }
             self.out.indent();
+            writeln!(self.out, "deserializer.increase_container_depth();")?;
             writeln!(self.out, "Builder builder = new Builder();")?;
             for field in fields {
                 writeln!(
@@ -688,6 +691,7 @@ return obj;
                     self.quote_deserialize(&field.value)
                 )?;
             }
+            writeln!(self.out, "deserializer.decrease_container_depth();")?;
             writeln!(self.out, "return builder.build();")?;
             self.out.unindent();
             writeln!(self.out, "}}")?;

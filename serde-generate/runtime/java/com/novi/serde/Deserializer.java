@@ -46,6 +46,10 @@ public interface Deserializer {
 
     boolean deserialize_option_tag() throws DeserializationError;
 
+    void increase_container_depth() throws DeserializationError;
+
+    void decrease_container_depth();
+
     int get_buffer_offset();
 
     void check_that_key_slices_are_increasing(Slice key1, Slice key2) throws DeserializationError;

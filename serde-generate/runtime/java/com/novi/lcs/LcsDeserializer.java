@@ -9,7 +9,7 @@ import com.novi.serde.BinaryDeserializer;
 
 public class LcsDeserializer extends BinaryDeserializer {
     public LcsDeserializer(byte[] input) {
-        super(input);
+        super(input, LcsSerializer.MAX_CONTAINER_DEPTH);
     }
 
     private int deserialize_uleb128_as_u32() throws DeserializationError {
@@ -17,7 +17,7 @@ public class LcsDeserializer extends BinaryDeserializer {
         for (int shift = 0; shift < 32; shift += 7) {
             byte x = getByte();
             byte digit = (byte) (x & 0x7F);
-            value = value | (digit << shift);
+            value = value | ((long)digit << shift);
             if ((value < 0) || (value > Integer.MAX_VALUE)) {
                 throw new DeserializationError("Overflow while parsing uleb128-encoded uint32 value");
             }

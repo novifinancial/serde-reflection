@@ -7,9 +7,22 @@ import java.math.BigInteger;
 
 public abstract class BinarySerializer implements Serializer {
     protected MyByteArrayOutputStream output;
+    private long containerDepthBudget;
 
-    public BinarySerializer() {
+    public BinarySerializer(long maxContainerDepth) {
         output = new BinarySerializer.MyByteArrayOutputStream();
+        containerDepthBudget = maxContainerDepth;
+    }
+
+    public void increase_container_depth() throws SerializationError {
+        if (containerDepthBudget == 0) {
+            throw new SerializationError("Exceeded maximum container depth");
+        }
+        containerDepthBudget -= 1;
+    }
+
+    public void decrease_container_depth() {
+        containerDepthBudget += 1;
     }
 
     public void serialize_str(String value) throws SerializationError {

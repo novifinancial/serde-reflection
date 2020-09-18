@@ -9,7 +9,7 @@ import com.novi.serde.BinaryDeserializer;
 
 public class BincodeDeserializer extends BinaryDeserializer {
     public BincodeDeserializer(byte[] input) {
-        super(input);
+        super(input, Long.MAX_VALUE);
     }
 
     public long deserialize_len() throws DeserializationError {
