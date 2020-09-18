@@ -141,6 +141,17 @@ fn test_golang_bincode_runtime_on_supported_types() {
     test_golang_runtime_on_supported_types(Runtime::Bincode);
 }
 
+fn quote_bytes(bytes: &[u8]) -> String {
+    format!(
+        "{{{}}}",
+        bytes
+            .iter()
+            .map(|x| format!("{}", x))
+            .collect::<Vec<_>>()
+            .join(", ")
+    )
+}
+
 fn test_golang_runtime_on_supported_types(runtime: Runtime) {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
@@ -157,19 +168,17 @@ fn test_golang_runtime_on_supported_types(runtime: Runtime) {
     let generator = golang::CodeGenerator::new(&config);
     generator.output(&mut source, &registry).unwrap();
 
-    let encodings = runtime
+    let positive_encodings = runtime
         .get_positive_samples()
         .iter()
-        .map(|bytes| {
-            format!(
-                "{{{}}}",
-                bytes
-                    .iter()
-                    .map(|x| format!("{}", x))
-                    .collect::<Vec<_>>()
-                    .join(", ")
-            )
-        })
+        .map(|bytes| quote_bytes(bytes))
+        .collect::<Vec<_>>()
+        .join(", ");
+
+    let negative_encodings = runtime
+        .get_negative_samples()
+        .iter()
+        .map(|bytes| quote_bytes(bytes))
         .collect::<Vec<_>>()
         .join(", ");
 
@@ -177,12 +186,13 @@ fn test_golang_runtime_on_supported_types(runtime: Runtime) {
         source,
         r#"
 func main() {{
-	inputs := [][]byte{{{0}}}
+	positive_inputs := [][]byte{{{0}}}
+	negative_inputs := [][]byte{{{1}}}
 
-	for _, input := range(inputs) {{
-		test, err := {1}DeserializeSerdeData(input)
+	for _, input := range(positive_inputs) {{
+		test, err := {2}DeserializeSerdeData(input)
 		if err != nil {{ panic(fmt.Sprintf("failed to deserialize input: %v", err)) }}
-		output, err := test.{1}Serialize()
+		output, err := test.{2}Serialize()
 		if err != nil {{ panic(fmt.Sprintf("failed to serialize: %v", err)) }}
 
 		if !cmp.Equal(input, output) {{ panic(fmt.Sprintf("input != output:\n  %v\n  %v", input, output)) }}
@@ -191,14 +201,20 @@ func main() {{
 			input2 := make([]byte, len(input))
 			copy(input2, input)
 			input2[i] ^= 0x80
-			test2, err := {1}DeserializeSerdeData(input2)
+			test2, err := {2}DeserializeSerdeData(input2)
 			if err != nil {{ continue }}
 			if cmp.Equal(test, test2) {{ panic("Modified input should give a different value.") }}
 		}}
 	}}
+
+	for _, input := range(negative_inputs) {{
+		_, err := {2}DeserializeSerdeData(input)
+		if err == nil {{ panic(fmt.Sprintf("Input should fail to deserialize: %v", input)) }}
+	}}
 }}
 "#,
-        encodings,
+        positive_encodings,
+        negative_encodings,
         runtime.name().to_camel_case(),
     )
     .unwrap();

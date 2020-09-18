@@ -49,6 +49,10 @@ type Serializer interface {
 	SortMapEntries(offsets []uint64)
 
 	GetBytes() []byte
+
+	IncreaseContainerDepth() error
+
+	DecreaseContainerDepth()
 }
 
 type Deserializer interface {
@@ -95,6 +99,10 @@ type Deserializer interface {
 	GetBufferOffset() uint64
 
 	CheckThatKeySlicesAreIncreasing(key1, key2 Slice) error
+
+	IncreaseContainerDepth() error
+
+	DecreaseContainerDepth()
 }
 
 type Slice struct {

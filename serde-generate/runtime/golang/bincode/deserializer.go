@@ -5,6 +5,7 @@ package bincode
 
 import (
 	"errors"
+	"math"
 
 	"github.com/novifinancial/serde-reflection/serde-generate/runtime/golang/serde"
 )
@@ -18,7 +19,7 @@ type deserializer struct {
 }
 
 func NewDeserializer(input []byte) serde.Deserializer {
-	return &deserializer{*serde.NewBinaryDeserializer(input)}
+	return &deserializer{*serde.NewBinaryDeserializer(input, math.MaxUint64)}
 }
 
 func (d *deserializer) DeserializeBytes() ([]byte, error) {

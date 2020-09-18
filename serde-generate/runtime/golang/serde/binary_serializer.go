@@ -11,11 +11,26 @@ import (
 // `BinarySerializer` is a partial implementation of the `Serializer` interface.
 // It is used as an embedded struct by the Bincode and LCS serializers.
 type BinarySerializer struct {
-	Buffer bytes.Buffer
+	Buffer               bytes.Buffer
+	containerDepthBudget uint64
 }
 
-func NewBinarySerializer() *BinarySerializer {
-	return new(BinarySerializer)
+func NewBinarySerializer(max_container_depth uint64) *BinarySerializer {
+	s := new(BinarySerializer)
+	s.containerDepthBudget = max_container_depth
+	return s
+}
+
+func (d *BinarySerializer) IncreaseContainerDepth() error {
+	if d.containerDepthBudget == 0 {
+		return errors.New("exceeded maximum container depth")
+	}
+	d.containerDepthBudget -= 1
+	return nil
+}
+
+func (d *BinarySerializer) DecreaseContainerDepth() {
+	d.containerDepthBudget += 1
 }
 
 // `serializeLen` to be provided by the extending struct.
