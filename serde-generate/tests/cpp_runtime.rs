@@ -107,6 +107,17 @@ fn test_cpp_bincode_runtime_on_supported_types() {
     test_cpp_runtime_on_supported_types(Runtime::Bincode);
 }
 
+fn quote_bytes(bytes: &[u8]) -> String {
+    format!(
+        "std::vector<uint8_t>{{{}}}",
+        bytes
+            .iter()
+            .map(|x| format!("0x{:02x}", x))
+            .collect::<Vec<_>>()
+            .join(", ")
+    )
+}
+
 fn test_cpp_runtime_on_supported_types(runtime: Runtime) {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
@@ -118,21 +129,17 @@ fn test_cpp_runtime_on_supported_types(runtime: Runtime) {
     let generator = cpp::CodeGenerator::new(&config);
     generator.output(&mut header, &registry).unwrap();
 
-    let encodings = runtime
+    let positive_encodings: Vec<_> = runtime
         .get_positive_samples()
         .iter()
-        .map(|bytes| {
-            format!(
-                "std::vector<uint8_t>{{{}}}",
-                bytes
-                    .iter()
-                    .map(|x| format!("0x{:02x}", x))
-                    .collect::<Vec<_>>()
-                    .join(", ")
-            )
-        })
-        .collect::<Vec<_>>()
-        .join(", ");
+        .map(|bytes| quote_bytes(bytes))
+        .collect();
+
+    let negative_encodings: Vec<_> = runtime
+        .get_negative_samples()
+        .iter()
+        .map(|bytes| quote_bytes(bytes))
+        .collect();
 
     let source_path = dir.path().join("test.cpp");
     let mut source = File::create(&source_path).unwrap();
@@ -148,12 +155,12 @@ fn test_cpp_runtime_on_supported_types(runtime: Runtime) {
 using namespace testing;
 
 int main() {{
+    std::vector<std::vector<uint8_t>> positive_inputs = {{{0}}};
+    std::vector<std::vector<uint8_t>> negative_inputs = {{{1}}};
     try {{
-        std::vector<std::vector<uint8_t>> inputs = {{{0}}};
-
-        for (auto input: inputs) {{
-            auto test = SerdeData::{1}Deserialize(input);
-            auto output = test.{1}Serialize();
+        for (auto input: positive_inputs) {{
+            auto test = SerdeData::{2}Deserialize(input);
+            auto output = test.{2}Serialize();
             assert(input == output);
 
             // Test simple mutations of the input.
@@ -161,7 +168,7 @@ int main() {{
                 auto input2 = input;
                 input2[i] ^= 0x81;
                 try {{
-                    auto test2 = SerdeData::{1}Deserialize(input2);
+                    auto test2 = SerdeData::{2}Deserialize(input2);
                     assert(!(test2 == test));
                 }} catch (serde::deserialization_error e) {{
                     // All good
@@ -172,6 +179,20 @@ int main() {{
                 }}
             }}
         }}
+
+        for (auto input: negative_inputs) {{
+            try {{
+                SerdeData::{2}Deserialize(input);
+                printf("Input should fail to deserialize:");
+                for (auto x : input) {{
+                    printf(" %d", x);
+                }}
+                printf("\n");
+                assert(false);
+            }} catch (serde::deserialization_error e) {{
+                // All good
+            }}
+        }}
         return 0;
     }} catch (std::exception& e) {{
         std::cout << "Error: " << e.what() << '\n';
@@ -179,7 +200,8 @@ int main() {{
     }}
 }}
 "#,
-        encodings,
+        positive_encodings.join(", "),
+        negative_encodings.join(", "),
         runtime.name(),
     )
     .unwrap();

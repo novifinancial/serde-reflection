@@ -215,6 +215,36 @@ uint8_t BinaryDeserializer<D>::read_byte() {
     return bytes_.at(pos_++);
 }
 
+inline bool is_valid_utf8(const std::string &input) {
+    uint8_t trailing_digits = 0;
+    for(uint8_t byte : input) {
+        if (trailing_digits == 0) {
+            // Start new codepoint.
+            if (byte >> 7 == 0) {
+                // ASCII character
+            } else if (byte >> 5 == 0b110) {
+                // Expecting a 2-byte codepoint
+                trailing_digits = 1;
+            } else if (byte >> 4 == 0b1110) {
+                // Expecting a 3-byte codepoint
+                trailing_digits = 2;
+            } else if (byte >> 3 == 0b11110) {
+                // Expecting a 4-byte codepoint
+                trailing_digits = 3;
+            } else {
+                return false;
+            }
+        } else {
+            // Process "trailing digit".
+            if (byte >> 6 != 0b10) {
+                return false;
+            }
+            trailing_digits -= 1;
+        }
+    }
+    return trailing_digits == 0;
+}
+
 template <class D>
 std::string BinaryDeserializer<D>::deserialize_str() {
     auto len = static_cast<D *>(this)->deserialize_len();
@@ -222,6 +252,9 @@ std::string BinaryDeserializer<D>::deserialize_str() {
     result.reserve(len);
     for (size_t i = 0; i < len; i++) {
         result.push_back(read_byte());
+    }
+    if (!is_valid_utf8(result)) {
+        throw serde::deserialization_error("Invalid UTF8 string: " + result);
     }
     return result;
 }
