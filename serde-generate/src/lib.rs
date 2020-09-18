@@ -65,10 +65,10 @@
 //! writeln!(
 //!     source,
 //!     r#"
-//! value = Test.bincode_deserialize(bytes.fromhex("{}"))
+//! value = Test.bincode_deserialize(bytes({:?}))
 //! assert value == Test(a=[4, 6], b=(3, 5))
 //! "#,
-//!     hex::encode(&bincode::serialize(&Test { a: vec![4, 6], b: (3, 5) }).unwrap()),
+//!     bincode::serialize(&Test { a: vec![4, 6], b: (3, 5) }).unwrap(),
 //! )?;
 //!
 //! // Execute the Python code.

@@ -143,11 +143,10 @@ fn test_java_runtime_on_supported_types(runtime: Runtime) {
         .write_source_files(dir.path().to_path_buf(), &registry)
         .unwrap();
 
-    let values = test_utils::get_sample_values(runtime.has_canonical_maps());
-    let encodings = values
+    let encodings = runtime
+        .get_positive_samples_quick()
         .iter()
-        .map(|v| {
-            let bytes = runtime.serialize(&v);
+        .map(|bytes| {
             format!(
                 "\n{{{}}}",
                 bytes

@@ -157,11 +157,10 @@ fn test_golang_runtime_on_supported_types(runtime: Runtime) {
     let generator = golang::CodeGenerator::new(&config);
     generator.output(&mut source, &registry).unwrap();
 
-    let values = test_utils::get_sample_values(runtime.has_canonical_maps());
-    let encodings = values
+    let encodings = runtime
+        .get_positive_samples()
         .iter()
-        .map(|v| {
-            let bytes = runtime.serialize(&v);
+        .map(|bytes| {
             format!(
                 "{{{}}}",
                 bytes
