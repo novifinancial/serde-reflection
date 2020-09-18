@@ -97,7 +97,7 @@ inline uint32_t LcsDeserializer::deserialize_uleb128_as_u32() {
     for (int shift = 0; shift < 32; shift += 7) {
         auto byte = read_byte();
         auto digit = byte & 0x7F;
-        value |= digit << shift;
+        value |= (uint64_t)digit << shift;
         if (value > std::numeric_limits<uint32_t>::max()) {
             throw serde::deserialization_error(
                 "Overflow while parsing uleb128-encoded uint32 value");
