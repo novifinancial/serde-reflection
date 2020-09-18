@@ -10,8 +10,11 @@ import (
 	"github.com/novifinancial/serde-reflection/serde-generate/runtime/golang/serde"
 )
 
-// MaxSequenceLength is max length allowed for sequence.
+// Maximum length allowed for sequences (vectors, bytes, strings) and maps.
 const MaxSequenceLength = (1 << 31) - 1
+
+// Maximum number of nested structs and enum variants.
+const MaxContainerDepth = 500
 
 const maxUint32 = uint64(^uint32(0))
 
@@ -21,7 +24,7 @@ type deserializer struct {
 }
 
 func NewDeserializer(input []byte) serde.Deserializer {
-	return &deserializer{*serde.NewBinaryDeserializer(input)}
+	return &deserializer{*serde.NewBinaryDeserializer(input, MaxContainerDepth)}
 }
 
 func (d *deserializer) DeserializeBytes() ([]byte, error) {

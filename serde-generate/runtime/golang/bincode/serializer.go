@@ -4,6 +4,8 @@
 package bincode
 
 import (
+	"math"
+
 	"github.com/novifinancial/serde-reflection/serde-generate/runtime/golang/serde"
 )
 
@@ -13,7 +15,7 @@ type serializer struct {
 }
 
 func NewSerializer() serde.Serializer {
-	return new(serializer)
+	return &serializer{*serde.NewBinarySerializer(math.MaxUint64)}
 }
 
 func (s *serializer) SerializeStr(value string) error {

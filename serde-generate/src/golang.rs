@@ -619,6 +619,10 @@ return obj, nil
                 full_name
             )?;
             self.out.indent();
+            writeln!(
+                self.out,
+                "if err := serializer.IncreaseContainerDepth(); err != nil {{ return err }}"
+            )?;
             if let Some(index) = variant_index {
                 writeln!(self.out, "serializer.SerializeVariantIndex({})", index)?;
             }
@@ -629,6 +633,7 @@ return obj, nil
                     self.quote_serialize_value(&format!("obj.{}", &field.name), &field.value)
                 )?;
             }
+            writeln!(self.out, "serializer.DecreaseContainerDepth()")?;
             writeln!(self.out, "return nil")?;
             self.out.unindent();
             writeln!(self.out, "}}")?;
@@ -651,6 +656,10 @@ return obj, nil
             )?;
             self.out.indent();
             writeln!(self.out, "var obj {}", full_name)?;
+            writeln!(
+                self.out,
+                "if err := deserializer.IncreaseContainerDepth(); err != nil {{ return obj, err }}"
+            )?;
             for field in fields {
                 writeln!(
                     self.out,
@@ -658,6 +667,7 @@ return obj, nil
                     self.quote_deserialize(&field.value, &format!("obj.{}", field.name), "obj")
                 )?;
             }
+            writeln!(self.out, "deserializer.DecreaseContainerDepth()")?;
             writeln!(self.out, "return obj, nil")?;
             self.out.unindent();
             writeln!(self.out, "}}")?;
@@ -702,6 +712,10 @@ return obj, nil
                 full_name
             )?;
             self.out.indent();
+            writeln!(
+                self.out,
+                "if err := serializer.IncreaseContainerDepth(); err != nil {{ return err }}"
+            )?;
             if let Some(index) = variant_index {
                 writeln!(self.out, "serializer.SerializeVariantIndex({})", index)?;
             }
@@ -713,6 +727,7 @@ return obj, nil
                     format
                 )
             )?;
+            writeln!(self.out, "serializer.DecreaseContainerDepth()")?;
             writeln!(self.out, "return nil")?;
             self.out.unindent();
             writeln!(self.out, "}}")?;
@@ -735,11 +750,13 @@ return obj, nil
             )?;
             self.out.indent();
             writeln!(self.out, "var obj {}", self.quote_type(format))?;
+            writeln!(self.out, "if err := deserializer.IncreaseContainerDepth(); err != nil {{ return ({})(obj), err }}", full_name)?;
             writeln!(
                 self.out,
                 "{}",
                 self.quote_deserialize(format, "obj", &format!("(({})(obj))", full_name))
             )?;
+            writeln!(self.out, "deserializer.DecreaseContainerDepth()")?;
             writeln!(self.out, "return ({})(obj), nil", full_name)?;
             self.out.unindent();
             writeln!(self.out, "}}")?;
