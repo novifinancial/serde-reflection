@@ -46,6 +46,10 @@ public interface Serializer {
 
     void serialize_option_tag(boolean value) throws SerializationError;
 
+    void increase_container_depth() throws SerializationError;
+
+    void decrease_container_depth();
+
     int get_buffer_offset();
 
     void sort_map_entries(int[] offsets);

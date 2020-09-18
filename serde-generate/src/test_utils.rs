@@ -79,7 +79,7 @@ pub struct OtherTypes {
     f_option: Option<Struct>,
     f_unit: (),
     f_seq: Vec<Struct>,
-    f_tuple: (u64, u32),
+    f_tuple: (u8, u16),
     f_stringmap: BTreeMap<String, u32>,
     f_intset: BTreeMap<u64, ()>, // Avoiding BTreeSet because Serde treats them as sequences.
 }
@@ -162,7 +162,7 @@ pub fn get_sample_values(has_canonical_maps: bool) -> Vec<SerdeData> {
     });
 
     let v2 = SerdeData::OtherTypes(OtherTypes {
-        f_string: "test.\u{10348}.\u{00a2}\u{0939}\u{20ac}\u{d55c}..".to_string(),
+        f_string: "test".to_string(),
         f_bytes: ByteBuf::from(b"bytes".to_vec()),
         f_option: Some(Struct { x: 2, y: 3 }),
         f_unit: (),
@@ -173,11 +173,7 @@ pub fn get_sample_values(has_canonical_maps: bool) -> Vec<SerdeData> {
         } else {
             btreemap! {"foo".to_string() => 1}
         },
-        f_intset: if has_canonical_maps {
-            btreemap! {1 => (), 5 => (), 16 => (), 64 => (), 257 => (), 1024 => ()}
-        } else {
-            btreemap! {64 => ()}
-        },
+        f_intset: BTreeMap::new(),
     });
 
     let v2bis = SerdeData::OtherTypes(OtherTypes {
@@ -188,12 +184,16 @@ pub fn get_sample_values(has_canonical_maps: bool) -> Vec<SerdeData> {
         f_seq: Vec::new(),
         f_tuple: (4, 5),
         f_stringmap: BTreeMap::new(),
-        f_intset: BTreeMap::new(),
+        f_intset: if has_canonical_maps {
+            btreemap! {1 => (), 5 => (), 16 => (), 64 => (), 257 => (), 1024 => ()}
+        } else {
+            btreemap! {64 => ()}
+        },
     });
 
     let v2ter = SerdeData::OtherTypes(OtherTypes {
-        f_string: vec!["1"; 1000].join(""),
-        f_bytes: ByteBuf::from(vec![1u8; 300]),
+        f_string: "".to_string(),
+        f_bytes: ByteBuf::from(vec![1u8; 129]),
         f_option: None,
         f_unit: (),
         f_seq: Vec::new(),
@@ -201,7 +201,7 @@ pub fn get_sample_values(has_canonical_maps: bool) -> Vec<SerdeData> {
         f_stringmap: BTreeMap::new(),
         f_intset: if has_canonical_maps {
             std::iter::repeat(())
-                .take(200)
+                .take(10)
                 .enumerate()
                 .map(|(i, ())| (i as u64, ()))
                 .collect()
@@ -212,7 +212,8 @@ pub fn get_sample_values(has_canonical_maps: bool) -> Vec<SerdeData> {
 
     let v3 = SerdeData::UnitVariant;
 
-    let v4 = SerdeData::NewTypeVariant("test".to_string());
+    let v4 =
+        SerdeData::NewTypeVariant("test.\u{10348}.\u{00a2}\u{0939}\u{20ac}\u{d55c}..".to_string());
 
     let v5 = SerdeData::TupleVariant(3, 6);
 
@@ -376,8 +377,8 @@ impl Runtime {
             return results;
         }
 
-        // For each byte position < 20 in the serialization of `value`:
-        for i in 0..std::cmp::min(s.len(), 20) {
+        // For each byte position < 11 in the serialization of `value`:
+        for i in 0..std::cmp::min(s.len(), 11) {
             // Flip the highest bit
             {
                 let mut s2 = s.clone();
@@ -497,6 +498,12 @@ impl Runtime {
                 self.get_alternate_sample_with_container_depth(depth + 1)
                     .unwrap(),
             );
+        }
+        if let Self::Lcs = self {
+            negative_samples.push(vec![0x09, 0x00, 0x00]);
+            negative_samples.push(vec![0x09, 0x80, 0x00]);
+            negative_samples.push(vec![0x09, 0xff, 0xff, 0xff, 0xff, 0x10]);
+            negative_samples.push(vec![0x09, 0xff, 0xff, 0xff, 0xff, 0x08]);
         }
         negative_samples
     }
@@ -638,8 +645,8 @@ OtherTypes:
           TYPENAME: Struct
     - f_tuple:
         TUPLE:
-          - U64
-          - U32
+          - U8
+          - U16
     - f_stringmap:
         MAP:
           KEY: STR
@@ -860,7 +867,7 @@ fn test_bincode_get_positive_samples() {
 #[cfg(not(debug_assertions))]
 #[cfg(feature = "runtime-testing")]
 fn test_lcs_get_positive_samples() {
-    assert_eq!(test_get_positive_samples(Runtime::Lcs), 125);
+    assert_eq!(test_get_positive_samples(Runtime::Lcs), 87);
 }
 
 // Make sure all the "positive" samples successfully deserialize with the reference Rust
@@ -887,7 +894,7 @@ fn test_bincode_get_negative_samples() {
 #[cfg(not(debug_assertions))]
 #[cfg(feature = "runtime-testing")]
 fn test_lcs_get_negative_samples() {
-    assert_eq!(test_get_negative_samples(Runtime::Lcs), 76);
+    assert_eq!(test_get_negative_samples(Runtime::Lcs), 57);
 }
 
 // Make sure all the "negative" samples fail to deserialize with the reference Rust
@@ -906,7 +913,10 @@ fn test_get_negative_samples(runtime: Runtime) -> usize {
 #[test]
 #[cfg(feature = "runtime-testing")]
 fn test_lcs_serialize_with_noise_and_deserialize() {
-    let value = "test.\u{10348}.".to_string();
+    let value = "\u{10348}.".to_string();
     let samples = Runtime::Lcs.serialize_with_noise_and_deserialize(&value);
-    assert_eq!(samples.len(), 13);
+    // 1 for original encoding
+    // 1 for each byte in the serialization (value.len() + 1)
+    // 1 for added incorrect 5-byte UTF8-like codepoint
+    assert_eq!(samples.len(), value.len() + 3);
 }
