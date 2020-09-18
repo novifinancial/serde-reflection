@@ -42,7 +42,7 @@ fn test_that_cpp_code_compiles_with_config(
         .unwrap();
     assert!(status.success());
 
-    (dir, header_path.clone())
+    (dir, header_path)
 }
 
 #[test]

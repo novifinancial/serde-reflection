@@ -508,7 +508,7 @@ impl Runtime {
         if depth < 2 {
             return None;
         }
-        let e = self.serialize::<List<SerdeData>>(&List::Empty);
+        let mut e = self.serialize::<List<SerdeData>>(&List::Empty);
 
         let f0 = self.serialize(&List::Node(
             Box::new(SerdeData::UnitVariant),
@@ -522,7 +522,7 @@ impl Runtime {
         for _ in 2..depth {
             result.append(&mut f.clone());
         }
-        result.append(&mut e.clone());
+        result.append(&mut e);
         Some(result)
     }
 
@@ -533,7 +533,7 @@ impl Runtime {
         if depth < 2 {
             return None;
         }
-        let e = self.serialize::<SimpleList>(&SimpleList(None));
+        let mut e = self.serialize::<SimpleList>(&SimpleList(None));
 
         let f0 = self.serialize(&SimpleList(Some(Box::new(SimpleList(None)))));
         let f = f0[..f0.len() - e.len()].to_vec();
@@ -544,7 +544,7 @@ impl Runtime {
         for _ in 2..depth {
             result.append(&mut f.clone());
         }
-        result.append(&mut e.clone());
+        result.append(&mut e);
         Some(result)
     }
 
