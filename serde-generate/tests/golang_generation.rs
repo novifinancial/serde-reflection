@@ -81,12 +81,12 @@ fn test_that_golang_code_compiles_with_config_and_registry(
     let status = Command::new("go")
         .current_dir(dir.path())
         .arg("build")
-        .arg(source_path.clone())
+        .arg(&source_path)
         .status()
         .unwrap();
     assert!(status.success());
 
-    (dir, source_path.clone())
+    (dir, source_path)
 }
 
 #[test]

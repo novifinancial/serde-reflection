@@ -25,13 +25,13 @@ fn test_that_python_code_parses_with_config(
         std::env::var("PYTHONPATH").unwrap_or_default()
     );
     let status = Command::new("python3")
-        .arg(source_path.clone())
+        .arg(&source_path)
         .env("PYTHONPATH", python_path)
         .status()
         .unwrap();
     assert!(status.success());
 
-    (dir, source_path.clone())
+    (dir, source_path)
 }
 
 #[test]

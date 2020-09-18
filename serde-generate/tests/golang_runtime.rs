@@ -125,7 +125,7 @@ func main() {{
     let status = Command::new("go")
         .current_dir(dir.path())
         .arg("run")
-        .arg(source_path.clone())
+        .arg(&source_path)
         .status()
         .unwrap();
     assert!(status.success());

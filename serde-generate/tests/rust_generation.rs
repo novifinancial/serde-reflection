@@ -25,12 +25,12 @@ fn test_that_rust_code_compiles_with_config(
         .arg("lib")
         .arg("--edition")
         .arg("2018")
-        .arg(source_path.clone())
+        .arg(&source_path)
         .status()
         .unwrap();
     assert!(status.success());
 
-    (dir, source_path.clone())
+    (dir, source_path)
 }
 
 #[test]
@@ -81,7 +81,7 @@ fn test_that_rust_code_compiles_with_external_definitions() {
         .arg("lib")
         .arg("--edition")
         .arg("2018")
-        .arg(source_path.clone())
+        .arg(&source_path)
         .output()
         .unwrap();
     assert!(!output.status.success()); // Must fail.
@@ -106,7 +106,7 @@ mod foo {{
         .arg("lib")
         .arg("--edition")
         .arg("2018")
-        .arg(source_path)
+        .arg(&source_path)
         .status()
         .unwrap();
     assert!(status.success());
