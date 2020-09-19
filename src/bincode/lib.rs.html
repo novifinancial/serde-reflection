@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/bincode-1.2.1/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../bincode/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/bincode-1.3.1/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../bincode/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -164,15 +164,9 @@
 <span id="164">164</span>
 <span id="165">165</span>
 <span id="166">166</span>
-<span id="167">167</span>
-<span id="168">168</span>
-<span id="169">169</span>
-<span id="170">170</span>
-<span id="171">171</span>
-<span id="172">172</span>
-<span id="173">173</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="attribute">#![<span class="ident">deny</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#![<span class="ident">allow</span>(<span class="ident">unknown_lints</span>, <span class="ident">bare_trait_objects</span>, <span class="ident">deprecated</span>)]</span>
 
 <span class="doccomment">//! Bincode is a crate for encoding and decoding using a tiny binary</span>
 <span class="doccomment">//! serialization strategy.  Using it, you can easily go from having</span>
@@ -197,7 +191,7 @@
 <span class="doccomment">//! Support for `i128` and `u128` is automatically enabled on Rust toolchains</span>
 <span class="doccomment">//! greater than or equal to `1.26.0` and disabled for targets which do not support it</span>
 
-<span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_root_url</span> <span class="op">=</span> <span class="string">&quot;https://docs.rs/bincode/1.2.1&quot;</span>)]</span>
+<span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_root_url</span> <span class="op">=</span> <span class="string">&quot;https://docs.rs/bincode/1.3.1&quot;</span>)]</span>
 <span class="attribute">#![<span class="ident">crate_name</span> <span class="op">=</span> <span class="string">&quot;bincode&quot;</span>]</span>
 <span class="attribute">#![<span class="ident">crate_type</span> <span class="op">=</span> <span class="string">&quot;rlib&quot;</span>]</span>
 <span class="attribute">#![<span class="ident">crate_type</span> <span class="op">=</span> <span class="string">&quot;dylib&quot;</span>]</span>
@@ -206,39 +200,20 @@
 <span class="attribute">#[<span class="ident">macro_use</span>]</span>
 <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">serde</span>;
 
-<span class="kw">mod</span> <span class="ident">config</span>;
-<span class="kw">mod</span> <span class="ident">de</span>;
+<span class="doccomment">/// Configuration settings for bincode.</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">config</span>;
+<span class="doccomment">/// Deserialize bincode data to a Rust data structure.</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">de</span>;
+
 <span class="kw">mod</span> <span class="ident">error</span>;
 <span class="kw">mod</span> <span class="ident">internal</span>;
 <span class="kw">mod</span> <span class="ident">ser</span>;
 
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">config</span>::<span class="ident">Config</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">de</span>::<span class="ident">read</span>::{<span class="ident">BincodeRead</span>, <span class="ident">IoReader</span>, <span class="ident">SliceReader</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">config</span>::{<span class="ident">Config</span>, <span class="ident">DefaultOptions</span>, <span class="ident">Options</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">de</span>::<span class="ident">read</span>::<span class="ident">BincodeRead</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">de</span>::<span class="ident">Deserializer</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">error</span>::{<span class="ident">Error</span>, <span class="ident">ErrorKind</span>, <span class="prelude-ty">Result</span>};
-
-<span class="doccomment">/// An object that implements this trait can be passed a</span>
-<span class="doccomment">/// serde::Deserializer without knowing its concrete type.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// This trait should be used only for `with_deserializer` functions.</span>
-<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">DeserializerAcceptor</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// The return type for the accept method</span>
-    <span class="kw">type</span> <span class="ident">Output</span>;
-    <span class="doccomment">/// Accept a serde::Deserializer and do whatever you want with it.</span>
-    <span class="kw">fn</span> <span class="ident">accept</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">serde</span>::<span class="ident">Deserializer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">Output</span>;
-}
-
-<span class="doccomment">/// An object that implements this trait can be passed a</span>
-<span class="doccomment">/// serde::Serializer without knowing its concrete type.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// This trait should be used only for `with_serializer` functions.</span>
-<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">SerializerAcceptor</span> {
-    <span class="doccomment">/// The return type for the accept method</span>
-    <span class="kw">type</span> <span class="ident">Output</span>;
-    <span class="doccomment">/// Accept a serde::Serializer and do whatever you want with it.</span>
-    <span class="kw">fn</span> <span class="ident">accept</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">serde</span>::<span class="ident">Serializer</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">Output</span>;
-}
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">ser</span>::<span class="ident">Serializer</span>;
 
 <span class="doccomment">/// Get a default configuration object.</span>
 <span class="doccomment">///</span>
@@ -248,8 +223,21 @@
 <span class="doccomment">/// |------------|------------|</span>
 <span class="doccomment">/// | Unlimited  | Little     |</span>
 <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+<span class="attribute">#[<span class="ident">deprecated</span>(<span class="ident">since</span> <span class="op">=</span> <span class="string">&quot;1.3.0&quot;</span>, <span class="ident">note</span> <span class="op">=</span> <span class="string">&quot;please use `options()` instead&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">config</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Config</span> {
     <span class="ident">Config</span>::<span class="ident">new</span>()
+}
+
+<span class="doccomment">/// Get a default configuration object.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ### Default Configuration:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// | Byte limit | Endianness | Int Encoding | Trailing Behavior |</span>
+<span class="doccomment">/// |------------|------------|--------------|-------------------|</span>
+<span class="doccomment">/// | Unlimited  | Little     | Varint       | Reject            |</span>
+<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">options</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DefaultOptions</span> {
+    <span class="ident">DefaultOptions</span>::<span class="ident">new</span>()
 }
 
 <span class="doccomment">/// Serializes an object directly into a `Writer` using the default configuration.</span>
@@ -261,7 +249,9 @@
     <span class="ident">W</span>: <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Write</span>,
     <span class="ident">T</span>: <span class="ident">serde</span>::<span class="ident">Serialize</span>,
 {
-    <span class="ident">config</span>().<span class="ident">serialize_into</span>(<span class="ident">writer</span>, <span class="ident">value</span>)
+    <span class="ident">DefaultOptions</span>::<span class="ident">new</span>()
+        .<span class="ident">with_fixint_encoding</span>()
+        .<span class="ident">serialize_into</span>(<span class="ident">writer</span>, <span class="ident">value</span>)
 }
 
 <span class="doccomment">/// Serializes a serializable object into a `Vec` of bytes using the default configuration.</span>
@@ -269,7 +259,10 @@
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">serde</span>::<span class="ident">Serialize</span>,
 {
-    <span class="ident">config</span>().<span class="ident">serialize</span>(<span class="ident">value</span>)
+    <span class="ident">DefaultOptions</span>::<span class="ident">new</span>()
+        .<span class="ident">with_fixint_encoding</span>()
+        .<span class="ident">allow_trailing_bytes</span>()
+        .<span class="ident">serialize</span>(<span class="ident">value</span>)
 }
 
 <span class="doccomment">/// Deserializes an object directly from a `Read`er using the default configuration.</span>
@@ -280,7 +273,10 @@
     <span class="ident">R</span>: <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Read</span>,
     <span class="ident">T</span>: <span class="ident">serde</span>::<span class="ident">de</span>::<span class="ident">DeserializeOwned</span>,
 {
-    <span class="ident">config</span>().<span class="ident">deserialize_from</span>(<span class="ident">reader</span>)
+    <span class="ident">DefaultOptions</span>::<span class="ident">new</span>()
+        .<span class="ident">with_fixint_encoding</span>()
+        .<span class="ident">allow_trailing_bytes</span>()
+        .<span class="ident">deserialize_from</span>(<span class="ident">reader</span>)
 }
 
 <span class="doccomment">/// Deserializes an object from a custom `BincodeRead`er using the default configuration.</span>
@@ -293,7 +289,10 @@
     <span class="ident">R</span>: <span class="ident">de</span>::<span class="ident">read</span>::<span class="ident">BincodeRead</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
     <span class="ident">T</span>: <span class="ident">serde</span>::<span class="ident">de</span>::<span class="ident">DeserializeOwned</span>,
 {
-    <span class="ident">config</span>().<span class="ident">deserialize_from_custom</span>(<span class="ident">reader</span>)
+    <span class="ident">DefaultOptions</span>::<span class="ident">new</span>()
+        .<span class="ident">with_fixint_encoding</span>()
+        .<span class="ident">allow_trailing_bytes</span>()
+        .<span class="ident">deserialize_from_custom</span>(<span class="ident">reader</span>)
 }
 
 <span class="doccomment">/// Only use this if you know what you&#39;re doing.</span>
@@ -305,7 +304,10 @@
     <span class="ident">T</span>: <span class="ident">serde</span>::<span class="ident">de</span>::<span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
     <span class="ident">R</span>: <span class="ident">BincodeRead</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
 {
-    <span class="ident">config</span>().<span class="ident">deserialize_in_place</span>(<span class="ident">reader</span>, <span class="ident">place</span>)
+    <span class="ident">DefaultOptions</span>::<span class="ident">new</span>()
+        .<span class="ident">with_fixint_encoding</span>()
+        .<span class="ident">allow_trailing_bytes</span>()
+        .<span class="ident">deserialize_in_place</span>(<span class="ident">reader</span>, <span class="ident">place</span>)
 }
 
 <span class="doccomment">/// Deserializes a slice of bytes into an instance of `T` using the default configuration.</span>
@@ -313,7 +315,10 @@
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">serde</span>::<span class="ident">de</span>::<span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
 {
-    <span class="ident">config</span>().<span class="ident">deserialize</span>(<span class="ident">bytes</span>)
+    <span class="ident">DefaultOptions</span>::<span class="ident">new</span>()
+        .<span class="ident">with_fixint_encoding</span>()
+        .<span class="ident">allow_trailing_bytes</span>()
+        .<span class="ident">deserialize</span>(<span class="ident">bytes</span>)
 }
 
 <span class="doccomment">/// Returns the size that an object would be if serialized using Bincode with the default configuration.</span>
@@ -321,29 +326,10 @@
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">serde</span>::<span class="ident">Serialize</span>,
 {
-    <span class="ident">config</span>().<span class="ident">serialized_size</span>(<span class="ident">value</span>)
-}
-
-<span class="doccomment">/// Executes the acceptor with a serde::Deserializer instance.</span>
-<span class="doccomment">/// NOT A PART OF THE STABLE PUBLIC API</span>
-<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_deserializer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">A</span>, <span class="ident">R</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="ident">R</span>, <span class="ident">acceptor</span>: <span class="ident">A</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">A</span>::<span class="ident">Output</span>
-<span class="kw">where</span>
-    <span class="ident">A</span>: <span class="ident">DeserializerAcceptor</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
-    <span class="ident">R</span>: <span class="ident">BincodeRead</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
-{
-    <span class="ident">config</span>().<span class="ident">with_deserializer</span>(<span class="ident">reader</span>, <span class="ident">acceptor</span>)
-}
-
-<span class="doccomment">/// Executes the acceptor with a serde::Serializer instance.</span>
-<span class="doccomment">/// NOT A PART OF THE STABLE PUBLIC API</span>
-<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_serializer</span><span class="op">&lt;</span><span class="ident">A</span>, <span class="ident">W</span><span class="op">&gt;</span>(<span class="ident">writer</span>: <span class="ident">W</span>, <span class="ident">acceptor</span>: <span class="ident">A</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">A</span>::<span class="ident">Output</span>
-<span class="kw">where</span>
-    <span class="ident">A</span>: <span class="ident">SerializerAcceptor</span>,
-    <span class="ident">W</span>: <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Write</span>,
-{
-    <span class="ident">config</span>().<span class="ident">with_serializer</span>(<span class="ident">writer</span>, <span class="ident">acceptor</span>)
+    <span class="ident">DefaultOptions</span>::<span class="ident">new</span>()
+        .<span class="ident">with_fixint_encoding</span>()
+        .<span class="ident">allow_trailing_bytes</span>()
+        .<span class="ident">serialized_size</span>(<span class="ident">value</span>)
 }
 </pre></div>
 </section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "bincode";</script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/bytes-0.5.4/src/bytes_mut.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>bytes_mut.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../bytes/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">   1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/bytes-0.5.6/src/bytes_mut.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>bytes_mut.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../bytes/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -1550,26 +1550,66 @@
 <span id="1550">1550</span>
 <span id="1551">1551</span>
 <span id="1552">1552</span>
+<span id="1553">1553</span>
+<span id="1554">1554</span>
+<span id="1555">1555</span>
+<span id="1556">1556</span>
+<span id="1557">1557</span>
+<span id="1558">1558</span>
+<span id="1559">1559</span>
+<span id="1560">1560</span>
+<span id="1561">1561</span>
+<span id="1562">1562</span>
+<span id="1563">1563</span>
+<span id="1564">1564</span>
+<span id="1565">1565</span>
+<span id="1566">1566</span>
+<span id="1567">1567</span>
+<span id="1568">1568</span>
+<span id="1569">1569</span>
+<span id="1570">1570</span>
+<span id="1571">1571</span>
+<span id="1572">1572</span>
+<span id="1573">1573</span>
+<span id="1574">1574</span>
+<span id="1575">1575</span>
+<span id="1576">1576</span>
+<span id="1577">1577</span>
+<span id="1578">1578</span>
+<span id="1579">1579</span>
+<span id="1580">1580</span>
+<span id="1581">1581</span>
 </pre><div class="example-wrap"><pre class="rust ">
-<span class="kw">use</span> <span class="ident">core</span>::{<span class="ident">cmp</span>, <span class="ident">fmt</span>, <span class="ident">hash</span>, <span class="ident">isize</span>, <span class="ident">slice</span>, <span class="ident">usize</span>};
+<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">iter</span>::{<span class="ident">FromIterator</span>, <span class="ident">Iterator</span>};
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">mem</span>::{<span class="self">self</span>, <span class="ident">ManuallyDrop</span>};
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">ops</span>::{<span class="ident">Deref</span>, <span class="ident">DerefMut</span>};
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">ptr</span>::{<span class="self">self</span>, <span class="ident">NonNull</span>};
-<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">iter</span>::{<span class="ident">FromIterator</span>, <span class="ident">Iterator</span>};
+<span class="kw">use</span> <span class="ident">core</span>::{<span class="ident">cmp</span>, <span class="ident">fmt</span>, <span class="ident">hash</span>, <span class="ident">isize</span>, <span class="ident">slice</span>, <span class="ident">usize</span>};
 
-<span class="kw">use</span> <span class="ident">alloc</span>::{<span class="ident">vec</span>::<span class="ident">Vec</span>, <span class="ident">string</span>::<span class="ident">String</span>, <span class="ident">boxed</span>::<span class="ident">Box</span>, <span class="ident">borrow</span>::{<span class="ident">Borrow</span>, <span class="ident">BorrowMut</span>}};
+<span class="kw">use</span> <span class="ident">alloc</span>::{
+    <span class="ident">borrow</span>::{<span class="ident">Borrow</span>, <span class="ident">BorrowMut</span>},
+    <span class="ident">boxed</span>::<span class="ident">Box</span>,
+    <span class="ident">string</span>::<span class="ident">String</span>,
+    <span class="ident">vec</span>::<span class="ident">Vec</span>,
+};
 
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Bytes</span>, <span class="ident">Buf</span>, <span class="ident">BufMut</span>};
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">bytes</span>::<span class="ident">Vtable</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">buf</span>::<span class="ident">IntoIter</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">bytes</span>::<span class="ident">Vtable</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused</span>)]</span>
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">loom</span>::<span class="ident">sync</span>::<span class="ident">atomic</span>::<span class="ident">AtomicMut</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">loom</span>::<span class="ident">sync</span>::<span class="ident">atomic</span>::{<span class="self">self</span>, <span class="ident">AtomicPtr</span>, <span class="ident">AtomicUsize</span>, <span class="ident">Ordering</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Buf</span>, <span class="ident">BufMut</span>, <span class="ident">Bytes</span>};
 
 <span class="doccomment">/// A unique reference to a contiguous slice of memory.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// `BytesMut` represents a unique view into a potentially shared memory region.</span>
 <span class="doccomment">/// Given the uniqueness guarantee, owners of `BytesMut` handles are able to</span>
-<span class="doccomment">/// mutate the memory. It is similar to a `Vec&lt;u8&gt;` but with less copies and</span>
-<span class="doccomment">/// allocations.</span>
+<span class="doccomment">/// mutate the memory.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// `BytesMut` can be thought of as containing a `buf: Arc&lt;Vec&lt;u8&gt;&gt;`, an offset</span>
+<span class="doccomment">/// into `buf`, a slice length, and a guarantee that no other `BytesMut` for the</span>
+<span class="doccomment">/// same `buf` overlaps with its slice. That guarantee means that a write lock</span>
+<span class="doccomment">/// is not required.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Growth</span>
 <span class="doccomment">///</span>
@@ -1660,8 +1700,7 @@
     <span class="doccomment">/// Creates a new `BytesMut` with the specified capacity.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// The returned `BytesMut` will be able to hold at least `capacity` bytes</span>
-    <span class="doccomment">/// without reallocating. If `capacity` is under `4 * size_of::&lt;usize&gt;() - 1`,</span>
-    <span class="doccomment">/// then `BytesMut` will not allocate.</span>
+    <span class="doccomment">/// without reallocating.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// It is important to note that this function does not specify the length</span>
     <span class="doccomment">/// of the returned `BytesMut`, but only the capacity.</span>
@@ -1786,7 +1825,9 @@
                 <span class="kw">let</span> (<span class="ident">off</span>, <span class="kw">_</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_vec_pos</span>();
                 <span class="kw">let</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">rebuild_vec</span>(<span class="self">self</span>.<span class="ident">ptr</span>.<span class="ident">as_ptr</span>(), <span class="self">self</span>.<span class="ident">len</span>, <span class="self">self</span>.<span class="ident">cap</span>, <span class="ident">off</span>);
                 <span class="ident">mem</span>::<span class="ident">forget</span>(<span class="self">self</span>);
-                <span class="ident">vec</span>.<span class="ident">into</span>()
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">b</span>: <span class="ident">Bytes</span> <span class="op">=</span> <span class="ident">vec</span>.<span class="ident">into</span>();
+                <span class="ident">b</span>.<span class="ident">advance</span>(<span class="ident">off</span>);
+                <span class="ident">b</span>
             }
         } <span class="kw">else</span> {
             <span class="macro">debug_assert_eq</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">kind</span>(), <span class="ident">KIND_ARC</span>);
@@ -1795,9 +1836,7 @@
             <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>;
             <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">AtomicPtr</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">data</span> <span class="kw">as</span> <span class="kw">_</span>);
             <span class="ident">mem</span>::<span class="ident">forget</span>(<span class="self">self</span>);
-            <span class="kw">unsafe</span> {
-                <span class="ident">Bytes</span>::<span class="ident">with_vtable</span>(<span class="ident">ptr</span>, <span class="ident">len</span>, <span class="ident">data</span>, <span class="kw-2">&amp;</span><span class="ident">SHARED_VTABLE</span>)
-            }
+            <span class="kw">unsafe</span> { <span class="ident">Bytes</span>::<span class="ident">with_vtable</span>(<span class="ident">ptr</span>, <span class="ident">len</span>, <span class="ident">data</span>, <span class="kw-2">&amp;</span><span class="ident">SHARED_VTABLE</span>) }
         }
     }
 
@@ -1939,7 +1978,9 @@
     <span class="doccomment">/// [`split_off`]: #method.split_off</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">truncate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">len</span>: <span class="ident">usize</span>) {
         <span class="kw">if</span> <span class="ident">len</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>() {
-            <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">set_len</span>(<span class="ident">len</span>); }
+            <span class="kw">unsafe</span> {
+                <span class="self">self</span>.<span class="ident">set_len</span>(<span class="ident">len</span>);
+            }
         }
     }
 
@@ -2020,6 +2061,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert_eq!(&amp;b[..], b&quot;hello world&quot;);</span>
     <span class="doccomment">/// ```</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">set_len</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">len</span>: <span class="ident">usize</span>) {
         <span class="macro">debug_assert</span><span class="macro">!</span>(<span class="ident">len</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">cap</span>, <span class="string">&quot;set_len out of bounds&quot;</span>);
         <span class="self">self</span>.<span class="ident">len</span> <span class="op">=</span> <span class="ident">len</span>;
@@ -2103,9 +2145,8 @@
             <span class="kw">unsafe</span> {
                 <span class="kw">let</span> (<span class="ident">off</span>, <span class="ident">prev</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_vec_pos</span>();
 
-                <span class="comment">// Only reuse space if we stand to gain at least capacity/2</span>
-                <span class="comment">// bytes of space back</span>
-                <span class="kw">if</span> <span class="ident">off</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">additional</span> <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="ident">off</span> <span class="op">&gt;</span><span class="op">=</span> (<span class="self">self</span>.<span class="ident">cap</span> <span class="op">/</span> <span class="number">2</span>) {
+                <span class="comment">// Only reuse space if we can satisfy the requested additional space.</span>
+                <span class="kw">if</span> <span class="self">self</span>.<span class="ident">capacity</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">len</span>() <span class="op">+</span> <span class="ident">off</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">additional</span> {
                     <span class="comment">// There&#39;s space - reuse it</span>
                     <span class="comment">//</span>
                     <span class="comment">// Just move the pointer back to the start after copying</span>
@@ -2120,7 +2161,8 @@
                     <span class="self">self</span>.<span class="ident">cap</span> <span class="op">+</span><span class="op">=</span> <span class="ident">off</span>;
                 } <span class="kw">else</span> {
                     <span class="comment">// No space - allocate more</span>
-                    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">v</span> <span class="op">=</span> <span class="ident">ManuallyDrop</span>::<span class="ident">new</span>(<span class="ident">rebuild_vec</span>(<span class="self">self</span>.<span class="ident">ptr</span>.<span class="ident">as_ptr</span>(), <span class="self">self</span>.<span class="ident">len</span>, <span class="self">self</span>.<span class="ident">cap</span>, <span class="ident">off</span>));
+                    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">v</span> <span class="op">=</span>
+                        <span class="ident">ManuallyDrop</span>::<span class="ident">new</span>(<span class="ident">rebuild_vec</span>(<span class="self">self</span>.<span class="ident">ptr</span>.<span class="ident">as_ptr</span>(), <span class="self">self</span>.<span class="ident">len</span>, <span class="self">self</span>.<span class="ident">cap</span>, <span class="ident">off</span>));
                     <span class="ident">v</span>.<span class="ident">reserve</span>(<span class="ident">additional</span>);
 
                     <span class="comment">// Update the info</span>
@@ -2135,7 +2177,6 @@
 
         <span class="macro">debug_assert_eq</span><span class="macro">!</span>(<span class="ident">kind</span>, <span class="ident">KIND_ARC</span>);
         <span class="kw">let</span> <span class="ident">shared</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">Shared</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">data</span> <span class="kw">as</span> <span class="kw">_</span>;
-
 
         <span class="comment">// Reserving involves abandoning the currently shared buffer and</span>
         <span class="comment">// allocating a new vector with the requested capacity.</span>
@@ -2180,9 +2221,7 @@
                 <span class="comment">// check.</span>
                 <span class="kw">let</span> <span class="ident">double</span> <span class="op">=</span> <span class="ident">v</span>.<span class="ident">capacity</span>().<span class="ident">checked_shl</span>(<span class="number">1</span>).<span class="ident">unwrap_or</span>(<span class="ident">new_cap</span>);
 
-                <span class="ident">new_cap</span> <span class="op">=</span> <span class="ident">cmp</span>::<span class="ident">max</span>(
-                    <span class="ident">cmp</span>::<span class="ident">max</span>(<span class="ident">double</span>, <span class="ident">new_cap</span>),
-                    <span class="ident">original_capacity</span>);
+                <span class="ident">new_cap</span> <span class="op">=</span> <span class="ident">cmp</span>::<span class="ident">max</span>(<span class="ident">cmp</span>::<span class="ident">max</span>(<span class="ident">double</span>, <span class="ident">new_cap</span>), <span class="ident">original_capacity</span>);
             } <span class="kw">else</span> {
                 <span class="ident">new_cap</span> <span class="op">=</span> <span class="ident">cmp</span>::<span class="ident">max</span>(<span class="ident">new_cap</span>, <span class="ident">original_capacity</span>);
             }
@@ -2231,14 +2270,12 @@
             <span class="comment">// Reserved above</span>
             <span class="macro">debug_assert</span><span class="macro">!</span>(<span class="ident">dst</span>.<span class="ident">len</span>() <span class="op">&gt;</span><span class="op">=</span> <span class="ident">cnt</span>);
 
-            <span class="ident">ptr</span>::<span class="ident">copy_nonoverlapping</span>(
-                <span class="ident">extend</span>.<span class="ident">as_ptr</span>(),
-                <span class="ident">dst</span>.<span class="ident">as_mut_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>,
-                <span class="ident">cnt</span>);
-
+            <span class="ident">ptr</span>::<span class="ident">copy_nonoverlapping</span>(<span class="ident">extend</span>.<span class="ident">as_ptr</span>(), <span class="ident">dst</span>.<span class="ident">as_mut_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>, <span class="ident">cnt</span>);
         }
 
-        <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">advance_mut</span>(<span class="ident">cnt</span>); }
+        <span class="kw">unsafe</span> {
+            <span class="self">self</span>.<span class="ident">advance_mut</span>(<span class="ident">cnt</span>);
+        }
     }
 
     <span class="doccomment">/// Absorbs a `BytesMut` that was previously split off.</span>
@@ -2303,16 +2340,12 @@
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">as_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
-        <span class="kw">unsafe</span> {
-            <span class="ident">slice</span>::<span class="ident">from_raw_parts</span>(<span class="self">self</span>.<span class="ident">ptr</span>.<span class="ident">as_ptr</span>(), <span class="self">self</span>.<span class="ident">len</span>)
-        }
+        <span class="kw">unsafe</span> { <span class="ident">slice</span>::<span class="ident">from_raw_parts</span>(<span class="self">self</span>.<span class="ident">ptr</span>.<span class="ident">as_ptr</span>(), <span class="self">self</span>.<span class="ident">len</span>) }
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">as_slice_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>] {
-        <span class="kw">unsafe</span> {
-            <span class="ident">slice</span>::<span class="ident">from_raw_parts_mut</span>(<span class="self">self</span>.<span class="ident">ptr</span>.<span class="ident">as_ptr</span>(), <span class="self">self</span>.<span class="ident">len</span>)
-        }
+        <span class="kw">unsafe</span> { <span class="ident">slice</span>::<span class="ident">from_raw_parts_mut</span>(<span class="self">self</span>.<span class="ident">ptr</span>.<span class="ident">as_ptr</span>(), <span class="self">self</span>.<span class="ident">len</span>) }
     }
 
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">set_start</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">start</span>: <span class="ident">usize</span>) {
@@ -2341,7 +2374,7 @@
                 <span class="comment">// on 64 bit systems and will only happen on 32 bit systems</span>
                 <span class="comment">// when shifting past 134,217,727 bytes. As such, we don&#39;t</span>
                 <span class="comment">// worry too much about performance here.</span>
-                <span class="self">self</span>.<span class="ident">promote_to_shared</span>(<span class="comment">/*ref_count = */</span><span class="number">1</span>);
+                <span class="self">self</span>.<span class="ident">promote_to_shared</span>(<span class="comment">/*ref_count = */</span> <span class="number">1</span>);
             }
         }
 
@@ -2373,10 +2406,10 @@
         }
 
         <span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">ptr</span>.<span class="ident">as_ptr</span>().<span class="ident">offset</span>(<span class="self">self</span>.<span class="ident">len</span> <span class="kw">as</span> <span class="ident">isize</span>) };
-        <span class="kw">if</span> <span class="ident">ptr</span> <span class="op">=</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">ptr</span>.<span class="ident">as_ptr</span>() <span class="kw-2">&amp;</span><span class="op">&amp;</span>
-           <span class="self">self</span>.<span class="ident">kind</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">KIND_ARC</span> <span class="kw-2">&amp;</span><span class="op">&amp;</span>
-           <span class="ident">other</span>.<span class="ident">kind</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">KIND_ARC</span> <span class="kw-2">&amp;</span><span class="op">&amp;</span>
-           <span class="self">self</span>.<span class="ident">data</span> <span class="op">=</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">data</span>
+        <span class="kw">if</span> <span class="ident">ptr</span> <span class="op">=</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">ptr</span>.<span class="ident">as_ptr</span>()
+            <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="self">self</span>.<span class="ident">kind</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">KIND_ARC</span>
+            <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="ident">other</span>.<span class="ident">kind</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">KIND_ARC</span>
+            <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="self">self</span>.<span class="ident">data</span> <span class="op">=</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">data</span>
         {
             <span class="comment">// Contiguous blocks, just combine directly</span>
             <span class="self">self</span>.<span class="ident">len</span> <span class="op">+</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">len</span>;
@@ -2437,7 +2470,7 @@
             <span class="ident">increment_shared</span>(<span class="self">self</span>.<span class="ident">data</span>);
             <span class="ident">ptr</span>::<span class="ident">read</span>(<span class="self">self</span>)
         } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">promote_to_shared</span>(<span class="comment">/*ref_count = */</span><span class="number">2</span>);
+            <span class="self">self</span>.<span class="ident">promote_to_shared</span>(<span class="comment">/*ref_count = */</span> <span class="number">2</span>);
             <span class="ident">ptr</span>::<span class="ident">read</span>(<span class="self">self</span>)
         }
     }
@@ -2505,7 +2538,9 @@
             <span class="ident">cnt</span>,
             <span class="self">self</span>.<span class="ident">remaining</span>(),
         );
-        <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">set_start</span>(<span class="ident">cnt</span>); }
+        <span class="kw">unsafe</span> {
+            <span class="self">self</span>.<span class="ident">set_start</span>(<span class="ident">cnt</span>);
+        }
     }
 
     <span class="kw">fn</span> <span class="ident">to_bytes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="ident">Bytes</span> {
@@ -2522,7 +2557,12 @@
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">advance_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">cnt</span>: <span class="ident">usize</span>) {
         <span class="kw">let</span> <span class="ident">new_len</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>() <span class="op">+</span> <span class="ident">cnt</span>;
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">new_len</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">cap</span>, <span class="string">&quot;new_len = {}; capacity = {}&quot;</span>, <span class="ident">new_len</span>, <span class="self">self</span>.<span class="ident">cap</span>);
+        <span class="macro">assert</span><span class="macro">!</span>(
+            <span class="ident">new_len</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">cap</span>,
+            <span class="string">&quot;new_len = {}; capacity = {}&quot;</span>,
+            <span class="ident">new_len</span>,
+            <span class="self">self</span>.<span class="ident">cap</span>
+        );
         <span class="self">self</span>.<span class="ident">len</span> <span class="op">=</span> <span class="ident">new_len</span>;
     }
 
@@ -2537,7 +2577,10 @@
     <span class="comment">// Specialize these methods so they can skip checking `remaining_mut`</span>
     <span class="comment">// and `advance_mut`.</span>
 
-    <span class="kw">fn</span> <span class="ident">put</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="kw">crate</span>::<span class="ident">Buf</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">src</span>: <span class="ident">T</span>) <span class="kw">where</span> <span class="self">Self</span>: <span class="ident">Sized</span> {
+    <span class="kw">fn</span> <span class="ident">put</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="kw">crate</span>::<span class="ident">Buf</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">src</span>: <span class="ident">T</span>)
+    <span class="kw">where</span>
+        <span class="self">Self</span>: <span class="ident">Sized</span>,
+    {
         <span class="kw">while</span> <span class="ident">src</span>.<span class="ident">has_remaining</span>() {
             <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">src</span>.<span class="ident">bytes</span>();
             <span class="kw">let</span> <span class="ident">l</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">len</span>();
@@ -2568,6 +2611,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">AsMut</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">BytesMut</span> {
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">as_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>] {
         <span class="self">self</span>.<span class="ident">as_slice_mut</span>()
     }
@@ -2616,8 +2660,7 @@
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Eq</span> <span class="kw">for</span> <span class="ident">BytesMut</span> {
-}
+<span class="kw">impl</span> <span class="ident">Eq</span> <span class="kw">for</span> <span class="ident">BytesMut</span> {}
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">BytesMut</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
@@ -2627,7 +2670,10 @@
 }
 
 <span class="kw">impl</span> <span class="ident">hash</span>::<span class="ident">Hash</span> <span class="kw">for</span> <span class="ident">BytesMut</span> {
-    <span class="kw">fn</span> <span class="ident">hash</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">H</span>) <span class="kw">where</span> <span class="ident">H</span>: <span class="ident">hash</span>::<span class="ident">Hasher</span> {
+    <span class="kw">fn</span> <span class="ident">hash</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">H</span>)
+    <span class="kw">where</span>
+        <span class="ident">H</span>: <span class="ident">hash</span>::<span class="ident">Hasher</span>,
+    {
         <span class="kw">let</span> <span class="ident">s</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="self">self</span>.<span class="ident">as_ref</span>();
         <span class="ident">s</span>.<span class="ident">hash</span>(<span class="ident">state</span>);
     }
@@ -2687,7 +2733,10 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Extend</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">BytesMut</span> {
-    <span class="kw">fn</span> <span class="ident">extend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">iter</span>: <span class="ident">T</span>) <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">u8</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">extend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">iter</span>: <span class="ident">T</span>)
+    <span class="kw">where</span>
+        <span class="ident">T</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">u8</span><span class="op">&gt;</span>,
+    {
         <span class="kw">let</span> <span class="ident">iter</span> <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">into_iter</span>();
 
         <span class="kw">let</span> (<span class="ident">lower</span>, <span class="kw">_</span>) <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">size_hint</span>();
@@ -2704,7 +2753,10 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Extend</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">u8</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">BytesMut</span> {
-    <span class="kw">fn</span> <span class="ident">extend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">iter</span>: <span class="ident">T</span>) <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">u8</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">extend</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">iter</span>: <span class="ident">T</span>)
+    <span class="kw">where</span>
+        <span class="ident">T</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">u8</span><span class="op">&gt;</span>,
+    {
         <span class="self">self</span>.<span class="ident">extend</span>(<span class="ident">iter</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">b</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">b</span>))
     }
 }
@@ -2782,7 +2834,10 @@
 
 <span class="kw">fn</span> <span class="ident">original_capacity_to_repr</span>(<span class="ident">cap</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
     <span class="kw">let</span> <span class="ident">width</span> <span class="op">=</span> <span class="ident">PTR_WIDTH</span> <span class="op">-</span> ((<span class="ident">cap</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">MIN_ORIGINAL_CAPACITY_WIDTH</span>).<span class="ident">leading_zeros</span>() <span class="kw">as</span> <span class="ident">usize</span>);
-    <span class="ident">cmp</span>::<span class="ident">min</span>(<span class="ident">width</span>, <span class="ident">MAX_ORIGINAL_CAPACITY_WIDTH</span> <span class="op">-</span> <span class="ident">MIN_ORIGINAL_CAPACITY_WIDTH</span>)
+    <span class="ident">cmp</span>::<span class="ident">min</span>(
+        <span class="ident">width</span>,
+        <span class="ident">MAX_ORIGINAL_CAPACITY_WIDTH</span> <span class="op">-</span> <span class="ident">MIN_ORIGINAL_CAPACITY_WIDTH</span>,
+    )
 }
 
 <span class="kw">fn</span> <span class="ident">original_capacity_from_repr</span>(<span class="ident">repr</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
@@ -2950,7 +3005,8 @@ fn test_original_capacity_from_repr() {
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> <span class="ident">PartialEq</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">BytesMut</span>
-    <span class="kw">where</span> <span class="ident">BytesMut</span>: <span class="ident">PartialEq</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">BytesMut</span>: <span class="ident">PartialEq</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="kw-2">*</span><span class="self">self</span> <span class="op">=</span><span class="op">=</span> <span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">other</span>
@@ -2958,7 +3014,8 @@ fn test_original_capacity_from_repr() {
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> <span class="ident">PartialOrd</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">BytesMut</span>
-    <span class="kw">where</span> <span class="ident">BytesMut</span>: <span class="ident">PartialOrd</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">BytesMut</span>: <span class="ident">PartialOrd</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="kw">fn</span> <span class="ident">partial_cmp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">cmp</span>::<span class="ident">Ordering</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">partial_cmp</span>(<span class="kw-2">*</span><span class="ident">other</span>)
@@ -3025,7 +3082,7 @@ fn test_original_capacity_from_repr() {
 };
 
 <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">shared_v_clone</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="ident">AtomicPtr</span><span class="op">&lt;</span>()<span class="op">&gt;</span>, <span class="ident">ptr</span>: <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span>, <span class="ident">len</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Bytes</span> {
-    <span class="kw">let</span> <span class="ident">shared</span> <span class="op">=</span> <span class="ident">data</span>.<span class="ident">load</span>(<span class="ident">Ordering</span>::<span class="ident">Acquire</span>) <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">Shared</span>;
+    <span class="kw">let</span> <span class="ident">shared</span> <span class="op">=</span> <span class="ident">data</span>.<span class="ident">load</span>(<span class="ident">Ordering</span>::<span class="ident">Relaxed</span>) <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">Shared</span>;
     <span class="ident">increment_shared</span>(<span class="ident">shared</span>);
 
     <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">AtomicPtr</span>::<span class="ident">new</span>(<span class="ident">shared</span> <span class="kw">as</span> <span class="kw">_</span>);
@@ -3033,8 +3090,9 @@ fn test_original_capacity_from_repr() {
 }
 
 <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">shared_v_drop</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">AtomicPtr</span><span class="op">&lt;</span>()<span class="op">&gt;</span>, <span class="ident">_ptr</span>: <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span>, <span class="ident">_len</span>: <span class="ident">usize</span>) {
-    <span class="kw">let</span> <span class="ident">shared</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="ident">data</span>.<span class="ident">get_mut</span>()) <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">Shared</span>;
-    <span class="ident">release_shared</span>(<span class="ident">shared</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">Shared</span>);
+    <span class="ident">data</span>.<span class="ident">with_mut</span>(<span class="op">|</span><span class="ident">shared</span><span class="op">|</span> {
+        <span class="ident">release_shared</span>(<span class="kw-2">*</span><span class="ident">shared</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">Shared</span>);
+    });
 }
 
 <span class="comment">// compile-fails</span>
@@ -3072,11 +3130,11 @@ fn test_original_capacity_from_repr() {
 <span class="comment">// fuzz tests</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">test</span>, <span class="ident">loom</span>))]</span>
 <span class="kw">mod</span> <span class="ident">fuzz</span> {
-    <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">sync</span>::<span class="ident">Arc</span>;
+    <span class="kw">use</span> <span class="ident">loom</span>::<span class="ident">sync</span>::<span class="ident">Arc</span>;
     <span class="kw">use</span> <span class="ident">loom</span>::<span class="ident">thread</span>;
 
-    <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">Bytes</span>;
     <span class="kw">use</span> <span class="kw">super</span>::<span class="ident">BytesMut</span>;
+    <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">Bytes</span>;
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">bytes_mut_cloning_frozen</span>() {

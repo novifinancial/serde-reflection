@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/cc-1.0.54/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../cc/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">   1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/cc-1.0.60/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../cc/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -2818,6 +2818,167 @@
 <span id="2818">2818</span>
 <span id="2819">2819</span>
 <span id="2820">2820</span>
+<span id="2821">2821</span>
+<span id="2822">2822</span>
+<span id="2823">2823</span>
+<span id="2824">2824</span>
+<span id="2825">2825</span>
+<span id="2826">2826</span>
+<span id="2827">2827</span>
+<span id="2828">2828</span>
+<span id="2829">2829</span>
+<span id="2830">2830</span>
+<span id="2831">2831</span>
+<span id="2832">2832</span>
+<span id="2833">2833</span>
+<span id="2834">2834</span>
+<span id="2835">2835</span>
+<span id="2836">2836</span>
+<span id="2837">2837</span>
+<span id="2838">2838</span>
+<span id="2839">2839</span>
+<span id="2840">2840</span>
+<span id="2841">2841</span>
+<span id="2842">2842</span>
+<span id="2843">2843</span>
+<span id="2844">2844</span>
+<span id="2845">2845</span>
+<span id="2846">2846</span>
+<span id="2847">2847</span>
+<span id="2848">2848</span>
+<span id="2849">2849</span>
+<span id="2850">2850</span>
+<span id="2851">2851</span>
+<span id="2852">2852</span>
+<span id="2853">2853</span>
+<span id="2854">2854</span>
+<span id="2855">2855</span>
+<span id="2856">2856</span>
+<span id="2857">2857</span>
+<span id="2858">2858</span>
+<span id="2859">2859</span>
+<span id="2860">2860</span>
+<span id="2861">2861</span>
+<span id="2862">2862</span>
+<span id="2863">2863</span>
+<span id="2864">2864</span>
+<span id="2865">2865</span>
+<span id="2866">2866</span>
+<span id="2867">2867</span>
+<span id="2868">2868</span>
+<span id="2869">2869</span>
+<span id="2870">2870</span>
+<span id="2871">2871</span>
+<span id="2872">2872</span>
+<span id="2873">2873</span>
+<span id="2874">2874</span>
+<span id="2875">2875</span>
+<span id="2876">2876</span>
+<span id="2877">2877</span>
+<span id="2878">2878</span>
+<span id="2879">2879</span>
+<span id="2880">2880</span>
+<span id="2881">2881</span>
+<span id="2882">2882</span>
+<span id="2883">2883</span>
+<span id="2884">2884</span>
+<span id="2885">2885</span>
+<span id="2886">2886</span>
+<span id="2887">2887</span>
+<span id="2888">2888</span>
+<span id="2889">2889</span>
+<span id="2890">2890</span>
+<span id="2891">2891</span>
+<span id="2892">2892</span>
+<span id="2893">2893</span>
+<span id="2894">2894</span>
+<span id="2895">2895</span>
+<span id="2896">2896</span>
+<span id="2897">2897</span>
+<span id="2898">2898</span>
+<span id="2899">2899</span>
+<span id="2900">2900</span>
+<span id="2901">2901</span>
+<span id="2902">2902</span>
+<span id="2903">2903</span>
+<span id="2904">2904</span>
+<span id="2905">2905</span>
+<span id="2906">2906</span>
+<span id="2907">2907</span>
+<span id="2908">2908</span>
+<span id="2909">2909</span>
+<span id="2910">2910</span>
+<span id="2911">2911</span>
+<span id="2912">2912</span>
+<span id="2913">2913</span>
+<span id="2914">2914</span>
+<span id="2915">2915</span>
+<span id="2916">2916</span>
+<span id="2917">2917</span>
+<span id="2918">2918</span>
+<span id="2919">2919</span>
+<span id="2920">2920</span>
+<span id="2921">2921</span>
+<span id="2922">2922</span>
+<span id="2923">2923</span>
+<span id="2924">2924</span>
+<span id="2925">2925</span>
+<span id="2926">2926</span>
+<span id="2927">2927</span>
+<span id="2928">2928</span>
+<span id="2929">2929</span>
+<span id="2930">2930</span>
+<span id="2931">2931</span>
+<span id="2932">2932</span>
+<span id="2933">2933</span>
+<span id="2934">2934</span>
+<span id="2935">2935</span>
+<span id="2936">2936</span>
+<span id="2937">2937</span>
+<span id="2938">2938</span>
+<span id="2939">2939</span>
+<span id="2940">2940</span>
+<span id="2941">2941</span>
+<span id="2942">2942</span>
+<span id="2943">2943</span>
+<span id="2944">2944</span>
+<span id="2945">2945</span>
+<span id="2946">2946</span>
+<span id="2947">2947</span>
+<span id="2948">2948</span>
+<span id="2949">2949</span>
+<span id="2950">2950</span>
+<span id="2951">2951</span>
+<span id="2952">2952</span>
+<span id="2953">2953</span>
+<span id="2954">2954</span>
+<span id="2955">2955</span>
+<span id="2956">2956</span>
+<span id="2957">2957</span>
+<span id="2958">2958</span>
+<span id="2959">2959</span>
+<span id="2960">2960</span>
+<span id="2961">2961</span>
+<span id="2962">2962</span>
+<span id="2963">2963</span>
+<span id="2964">2964</span>
+<span id="2965">2965</span>
+<span id="2966">2966</span>
+<span id="2967">2967</span>
+<span id="2968">2968</span>
+<span id="2969">2969</span>
+<span id="2970">2970</span>
+<span id="2971">2971</span>
+<span id="2972">2972</span>
+<span id="2973">2973</span>
+<span id="2974">2974</span>
+<span id="2975">2975</span>
+<span id="2976">2976</span>
+<span id="2977">2977</span>
+<span id="2978">2978</span>
+<span id="2979">2979</span>
+<span id="2980">2980</span>
+<span id="2981">2981</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! A library for build scripts to compile custom C code</span>
 <span class="doccomment">//!</span>
@@ -2941,6 +3102,7 @@
     <span class="ident">warnings</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span>,
     <span class="ident">extra_warnings</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span>,
     <span class="ident">env_cache</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">apple_sdk_root_cache</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">OsString</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
 <span class="doccomment">/// Represents the types of errors that may occur while using cc-rs.</span>
@@ -3133,6 +3295,7 @@
             <span class="ident">extra_warnings</span>: <span class="prelude-val">None</span>,
             <span class="ident">warnings_into_errors</span>: <span class="bool-val">false</span>,
             <span class="ident">env_cache</span>: <span class="ident">Arc</span>::<span class="ident">new</span>(<span class="ident">Mutex</span>::<span class="ident">new</span>(<span class="ident">HashMap</span>::<span class="ident">new</span>())),
+            <span class="ident">apple_sdk_root_cache</span>: <span class="ident">Arc</span>::<span class="ident">new</span>(<span class="ident">Mutex</span>::<span class="ident">new</span>(<span class="ident">HashMap</span>::<span class="ident">new</span>())),
         }
     }
 
@@ -3235,7 +3398,7 @@
     <span class="doccomment">/// For a convenience method for setting flags conditionally,</span>
     <span class="doccomment">/// see `flag_if_supported()`.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// It may return error if it&#39;s unable to run the compilier with a test file</span>
+    <span class="doccomment">/// It may return error if it&#39;s unable to run the compiler with a test file</span>
     <span class="doccomment">/// (e.g. the compiler is missing or a write to the `out_dir` failed).</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Note: Once computed, the result of this call is stored in the</span>
@@ -3789,7 +3952,7 @@
     <span class="doccomment">/// Run the compiler, generating the file `output`</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// The name `output` should be the name of the library.  For backwards compatibility,</span>
-    <span class="doccomment">/// the `output` may start with `lib` and end with `.a`.  The Rust compilier will create</span>
+    <span class="doccomment">/// the `output` may start with `lib` and end with `.a`.  The Rust compiler will create</span>
     <span class="doccomment">/// the assembly with the lib prefix and .a extension.  MSVC will create a file without prefix,</span>
     <span class="doccomment">/// ending with `.lib`.</span>
     <span class="doccomment">///</span>
@@ -3993,6 +4156,9 @@
             <span class="ident">cmd</span>.<span class="ident">arg</span>(<span class="string">&quot;-c&quot;</span>);
         }
         <span class="ident">cmd</span>.<span class="ident">arg</span>(<span class="kw-2">&amp;</span><span class="ident">obj</span>.<span class="ident">src</span>);
+        <span class="kw">if</span> <span class="macro">cfg</span><span class="macro">!</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;macos&quot;</span>) {
+            <span class="self">self</span>.<span class="ident">fix_env_for_apple_os</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">cmd</span>)<span class="question-mark">?</span>;
+        }
 
         <span class="ident">run</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">cmd</span>, <span class="kw-2">&amp;</span><span class="ident">name</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
@@ -4239,20 +4405,29 @@
                 <span class="kw">if</span> <span class="op">!</span>(<span class="ident">target</span>.<span class="ident">contains</span>(<span class="string">&quot;android&quot;</span>)
                     <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="ident">android_clang_compiler_uses_target_arg_internally</span>(<span class="kw-2">&amp;</span><span class="ident">cmd</span>.<span class="ident">path</span>))
                 {
-                    <span class="ident">cmd</span>.<span class="ident">args</span>.<span class="ident">push</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;--target={}&quot;</span>, <span class="ident">target</span>).<span class="ident">into</span>());
+                    <span class="kw">if</span> <span class="ident">target</span>.<span class="ident">contains</span>(<span class="string">&quot;darwin&quot;</span>) {
+                        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">arch</span>) <span class="op">=</span>
+                            <span class="ident">map_darwin_target_from_rust_to_compiler_architecture</span>(<span class="ident">target</span>)
+                        {
+                            <span class="ident">cmd</span>.<span class="ident">args</span>
+                                .<span class="ident">push</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;--target={}-apple-darwin&quot;</span>, <span class="ident">arch</span>).<span class="ident">into</span>());
+                        }
+                    } <span class="kw">else</span> {
+                        <span class="ident">cmd</span>.<span class="ident">args</span>.<span class="ident">push</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;--target={}&quot;</span>, <span class="ident">target</span>).<span class="ident">into</span>());
+                    }
                 }
             }
             <span class="ident">ToolFamily</span>::<span class="ident">Msvc</span> { <span class="ident">clang_cl</span> } <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="comment">// This is an undocumented flag from MSVC but helps with making</span>
                 <span class="comment">// builds more reproducible by avoiding putting timestamps into</span>
                 <span class="comment">// files.</span>
-                <span class="ident">cmd</span>.<span class="ident">args</span>.<span class="ident">push</span>(<span class="string">&quot;-Brepro&quot;</span>.<span class="ident">into</span>());
+                <span class="ident">cmd</span>.<span class="ident">push_cc_arg</span>(<span class="string">&quot;-Brepro&quot;</span>.<span class="ident">into</span>());
 
                 <span class="kw">if</span> <span class="ident">clang_cl</span> {
                     <span class="kw">if</span> <span class="ident">target</span>.<span class="ident">contains</span>(<span class="string">&quot;x86_64&quot;</span>) {
-                        <span class="ident">cmd</span>.<span class="ident">args</span>.<span class="ident">push</span>(<span class="string">&quot;-m64&quot;</span>.<span class="ident">into</span>());
+                        <span class="ident">cmd</span>.<span class="ident">push_cc_arg</span>(<span class="string">&quot;-m64&quot;</span>.<span class="ident">into</span>());
                     } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">target</span>.<span class="ident">contains</span>(<span class="string">&quot;86&quot;</span>) {
-                        <span class="ident">cmd</span>.<span class="ident">args</span>.<span class="ident">push</span>(<span class="string">&quot;-m32&quot;</span>.<span class="ident">into</span>());
+                        <span class="ident">cmd</span>.<span class="ident">push_cc_arg</span>(<span class="string">&quot;-m32&quot;</span>.<span class="ident">into</span>());
                         <span class="ident">cmd</span>.<span class="ident">push_cc_arg</span>(<span class="string">&quot;-arch:IA32&quot;</span>.<span class="ident">into</span>());
                     } <span class="kw">else</span> {
                         <span class="ident">cmd</span>.<span class="ident">push_cc_arg</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;--target={}&quot;</span>, <span class="ident">target</span>).<span class="ident">into</span>());
@@ -4284,6 +4459,14 @@
                     <span class="ident">cmd</span>.<span class="ident">args</span>.<span class="ident">push</span>(<span class="string">&quot;-mx32&quot;</span>.<span class="ident">into</span>());
                 } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">target</span>.<span class="ident">contains</span>(<span class="string">&quot;x86_64&quot;</span>) <span class="op">|</span><span class="op">|</span> <span class="ident">target</span>.<span class="ident">contains</span>(<span class="string">&quot;powerpc64&quot;</span>) {
                     <span class="ident">cmd</span>.<span class="ident">args</span>.<span class="ident">push</span>(<span class="string">&quot;-m64&quot;</span>.<span class="ident">into</span>());
+                }
+
+                <span class="kw">if</span> <span class="ident">target</span>.<span class="ident">contains</span>(<span class="string">&quot;darwin&quot;</span>) {
+                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">arch</span>) <span class="op">=</span> <span class="ident">map_darwin_target_from_rust_to_compiler_architecture</span>(<span class="ident">target</span>)
+                    {
+                        <span class="ident">cmd</span>.<span class="ident">args</span>.<span class="ident">push</span>(<span class="string">&quot;-arch&quot;</span>.<span class="ident">into</span>());
+                        <span class="ident">cmd</span>.<span class="ident">args</span>.<span class="ident">push</span>(<span class="ident">arch</span>.<span class="ident">into</span>());
+                    }
                 }
 
                 <span class="kw">if</span> <span class="self">self</span>.<span class="ident">static_flag</span>.<span class="ident">is_none</span>() {
@@ -4508,14 +4691,19 @@
             <span class="string">&quot;ml.exe&quot;</span>
         };
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cmd</span> <span class="op">=</span> <span class="ident">windows_registry</span>::<span class="ident">find</span>(<span class="kw-2">&amp;</span><span class="ident">target</span>, <span class="ident">tool</span>).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">cmd</span>(<span class="ident">tool</span>));
+        <span class="ident">cmd</span>.<span class="ident">arg</span>(<span class="string">&quot;-nologo&quot;</span>); <span class="comment">// undocumented, yet working with armasm[64]</span>
         <span class="kw">for</span> <span class="ident">directory</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">include_directories</span>.<span class="ident">iter</span>() {
             <span class="ident">cmd</span>.<span class="ident">arg</span>(<span class="string">&quot;-I&quot;</span>).<span class="ident">arg</span>(<span class="ident">directory</span>);
         }
-        <span class="kw">for</span> <span class="kw-2">&amp;</span>(<span class="kw-2">ref</span> <span class="ident">key</span>, <span class="kw-2">ref</span> <span class="ident">value</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">definitions</span>.<span class="ident">iter</span>() {
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">value</span>) <span class="op">=</span> <span class="kw-2">*</span><span class="ident">value</span> {
-                <span class="ident">cmd</span>.<span class="ident">arg</span>(<span class="kw-2">&amp;</span><span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;-D{}={}&quot;</span>, <span class="ident">key</span>, <span class="ident">value</span>));
-            } <span class="kw">else</span> {
-                <span class="ident">cmd</span>.<span class="ident">arg</span>(<span class="kw-2">&amp;</span><span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;-D{}&quot;</span>, <span class="ident">key</span>));
+        <span class="kw">if</span> <span class="ident">target</span>.<span class="ident">contains</span>(<span class="string">&quot;aarch64&quot;</span>) <span class="op">|</span><span class="op">|</span> <span class="ident">target</span>.<span class="ident">contains</span>(<span class="string">&quot;arm&quot;</span>) {
+            <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;cargo:warning=The MSVC ARM assemblers do not support -D flags&quot;</span>);
+        } <span class="kw">else</span> {
+            <span class="kw">for</span> <span class="kw-2">&amp;</span>(<span class="kw-2">ref</span> <span class="ident">key</span>, <span class="kw-2">ref</span> <span class="ident">value</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">definitions</span>.<span class="ident">iter</span>() {
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">value</span>) <span class="op">=</span> <span class="kw-2">*</span><span class="ident">value</span> {
+                    <span class="ident">cmd</span>.<span class="ident">arg</span>(<span class="kw-2">&amp;</span><span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;-D{}={}&quot;</span>, <span class="ident">key</span>, <span class="ident">value</span>));
+                } <span class="kw">else</span> {
+                    <span class="ident">cmd</span>.<span class="ident">arg</span>(<span class="kw-2">&amp;</span><span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;-D{}&quot;</span>, <span class="ident">key</span>));
+                }
             }
         }
 
@@ -4658,6 +4846,7 @@
         <span class="kw">let</span> <span class="ident">arch</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">arch</span> {
             <span class="string">&quot;arm&quot;</span> <span class="op">|</span> <span class="string">&quot;armv7&quot;</span> <span class="op">|</span> <span class="string">&quot;thumbv7&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ArchSpec</span>::<span class="ident">Device</span>(<span class="string">&quot;armv7&quot;</span>),
             <span class="string">&quot;armv7s&quot;</span> <span class="op">|</span> <span class="string">&quot;thumbv7s&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ArchSpec</span>::<span class="ident">Device</span>(<span class="string">&quot;armv7s&quot;</span>),
+            <span class="string">&quot;arm64e&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ArchSpec</span>::<span class="ident">Device</span>(<span class="string">&quot;arm64e&quot;</span>),
             <span class="string">&quot;arm64&quot;</span> <span class="op">|</span> <span class="string">&quot;aarch64&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ArchSpec</span>::<span class="ident">Device</span>(<span class="string">&quot;arm64&quot;</span>),
             <span class="string">&quot;i386&quot;</span> <span class="op">|</span> <span class="string">&quot;i686&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ArchSpec</span>::<span class="ident">Simulator</span>(<span class="string">&quot;-m32&quot;</span>),
             <span class="string">&quot;x86_64&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ArchSpec</span>::<span class="ident">Simulator</span>(<span class="string">&quot;-m64&quot;</span>),
@@ -4689,27 +4878,9 @@
         };
 
         <span class="self">self</span>.<span class="ident">print</span>(<span class="kw-2">&amp;</span><span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;Detecting iOS SDK path for {}&quot;</span>, <span class="ident">sdk</span>));
-        <span class="kw">let</span> <span class="ident">sdk_path</span> <span class="op">=</span> <span class="self">self</span>
-            .<span class="ident">cmd</span>(<span class="string">&quot;xcrun&quot;</span>)
-            .<span class="ident">arg</span>(<span class="string">&quot;--show-sdk-path&quot;</span>)
-            .<span class="ident">arg</span>(<span class="string">&quot;--sdk&quot;</span>)
-            .<span class="ident">arg</span>(<span class="ident">sdk</span>)
-            .<span class="ident">stderr</span>(<span class="ident">Stdio</span>::<span class="ident">inherit</span>())
-            .<span class="ident">output</span>()<span class="question-mark">?</span>
-            .<span class="ident">stdout</span>;
-
-        <span class="kw">let</span> <span class="ident">sdk_path</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">String</span>::<span class="ident">from_utf8</span>(<span class="ident">sdk_path</span>) {
-            <span class="prelude-val">Ok</span>(<span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">p</span>,
-            <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">new</span>(
-                    <span class="ident">ErrorKind</span>::<span class="ident">IOError</span>,
-                    <span class="string">&quot;Unable to determine iOS SDK path.&quot;</span>,
-                ));
-            }
-        };
-
+        <span class="kw">let</span> <span class="ident">sdk_path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">apple_sdk_root</span>(<span class="ident">sdk</span>)<span class="question-mark">?</span>;
         <span class="ident">cmd</span>.<span class="ident">args</span>.<span class="ident">push</span>(<span class="string">&quot;-isysroot&quot;</span>.<span class="ident">into</span>());
-        <span class="ident">cmd</span>.<span class="ident">args</span>.<span class="ident">push</span>(<span class="ident">sdk_path</span>.<span class="ident">trim</span>().<span class="ident">into</span>());
+        <span class="ident">cmd</span>.<span class="ident">args</span>.<span class="ident">push</span>(<span class="ident">sdk_path</span>);
         <span class="ident">cmd</span>.<span class="ident">args</span>.<span class="ident">push</span>(<span class="string">&quot;-fembed-bitcode&quot;</span>.<span class="ident">into</span>());
         <span class="comment">/*
          * TODO we probably ultimately want the -fembed-bitcode-marker flag
@@ -4817,7 +4988,11 @@
                 {
                     <span class="string">&quot;clang&quot;</span>.<span class="ident">to_string</span>()
                 } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">target</span>.<span class="ident">contains</span>(<span class="string">&quot;vxworks&quot;</span>) {
-                    <span class="string">&quot;wr-c++&quot;</span>.<span class="ident">to_string</span>()
+                    <span class="kw">if</span> <span class="self">self</span>.<span class="ident">cpp</span> {
+                        <span class="string">&quot;wr-c++&quot;</span>.<span class="ident">to_string</span>()
+                    } <span class="kw">else</span> {
+                        <span class="string">&quot;wr-cc&quot;</span>.<span class="ident">to_string</span>()
+                    }
                 } <span class="kw">else</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">get_host</span>()<span class="question-mark">?</span> <span class="op">!</span><span class="op">=</span> <span class="ident">target</span> {
                     <span class="kw">let</span> <span class="ident">prefix</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">prefix_for_target</span>(<span class="kw-2">&amp;</span><span class="ident">target</span>);
                     <span class="kw">match</span> <span class="ident">prefix</span> {
@@ -5084,6 +5259,7 @@
             <span class="string">&quot;arm-unknown-linux-musleabihf&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;arm-linux-musleabihf&quot;</span>),
             <span class="string">&quot;arm-unknown-netbsd-eabi&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;arm--netbsdelf-eabi&quot;</span>),
             <span class="string">&quot;armv6-unknown-netbsd-eabihf&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;armv6--netbsdelf-eabihf&quot;</span>),
+            <span class="string">&quot;armv7-unknown-linux-gnueabi&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;arm-linux-gnueabi&quot;</span>),
             <span class="string">&quot;armv7-unknown-linux-gnueabihf&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;arm-linux-gnueabihf&quot;</span>),
             <span class="string">&quot;armv7-unknown-linux-musleabihf&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;arm-linux-musleabihf&quot;</span>),
             <span class="string">&quot;armv7neon-unknown-linux-gnueabihf&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;arm-linux-gnueabihf&quot;</span>),
@@ -5093,6 +5269,7 @@
             <span class="string">&quot;thumbv7neon-unknown-linux-gnueabihf&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;arm-linux-gnueabihf&quot;</span>),
             <span class="string">&quot;thumbv7neon-unknown-linux-musleabihf&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;arm-linux-musleabihf&quot;</span>),
             <span class="string">&quot;armv7-unknown-netbsd-eabihf&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;armv7--netbsdelf-eabihf&quot;</span>),
+            <span class="string">&quot;hexagon-unknown-linux-musl&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;hexagon-linux-musl&quot;</span>),
             <span class="string">&quot;i586-unknown-linux-musl&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;musl&quot;</span>),
             <span class="string">&quot;i686-pc-windows-gnu&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;i686-w64-mingw32&quot;</span>),
             <span class="string">&quot;i686-uwp-windows-gnu&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;i686-w64-mingw32&quot;</span>),
@@ -5111,11 +5288,31 @@
             <span class="string">&quot;powerpc-unknown-netbsd&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;powerpc--netbsd&quot;</span>),
             <span class="string">&quot;powerpc64-unknown-linux-gnu&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;powerpc-linux-gnu&quot;</span>),
             <span class="string">&quot;powerpc64le-unknown-linux-gnu&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;powerpc64le-linux-gnu&quot;</span>),
-            <span class="string">&quot;riscv32i-unknown-none-elf&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;riscv32-unknown-elf&quot;</span>),
-            <span class="string">&quot;riscv32imac-unknown-none-elf&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;riscv32-unknown-elf&quot;</span>),
-            <span class="string">&quot;riscv32imc-unknown-none-elf&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;riscv32-unknown-elf&quot;</span>),
-            <span class="string">&quot;riscv64gc-unknown-none-elf&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;riscv64-unknown-elf&quot;</span>),
-            <span class="string">&quot;riscv64imac-unknown-none-elf&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;riscv64-unknown-elf&quot;</span>),
+            <span class="string">&quot;riscv32i-unknown-none-elf&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">find_working_gnu_prefix</span>(<span class="kw-2">&amp;</span>[
+                <span class="string">&quot;riscv32-unknown-elf&quot;</span>,
+                <span class="string">&quot;riscv64-unknown-elf&quot;</span>,
+                <span class="string">&quot;riscv-none-embed&quot;</span>,
+            ]),
+            <span class="string">&quot;riscv32imac-unknown-none-elf&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">find_working_gnu_prefix</span>(<span class="kw-2">&amp;</span>[
+                <span class="string">&quot;riscv32-unknown-elf&quot;</span>,
+                <span class="string">&quot;riscv64-unknown-elf&quot;</span>,
+                <span class="string">&quot;riscv-none-embed&quot;</span>,
+            ]),
+            <span class="string">&quot;riscv32imc-unknown-none-elf&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">find_working_gnu_prefix</span>(<span class="kw-2">&amp;</span>[
+                <span class="string">&quot;riscv32-unknown-elf&quot;</span>,
+                <span class="string">&quot;riscv64-unknown-elf&quot;</span>,
+                <span class="string">&quot;riscv-none-embed&quot;</span>,
+            ]),
+            <span class="string">&quot;riscv64gc-unknown-none-elf&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">find_working_gnu_prefix</span>(<span class="kw-2">&amp;</span>[
+                <span class="string">&quot;riscv64-unknown-elf&quot;</span>,
+                <span class="string">&quot;riscv32-unknown-elf&quot;</span>,
+                <span class="string">&quot;riscv-none-embed&quot;</span>,
+            ]),
+            <span class="string">&quot;riscv64imac-unknown-none-elf&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">find_working_gnu_prefix</span>(<span class="kw-2">&amp;</span>[
+                <span class="string">&quot;riscv64-unknown-elf&quot;</span>,
+                <span class="string">&quot;riscv32-unknown-elf&quot;</span>,
+                <span class="string">&quot;riscv-none-embed&quot;</span>,
+            ]),
             <span class="string">&quot;riscv64gc-unknown-linux-gnu&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;riscv64-linux-gnu&quot;</span>),
             <span class="string">&quot;s390x-unknown-linux-gnu&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;s390x-linux-gnu&quot;</span>),
             <span class="string">&quot;sparc-unknown-linux-gnu&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;sparc-linux-gnu&quot;</span>),
@@ -5143,6 +5340,38 @@
             <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
         }
         .<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">to_owned</span>()))
+    }
+
+    <span class="doccomment">/// Some platforms have multiple, compatible, canonical prefixes. Look through</span>
+    <span class="doccomment">/// each possible prefix for a compiler that exists and return it. The prefixes</span>
+    <span class="doccomment">/// should be ordered from most-likely to least-likely.</span>
+    <span class="kw">fn</span> <span class="ident">find_working_gnu_prefix</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">prefixes</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">suffix</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">cpp</span> { <span class="string">&quot;-g++&quot;</span> } <span class="kw">else</span> { <span class="string">&quot;-gcc&quot;</span> };
+        <span class="kw">let</span> <span class="ident">extension</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">env</span>::<span class="ident">consts</span>::<span class="ident">EXE_SUFFIX</span>;
+
+        <span class="comment">// Loop through PATH entries searching for each toolchain. This ensures that we</span>
+        <span class="comment">// are more likely to discover the toolchain early on, because chances are good</span>
+        <span class="comment">// that the desired toolchain is in one of the higher-priority paths.</span>
+        <span class="ident">env</span>::<span class="ident">var_os</span>(<span class="string">&quot;PATH&quot;</span>)
+            .<span class="ident">as_ref</span>()
+            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">path_entries</span><span class="op">|</span> {
+                <span class="ident">env</span>::<span class="ident">split_paths</span>(<span class="ident">path_entries</span>).<span class="ident">find_map</span>(<span class="op">|</span><span class="ident">path_entry</span><span class="op">|</span> {
+                    <span class="kw">for</span> <span class="ident">prefix</span> <span class="kw">in</span> <span class="ident">prefixes</span> {
+                        <span class="kw">let</span> <span class="ident">target_compiler</span> <span class="op">=</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}{}{}&quot;</span>, <span class="ident">prefix</span>, <span class="ident">suffix</span>, <span class="ident">extension</span>);
+                        <span class="kw">if</span> <span class="ident">path_entry</span>.<span class="ident">join</span>(<span class="kw-2">&amp;</span><span class="ident">target_compiler</span>).<span class="ident">exists</span>() {
+                            <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">prefix</span>);
+                        }
+                    }
+                    <span class="prelude-val">None</span>
+                })
+            })
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">prefix</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">prefix</span>)
+            .<span class="ident">or_else</span>(<span class="op">|</span><span class="op">|</span>
+            <span class="comment">// If no toolchain was found, provide the first toolchain that was passed in.</span>
+            <span class="comment">// This toolchain has been shown not to exist, however it will appear in the</span>
+            <span class="comment">// error that is shown to the user which should make it easier to search for</span>
+            <span class="comment">// where it should be obtained.</span>
+            <span class="ident">prefixes</span>.<span class="ident">first</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">prefix</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">prefix</span>))
     }
 
     <span class="kw">fn</span> <span class="ident">get_target</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
@@ -5214,6 +5443,63 @@
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">cargo_metadata</span> {
             <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">s</span>);
         }
+    }
+
+    <span class="kw">fn</span> <span class="ident">fix_env_for_apple_os</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">cmd</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Command</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">target</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_target</span>()<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">host</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_host</span>()<span class="question-mark">?</span>;
+        <span class="kw">if</span> <span class="ident">host</span>.<span class="ident">contains</span>(<span class="string">&quot;apple-darwin&quot;</span>) <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="ident">target</span>.<span class="ident">contains</span>(<span class="string">&quot;apple-darwin&quot;</span>) {
+            <span class="comment">// If, for example, `cargo` runs during the build of an XCode project, then `SDKROOT` environment variable</span>
+            <span class="comment">// would represent the current target, and this is the problem for us, if we want to compile something</span>
+            <span class="comment">// for the host, when host != target.</span>
+            <span class="comment">// We can not just remove `SDKROOT`, because, again, for example, XCode add to PATH</span>
+            <span class="comment">// /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin</span>
+            <span class="comment">// and `cc` from this path can not find system include files, like `pthread.h`, if `SDKROOT`</span>
+            <span class="comment">// is not set</span>
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">sdkroot</span>) <span class="op">=</span> <span class="ident">env</span>::<span class="ident">var</span>(<span class="string">&quot;SDKROOT&quot;</span>) {
+                <span class="kw">if</span> <span class="op">!</span><span class="ident">sdkroot</span>.<span class="ident">contains</span>(<span class="string">&quot;MacOSX&quot;</span>) {
+                    <span class="kw">let</span> <span class="ident">macos_sdk</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">apple_sdk_root</span>(<span class="string">&quot;macosx&quot;</span>)<span class="question-mark">?</span>;
+                    <span class="ident">cmd</span>.<span class="ident">env</span>(<span class="string">&quot;SDKROOT&quot;</span>, <span class="ident">macos_sdk</span>);
+                }
+            }
+            <span class="comment">// Additionally, `IPHONEOS_DEPLOYMENT_TARGET` must not be set when using the Xcode linker at</span>
+            <span class="comment">// &quot;/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld&quot;,</span>
+            <span class="comment">// although this is apparently ignored when using the linker at &quot;/usr/bin/ld&quot;.</span>
+            <span class="ident">cmd</span>.<span class="ident">env_remove</span>(<span class="string">&quot;IPHONEOS_DEPLOYMENT_TARGET&quot;</span>);
+        }
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">fn</span> <span class="ident">apple_sdk_root</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sdk</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">OsString</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cache</span> <span class="op">=</span> <span class="self">self</span>
+            .<span class="ident">apple_sdk_root_cache</span>
+            .<span class="ident">lock</span>()
+            .<span class="ident">expect</span>(<span class="string">&quot;apple_sdk_root_cache lock failed&quot;</span>);
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ret</span>) <span class="op">=</span> <span class="ident">cache</span>.<span class="ident">get</span>(<span class="ident">sdk</span>) {
+            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">ret</span>.<span class="ident">clone</span>());
+        }
+
+        <span class="kw">let</span> <span class="ident">sdk_path</span> <span class="op">=</span> <span class="self">self</span>
+            .<span class="ident">cmd</span>(<span class="string">&quot;xcrun&quot;</span>)
+            .<span class="ident">arg</span>(<span class="string">&quot;--show-sdk-path&quot;</span>)
+            .<span class="ident">arg</span>(<span class="string">&quot;--sdk&quot;</span>)
+            .<span class="ident">arg</span>(<span class="ident">sdk</span>)
+            .<span class="ident">stderr</span>(<span class="ident">Stdio</span>::<span class="ident">inherit</span>())
+            .<span class="ident">output</span>()<span class="question-mark">?</span>
+            .<span class="ident">stdout</span>;
+
+        <span class="kw">let</span> <span class="ident">sdk_path</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">String</span>::<span class="ident">from_utf8</span>(<span class="ident">sdk_path</span>) {
+            <span class="prelude-val">Ok</span>(<span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">p</span>,
+            <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">new</span>(
+                    <span class="ident">ErrorKind</span>::<span class="ident">IOError</span>,
+                    <span class="string">&quot;Unable to determine iOS SDK path.&quot;</span>,
+                ));
+            }
+        };
+        <span class="kw">let</span> <span class="ident">ret</span>: <span class="ident">OsString</span> <span class="op">=</span> <span class="ident">sdk_path</span>.<span class="ident">trim</span>().<span class="ident">into</span>();
+        <span class="ident">cache</span>.<span class="ident">insert</span>(<span class="ident">sdk</span>.<span class="ident">into</span>(), <span class="ident">ret</span>.<span class="ident">clone</span>());
+        <span class="prelude-val">Ok</span>(<span class="ident">ret</span>)
     }
 }
 
@@ -5587,10 +5873,33 @@
 <span class="comment">// So to construct proper command line check if</span>
 <span class="comment">// `--target` argument would be passed or not to clang</span>
 <span class="kw">fn</span> <span class="ident">android_clang_compiler_uses_target_arg_internally</span>(<span class="ident">clang_path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-    <span class="ident">NEW_STANDALONE_ANDROID_COMPILERS</span>.<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> {
-        <span class="kw">let</span> <span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="ident">OsStr</span> <span class="op">=</span> <span class="ident">x</span>.<span class="ident">as_ref</span>();
-        <span class="ident">x</span> <span class="op">=</span><span class="op">=</span> <span class="ident">clang_path</span>.<span class="ident">as_os_str</span>()
-    })
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">filename</span>) <span class="op">=</span> <span class="ident">clang_path</span>.<span class="ident">file_name</span>() {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">filename_str</span>) <span class="op">=</span> <span class="ident">filename</span>.<span class="ident">to_str</span>() {
+            <span class="ident">filename_str</span>.<span class="ident">contains</span>(<span class="string">&quot;android&quot;</span>)
+        } <span class="kw">else</span> {
+            <span class="bool-val">false</span>
+        }
+    } <span class="kw">else</span> {
+        <span class="bool-val">false</span>
+    }
+}
+
+<span class="attribute">#[<span class="ident">test</span>]</span>
+<span class="kw">fn</span> <span class="ident">test_android_clang_compiler_uses_target_arg_internally</span>() {
+    <span class="kw">for</span> <span class="ident">version</span> <span class="kw">in</span> <span class="number">16</span>..<span class="number">21</span> {
+        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">android_clang_compiler_uses_target_arg_internally</span>(
+            <span class="kw-2">&amp;</span><span class="ident">PathBuf</span>::<span class="ident">from</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;armv7a-linux-androideabi{}-clang&quot;</span>, <span class="ident">version</span>))
+        ));
+        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">android_clang_compiler_uses_target_arg_internally</span>(
+            <span class="kw-2">&amp;</span><span class="ident">PathBuf</span>::<span class="ident">from</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;armv7a-linux-androideabi{}-clang++&quot;</span>, <span class="ident">version</span>))
+        ));
+    }
+    <span class="macro">assert</span><span class="macro">!</span>(<span class="op">!</span><span class="ident">android_clang_compiler_uses_target_arg_internally</span>(
+        <span class="kw-2">&amp;</span><span class="ident">PathBuf</span>::<span class="ident">from</span>(<span class="string">&quot;clang&quot;</span>)
+    ));
+    <span class="macro">assert</span><span class="macro">!</span>(<span class="op">!</span><span class="ident">android_clang_compiler_uses_target_arg_internally</span>(
+        <span class="kw-2">&amp;</span><span class="ident">PathBuf</span>::<span class="ident">from</span>(<span class="string">&quot;clang++&quot;</span>)
+    ));
 }
 
 <span class="kw">fn</span> <span class="ident">autodetect_android_compiler</span>(<span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">host</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">gnu</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">clang</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
@@ -5637,6 +5946,19 @@
         <span class="ident">clang_compiler_cmd</span>
     } <span class="kw">else</span> {
         <span class="ident">clang_compiler</span>
+    }
+}
+
+<span class="comment">// Rust and clang/cc don&#39;t agree on how to name the target.</span>
+<span class="kw">fn</span> <span class="ident">map_darwin_target_from_rust_to_compiler_architecture</span>(<span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+    <span class="kw">if</span> <span class="ident">target</span>.<span class="ident">contains</span>(<span class="string">&quot;x86_64&quot;</span>) {
+        <span class="prelude-val">Some</span>(<span class="string">&quot;x86_64&quot;</span>)
+    } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">target</span>.<span class="ident">contains</span>(<span class="string">&quot;arm64e&quot;</span>) {
+        <span class="prelude-val">Some</span>(<span class="string">&quot;arm64e&quot;</span>)
+    } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">target</span>.<span class="ident">contains</span>(<span class="string">&quot;aarch64&quot;</span>) {
+        <span class="prelude-val">Some</span>(<span class="string">&quot;arm64&quot;</span>)
+    } <span class="kw">else</span> {
+        <span class="prelude-val">None</span>
     }
 }
 </pre></div>

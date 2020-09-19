@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/subtle-2.2.3/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../subtle/index.html'><div class='logo-container'><img src='https://doc.dalek.rs/assets/dalek-logo-clear.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/subtle-2.3.0/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../subtle/index.html'><div class='logo-container'><img src='https://doc.dalek.rs/assets/dalek-logo-clear.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -634,6 +634,36 @@
 <span id="634">634</span>
 <span id="635">635</span>
 <span id="636">636</span>
+<span id="637">637</span>
+<span id="638">638</span>
+<span id="639">639</span>
+<span id="640">640</span>
+<span id="641">641</span>
+<span id="642">642</span>
+<span id="643">643</span>
+<span id="644">644</span>
+<span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
+<span id="651">651</span>
+<span id="652">652</span>
+<span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
+<span id="656">656</span>
+<span id="657">657</span>
+<span id="658">658</span>
+<span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
+<span id="662">662</span>
+<span id="663">663</span>
+<span id="664">664</span>
+<span id="665">665</span>
+<span id="666">666</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// -*- mode: rust; -*-</span>
 <span class="comment">//</span>
@@ -650,7 +680,7 @@
 <span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;nightly&quot;</span>, <span class="ident">doc</span>(<span class="ident">include</span> <span class="op">=</span> <span class="string">&quot;../README.md&quot;</span>))]</span>
 <span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;nightly&quot;</span>, <span class="ident">deny</span>(<span class="ident">missing_docs</span>))]</span>
 <span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_logo_url</span> <span class="op">=</span> <span class="string">&quot;https://doc.dalek.rs/assets/dalek-logo-clear.png&quot;</span>)]</span>
-<span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_root_url</span> <span class="op">=</span> <span class="string">&quot;https://docs.rs/subtle/2.2.3&quot;</span>)]</span>
+<span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_root_url</span> <span class="op">=</span> <span class="string">&quot;https://docs.rs/subtle/2.3.0&quot;</span>)]</span>
 
 <span class="doccomment">//! Note that docs will only build on nightly Rust until</span>
 <span class="doccomment">//! [RFC 1990 stabilizes](https://github.com/rust-lang/rust/issues/44732).</span>
@@ -660,22 +690,23 @@
 <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">std</span>;
 
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">ops</span>::{<span class="ident">BitAnd</span>, <span class="ident">BitAndAssign</span>, <span class="ident">BitOr</span>, <span class="ident">BitOrAssign</span>, <span class="ident">BitXor</span>, <span class="ident">BitXorAssign</span>, <span class="ident">Neg</span>, <span class="ident">Not</span>};
+<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">option</span>::<span class="prelude-ty">Option</span>;
 
 <span class="doccomment">/// The `Choice` struct represents a choice for use in conditional assignment.</span>
-<span class="doccomment">/// </span>
+<span class="doccomment">///</span>
 <span class="doccomment">/// It is a wrapper around a `u8`, which should have the value either `1` (true)</span>
 <span class="doccomment">/// or `0` (false).</span>
-<span class="doccomment">/// </span>
+<span class="doccomment">///</span>
 <span class="doccomment">/// The conversion from `u8` to `Choice` passes the value through an optimization</span>
 <span class="doccomment">/// barrier, as a best-effort attempt to prevent the compiler from inferring that</span>
 <span class="doccomment">/// the `Choice` value is a boolean. This strategy is based on Tim Maclean&#39;s</span>
 <span class="doccomment">/// [work on `rust-timing-shield`][rust-timing-shield], which attempts to provide</span>
 <span class="doccomment">/// a more comprehensive approach for preventing software side-channels in Rust</span>
 <span class="doccomment">/// code.</span>
-<span class="doccomment">/// </span>
+<span class="doccomment">///</span>
 <span class="doccomment">/// The `Choice` struct implements operators for AND, OR, XOR, and NOT, to allow</span>
 <span class="doccomment">/// combining `Choice` values. These operations do not short-circuit.</span>
-<span class="doccomment">/// </span>
+<span class="doccomment">///</span>
 <span class="doccomment">/// [rust-timing-shield]:</span>
 <span class="doccomment">/// https://www.chosenplaintext.ca/open-source/rust-timing-shield/security</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
@@ -773,11 +804,11 @@
 
 <span class="doccomment">/// This function is a best-effort attempt to prevent the compiler from knowing</span>
 <span class="doccomment">/// anything about the value of the returned `u8`, other than its type.</span>
-<span class="doccomment">/// </span>
+<span class="doccomment">///</span>
 <span class="doccomment">/// Because we want to support stable Rust, we don&#39;t have access to inline</span>
 <span class="doccomment">/// assembly or test::black_box, so we use the fact that volatile values will</span>
 <span class="doccomment">/// never be elided to register values.</span>
-<span class="doccomment">/// </span>
+<span class="doccomment">///</span>
 <span class="doccomment">/// Note: Rust&#39;s notion of &quot;volatile&quot; is subject to change over time. While this</span>
 <span class="doccomment">/// code may break in a non-destructive way in the future, “constant-time” code</span>
 <span class="doccomment">/// is a continually moving target, and this is better than doing nothing.</span>
@@ -874,6 +905,13 @@
         }
 
         <span class="ident">x</span>.<span class="ident">into</span>()
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">ConstantTimeEq</span> <span class="kw">for</span> <span class="ident">Choice</span> {
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">ct_eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="ident">Choice</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Choice</span> {
+        <span class="op">!</span>(<span class="kw-2">*</span><span class="self">self</span> <span class="op">^</span> <span class="kw-2">*</span><span class="ident">rhs</span>)
     }
 }
 
@@ -1136,6 +1174,25 @@
     <span class="ident">is_some</span>: <span class="ident">Choice</span>,
 }
 
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">CtOption</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Convert the `CtOption&lt;T&gt;` wrapper into an `Option&lt;T&gt;`, depending on whether</span>
+    <span class="doccomment">/// the underlying `is_some` `Choice` was a `0` or a `1` once unwrapped.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Note</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This function exists to avoid ending up with ugly, verbose and/or bad handled</span>
+    <span class="doccomment">/// conversions from the `CtOption&lt;T&gt;` wraps to an `Option&lt;T&gt;` or `Result&lt;T, E&gt;`.</span>
+    <span class="doccomment">/// This implementation doesn&#39;t intend to be constant-time nor try to protect the</span>
+    <span class="doccomment">/// leakage of the `T` since the `Option&lt;T&gt;` will do it anyways.</span>
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">source</span>: <span class="ident">CtOption</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="ident">source</span>.<span class="ident">is_some</span>().<span class="ident">unwrap_u8</span>() <span class="op">=</span><span class="op">=</span> <span class="number">1u8</span> {
+            <span class="prelude-ty">Option</span>::<span class="prelude-val">Some</span>(<span class="ident">source</span>.<span class="ident">value</span>)
+        } <span class="kw">else</span> {
+            <span class="prelude-val">None</span>
+        }
+    }
+}
+
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">CtOption</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="doccomment">/// This method is used to construct a new `CtOption&lt;T&gt;` and takes</span>
     <span class="doccomment">/// a value of type `T`, and a `Choice` that determines whether</span>
@@ -1144,7 +1201,10 @@
     <span class="doccomment">/// exposed.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">value</span>: <span class="ident">T</span>, <span class="ident">is_some</span>: <span class="ident">Choice</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CtOption</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">CtOption</span> { <span class="ident">value</span>: <span class="ident">value</span>, <span class="ident">is_some</span>: <span class="ident">is_some</span> }
+        <span class="ident">CtOption</span> {
+            <span class="ident">value</span>: <span class="ident">value</span>,
+            <span class="ident">is_some</span>: <span class="ident">is_some</span>,
+        }
     }
 
     <span class="doccomment">/// This returns the underlying value but panics if it</span>

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/bincode-1.2.1/src/de/read.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>read.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../bincode/index.html'><div class='logo-container'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/bincode-1.3.1/src/de/read.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>read.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../bincode/index.html'><div class='logo-container'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -199,40 +199,42 @@
 <span id="199">199</span>
 <span id="200">200</span>
 <span id="201">201</span>
+<span id="202">202</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">error</span>::<span class="prelude-ty">Result</span>;
 <span class="kw">use</span> <span class="ident">serde</span>;
-<span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">io</span>, <span class="ident">slice</span>};
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>;
 
 <span class="doccomment">/// An optional Read trait for advanced Bincode usage.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// It is highly recommended to use bincode with `io::Read` or `&amp;[u8]` before</span>
 <span class="doccomment">/// implementing a custom `BincodeRead`.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// The forward_read_* methods are necessary because some byte sources want</span>
+<span class="doccomment">/// to pass a long-lived borrow to the visitor and others want to pass a</span>
+<span class="doccomment">/// transient slice.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">BincodeRead</span><span class="op">&lt;</span><span class="lifetime">&#39;storage</span><span class="op">&gt;</span>: <span class="ident">io</span>::<span class="ident">Read</span> {
-    <span class="doccomment">/// Forwards reading `length` bytes of a string on to the serde reader.</span>
+    <span class="doccomment">/// Check that the next `length` bytes are a valid string and pass</span>
+    <span class="doccomment">/// it on to the serde reader.</span>
     <span class="kw">fn</span> <span class="ident">forward_read_str</span><span class="op">&lt;</span><span class="ident">V</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">length</span>: <span class="ident">usize</span>, <span class="ident">visitor</span>: <span class="ident">V</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">V</span>::<span class="ident">Value</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">V</span>: <span class="ident">serde</span>::<span class="ident">de</span>::<span class="ident">Visitor</span><span class="op">&lt;</span><span class="lifetime">&#39;storage</span><span class="op">&gt;</span>;
 
-    <span class="doccomment">/// Return the first `length` bytes of the internal byte buffer.</span>
+    <span class="doccomment">/// Transfer ownership of the next `length` bytes to the caller.</span>
     <span class="kw">fn</span> <span class="ident">get_byte_buffer</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">length</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
-    <span class="doccomment">/// Forwards reading `length` bytes on to the serde reader.</span>
+    <span class="doccomment">/// Pass a slice of the next `length` bytes on to the serde reader.</span>
     <span class="kw">fn</span> <span class="ident">forward_read_bytes</span><span class="op">&lt;</span><span class="ident">V</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">length</span>: <span class="ident">usize</span>, <span class="ident">visitor</span>: <span class="ident">V</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">V</span>::<span class="ident">Value</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">V</span>: <span class="ident">serde</span>::<span class="ident">de</span>::<span class="ident">Visitor</span><span class="op">&lt;</span><span class="lifetime">&#39;storage</span><span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// A BincodeRead implementation for byte slices</span>
-<span class="doccomment">/// NOT A PART OF THE STABLE PUBLIC API</span>
-<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SliceReader</span><span class="op">&lt;</span><span class="lifetime">&#39;storage</span><span class="op">&gt;</span> {
     <span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;storage</span> [<span class="ident">u8</span>],
 }
 
-<span class="doccomment">/// A BincodeRead implementation for io::Readers</span>
-<span class="doccomment">/// NOT A PART OF THE STABLE PUBLIC API</span>
-<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="doccomment">/// A BincodeRead implementation for `io::Read`ers</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">IoReader</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> {
     <span class="ident">reader</span>: <span class="ident">R</span>,
     <span class="ident">temp_buffer</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
@@ -240,14 +242,28 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;storage</span><span class="op">&gt;</span> <span class="ident">SliceReader</span><span class="op">&lt;</span><span class="lifetime">&#39;storage</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Constructs a slice reader</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;storage</span> [<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SliceReader</span><span class="op">&lt;</span><span class="lifetime">&#39;storage</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;storage</span> [<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SliceReader</span><span class="op">&lt;</span><span class="lifetime">&#39;storage</span><span class="op">&gt;</span> {
         <span class="ident">SliceReader</span> { <span class="ident">slice</span>: <span class="ident">bytes</span> }
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+    <span class="kw">fn</span> <span class="ident">get_byte_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">length</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;storage</span> [<span class="ident">u8</span>]<span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="ident">length</span> <span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">slice</span>.<span class="ident">len</span>() {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">SliceReader</span>::<span class="ident">unexpected_eof</span>());
+        }
+        <span class="kw">let</span> (<span class="ident">read_slice</span>, <span class="ident">remaining</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">slice</span>.<span class="ident">split_at</span>(<span class="ident">length</span>);
+        <span class="self">self</span>.<span class="ident">slice</span> <span class="op">=</span> <span class="ident">remaining</span>;
+        <span class="prelude-val">Ok</span>(<span class="ident">read_slice</span>)
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">is_finished</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">slice</span>.<span class="ident">is_empty</span>()
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> <span class="ident">IoReader</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Constructs an IoReadReader</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">r</span>: <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">IoReader</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">r</span>: <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">IoReader</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> {
         <span class="ident">IoReader</span> {
             <span class="ident">reader</span>: <span class="ident">r</span>,
             <span class="ident">temp_buffer</span>: <span class="macro">vec</span><span class="macro">!</span>[],
@@ -258,11 +274,19 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;storage</span><span class="op">&gt;</span> <span class="ident">io</span>::<span class="ident">Read</span> <span class="kw">for</span> <span class="ident">SliceReader</span><span class="op">&lt;</span><span class="lifetime">&#39;storage</span><span class="op">&gt;</span> {
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
     <span class="kw">fn</span> <span class="ident">read</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
-        (<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">slice</span>).<span class="ident">read</span>(<span class="ident">out</span>)
+        <span class="kw">if</span> <span class="ident">out</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">slice</span>.<span class="ident">len</span>() {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">io</span>::<span class="ident">ErrorKind</span>::<span class="ident">UnexpectedEof</span>.<span class="ident">into</span>());
+        }
+        <span class="kw">let</span> (<span class="ident">read_slice</span>, <span class="ident">remaining</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">slice</span>.<span class="ident">split_at</span>(<span class="ident">out</span>.<span class="ident">len</span>());
+        <span class="ident">out</span>.<span class="ident">copy_from_slice</span>(<span class="ident">read_slice</span>);
+        <span class="self">self</span>.<span class="ident">slice</span> <span class="op">=</span> <span class="ident">remaining</span>;
+
+        <span class="prelude-val">Ok</span>(<span class="ident">out</span>.<span class="ident">len</span>())
     }
+
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
     <span class="kw">fn</span> <span class="ident">read_exact</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        (<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">slice</span>).<span class="ident">read_exact</span>(<span class="ident">out</span>)
+        <span class="self">self</span>.<span class="ident">read</span>(<span class="ident">out</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())
     }
 }
 
@@ -280,10 +304,10 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;storage</span><span class="op">&gt;</span> <span class="ident">SliceReader</span><span class="op">&lt;</span><span class="lifetime">&#39;storage</span><span class="op">&gt;</span> {
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
     <span class="kw">fn</span> <span class="ident">unexpected_eof</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span>::<span class="ident">ErrorKind</span><span class="op">&gt;</span> {
-        <span class="kw">return</span> <span class="ident">Box</span>::<span class="ident">new</span>(::<span class="ident">ErrorKind</span>::<span class="ident">Io</span>(<span class="ident">io</span>::<span class="ident">Error</span>::<span class="ident">new</span>(
+        <span class="ident">Box</span>::<span class="ident">new</span>(::<span class="ident">ErrorKind</span>::<span class="ident">Io</span>(<span class="ident">io</span>::<span class="ident">Error</span>::<span class="ident">new</span>(
             <span class="ident">io</span>::<span class="ident">ErrorKind</span>::<span class="ident">UnexpectedEof</span>,
             <span class="string">&quot;&quot;</span>,
-        )));
+        )))
     }
 }
 
@@ -294,28 +318,16 @@
         <span class="ident">V</span>: <span class="ident">serde</span>::<span class="ident">de</span>::<span class="ident">Visitor</span><span class="op">&lt;</span><span class="lifetime">&#39;storage</span><span class="op">&gt;</span>,
     {
         <span class="kw">use</span> <span class="ident">ErrorKind</span>;
-        <span class="kw">if</span> <span class="ident">length</span> <span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">slice</span>.<span class="ident">len</span>() {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">SliceReader</span>::<span class="ident">unexpected_eof</span>());
-        }
-
-        <span class="kw">let</span> <span class="ident">string</span> <span class="op">=</span> <span class="kw">match</span> ::<span class="ident">std</span>::<span class="ident">str</span>::<span class="ident">from_utf8</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">slice</span>[..<span class="ident">length</span>]) {
+        <span class="kw">let</span> <span class="ident">string</span> <span class="op">=</span> <span class="kw">match</span> ::<span class="ident">std</span>::<span class="ident">str</span>::<span class="ident">from_utf8</span>(<span class="self">self</span>.<span class="ident">get_byte_slice</span>(<span class="ident">length</span>)<span class="question-mark">?</span>) {
             <span class="prelude-val">Ok</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>,
             <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ErrorKind</span>::<span class="ident">InvalidUtf8Encoding</span>(<span class="ident">e</span>).<span class="ident">into</span>()),
         };
-        <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">visitor</span>.<span class="ident">visit_borrowed_str</span>(<span class="ident">string</span>);
-        <span class="self">self</span>.<span class="ident">slice</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">slice</span>[<span class="ident">length</span>..];
-        <span class="ident">r</span>
+        <span class="ident">visitor</span>.<span class="ident">visit_borrowed_str</span>(<span class="ident">string</span>)
     }
 
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
     <span class="kw">fn</span> <span class="ident">get_byte_buffer</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">length</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">length</span> <span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">slice</span>.<span class="ident">len</span>() {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">SliceReader</span>::<span class="ident">unexpected_eof</span>());
-        }
-
-        <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">slice</span>[..<span class="ident">length</span>];
-        <span class="self">self</span>.<span class="ident">slice</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">slice</span>[<span class="ident">length</span>..];
-        <span class="prelude-val">Ok</span>(<span class="ident">r</span>.<span class="ident">to_vec</span>())
+        <span class="self">self</span>.<span class="ident">get_byte_slice</span>(<span class="ident">length</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">to_vec</span>())
     }
 
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
@@ -323,13 +335,7 @@
     <span class="kw">where</span>
         <span class="ident">V</span>: <span class="ident">serde</span>::<span class="ident">de</span>::<span class="ident">Visitor</span><span class="op">&lt;</span><span class="lifetime">&#39;storage</span><span class="op">&gt;</span>,
     {
-        <span class="kw">if</span> <span class="ident">length</span> <span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">slice</span>.<span class="ident">len</span>() {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">SliceReader</span>::<span class="ident">unexpected_eof</span>());
-        }
-
-        <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">visitor</span>.<span class="ident">visit_borrowed_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">slice</span>[..<span class="ident">length</span>]);
-        <span class="self">self</span>.<span class="ident">slice</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">slice</span>[<span class="ident">length</span>..];
-        <span class="ident">r</span>
+        <span class="ident">visitor</span>.<span class="ident">visit_borrowed_bytes</span>(<span class="self">self</span>.<span class="ident">get_byte_slice</span>(<span class="ident">length</span>)<span class="question-mark">?</span>)
     }
 }
 
@@ -338,31 +344,9 @@
     <span class="ident">R</span>: <span class="ident">io</span>::<span class="ident">Read</span>,
 {
     <span class="kw">fn</span> <span class="ident">fill_buffer</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">length</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="comment">// We first reserve the space needed in our buffer.</span>
-        <span class="kw">let</span> <span class="ident">current_length</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">temp_buffer</span>.<span class="ident">len</span>();
-        <span class="kw">if</span> <span class="ident">length</span> <span class="op">&gt;</span> <span class="ident">current_length</span> {
-            <span class="self">self</span>.<span class="ident">temp_buffer</span>.<span class="ident">reserve_exact</span>(<span class="ident">length</span> <span class="op">-</span> <span class="ident">current_length</span>);
-        }
+        <span class="self">self</span>.<span class="ident">temp_buffer</span>.<span class="ident">resize</span>(<span class="ident">length</span>, <span class="number">0</span>);
 
-        <span class="comment">// Then create a slice with the length as our desired length. This is</span>
-        <span class="comment">// safe as long as we only write (no reads) to this buffer, because</span>
-        <span class="comment">// `reserve_exact` above has allocated this space.</span>
-        <span class="kw">let</span> <span class="ident">buf</span> <span class="op">=</span> <span class="kw">unsafe</span> {
-            <span class="ident">slice</span>::<span class="ident">from_raw_parts_mut</span>(<span class="self">self</span>.<span class="ident">temp_buffer</span>.<span class="ident">as_mut_ptr</span>(), <span class="ident">length</span>)
-        };
-
-        <span class="comment">// This method is assumed to properly handle slices which include</span>
-        <span class="comment">// uninitialized bytes (as ours does). See discussion at the link below.</span>
-        <span class="comment">// https://github.com/servo/bincode/issues/260</span>
-        <span class="self">self</span>.<span class="ident">reader</span>.<span class="ident">read_exact</span>(<span class="ident">buf</span>)<span class="question-mark">?</span>;
-
-        <span class="comment">// Only after `read_exact` successfully returns do we set the buffer</span>
-        <span class="comment">// length. By doing this after the call to `read_exact`, we can avoid</span>
-        <span class="comment">// exposing uninitialized memory in the case of `read_exact` returning</span>
-        <span class="comment">// an error.</span>
-        <span class="kw">unsafe</span> {
-            <span class="self">self</span>.<span class="ident">temp_buffer</span>.<span class="ident">set_len</span>(<span class="ident">length</span>);
-        }
+        <span class="self">self</span>.<span class="ident">reader</span>.<span class="ident">read_exact</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">temp_buffer</span>)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(())
     }
@@ -383,8 +367,7 @@
             <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(::<span class="ident">ErrorKind</span>::<span class="ident">InvalidUtf8Encoding</span>(<span class="ident">e</span>).<span class="ident">into</span>()),
         };
 
-        <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">visitor</span>.<span class="ident">visit_str</span>(<span class="ident">string</span>);
-        <span class="ident">r</span>
+        <span class="ident">visitor</span>.<span class="ident">visit_str</span>(<span class="ident">string</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">get_byte_buffer</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">length</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
@@ -397,8 +380,27 @@
         <span class="ident">V</span>: <span class="ident">serde</span>::<span class="ident">de</span>::<span class="ident">Visitor</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
     {
         <span class="self">self</span>.<span class="ident">fill_buffer</span>(<span class="ident">length</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">visitor</span>.<span class="ident">visit_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">temp_buffer</span>[..]);
-        <span class="ident">r</span>
+        <span class="ident">visitor</span>.<span class="ident">visit_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">temp_buffer</span>[..])
+    }
+}
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
+<span class="kw">mod</span> <span class="ident">test</span> {
+    <span class="kw">use</span> <span class="kw">super</span>::<span class="ident">IoReader</span>;
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">test_fill_buffer</span>() {
+        <span class="kw">let</span> <span class="ident">buffer</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0u8</span>; <span class="number">64</span>];
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reader</span> <span class="op">=</span> <span class="ident">IoReader</span>::<span class="ident">new</span>(<span class="ident">buffer</span>.<span class="ident">as_slice</span>());
+
+        <span class="ident">reader</span>.<span class="ident">fill_buffer</span>(<span class="number">20</span>).<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="number">20</span>, <span class="ident">reader</span>.<span class="ident">temp_buffer</span>.<span class="ident">len</span>());
+
+        <span class="ident">reader</span>.<span class="ident">fill_buffer</span>(<span class="number">30</span>).<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="number">30</span>, <span class="ident">reader</span>.<span class="ident">temp_buffer</span>.<span class="ident">len</span>());
+
+        <span class="ident">reader</span>.<span class="ident">fill_buffer</span>(<span class="number">5</span>).<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="number">5</span>, <span class="ident">reader</span>.<span class="ident">temp_buffer</span>.<span class="ident">len</span>());
     }
 }
 </pre></div>

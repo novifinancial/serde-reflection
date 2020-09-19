@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/git/checkouts/libra-0f33c279f44a04b6/58882b9/common/lcs/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../libra_canonical_serialization/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/git/checkouts/libra-0f33c279f44a04b6/1362572/common/lcs/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../libra_canonical_serialization/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -285,6 +285,27 @@
 <span id="285">285</span>
 <span id="286">286</span>
 <span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) The Libra Core Contributors</span>
 <span class="comment">// SPDX-License-Identifier: Apache-2.0</span>
@@ -327,8 +348,8 @@
 <span class="doccomment">//! * Fixed and variable length sequences</span>
 <span class="doccomment">//! * UTF-8 Encoded Strings</span>
 <span class="doccomment">//! * Tuples</span>
-<span class="doccomment">//! * Structures</span>
-<span class="doccomment">//! * Externally tagged enumerations</span>
+<span class="doccomment">//! * Structures (aka &quot;structs&quot;)</span>
+<span class="doccomment">//! * Externally tagged enumerations (aka &quot;enums&quot;)</span>
 <span class="doccomment">//! * Maps</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ## General structure</span>
@@ -337,6 +358,24 @@
 <span class="doccomment">//! know the message type and layout ahead of time.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Unless specified, all numbers are stored in little endian, two&#39;s complement format.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ## Recursion and Depth of LCS Data</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Recursive data-structures (e.g. trees) are allowed. However, because of the possibility of stack</span>
+<span class="doccomment">//! overflow during (de)serialization, the *container depth* of any valid LCS data cannot exceed the constant</span>
+<span class="doccomment">//! `MAX_CONTAINER_DEPTH`. Formally, we define *container depth* as the number of structs and enums traversed</span>
+<span class="doccomment">//! during (de)serialization.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! This definition aims to minimize the number of operations while ensuring that</span>
+<span class="doccomment">//! (de)serialization of a known LCS format cannot cause arbitrarily large stack allocations.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! As an example, if `v1` and `v2` are values of depth `n1` and `n2`,</span>
+<span class="doccomment">//! * a struct value `Foo { v1, v2 }` has depth `1 + max(n1, n2)`;</span>
+<span class="doccomment">//! * an enum value `E::Foo { v1, v2 }` has depth `1 + max(n1, n2)`;</span>
+<span class="doccomment">//! * a pair `(v1, v2)` has depth `max(n1, n2)`;</span>
+<span class="doccomment">//! * the value `Some(v1)` has depth `n1`.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! All string and integer values have depths `0`.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ### Booleans and Integers</span>
 <span class="doccomment">//!</span>
@@ -567,8 +606,11 @@
 <span class="kw">mod</span> <span class="ident">ser</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">test_helpers</span>;
 
-<span class="doccomment">/// Variable length sequences in LCS are limited to max length of 2^31</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MAX_SEQUENCE_LENGTH</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">31</span>;
+<span class="doccomment">/// Variable length sequences in LCS are limited to max length of 2^31 - 1.</span>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MAX_SEQUENCE_LENGTH</span>: <span class="ident">usize</span> <span class="op">=</span> (<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">31</span>) <span class="op">-</span> <span class="number">1</span>;
+
+<span class="doccomment">/// Maximal allowed depth of LCS data, counting only structs and enums.</span>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MAX_CONTAINER_DEPTH</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">500</span>;
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">de</span>::{<span class="ident">from_bytes</span>, <span class="ident">from_bytes_seed</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">error</span>::{<span class="ident">Error</span>, <span class="prelude-ty">Result</span>};

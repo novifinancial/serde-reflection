@@ -197,10 +197,10 @@
 <span class="doccomment">//! writeln!(</span>
 <span class="doccomment">//!     source,</span>
 <span class="doccomment">//!     r#&quot;</span>
-<span class="doccomment">//! value = Test.bincode_deserialize(bytes.fromhex(&quot;{}&quot;))</span>
+<span class="doccomment">//! value = Test.bincode_deserialize(bytes({:?}))</span>
 <span class="doccomment">//! assert value == Test(a=[4, 6], b=(3, 5))</span>
 <span class="doccomment">//! &quot;#,</span>
-<span class="doccomment">//!     hex::encode(&amp;bincode::serialize(&amp;Test { a: vec![4, 6], b: (3, 5) }).unwrap()),</span>
+<span class="doccomment">//!     bincode::serialize(&amp;Test { a: vec![4, 6], b: (3, 5) }).unwrap(),</span>
 <span class="doccomment">//! )?;</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // Execute the Python code.</span>

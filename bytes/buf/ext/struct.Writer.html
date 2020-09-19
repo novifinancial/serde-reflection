@@ -8,7 +8,7 @@ details.</p>
 <div class="example-wrap"><pre class="rust rust-example-rendered">
 <span class="kw">use</span> <span class="ident">bytes</span>::<span class="ident">buf</span>::<span class="ident">BufMutExt</span>;
 
-<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">with_capacity</span>(<span class="number">1024</span>).<span class="ident">writer</span>();
+<span class="kw">let</span> <span class="ident">buf</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">with_capacity</span>(<span class="number">1024</span>).<span class="ident">writer</span>();
 
 <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="number">1024</span>, <span class="ident">buf</span>.<span class="ident">get_ref</span>().<span class="ident">capacity</span>());</pre></div>
 </div><h4 id='method.get_mut' class="method"><code>pub fn <a href='#method.get_mut' class='fnname'>get_mut</a>(&amp;mut self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut </a>B</code><a class='srclink' href='../../../src/bytes/buf/ext/writer.rs.html#52-54' title='goto source code'>[src]</a></h4><div class='docblock'><p>Gets a mutable reference to the underlying <code>BufMut</code>.</p>
