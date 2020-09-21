@@ -13,11 +13,11 @@ public final class Tuple5<T0, T1, T2, T3, T4> {
     public final T4 field4;
 
     public Tuple5(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4) {
-        assert f0 != null;
-        assert f1 != null;
-        assert f2 != null;
-        assert f3 != null;
-        assert f4 != null;
+        Objects.requireNonNull(f0, "f0 must not be null");
+        Objects.requireNonNull(f1, "f1 must not be null");
+        Objects.requireNonNull(f2, "f2 must not be null");
+        Objects.requireNonNull(f3, "f3 must not be null");
+        Objects.requireNonNull(f4, "f4 must not be null");
         this.field0 = f0;
         this.field1 = f1;
         this.field2 = f2;

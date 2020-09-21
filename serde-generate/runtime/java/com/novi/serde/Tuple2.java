@@ -10,8 +10,8 @@ public final class Tuple2<T0, T1> {
     public final T1 field1;
 
     public Tuple2(T0 f0, T1 f1) {
-        assert f0 != null;
-        assert f1 != null;
+        Objects.requireNonNull(f0, "f0 must not be null");
+        Objects.requireNonNull(f1, "f1 must not be null");
         this.field0 = f0;
         this.field1 = f1;
     }

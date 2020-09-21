@@ -11,9 +11,9 @@ public final class Tuple3<T0, T1, T2> {
     public final T2 field2;
 
     public Tuple3(T0 f0, T1 f1, T2 f2) {
-        assert f0 != null;
-        assert f1 != null;
-        assert f2 != null;
+        Objects.requireNonNull(f0, "f0 must not be null");
+        Objects.requireNonNull(f1, "f1 must not be null");
+        Objects.requireNonNull(f2, "f2 must not be null");
         this.field0 = f0;
         this.field1 = f1;
         this.field2 = f2;
