@@ -846,12 +846,10 @@ if (other == null) return false;"#,
                 }
             }
             self.out.unindent();
+        } else if variant_index.is_none() {
+            writeln!(self.out, "\n{0}.fromJson(Map<String, dynamic> json);", name)?;
         } else {
-            if variant_index.is_none() {
-                writeln!(self.out, "\n{0}.fromJson(Map<String, dynamic> json);", name)?;
-            } else {
-                writeln!(self.out, "\n{0}.loadJson(Map<String, dynamic> json);", name)?;
-            }
+            writeln!(self.out, "\n{0}.loadJson(Map<String, dynamic> json);", name)?;
         }
 
         writeln!(self.out, "\nMap<String, dynamic> toJson() => {{")?;
