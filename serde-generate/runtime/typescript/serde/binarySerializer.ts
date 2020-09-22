@@ -6,8 +6,6 @@ import bytes from '@ethersproject/bytes';
 export abstract class BinarySerializer implements Serializer {
     private output: Uint8Array = Buffer.alloc(0);
 
-    abstract serializeHexString(hex: string): void;
-
     abstract serializeLen(value: number): void ;
 
     abstract serializeVariantIndex(value: number): void;

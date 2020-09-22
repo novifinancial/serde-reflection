@@ -4,8 +4,6 @@ import { BigNumber } from '@ethersproject/bignumber';
 export interface Deserializer {
   deserializeStr(): string;
 
-  deserializeToHexString(): string;
-
   deserializeBytes(): Uint8Array;
 
   deserializeBool(): boolean;

@@ -25,11 +25,6 @@ export class LcsDeserializer extends BinaryDeserializer {
     return this.deserializeUleb128AsU32();
   }
 
-  public deserializeToHexString(): string {
-    const bytes = this.deserializeBytes();
-    return Buffer.from(bytes).toString('hex');
-  }
-
   public checkThatKeySlicesAreIncreasing(key1:[number, number], key2:[number, number]): void {
     return;
   }
