@@ -14,12 +14,8 @@ export class LcsSerializer extends BinarySerializer {
         this.serializeU32AsUleb128(value);
     }
 
-    public serializeHexString(value: string): void {
-        this.concat(LcsSerializer.hexString(value));
-    }
-
     public sortMapEntries(offsets: number[]) {
-        throw new Error('Method sortMapEntries not implemented.');
+        // leaving it empty for now, should be implemented soon
     }
 
     public static hexString(value: string): Uint8Array {

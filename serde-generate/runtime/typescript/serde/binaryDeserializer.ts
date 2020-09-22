@@ -6,6 +6,7 @@ import { Readable } from 'stream';
 export abstract class BinaryDeserializer implements Deserializer {
   public static readonly MAX_VALUE = 2147483647;
   public data: Readable;
+  private readonly totalLength;
 
   private static makeReadable(data: Uint8Array): Readable {
     const r = new Readable();
@@ -16,9 +17,8 @@ export abstract class BinaryDeserializer implements Deserializer {
 
   protected constructor(data: Uint8Array) {
     this.data = BinaryDeserializer.makeReadable(data);
+    this.totalLength = this.data.readableLength;
   }
-
-  abstract deserializeToHexString(): string;
 
   abstract deserializeLen(): number;
 
@@ -96,7 +96,7 @@ export abstract class BinaryDeserializer implements Deserializer {
   }
 
   public getBufferOffset(): number {
-    throw new Error('Method getBufferOffset not implemented.');
+    return this.totalLength - this.data.readableLength;
   }
 
   public deserializeChar(): string {

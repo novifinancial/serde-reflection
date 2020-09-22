@@ -1,13 +1,12 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+use include_dir::include_dir as include_directory;
 use std::{
     collections::{BTreeMap, HashMap},
     io::{Result, Write},
     path::PathBuf,
 };
-
-use include_dir::include_dir as include_directory;
 
 use serde_reflection::{ContainerFormat, Format, FormatHolder, Named, Registry, VariantFormat};
 
@@ -15,16 +14,17 @@ use crate::{
     indent::{IndentConfig, IndentedWriter},
     CodeGeneratorConfig,
 };
+use heck::CamelCase;
 
 /// Main configuration object for code-generation in TypeScript.
 pub struct CodeGenerator<'a> {
     /// Language-independent configuration.
     config: &'a CodeGeneratorConfig,
-    /// Mapping from external type names to fully-qualified class names (e.g. "MyClass" -> "com.facebook.my_package.MyClass").
+    /// Mapping from external type names to fully-qualified class names (e.g. "MyClass" -> "com.my_org.my_package.MyClass").
     /// Derived from `config.external_definitions`.
     external_qualified_names: HashMap<String, String>,
-    /// Should include TraitHelpers preamble?
-    import_trait_helpers: bool,
+    /// vector of namespaces to import
+    namespaces_to_import: Vec<String>,
 }
 
 /// Shared state for the code generation of a TypeScript source file.
@@ -33,97 +33,49 @@ struct TypeScriptEmitter<'a, T> {
     out: IndentedWriter<T>,
     /// Generator.
     generator: &'a CodeGenerator<'a>,
-    /// Current namespace (e.g. vec!["com", "facebook", "my_package", "MyClass"])
-    current_namespace: Vec<String>,
-    /// Current (non-qualified) generated class names that could clash with names in the registry
-    /// (e.g. "Builder" or variant classes).
-    /// * We cound multiplicities to allow inplace backtracking.
-    /// * Names in the registry (and a few base types such as "BigInteger") are assumed to never clash.
-    current_reserved_names: HashMap<String, usize>,
 }
 
 impl<'a> CodeGenerator<'a> {
     /// Create a TypeScript code generator for the given config.
-    pub fn new(config: &'a CodeGeneratorConfig, import_trait_helpers: bool) -> Self {
+    pub fn new(config: &'a CodeGeneratorConfig) -> Self {
         let mut external_qualified_names = HashMap::new();
-        for names in config.external_definitions.values() {
+        for (namespace, names) in &config.external_definitions {
             for name in names {
-                external_qualified_names.insert(name.to_string(), name.to_string());
+                external_qualified_names.insert(
+                    name.to_string(),
+                    format!("{}.{}", namespace.to_camel_case(), name),
+                );
             }
         }
         Self {
             config,
             external_qualified_names,
-            import_trait_helpers,
+            namespaces_to_import: config
+                .external_definitions
+                .keys()
+                .map(|k| k.to_string())
+                .collect::<Vec<_>>(),
         }
     }
 
-    /// Output class definitions for ` registry` in separate source files.
-    /// Source files will be created in a subdirectory of `install_dir` corresponding to the given
-    /// package name (if any, otherwise `install_dir` it self).
-    pub fn write_source_files(
-        &self,
-        install_dir: std::path::PathBuf,
-        registry: &Registry,
-    ) -> Result<()> {
-        let current_namespace = self
-            .config
-            .module_name
-            .split('.')
-            .map(String::from)
-            .collect::<Vec<_>>();
+    /// Output class definitions for ` registry` in a single source file.
+    pub fn output(&self, out: &mut dyn Write, registry: &Registry) -> Result<()> {
+        let mut emitter = TypeScriptEmitter {
+            out: IndentedWriter::new(out, IndentConfig::Space(2)),
+            generator: self,
+        };
 
-        let mut dir_path = install_dir;
-        for part in &current_namespace {
-            dir_path = dir_path.join(part);
-        }
-        std::fs::create_dir_all(&dir_path)?;
+        emitter.output_preamble()?;
 
         for (name, format) in registry {
-            self.write_container_class(&dir_path, current_namespace.clone(), name, format)?;
+            emitter.output_container(name, format)?;
         }
+
         if self.config.serialization {
-            self.write_helper_class(&dir_path, current_namespace, registry)?;
+            emitter.output_helpers(registry)?;
         }
+
         Ok(())
-    }
-
-    fn write_container_class(
-        &self,
-        dir_path: &std::path::Path,
-        current_namespace: Vec<String>,
-        name: &str,
-        format: &ContainerFormat,
-    ) -> Result<()> {
-        let mut file = std::fs::File::create(dir_path.join(name.to_string() + ".ts"))?;
-        let mut emitter = TypeScriptEmitter {
-            out: IndentedWriter::new(&mut file, IndentConfig::Space(4)),
-            generator: self,
-            current_namespace,
-            current_reserved_names: HashMap::new(),
-        };
-
-        emitter.output_preamble(name)?;
-        emitter.output_container(name, format)
-    }
-
-    fn write_helper_class(
-        &self,
-        dir_path: &std::path::Path,
-        current_namespace: Vec<String>,
-        registry: &Registry,
-    ) -> Result<()> {
-        let name = "traitHelpers.ts";
-        let mut file = std::fs::File::create(dir_path.join(name))?;
-        let mut emitter = TypeScriptEmitter {
-            out: IndentedWriter::new(&mut file, IndentConfig::Space(4)),
-            generator: self,
-            current_namespace,
-            current_reserved_names: HashMap::new(),
-        };
-
-        emitter.output_preamble(name)?;
-        emitter.output_trait_helpers(registry)
     }
 }
 
@@ -131,7 +83,7 @@ impl<'a, T> TypeScriptEmitter<'a, T>
 where
     T: Write,
 {
-    fn output_preamble(&mut self, name: &str) -> Result<()> {
+    fn output_preamble(&mut self) -> Result<()> {
         writeln!(
             self.out,
             "import {{BigNumber}} from '@ethersproject/bignumber';"
@@ -149,27 +101,18 @@ where
             self.out,
             "import {{ Deserializer }} from '../serde/deserializer';\n"
         )?;
-        if self.generator.import_trait_helpers && !name.starts_with("traitHelpers") {
-            writeln!(self.out, "import {{ TraitHelpers }} from './traitHelpers';")?;
-        } else {
+        for namespace in self.generator.namespaces_to_import.iter() {
             writeln!(
                 self.out,
-                "{}\n",
-                self.generator
-                    .external_qualified_names
-                    .iter()
-                    .map(|(_, name)| format!("import {{ {0} }} from '../libraTypes/{0}';\n", name))
-                    .collect::<String>()
+                "import * as {} from '../{}';\n",
+                namespace.to_camel_case(),
+                namespace
             )?;
         }
 
         Ok(())
     }
 
-    /// Compute a safe reference to the registry type `name` in the given context.
-    /// If `name` is not marked as "reserved" (e.g. "Builder"), we compare the global
-    /// name `self.qualified_names[name]` with the current namespace and try to use the
-    /// short string `name` if possible.
     fn quote_qualified_name(&self, name: &str) -> String {
         self.generator
             .external_qualified_names
@@ -179,24 +122,13 @@ where
     }
 
     fn output_comment(&mut self, name: &str) -> std::io::Result<()> {
-        let mut path = self.current_namespace.clone();
+        let mut path = Vec::new();
         path.push(name.to_string());
         if let Some(doc) = self.generator.config.comments.get(&path) {
             let text = textwrap::indent(doc, " * ").replace("\n\n", "\n *\n");
             writeln!(self.out, "/**\n{} */", text)?;
         }
         Ok(())
-    }
-
-    fn quote_leading_path(&self, format: &Format) -> String {
-        use Format::*;
-        let mut ret: String = ".".into();
-        if let TypeName(x) = format {
-            if self.generator.external_qualified_names.contains_key(x) {
-                ret = "../libraTypes".into()
-            }
-        }
-        ret
     }
 
     fn quote_type(&self, format: &Format) -> String {
@@ -233,30 +165,6 @@ where
         }
     }
 
-    fn enter_class(&mut self, name: &str, reserved_subclass_names: &[&str]) {
-        self.out.indent();
-        self.current_namespace.push(name.to_string());
-        for name in reserved_subclass_names {
-            let entry = self
-                .current_reserved_names
-                .entry(name.to_string())
-                .or_insert(0);
-            *entry += 1;
-        }
-    }
-
-    fn leave_class(&mut self, reserved_subclass_names: &[&str]) {
-        self.out.unindent();
-        self.current_namespace.pop();
-        for name in reserved_subclass_names {
-            let entry = self.current_reserved_names.get_mut(*name).unwrap();
-            *entry -= 1;
-            if *entry == 0 {
-                self.current_reserved_names.remove(*name);
-            }
-        }
-    }
-
     fn quote_types(&self, formats: &[Format]) -> String {
         formats
             .iter()
@@ -265,7 +173,7 @@ where
             .join("")
     }
 
-    fn output_trait_helpers(&mut self, registry: &Registry) -> Result<()> {
+    fn output_helpers(&mut self, registry: &Registry) -> Result<()> {
         let mut subtypes = BTreeMap::new();
         for format in registry.values() {
             format
@@ -278,20 +186,19 @@ where
                 .unwrap();
         }
 
-        let mut imported = Vec::new();
         for subtype in subtypes.values() {
-            self.output_typedef_helper(subtype, &mut imported)?;
+            self.output_typedef_helper(subtype)?;
         }
 
-        writeln!(self.out, "export class TraitHelpers {{")?;
-        let reserved_names = &[];
-        self.enter_class("TraitHelpers", reserved_names);
+        writeln!(self.out, "export class Helpers {{")?;
+        self.out.indent();
         for (mangled_name, subtype) in &subtypes {
             self.output_serialization_helper(mangled_name, subtype)?;
             self.output_deserialization_helper(mangled_name, subtype)?;
         }
-        self.leave_class(reserved_names);
-        writeln!(self.out, "}}\n")
+        self.out.unindent();
+        writeln!(self.out, "}}")?;
+        writeln!(self.out, "")
     }
 
     fn mangle_type(format: &Format) -> String {
@@ -345,14 +252,6 @@ where
         }
     }
 
-    fn needs_import(format: &Format) -> bool {
-        use Format::*;
-        match format {
-            TypeName { .. } => true,
-            _ => false,
-        }
-    }
-
     fn quote_serialize_value(&self, value: &str, format: &Format, use_this: bool) -> String {
         use Format::*;
         let this_str = if use_this { "this." } else { "" };
@@ -377,8 +276,7 @@ where
             Str => format!("serializer.serializeStr({}{});", this_str, value),
             Bytes => format!("serializer.serializeBytes({}{});", this_str, value),
             _ => format!(
-                "{}.serialize{}({}{}, serializer);",
-                self.quote_qualified_name("TraitHelpers"),
+                "Helpers.serialize{}({}{}, serializer);",
                 Self::mangle_type(format),
                 this_str,
                 value
@@ -411,8 +309,7 @@ where
             Str => "deserializer.deserializeStr()".to_string(),
             Bytes => "deserializer.deserializeBytes()".to_string(),
             _ => format!(
-                "{}.deserialize{}(deserializer)",
-                self.quote_qualified_name("TraitHelpers"),
+                "Helpers.deserialize{}(deserializer)",
                 Self::mangle_type(format),
             ),
         }
@@ -621,23 +518,11 @@ return list;
         writeln!(self.out, "}}\n")
     }
 
-    fn output_typedef_helper(
-        &mut self,
-        format0: &Format,
-        imported: &mut Vec<String>,
-    ) -> Result<()> {
+    fn output_typedef_helper(&mut self, format0: &Format) -> Result<()> {
         use Format::*;
 
         match format0 {
             Option(format) => {
-                if Self::needs_import(format) && !imported.contains(&self.quote_type(format)) {
-                    writeln!(
-                        self.out,
-                        "import {{{0}}} from './{0}';",
-                        self.quote_type(format)
-                    )?;
-                    imported.push(self.quote_type(format));
-                }
                 writeln!(
                     self.out,
                     "export type Optional{0} = {0} | null;",
@@ -646,14 +531,6 @@ return list;
             }
 
             Seq(format) => {
-                if Self::needs_import(format) && !imported.contains(&self.quote_type(format)) {
-                    writeln!(
-                        self.out,
-                        "import {{{0}}} from './{0}';",
-                        self.quote_type(format)
-                    )?;
-                    imported.push(self.quote_type(format));
-                }
                 writeln!(
                     self.out,
                     "export type List{0} = {0}[];",
@@ -662,22 +539,6 @@ return list;
             }
 
             Map { key, value } => {
-                if Self::needs_import(key) && !imported.contains(&self.quote_type(key)) {
-                    writeln!(
-                        self.out,
-                        "import {{{0}}} from './{0}';",
-                        self.quote_type(key)
-                    )?;
-                    imported.push(self.quote_type(key));
-                }
-                if Self::needs_import(value) && !imported.contains(&self.quote_type(value)) {
-                    writeln!(
-                        self.out,
-                        "import {{{0}}} from './{0}';",
-                        self.quote_type(value)
-                    )?;
-                    imported.push(self.quote_type(value));
-                }
                 writeln!(
                     self.out,
                     "export type Map{0}{1} = Record<{0}, {1}>;",
@@ -687,17 +548,6 @@ return list;
             }
 
             Tuple(formats) => {
-                for (_index, format) in formats.iter().enumerate() {
-                    if Self::needs_import(format) && !imported.contains(&self.quote_type(format)) {
-                        writeln!(
-                            self.out,
-                            "import {{{0}}} from './{0}';",
-                            self.quote_type(format)
-                        )?;
-                        imported.push(self.quote_type(format));
-                    }
-                }
-
                 write!(self.out, "export type Tuple")?;
                 for (_index, format) in formats.iter().enumerate() {
                     write!(self.out, "{}", self.quote_type(format))?;
@@ -778,75 +628,6 @@ return list;
         name: &str,
         fields: &[Named<Format>],
     ) -> Result<()> {
-        // add imports to field types
-        if self.generator.import_trait_helpers {
-            let mut imported_types = Vec::new();
-            for field in fields {
-                let field_type = &field.value;
-                if let Some(base) = variant_base {
-                    if base.eq(&self.quote_type(&field.value)) {
-                        // no need to import myself
-                        continue;
-                    }
-                }
-                if imported_types.contains(&self.quote_type(field_type)) {
-                    continue;
-                }
-                imported_types.push(self.quote_type(field_type));
-                match &field.value {
-                    Format::TypeName(_) => {
-                        writeln!(
-                            self.out,
-                            "import {{{0}}} from '{1}/{0}';",
-                            self.quote_type(&field.value),
-                            self.quote_leading_path(&field.value)
-                        )?;
-                    }
-                    Format::Tuple(_) => {
-                        writeln!(
-                            self.out,
-                            "import {{{0}}} from './traitHelpers';",
-                            self.quote_type(&field.value)
-                        )?;
-                    }
-                    Format::Option(_) => {
-                        writeln!(
-                            self.out,
-                            "import {{{0}}} from './traitHelpers';",
-                            self.quote_type(&field.value)
-                        )?;
-                    }
-                    Format::Seq(_) => {
-                        writeln!(
-                            self.out,
-                            "import {{{0}}} from './traitHelpers';",
-                            self.quote_type(&field.value)
-                        )?;
-                    }
-                    Format::TupleArray {
-                        content: _content,
-                        size: _size,
-                    } => {
-                        writeln!(
-                            self.out,
-                            "import {{{0}}} from './traitHelpers';",
-                            self.quote_type(&field.value)
-                        )?;
-                    }
-                    Format::Map {
-                        key: _key,
-                        value: _value,
-                    } => {
-                        writeln!(
-                            self.out,
-                            "import {{{0}}} from './traitHelpers';",
-                            self.quote_type(&field.value)
-                        )?;
-                    }
-                    _ => {}
-                }
-            }
-        }
         let mut variant_base_name = format!("");
 
         // Beginning of class
@@ -863,8 +644,6 @@ return list;
             self.output_comment(name)?;
             writeln!(self.out, "export class {} {{", name)?;
         }
-        let reserved_names = &["Builder"];
-        self.enter_class(name, reserved_names);
         if !fields.is_empty() {
             writeln!(self.out)?;
         }
@@ -874,7 +653,7 @@ return list;
             "constructor ({}) {{",
             fields
                 .iter()
-                .map(|f| format!("public {}: {}", &f.name, self.quote_type(&f.value)))
+                .map(|f| { format!("public {}: {}", &f.name, self.quote_type(&f.value)) })
                 .collect::<Vec<_>>()
                 .join(", ")
         )?;
@@ -942,8 +721,6 @@ return list;
             self.out.unindent();
             writeln!(self.out, "}}\n")?;
         }
-        // End of class
-        self.leave_class(reserved_names);
         writeln!(self.out, "}}")
     }
 
@@ -954,11 +731,6 @@ return list;
     ) -> Result<()> {
         self.output_comment(name)?;
         writeln!(self.out, "export abstract class {} {{", name)?;
-        let reserved_names = variants
-            .values()
-            .map(|v| v.name.as_str())
-            .collect::<Vec<_>>();
-        self.enter_class(name, &reserved_names);
         if self.generator.config.serialization {
             writeln!(
                 self.out,
@@ -994,7 +766,6 @@ switch (index) {{"#,
             self.out.unindent();
             writeln!(self.out, "}}")?;
         }
-        self.leave_class(&reserved_names);
         writeln!(self.out, "}}\n")?;
         self.output_variants(name, variants)?;
         Ok(())
@@ -1044,7 +815,6 @@ impl Installer {
         let dir_path = self.install_dir.join(path);
         std::fs::create_dir_all(&dir_path)?;
         for entry in source_dir.files() {
-            println!("writing file {}", entry.path().to_string_lossy());
             let mut file = std::fs::File::create(dir_path.join(entry.path()))?;
             file.write_all(entry.contents())?;
         }
@@ -1060,20 +830,29 @@ impl crate::SourceInstaller for Installer {
         config: &CodeGeneratorConfig,
         registry: &Registry,
     ) -> std::result::Result<(), Self::Error> {
-        let generator = CodeGenerator::new(config, true);
-        generator.write_source_files(self.install_dir.clone(), registry)?;
+        let dir_path = self.install_dir.join(&config.module_name);
+        std::fs::create_dir_all(&dir_path)?;
+        let source_path = dir_path.join("index.ts");
+        let mut file = std::fs::File::create(source_path)?;
+
+        let generator = CodeGenerator::new(config);
+        generator.output(&mut file, registry)?;
         Ok(())
+
+        // let generator = CodeGenerator::new(config, true);
+        // generator.write_source_files(self.install_dir.clone(), registry)?;
+        // Ok(())
     }
 
     fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.install_runtime(include_directory!("runtime/ts/serde"), "serde")
+        self.install_runtime(include_directory!("runtime/typescript/serde"), "serde")
     }
 
     fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.install_runtime(include_directory!("runtime/ts/bincode"), "bincode")
+        self.install_runtime(include_directory!("runtime/typescript/bincode"), "bincode")
     }
 
     fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.install_runtime(include_directory!("runtime/ts/lcs"), "lcs")
+        self.install_runtime(include_directory!("runtime/typescript/lcs"), "lcs")
     }
 }

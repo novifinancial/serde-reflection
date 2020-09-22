@@ -4,8 +4,6 @@ import { BigNumber } from '@ethersproject/bignumber';
 export interface Serializer {
   serializeStr(value: string): void;
 
-  serializeHexString(hex: string): void;
-
   serializeBytes(value: Uint8Array): void;
 
   serializeBool(value: boolean): void;

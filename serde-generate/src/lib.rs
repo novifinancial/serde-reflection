@@ -119,7 +119,7 @@ pub mod python3;
 /// Support for code-generation in Rust
 pub mod rust;
 /// Support for code-generation in TypeScript/JavaScript
-pub mod ts;
+pub mod typescript;
 
 #[doc(hidden)]
 /// Utility functions to help testing code generators.

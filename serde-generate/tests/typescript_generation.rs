@@ -1,7 +1,8 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use serde_generate::{test_utils, ts, CodeGeneratorConfig, Encoding, SourceInstaller};
+use serde_generate::{test_utils, typescript, CodeGeneratorConfig, Encoding, SourceInstaller};
+use std::fs::File;
 use std::io::{Result, Write};
 use std::process::Command;
 use tempfile::{tempdir, TempDir};
@@ -59,15 +60,15 @@ fn test_that_ts_code_compiles_with_config(
 ) -> (TempDir, std::path::PathBuf) {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
+    make_output_file(&dir);
+    let source_path = dir.path().join("testing").join("test.ts");
+    let mut source = File::create(&source_path).unwrap();
 
-    let generator = ts::CodeGenerator::new(&config, true);
-    generator
-        .write_source_files(dir.path().to_path_buf(), &registry)
-        .unwrap();
-
+    let generator = typescript::CodeGenerator::new(&config);
+    generator.output(&mut source, &registry).unwrap();
     let _result = write_package_tsconfig_json_for_test_build(dir.path().to_path_buf());
 
-    let installer = ts::Installer::new(dir.path().to_path_buf());
+    let installer = typescript::Installer::new(dir.path().to_path_buf());
     installer.install_serde_runtime().unwrap();
     installer.install_bincode_runtime().unwrap();
     installer.install_lcs_runtime().unwrap();
@@ -91,6 +92,13 @@ fn test_that_ts_code_compiles_with_config(
     (dir, path)
 }
 
+fn make_output_file(dir: &TempDir) {
+    match std::fs::create_dir_all(dir.path().join("testing")) {
+        Ok(_) => {}
+        Err(_) => {}
+    }
+}
+
 #[test]
 fn test_that_ts_code_compiles() {
     let config = CodeGeneratorConfig::new("testing".to_string());
@@ -106,18 +114,15 @@ fn test_that_ts_code_compiles_with_lcs() {
 
 #[test]
 fn test_that_ts_code_compiles_with_comments() {
-    let comments = vec![(
-        vec!["testing".to_string(), "SerdeData".to_string()],
-        "Some\ncomments".to_string(),
-    )]
-    .into_iter()
-    .collect();
+    let comments = vec![(vec!["SerdeData".to_string()], "Some\ncomments".to_string())]
+        .into_iter()
+        .collect();
     let config = CodeGeneratorConfig::new("testing".to_string()).with_comments(comments);
 
     let (_dir, path) = test_that_ts_code_compiles_with_config(&config);
 
     // Comment was correctly generated.
-    let content = std::fs::read_to_string(path.join("SerdeData.ts")).unwrap();
+    let content = std::fs::read_to_string(path.join("test.ts")).unwrap();
     assert!(content.contains(
         r#"
 /**
