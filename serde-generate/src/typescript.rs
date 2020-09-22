@@ -198,7 +198,7 @@ where
         }
         self.out.unindent();
         writeln!(self.out, "}}")?;
-        writeln!(self.out, "")
+        writeln!(self.out)
     }
 
     fn mangle_type(format: &Format) -> String {
