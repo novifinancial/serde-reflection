@@ -3,6 +3,7 @@ use crate::{common, CodeGeneratorConfig, Encoding};
 use heck::CamelCase;
 use include_dir::include_dir as include_directory;
 use serde_reflection::{ContainerFormat, Format, FormatHolder, Named, Registry, VariantFormat};
+use std::borrow::Borrow;
 use std::collections::BTreeMap;
 use std::{
     collections::HashMap,
@@ -74,6 +75,7 @@ impl<'a> CodeGenerator<'a> {
 dependencies:
   optional: '5.0.0'
   tuple: '1.0.3'  
+  json_serializable: '3.4.1'   
 dev_dependencies:
   mockito: '>=4.0.0 <5.0.0'
   test: '>=0.12.0 <2.0.0'
@@ -97,6 +99,7 @@ dev_dependencies:
 
 import 'package:test/test.dart';
 import 'dart:typed_data';
+import 'dart:convert';
 import 'package:{0}/{0}/{0}.dart';
 import 'package:{0}/serde/serde.dart';"#,
             self.config.module_name
@@ -232,6 +235,56 @@ where
 
     fn quote_qualified_name(&self, name: &str) -> String {
         name.to_string()
+    }
+
+    fn to_json(&self, format: &Named<Format>) -> String {
+        use Format::*;
+        match &format.value {
+            TypeName(_) => format!("\"{0}\" : {0} ,", format.name),
+            Unit | Bool | I8 | I16 | I32 | I64 | I128 | U8 | U16 | U32 | U64 | U128 | F32 | F64 => {
+                format!("\"{0}\" : {0} ,", format.name)
+            }
+            Char | Str => format!("\"{0}\" : '{0}' ,", format.name),
+            Bytes | Variable(_) | Map { key: _, value: _ } => {
+                format!("\"{0}\" : {0} ,", format.name)
+            }
+            Option(_) => format!("\"{0}\" : {0}.isEmpty?null:{0}.value ,", format.name),
+            Seq(_) => format!("\"{0}\" : {0} ,", format.name),
+            Tuple(_) => format!("\"{0}\" : {0} ,", format.name),
+            TupleArray {
+                content: _,
+                size: _,
+            } => format!("\"{0}\" : {0} ,", format.name),
+        }
+    }
+
+    fn from_json(&self, format: &Named<Format>) -> String {
+        use Format::*;
+        match &format.value {
+            Unit | Bool | I8 | I16 | I32 | I64 | I128 | U8 | U16 | U32 | U64 | U128 | F32 | F64
+            | Char | Str => format!("{0} = json['{0}']", format.name),
+            Bytes | Variable(_) | Map { key: _, value: _ } => {
+                format!("{0} = Bytes.fromJson(json['{0}'])", format.name)
+            }
+            TypeName(t) => format!("{0} = {1}.fromJson(json['{0}'])", format.name, t),
+            Option(_) => format!("{0} = json['{0}']", format.name),
+            Seq(t) => {
+                if let TypeName(name) = t.borrow() {
+                    format!(
+                        "{0} = List<{1}>.from(json['{0}'].map((f) => {1}.fromJson(f)).toList())",
+                        format.name, name
+                    )
+                } else {
+                    format!("{0} = json['{0}']", format.name,)
+                }
+            }
+            Tuple(_) => format!("{0} = {0}", format.name),
+            TupleArray { content, size: _ } => format!(
+                "{0} = List<{1}>.from(json['{0}'])",
+                format.name,
+                self.quote_type(content)
+            ),
+        }
     }
 
     fn quote_type(&self, format: &Format) -> String {
@@ -613,10 +666,8 @@ return obj;
         // Beginning of class
         writeln!(self.out)?;
         if let Some(base) = variant_base {
-            //self.output_comment(name)?;
             writeln!(self.out, "class {} extends {} {{", name, base)?;
         } else {
-            //self.output_comment(name)?;
             writeln!(self.out, "class {} {{", name)?;
         }
         self.enter_class(name);
@@ -775,6 +826,48 @@ if (other == null) return false;"#,
         writeln!(self.out, "return value;")?;
         self.out.unindent();
         writeln!(self.out, "}}")?;
+
+        if fields_num > 0 {
+            if variant_index.is_none() {
+                writeln!(
+                    self.out,
+                    "\n{0}.fromJson(Map<String, dynamic> json) :",
+                    name
+                )?;
+            } else {
+                writeln!(self.out, "\n{}.loadJson(Map<String, dynamic> json) :", name,)?;
+            }
+            self.out.indent();
+            for (index, field) in fields.iter().enumerate() {
+                if index == fields_num - 1 {
+                    writeln!(self.out, "{} ;", self.from_json(field))?;
+                } else {
+                    writeln!(self.out, "{} ,", self.from_json(field))?;
+                }
+            }
+            self.out.unindent();
+        } else {
+            if variant_index.is_none() {
+                writeln!(self.out, "\n{0}.fromJson(Map<String, dynamic> json);", name)?;
+            } else {
+                writeln!(self.out, "\n{0}.loadJson(Map<String, dynamic> json);", name)?;
+            }
+        }
+
+        writeln!(self.out, "\nMap<String, dynamic> toJson() => {{")?;
+
+        self.out.indent();
+
+        for (_, field) in fields.iter().enumerate() {
+            writeln!(self.out, "{}", self.to_json(field))?;
+        }
+        if let Some(index) = variant_index {
+            writeln!(self.out, "\"type\" : {}", index)?;
+        }
+
+        self.out.unindent();
+        writeln!(self.out, "}};")?;
+        self.out.unindent();
         // End of class
         self.leave_class();
         writeln!(self.out, "}}")
@@ -825,6 +918,8 @@ static {0} {1}Deserialize(Uint8List input)  {{
         //self.output_comment(name)?;
         writeln!(self.out, "abstract class {} {{", name)?;
         self.enter_class(name);
+        writeln!(self.out, "{}();", name)?;
+
         if self.generator.config.serialization {
             writeln!(self.out, "\nvoid serialize(BinarySerializer serializer);")?;
             write!(
@@ -861,6 +956,35 @@ switch (index) {{"#,
                 self.output_class_serialize_for_encoding(*encoding)?;
                 self.output_class_deserialize_for_encoding(name, *encoding)?;
             }
+
+            writeln!(
+                self.out,
+                r#"
+static {} fromJson(Map<String, dynamic> json){{
+  final type = json['type'] as int;
+  switch (type) {{"#,
+                name,
+            )?;
+            self.out.indent();
+            self.out.indent();
+            for (index, variant) in variants {
+                writeln!(
+                    self.out,
+                    "case {}: return {}{}Item.loadJson(json);",
+                    index, name, variant.name,
+                )?;
+            }
+            writeln!(
+                self.out,
+                "default: throw new Exception(\"Unknown type for {}: \" + type.toString());",
+                name,
+            )?;
+            self.out.unindent();
+            writeln!(self.out, "}}")?;
+            self.out.unindent();
+            writeln!(self.out, "}}")?;
+
+            writeln!(self.out, "\nMap<String, dynamic> toJson();",)?;
         }
         self.out.unindent();
         self.out.unindent();

@@ -1,6 +1,7 @@
 library serde;
 
 import 'dart:typed_data';
+import 'dart:convert';
 
 part 'BinaryDeserializer.dart';
 part 'BinarySerializer.dart';

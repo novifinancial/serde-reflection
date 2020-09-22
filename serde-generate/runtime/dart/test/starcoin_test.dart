@@ -25,6 +25,9 @@ void runStarcoinTests() {
 
     AccountAddress address = AccountAddress.lcsDeserialize(expect_result);
     expect(address, accountAddress);
+
+    expect(AccountAddress.fromJson(jsonDecode(jsonEncode(accountAddress))),
+        accountAddress);
   });
 
   test('AccessPath', () {
@@ -74,6 +77,11 @@ void runStarcoinTests() {
 
     AccessPath path = AccessPath.lcsDeserialize(expect_result);
     expect(accessPath1, path);
+
+    print(jsonEncode(accessPath1));
+    expect(
+        AccessPath.fromJson(jsonDecode(jsonEncode(accessPath1))), accessPath1);
+
   });
 
   test('TransactionArgument', () {
@@ -84,6 +92,11 @@ void runStarcoinTests() {
 
     var u8args_de = TransactionArgument.lcsDeserialize(expect_result);
     expect(u8args_de, u8ags);
+
+    print(jsonEncode(u8args_de));
+
+    expect(
+        TransactionArgument.fromJson(jsonDecode(jsonEncode(u8args_de))), u8args_de);
   });
 
   test('TransactionPayload', () {
@@ -101,5 +114,11 @@ void runStarcoinTests() {
 
     var payload = TransactionPayload.lcsDeserialize(result);
     expect(payload, t_script);
+
+    print(jsonEncode(payload));
+
+    expect(
+        TransactionPayload.fromJson(jsonDecode(jsonEncode(payload))), payload);
+
   });
 }
