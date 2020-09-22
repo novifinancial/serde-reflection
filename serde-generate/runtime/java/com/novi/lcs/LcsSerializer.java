@@ -9,6 +9,11 @@ import com.novi.serde.BinarySerializer;
 
 public class LcsSerializer extends BinarySerializer {
     public static final long MAX_LENGTH = Integer.MAX_VALUE;
+    public static final long MAX_CONTAINER_DEPTH = 500;
+
+    public LcsSerializer() {
+        super(MAX_CONTAINER_DEPTH);
+    }
 
     private void serialize_u32_as_uleb128(int value) {
         while ((value >>> 7) != 0) {

@@ -412,7 +412,12 @@ inline {} {}::{}Deserialize(std::vector<uint8_t> input) {{
         )
     }
 
-    fn output_struct_serializable(&mut self, name: &str, fields: &[&str]) -> Result<()> {
+    fn output_struct_serializable(
+        &mut self,
+        name: &str,
+        fields: &[&str],
+        is_container: bool,
+    ) -> Result<()> {
         writeln!(
             self.out,
             r#"
@@ -422,6 +427,9 @@ void serde::Serializable<{0}>::serialize(const {0} &obj, Serializer &serializer)
             name,
         )?;
         self.out.indent();
+        if is_container {
+            writeln!(self.out, "serializer.increase_container_depth();")?;
+        }
         for field in fields {
             writeln!(
                 self.out,
@@ -429,11 +437,19 @@ void serde::Serializable<{0}>::serialize(const {0} &obj, Serializer &serializer)
                 field,
             )?;
         }
+        if is_container {
+            writeln!(self.out, "serializer.decrease_container_depth();")?;
+        }
         self.out.unindent();
         writeln!(self.out, "}}")
     }
 
-    fn output_struct_deserializable(&mut self, name: &str, fields: &[&str]) -> Result<()> {
+    fn output_struct_deserializable(
+        &mut self,
+        name: &str,
+        fields: &[&str],
+        is_container: bool,
+    ) -> Result<()> {
         writeln!(
             self.out,
             r#"
@@ -443,6 +459,9 @@ template <typename Deserializer>
             name,
         )?;
         self.out.indent();
+        if is_container {
+            writeln!(self.out, "deserializer.increase_container_depth();")?;
+        }
         writeln!(self.out, "{} obj;", name)?;
         for field in fields {
             writeln!(
@@ -451,12 +470,20 @@ template <typename Deserializer>
                 field,
             )?;
         }
+        if is_container {
+            writeln!(self.out, "deserializer.decrease_container_depth();")?;
+        }
         writeln!(self.out, "return obj;")?;
         self.out.unindent();
         writeln!(self.out, "}}")
     }
 
-    fn output_struct_traits(&mut self, name: &str, fields: &[&str]) -> Result<()> {
+    fn output_struct_traits(
+        &mut self,
+        name: &str,
+        fields: &[&str],
+        is_container: bool,
+    ) -> Result<()> {
         self.output_open_namespace()?;
         self.output_struct_equality_test(name, fields)?;
         if self.generator.config.serialization {
@@ -468,8 +495,8 @@ template <typename Deserializer>
         self.output_close_namespace()?;
         let namespaced_name = self.quote_qualified_name(name);
         if self.generator.config.serialization {
-            self.output_struct_serializable(&namespaced_name, fields)?;
-            self.output_struct_deserializable(&namespaced_name, fields)?;
+            self.output_struct_serializable(&namespaced_name, fields, is_container)?;
+            self.output_struct_deserializable(&namespaced_name, fields, is_container)?;
         }
         Ok(())
     }
@@ -491,22 +518,24 @@ template <typename Deserializer>
     fn output_container_traits(&mut self, name: &str, format: &ContainerFormat) -> Result<()> {
         use ContainerFormat::*;
         match format {
-            UnitStruct => self.output_struct_traits(name, &[]),
-            NewTypeStruct(_format) => self.output_struct_traits(name, &["value"]),
-            TupleStruct(_formats) => self.output_struct_traits(name, &["value"]),
+            UnitStruct => self.output_struct_traits(name, &[], true),
+            NewTypeStruct(_format) => self.output_struct_traits(name, &["value"], true),
+            TupleStruct(_formats) => self.output_struct_traits(name, &["value"], true),
             Struct(fields) => self.output_struct_traits(
                 name,
                 &fields
                     .iter()
                     .map(|field| field.name.as_str())
                     .collect::<Vec<_>>(),
+                true,
             ),
             Enum(variants) => {
-                self.output_struct_traits(name, &["value"])?;
+                self.output_struct_traits(name, &["value"], true)?;
                 for variant in variants.values() {
                     self.output_struct_traits(
                         &format!("{}::{}", name, variant.name),
                         &Self::get_variant_fields(&variant.value),
+                        false,
                     )?;
                 }
                 Ok(())

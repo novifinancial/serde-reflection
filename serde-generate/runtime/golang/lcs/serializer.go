@@ -17,7 +17,7 @@ type serializer struct {
 }
 
 func NewSerializer() serde.Serializer {
-	return new(serializer)
+	return &serializer{*serde.NewBinarySerializer(MaxContainerDepth)}
 }
 
 func (s *serializer) SerializeStr(value string) error {

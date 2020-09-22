@@ -7,6 +7,10 @@ import com.novi.serde.SerializationError;
 import com.novi.serde.BinarySerializer;
 
 public class BincodeSerializer extends BinarySerializer {
+    public BincodeSerializer() {
+        super(Long.MAX_VALUE);
+    }
+
     public void serialize_len(long value) throws SerializationError {
         serialize_u64(value);
     }

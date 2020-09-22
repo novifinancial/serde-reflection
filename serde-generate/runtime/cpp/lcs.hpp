@@ -14,6 +14,7 @@ namespace serde {
 
 // Maximum length supported for LCS sequences and maps.
 constexpr size_t LCS_MAX_LENGTH = (1ull << 31) - 1;
+constexpr size_t LCS_MAX_CONTAINER_DEPTH = 500;
 
 class LcsSerializer : public BinarySerializer<LcsSerializer> {
     using Parent = BinarySerializer<LcsSerializer>;
@@ -21,7 +22,7 @@ class LcsSerializer : public BinarySerializer<LcsSerializer> {
     void serialize_u32_as_uleb128(uint32_t);
 
   public:
-    LcsSerializer() : Parent() {}
+    LcsSerializer() : Parent(LCS_MAX_CONTAINER_DEPTH) {}
 
     void serialize_len(size_t value);
     void serialize_variant_index(uint32_t value);
@@ -36,7 +37,8 @@ class LcsDeserializer : public BinaryDeserializer<LcsDeserializer> {
     uint32_t deserialize_uleb128_as_u32();
 
   public:
-    LcsDeserializer(std::vector<uint8_t> bytes) : Parent(std::move(bytes)) {}
+    LcsDeserializer(std::vector<uint8_t> bytes)
+        : Parent(std::move(bytes), LCS_MAX_CONTAINER_DEPTH) {}
 
     size_t deserialize_len();
     uint32_t deserialize_variant_index();
@@ -95,7 +97,7 @@ inline uint32_t LcsDeserializer::deserialize_uleb128_as_u32() {
     for (int shift = 0; shift < 32; shift += 7) {
         auto byte = read_byte();
         auto digit = byte & 0x7F;
-        value |= digit << shift;
+        value |= (uint64_t)digit << shift;
         if (value > std::numeric_limits<uint32_t>::max()) {
             throw serde::deserialization_error(
                 "Overflow while parsing uleb128-encoded uint32 value");

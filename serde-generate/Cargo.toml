@@ -1,6 +1,6 @@
 [package]
 name = "serde-generate"
-version = "0.14.0"
+version = "0.14.2"
 description = "Generate (de)serialization code in multiple languages"
 documentation = "https://docs.rs/serde-generate"
 repository = "https://github.com/novifinancial/serde-reflection"
@@ -22,7 +22,7 @@ runtime-testing = ["libra-canonical-serialization", "bincode"]
 heck = "0.3.1"
 include_dir = "0.6"
 maplit = "1.0.2"
-serde = { version = "1.0.112", features = ["derive"] }
+serde = { version = "1.0.116", features = ["derive"] }
 serde_bytes = "0.11.3"
 serde_yaml = "0.8"
 structopt = "0.3.12"
@@ -30,11 +30,11 @@ textwrap = "0.12.1"
 
 serde-reflection = { path = "../serde-reflection", version = "0.3.0" }
 
-bincode = { version = "1.2", optional = true }
-libra-canonical-serialization = { git = "https://github.com/libra/libra.git", branch = "testnet", optional = true }
+bincode = { version = "1.3.1", optional = true }
+libra-canonical-serialization = { git = "https://github.com/libra/libra.git", branch = "auto", optional = true }
 
 [dev-dependencies]
-bincode = { version = "1.2" }
+bincode = { version = "1.3.1" }
 tempfile = "3.1"
 hex = "0.4.2"
 which = "4.0.2"

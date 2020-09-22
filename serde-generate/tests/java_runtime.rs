@@ -132,6 +132,17 @@ fn test_java_bincode_runtime_on_supported_types() {
     test_java_runtime_on_supported_types(Runtime::Bincode);
 }
 
+fn quote_bytes(bytes: &[u8]) -> String {
+    format!(
+        "{{{}}}",
+        bytes
+            .iter()
+            .map(|x| format!("{}", *x as i8))
+            .collect::<Vec<_>>()
+            .join(", ")
+    )
+}
+
 fn test_java_runtime_on_supported_types(runtime: Runtime) {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
@@ -143,22 +154,17 @@ fn test_java_runtime_on_supported_types(runtime: Runtime) {
         .write_source_files(dir.path().to_path_buf(), &registry)
         .unwrap();
 
-    let values = test_utils::get_sample_values(runtime.has_canonical_maps());
-    let encodings = values
+    let positive_encodings: Vec<_> = runtime
+        .get_positive_samples_quick()
         .iter()
-        .map(|v| {
-            let bytes = runtime.serialize(&v);
-            format!(
-                "\n{{{}}}",
-                bytes
-                    .iter()
-                    .map(|x| format!("{}", *x as i8))
-                    .collect::<Vec<_>>()
-                    .join(", ")
-            )
-        })
-        .collect::<Vec<_>>()
-        .join(", ");
+        .map(|bytes| quote_bytes(bytes))
+        .collect();
+
+    let negative_encodings: Vec<_> = runtime
+        .get_negative_samples()
+        .iter()
+        .map(|bytes| quote_bytes(bytes))
+        .collect();
 
     let mut source = File::create(&dir.path().join("Main.java")).unwrap();
     writeln!(
@@ -172,12 +178,13 @@ import com.novi.serde.Tuple2;
 import testing.SerdeData;
 
 public class Main {{
-    public static void main(String[] args) throws java.lang.Exception {{
-        byte[][] inputs = new byte[][] {{{0}}};
+    static final byte[][] positive_inputs = new byte[][] {{{0}}};
+    static final byte[][] negative_inputs = new byte[][] {{{1}}};
 
-        for (byte[] input : inputs) {{
-            SerdeData test = SerdeData.{1}Deserialize(input);
-            byte[] output = test.{1}Serialize();
+    public static void main(String[] args) throws java.lang.Exception {{
+        for (byte[] input : positive_inputs) {{
+            SerdeData test = SerdeData.{2}Deserialize(input);
+            byte[] output = test.{2}Serialize();
 
             assert java.util.Arrays.equals(input, output);
 
@@ -186,7 +193,7 @@ public class Main {{
                 byte[] input2 = input.clone();
                 input2[i] ^= 0x80;
                 try {{
-                    SerdeData test2 = SerdeData.{1}Deserialize(input2);
+                    SerdeData test2 = SerdeData.{2}Deserialize(input2);
                     assert test2 != test;
                 }} catch (DeserializationError e) {{
                     // All good
@@ -194,10 +201,22 @@ public class Main {{
             }}
 
         }}
+
+        for (byte[] input : negative_inputs) {{
+            try {{
+                SerdeData test = SerdeData.{2}Deserialize(input);
+                Integer[] bytes = new Integer[input.length];
+                Arrays.setAll(bytes, n -> Math.floorMod(input[n], 256));
+                throw new Exception("Input should fail to deserialize: " + Arrays.asList(bytes));
+            }} catch (DeserializationError e) {{
+                    // All good
+            }}
+        }}
     }}
 }}
 "#,
-        encodings,
+        positive_encodings.join(", "),
+        negative_encodings.join(", "),
         runtime.name(),
     )
     .unwrap();

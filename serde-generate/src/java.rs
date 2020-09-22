@@ -415,9 +415,11 @@ serializer.sort_map_entries(offsets);
                 write!(
                     self.out,
                     r#"
-assert value.length == {};
-for ({} item : value) {{
-    {}
+if (value.length != {0}) {{
+    throw new java.lang.IllegalArgumentException("Invalid length for fixed-size array: " + value.length + " instead of "+ {0});
+}}
+for ({1} item : value) {{
+    {2}
 }}
 "#,
                     size,
@@ -630,7 +632,11 @@ return obj;
         )?;
         self.out.indent();
         for field in fields {
-            writeln!(self.out, "assert {} != null;", &field.name)?;
+            writeln!(
+                self.out,
+                "java.util.Objects.requireNonNull({0}, \"{0} must not be null\");",
+                &field.name
+            )?;
         }
         for field in fields {
             writeln!(self.out, "this.{} = {};", &field.name, &field.name)?;
@@ -644,6 +650,7 @@ return obj;
                 "\npublic void serialize(com.novi.serde.Serializer serializer) throws com.novi.serde.SerializationError {{",
             )?;
             self.out.indent();
+            writeln!(self.out, "serializer.increase_container_depth();")?;
             if let Some(index) = variant_index {
                 writeln!(self.out, "serializer.serialize_variant_index({});", index)?;
             }
@@ -654,6 +661,7 @@ return obj;
                     self.quote_serialize_value(&field.name, &field.value)
                 )?;
             }
+            writeln!(self.out, "serializer.decrease_container_depth();")?;
             self.out.unindent();
             writeln!(self.out, "}}")?;
 
@@ -679,6 +687,7 @@ return obj;
                 )?;
             }
             self.out.indent();
+            writeln!(self.out, "deserializer.increase_container_depth();")?;
             writeln!(self.out, "Builder builder = new Builder();")?;
             for field in fields {
                 writeln!(
@@ -688,6 +697,7 @@ return obj;
                     self.quote_deserialize(&field.value)
                 )?;
             }
+            writeln!(self.out, "deserializer.decrease_container_depth();")?;
             writeln!(self.out, "return builder.build();")?;
             self.out.unindent();
             writeln!(self.out, "}}")?;

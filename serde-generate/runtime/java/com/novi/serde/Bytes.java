@@ -4,6 +4,7 @@
 package com.novi.serde;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Immutable wrapper class around byte[].
@@ -14,7 +15,7 @@ public final class Bytes {
     private final byte[] content;
 
     public Bytes(byte[] content) {
-        assert content != null;
+        Objects.requireNonNull(content, "content must not be null");
         this.content = content.clone();
     }
 

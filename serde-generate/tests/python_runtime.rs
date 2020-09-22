@@ -41,10 +41,11 @@ fn test_python_runtime_on_simple_data(runtime: Runtime) {
     writeln!(
         source,
         r#"
+input = bytes({1:?})
 value = Test([4, 6], (3, 5), Choice__C(7))
 
 s = value.{0}_serialize()
-assert s == bytes.fromhex("{1}")
+assert s == input
 
 v = Test.{0}_deserialize(s)
 assert v == value
@@ -57,13 +58,13 @@ assert t != s
 
 seen_error = False
 try:
-    Test.{0}_deserialize(bytes.fromhex("{1}") + bytes([0]))
+    Test.{0}_deserialize(input + bytes([0]))
 except st.DeserializationError:
     seen_error = True
 assert seen_error
 "#,
         runtime.name(),
-        hex::encode(&reference),
+        reference,
     )
     .unwrap();
 
@@ -77,16 +78,16 @@ assert seen_error
 }
 
 #[test]
-fn test_python_lcs_runtime_on_all_supported_types() {
-    test_python_runtime_on_all_supported_types(Runtime::Lcs);
+fn test_python_lcs_runtime_on_supported_types() {
+    test_python_runtime_on_supported_types(Runtime::Lcs);
 }
 
 #[test]
-fn test_python_bincode_runtime_on_all_supported_types() {
-    test_python_runtime_on_all_supported_types(Runtime::Bincode);
+fn test_python_bincode_runtime_on_supported_types() {
+    test_python_runtime_on_supported_types(Runtime::Bincode);
 }
 
-fn test_python_runtime_on_all_supported_types(runtime: Runtime) {
+fn test_python_runtime_on_supported_types(runtime: Runtime) {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
     let source_path = dir.path().join("test.py");
@@ -97,35 +98,48 @@ fn test_python_runtime_on_all_supported_types(runtime: Runtime) {
     let generator = python3::CodeGenerator::new(&config);
     generator.output(&mut source, &registry).unwrap();
 
-    let values = test_utils::get_sample_values(runtime.has_canonical_maps());
-    let hex_encodings: Vec<_> = values
-        .iter()
-        .map(|v| format!("'{}'", hex::encode(&runtime.serialize(&v))))
-        .collect();
+    let positive_encodings: Vec<_> = runtime.get_positive_samples_quick();
+    let negative_encodings: Vec<_> = runtime.get_negative_samples();
 
     writeln!(
         source,
         r#"
 from copy import copy
 import serde_types as st
-encodings = [bytes.fromhex(s) for s in [{1}]]
+import sys
+import lcs
 
-for encoding in encodings:
+# Required to avoid RecursionError's in python.
+sys.setrecursionlimit(lcs.MAX_CONTAINER_DEPTH * 5)
+
+positive_encodings = [bytes(a) for a in {1:?}]
+negative_encodings = [bytes(a) for a in {2:?}]
+
+for encoding in positive_encodings:
     v = SerdeData.{0}_deserialize(encoding)
     s = v.{0}_serialize()
     assert s == encoding
 
-    for i in range(len(encoding)):
+    for i in range(min(len(encoding), 20)):
         encoding2 = bytearray(encoding)
-        encoding2[i] ^= 0x80
+        encoding2[i] ^= 0x81
         try:
             v2 = SerdeData.{0}_deserialize(encoding2)
             assert v2 != v
         except st.DeserializationError:
             pass
+
+for encoding in negative_encodings:
+    try:
+        SerdeData.{0}_deserialize(encoding)
+        print('Input bitstring was wrongfully accepted:\n', encoding)
+        sys.exit(1)
+    except st.DeserializationError:
+        pass
 "#,
         runtime.name(),
-        hex_encodings.join(", ")
+        positive_encodings,
+        negative_encodings,
     )
     .unwrap();
 
@@ -134,7 +148,7 @@ for encoding in encodings:
         std::env::var("PYTHONPATH").unwrap_or_default()
     );
     let status = Command::new("python3")
-        .arg(source_path)
+        .arg(&source_path)
         .env("PYTHONPATH", python_path)
         .status()
         .unwrap();

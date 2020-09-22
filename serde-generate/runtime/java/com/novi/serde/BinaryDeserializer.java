@@ -5,19 +5,46 @@ package com.novi.serde;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.charset.CharacterCodingException;
 import java.math.BigInteger;
 
 public abstract class BinaryDeserializer implements Deserializer {
     protected ByteBuffer input;
+    private long containerDepthBudget;
 
-    public BinaryDeserializer(byte[] input) {
+    public BinaryDeserializer(byte[] input, long maxContainerDepth) {
         this.input = ByteBuffer.wrap(input);
         this.input.order(ByteOrder.LITTLE_ENDIAN);
+        containerDepthBudget = maxContainerDepth;
+    }
+
+    public void increase_container_depth() throws DeserializationError {
+        if (containerDepthBudget == 0) {
+            throw new DeserializationError("Exceeded maximum container depth");
+        }
+        containerDepthBudget -= 1;
+    }
+
+    public void decrease_container_depth() {
+        containerDepthBudget += 1;
     }
 
     public String deserialize_str() throws DeserializationError {
-        Bytes value = deserialize_bytes();
-        return new String(value.content());
+        long len = deserialize_len();
+        if (len < 0 || len > Integer.MAX_VALUE) {
+            throw new DeserializationError("Incorrect length value for Java string");
+        }
+        byte[] content = new byte[(int) len];
+        read(content);
+        CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
+        try {
+            decoder.decode(ByteBuffer.wrap(content));
+        } catch (CharacterCodingException ex) {
+            throw new DeserializationError("Incorrect UTF8 string");
+        }
+        return new String(content);
     }
 
     public Bytes deserialize_bytes() throws DeserializationError {

@@ -7,20 +7,35 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"unicode/utf8"
 )
 
 // `BinaryDeserializer` is a partial implementation of the `Deserializer` interface.
 // It is used as an embedded struct by the Bincode and LCS deserializers.
 type BinaryDeserializer struct {
-	Buffer *bytes.Buffer
-	Input  []byte
+	Buffer               *bytes.Buffer
+	Input                []byte
+	containerDepthBudget uint64
 }
 
-func NewBinaryDeserializer(input []byte) *BinaryDeserializer {
+func NewBinaryDeserializer(input []byte, max_container_depth uint64) *BinaryDeserializer {
 	return &BinaryDeserializer{
-		Buffer: bytes.NewBuffer(input),
-		Input:  input,
+		Buffer:               bytes.NewBuffer(input),
+		Input:                input,
+		containerDepthBudget: max_container_depth,
 	}
+}
+
+func (d *BinaryDeserializer) IncreaseContainerDepth() error {
+	if d.containerDepthBudget == 0 {
+		return errors.New("exceeded maximum container depth")
+	}
+	d.containerDepthBudget -= 1
+	return nil
+}
+
+func (d *BinaryDeserializer) DecreaseContainerDepth() {
+	d.containerDepthBudget += 1
 }
 
 // `deserializeLen` to be provided by the extending struct.
@@ -30,14 +45,23 @@ func (d *BinaryDeserializer) DeserializeBytes(deserializeLen func() (uint64, err
 		return nil, err
 	}
 	ret := make([]byte, len)
-	_, err = d.Buffer.Read(ret)
+	n, err := d.Buffer.Read(ret)
+	if err == nil && uint64(n) < len {
+		return nil, errors.New("input is too short")
+	}
 	return ret, err
 }
 
 // `deserializeLen` to be provided by the extending struct.
 func (d *BinaryDeserializer) DeserializeStr(deserializeLen func() (uint64, error)) (string, error) {
 	bytes, err := d.DeserializeBytes(deserializeLen)
-	return string(bytes), err
+	if err != nil {
+		return "", err
+	}
+	if !utf8.Valid(bytes) {
+		return "", errors.New("invalid UTF8 string")
+	}
+	return string(bytes), nil
 }
 
 func (d *BinaryDeserializer) DeserializeBool() (bool, error) {

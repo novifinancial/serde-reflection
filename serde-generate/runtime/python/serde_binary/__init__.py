@@ -67,6 +67,16 @@ class SerializationConfig:
             bytes: lambda x: _encode_bytes(encode_length, x),
         }
 
+    def increase_current_container_depth(self):
+        if self.max_container_depth is not None:
+            if self.max_container_depth == 0:
+                raise st.SerializationError("Exceeded maximum container depth")
+            self.max_container_depth -= 1
+
+    def decrease_current_container_depth(self):
+        if self.max_container_depth is not None:
+            self.max_container_depth += 1
+
 
 @dataclasses.dataclass(init=False)
 class DeserializationConfig:
@@ -166,6 +176,16 @@ class DeserializationConfig:
             bytes: lambda content: _decode_bytes(decode_length, content),
         }
 
+    def increase_current_container_depth(self):
+        if self.max_container_depth is not None:
+            if self.max_container_depth == 0:
+                raise st.DeserializationError("Exceeded maximum container depth")
+            self.max_container_depth -= 1
+
+    def decrease_current_container_depth(self):
+        if self.max_container_depth is not None:
+            self.max_container_depth += 1
+
 
 def peek(content: bytes, size: int) -> bytes:
     if len(content) < size:
@@ -222,12 +242,7 @@ def serialize_with_config(
     config: SerializationConfig,
     obj: typing.Any,
     obj_type,
-    current_container_depth: int,
 ) -> bytes:
-    if config.max_container_depth is not None:
-        # pyre-ignore
-        if current_container_depth > config.max_container_depth:
-            raise st.SerializationError("Exceeded maximum container depth")
     result = b""
 
     if obj_type in config.primitive_encode_map:
@@ -241,19 +256,12 @@ def serialize_with_config(
             item_type = types[0]
             result += config.encode_length(len(obj))
             result += b"".join(
-                [
-                    serialize_with_config(
-                        config, item, item_type, current_container_depth
-                    )
-                    for item in obj
-                ]
+                [serialize_with_config(config, item, item_type) for item in obj]
             )
 
         elif getattr(obj_type, "__origin__") == tuple:  # Tuple
             for i in range(len(obj)):
-                result += serialize_with_config(
-                    config, obj[i], types[i], current_container_depth
-                )
+                result += serialize_with_config(config, obj[i], types[i])
 
         elif getattr(obj_type, "__origin__") == typing.Union:  # Option
             assert len(types) == 2 and types[1] == type(None)
@@ -261,17 +269,14 @@ def serialize_with_config(
                 result += b"\x00"
             else:
                 result += b"\x01"
-                result += serialize_with_config(
-                    config, obj, types[0], current_container_depth
-                )
+                result += serialize_with_config(config, obj, types[0])
 
         elif getattr(obj_type, "__origin__") == dict:  # Map
             assert len(types) == 2
             item_type = typing.Tuple[types[0], types[1]]
             result += config.encode_length(len(obj))
             serialized_items = config.sort_map_entries(
-                serialize_with_config(config, item, item_type, current_container_depth)
-                for item in obj.items()
+                serialize_with_config(config, item, item_type) for item in obj.items()
             )
             for s in serialized_items:
                 result += s
@@ -298,12 +303,12 @@ def serialize_with_config(
         # Content of struct or variant
         fields = dataclasses.fields(obj_type)
         types = get_type_hints(obj_type)
+        config.increase_current_container_depth()
         for field in fields:
             field_type = types[field.name]
             field_value = obj.__dict__[field.name]
-            result += serialize_with_config(
-                config, field_value, field_type, current_container_depth + 1
-            )
+            result += serialize_with_config(config, field_value, field_type)
+        config.decrease_current_container_depth()
 
     return result
 
@@ -313,12 +318,7 @@ def deserialize_with_config(
     config: DeserializationConfig,
     content: bytes,
     obj_type,
-    current_container_depth: int,
 ) -> typing.Tuple[typing.Any, bytes]:
-    if config.max_container_depth is not None:
-        # pyre-ignore
-        if current_container_depth > config.max_container_depth:
-            raise st.DeserializationError("Exceeded maximum container depth")
     if obj_type in config.primitive_decode_map:
         res, content = config.primitive_decode_map[obj_type](content)
         return res, content
@@ -331,9 +331,7 @@ def deserialize_with_config(
             seqlen, content = config.decode_length(content)
             res = []
             for i in range(0, seqlen):
-                item, content = deserialize_with_config(
-                    config, content, item_type, current_container_depth
-                )
+                item, content = deserialize_with_config(config, content, item_type)
                 res.append(item)
 
             return res, content
@@ -341,9 +339,7 @@ def deserialize_with_config(
         elif getattr(obj_type, "__origin__") == tuple:  # Tuple
             res = []
             for i in range(len(types)):
-                item, content = deserialize_with_config(
-                    config, content, types[i], current_container_depth
-                )
+                item, content = deserialize_with_config(config, content, types[i])
                 res.append(item)
             return tuple(res), content
 
@@ -354,9 +350,7 @@ def deserialize_with_config(
             if tag == 0:
                 return None, content
             elif tag == 1:
-                return deserialize_with_config(
-                    config, content, types[0], current_container_depth
-                )
+                return deserialize_with_config(config, content, types[0])
             else:
                 raise st.DeserializationError("Wrong tag for Option value")
 
@@ -368,15 +362,13 @@ def deserialize_with_config(
             for i in range(0, seqlen):
                 previous_content = content
                 key, content = deserialize_with_config(
-                    config, previous_content, types[0], current_container_depth
+                    config, previous_content, types[0]
                 )
                 if content:
                     serialized_key = previous_content[: -len(content)]
                 else:
                     serialized_key = previous_content
-                value, content = deserialize_with_config(
-                    config, content, types[1], current_container_depth
-                )
+                value, content = deserialize_with_config(config, content, types[1])
                 if previous_serialized_key is not None:
                     config.check_that_key_slices_are_increasing(
                         previous_serialized_key, serialized_key
@@ -395,13 +387,14 @@ def deserialize_with_config(
             values = []
             fields = dataclasses.fields(obj_type)
             typing_hints = get_type_hints(obj_type)
+            config.increase_current_container_depth()
             for field in fields:
                 field_type = typing_hints[field.name]
                 field_value, content = deserialize_with_config(
-                    config, content, field_type, current_container_depth + 1
+                    config, content, field_type
                 )
                 values.append(field_value)
-
+            config.decrease_current_container_depth()
             res = obj_type(*values)
             return res, content
 
@@ -411,9 +404,7 @@ def deserialize_with_config(
             if variant_index not in range(len(obj_type.VARIANTS)):
                 raise st.DeserializationError("Unexpected variant index", variant_index)
             new_type = obj_type.VARIANTS[variant_index]
-            res, content = deserialize_with_config(
-                config, content, new_type, current_container_depth + 1
-            )
+            res, content = deserialize_with_config(config, content, new_type)
             return res, content
 
         else:

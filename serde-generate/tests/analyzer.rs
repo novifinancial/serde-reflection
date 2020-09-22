@@ -71,7 +71,8 @@ fn test_on_larger_registry() {
             "Struct",
             "Tree",
             "TupleStruct",
-            "UnitStruct"
+            "UnitStruct",
+            "SimpleList",
         )
     );
 
@@ -84,6 +85,7 @@ fn test_on_larger_registry() {
             "Struct",
             "OtherTypes",
             "PrimitiveTypes",
+            "SimpleList",
             "Tree",
             "TupleStruct",
             "UnitStruct",
