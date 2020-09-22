@@ -518,6 +518,7 @@ return list;
         writeln!(self.out, "}}\n")
     }
 
+    /// Make code more readable by using typedefs for complex types (e.g. instead of string | null as a type, we define OptionalString = string | null)
     fn output_typedef_helper(&mut self, format0: &Format) -> Result<()> {
         use Format::*;
 
