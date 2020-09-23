@@ -359,19 +359,17 @@ value.forEach((item: {}) => {{
                 write!(
                     self.out,
                     r#"
-const keys = Object.keys(value);
-serializer.serializeLen(keys.length);
+serializer.serializeLen(value.size);
 const offsets: number[] = [];
-keys.forEach((key: {}) => {{
-    offsets.push(serializer.getBufferOffset());
-    {}
-    {}
-}});
+for (const [k, v] of value.entries()) {{
+  offsets.push(serializer.getBufferOffset());
+  {}
+  {}
+}}
 serializer.sortMapEntries(offsets);
 "#,
-                    self.quote_type(key),
-                    self.quote_serialize_value("key", key, false),
-                    self.quote_serialize_value("value[key]", value, false)
+                    self.quote_serialize_value("k", key, false),
+                    self.quote_serialize_value("v", value, false)
                 )?;
             }
 
@@ -455,7 +453,7 @@ return list;
                     self.out,
                     r#"
 const length = deserializer.deserializeLen();
-const obj: {{[key: {0}]: {1}}} = {{}};
+const obj = new Map<{0}, {1}>();
 let previousKeyStart = 0;
 let previousKeyEnd = 0;
 for (let i = 0; i < length; i++) {{
@@ -470,7 +468,7 @@ for (let i = 0; i < length; i++) {{
     previousKeyStart = keyStart;
     previousKeyEnd = keyEnd;
     const value = {3};
-    obj[key] =  value;
+    obj.set(key, value);
 }}
 return obj;
 "#,
@@ -542,7 +540,7 @@ return list;
             Map { key, value } => {
                 writeln!(
                     self.out,
-                    "export type Map{0}{1} = Record<{0}, {1}>;",
+                    "export type Map{0}{1} = Map<{0}, {1}>;",
                     self.quote_type(key),
                     self.quote_type(value)
                 )?;
