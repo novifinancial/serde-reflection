@@ -157,6 +157,11 @@ class BincodeTestCase(unittest.TestCase):
                 b"\x02\x00\x00\x00\x00\x00\x00\x00\x01\x00\x05\x00\x01\x03", Map
             ),
         )
+        m2 = OrderedDict([(1, 5), (256, 3)])
+        e2 = bincode.serialize(m2, Map)
+        self.assertEqual(
+            e2, b"\x02\x00\x00\x00\x00\x00\x00\x00\x01\x00\x05\x00\x01\x03"
+        )
 
     def test_serialize_set(self):
         Set = typing.Dict[st.uint16, st.unit]
