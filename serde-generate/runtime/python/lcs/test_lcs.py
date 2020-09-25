@@ -4,6 +4,33 @@ import lcs
 import typing
 import sys
 from dataclasses import dataclass
+from collections import OrderedDict
+
+
+def encode_u32_as_uleb128(value: int) -> bytes:
+    serializer = lcs.LcsSerializer()
+    serializer.serialize_u32_as_uleb128(value)
+    return serializer.get_buffer()
+
+
+def decode_uleb128_as_u32(content: bytes) -> int:
+    deserializer = lcs.LcsDeserializer(content)
+    value = deserializer.deserialize_uleb128_as_u32()
+    assert deserializer.get_remaining_buffer() == b""
+    return value
+
+
+def encode_length(value: int) -> bytes:
+    serializer = lcs.LcsSerializer()
+    serializer.serialize_len(value)
+    return serializer.get_buffer()
+
+
+def decode_length(content: bytes) -> int:
+    deserializer = lcs.LcsDeserializer(content)
+    value = deserializer.deserialize_len()
+    assert deserializer.get_remaining_buffer() == b""
+    return value
 
 
 class LcsTestCase(unittest.TestCase):
@@ -75,38 +102,32 @@ class LcsTestCase(unittest.TestCase):
         self.assertEqual(lcs.deserialize(b"\xff" * 16, st.int128), (st.int128(-1), b""))
 
     def test_encode_u32_as_uleb128(self):
-        self.assertEqual(lcs._encode_u32_as_uleb128(0), b"\x00")
-        self.assertEqual(lcs._encode_u32_as_uleb128(3), b"\x03")
-        self.assertEqual(lcs._encode_u32_as_uleb128(0x7F), b"\x7f")
-        self.assertEqual(lcs._encode_u32_as_uleb128(0x3F01), b"\x81\x7e")
-        self.assertEqual(lcs._encode_u32_as_uleb128(0x8001), b"\x81\x80\x02")
-        self.assertEqual(
-            lcs._encode_u32_as_uleb128(lcs.MAX_U32), b"\xff\xff\xff\xff\x0f"
-        )
+        self.assertEqual(encode_u32_as_uleb128(0), b"\x00")
+        self.assertEqual(encode_u32_as_uleb128(3), b"\x03")
+        self.assertEqual(encode_u32_as_uleb128(0x7F), b"\x7f")
+        self.assertEqual(encode_u32_as_uleb128(0x3F01), b"\x81\x7e")
+        self.assertEqual(encode_u32_as_uleb128(0x8001), b"\x81\x80\x02")
+        self.assertEqual(encode_u32_as_uleb128(lcs.MAX_U32), b"\xff\xff\xff\xff\x0f")
 
-        self.assertEqual(lcs._decode_uleb128_as_u32(b"\x00"), (0, b""))
-        self.assertEqual(lcs._decode_uleb128_as_u32(b"\x03"), (3, b""))
-        self.assertEqual(lcs._decode_uleb128_as_u32(b"\x7f"), (0x7F, b""))
-        self.assertEqual(lcs._decode_uleb128_as_u32(b"\x81\x7e"), (0x3F01, b""))
-        self.assertEqual(lcs._decode_uleb128_as_u32(b"\x80\x80\x01"), (0x4000, b""))
-        self.assertEqual(
-            lcs._decode_uleb128_as_u32(b"\x80\x80\x01\x00"), (0x4000, b"\x00")
-        )
-        self.assertEqual(lcs._decode_uleb128_as_u32(b"\x81\x80\x02"), (0x8001, b""))
-        self.assertEqual(
-            lcs._decode_uleb128_as_u32(b"\xff\xff\xff\xff\x0f"), (lcs.MAX_U32, b"")
-        )
+        self.assertEqual(decode_uleb128_as_u32(b"\x00"), 0)
+        self.assertEqual(decode_uleb128_as_u32(b"\x03"), 3)
+        self.assertEqual(decode_uleb128_as_u32(b"\x7f"), 0x7F)
+        self.assertEqual(decode_uleb128_as_u32(b"\x81\x7e"), 0x3F01)
+        self.assertEqual(decode_uleb128_as_u32(b"\x80\x80\x01"), 0x4000)
+        self.assertEqual(decode_uleb128_as_u32(b"\x80\x80\x01"), 0x4000)
+        self.assertEqual(decode_uleb128_as_u32(b"\x81\x80\x02"), 0x8001)
+        self.assertEqual(decode_uleb128_as_u32(b"\xff\xff\xff\xff\x0f"), lcs.MAX_U32)
         with self.assertRaises(st.DeserializationError):
-            lcs._decode_uleb128_as_u32(b"\x80\x00")
+            decode_uleb128_as_u32(b"\x80\x00")
         with self.assertRaises(st.DeserializationError):
-            lcs._decode_uleb128_as_u32(b"\xff\xff\xff\xff\x10")
+            decode_uleb128_as_u32(b"\xff\xff\xff\xff\x10")
 
     def test_encode_length(self):
-        self.assertEqual(lcs._encode_length(lcs.MAX_LENGTH), b"\xff\xff\xff\xff\x07")
+        self.assertEqual(encode_length(lcs.MAX_LENGTH), b"\xff\xff\xff\xff\x07")
         with self.assertRaises(st.SerializationError):
-            lcs._encode_length(lcs.MAX_LENGTH + 1)
+            encode_length(lcs.MAX_LENGTH + 1)
         with self.assertRaises(st.DeserializationError):
-            lcs._decode_length(b"\xff\xff\xff\xff\x08")
+            decode_length(b"\xff\xff\xff\xff\x08")
 
     def test_serialize_bytes(self):
         self.assertEqual(lcs.serialize(b"", bytes), b"\x00")
@@ -151,12 +172,15 @@ class LcsTestCase(unittest.TestCase):
 
     def test_serialize_map(self):
         Map = typing.Dict[st.uint16, st.uint8]
-        m = {256: 3, 1: 5}
+        m = OrderedDict([(1, 5), (256, 3)])
         e = lcs.serialize(m, Map)
         self.assertEqual(e, b"\x02\x00\x01\x03\x01\x00\x05")
         self.assertEqual(
             (m, b""), lcs.deserialize(b"\x02\x00\x01\x03\x01\x00\x05", Map)
         )
+        m2 = OrderedDict([(256, 3), (1, 5)])
+        e2 = lcs.serialize(m2, Map)
+        self.assertEqual(e2, e)
         with self.assertRaises(st.DeserializationError):
             # Must enforce canonical encoding.
             lcs.deserialize(b"\x02\x01\x00\x05\x00\x01\x03", Map)
