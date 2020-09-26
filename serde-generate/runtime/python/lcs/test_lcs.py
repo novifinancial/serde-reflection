@@ -170,6 +170,13 @@ class LcsTestCase(unittest.TestCase):
         with self.assertRaises(st.DeserializationError):
             lcs.deserialize(b"\x03\x80ab", str)
 
+    def test_deserialize_long_sequence(self):
+        Seq = typing.Sequence[st.uint16]
+        five = st.uint16(5)
+        v = [five] * 1000000
+        b = lcs.serialize(v, Seq)
+        self.assertEqual(lcs.deserialize(b, Seq), (v, b""))
+
     def test_serialize_map(self):
         Map = typing.Dict[st.uint16, st.uint8]
         m = OrderedDict([(1, 5), (256, 3)])
