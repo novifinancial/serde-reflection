@@ -6,7 +6,7 @@ import { Readable } from 'stream';
 export abstract class BinaryDeserializer implements Deserializer {
   public static readonly MAX_VALUE = 2147483647;
   public data: Readable;
-  private readonly totalLength;
+  private readonly totalLength: number;
 
   private static makeReadable(data: Uint8Array): Readable {
     const r = new Readable();

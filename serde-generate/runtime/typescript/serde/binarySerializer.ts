@@ -27,6 +27,7 @@ export abstract class BinarySerializer implements Serializer {
     }
 
     public serializeUnit(value: any): void {
+        return;
     }
 
     public serializeU8(value: number): void {
