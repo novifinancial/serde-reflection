@@ -55,7 +55,10 @@ fn write_package_tsconfig_json_for_test_build(path: std::path::PathBuf) -> Resul
     Ok(())
 }
 
-pub fn copy_dir<U: AsRef<std::path::Path>, V: AsRef<std::path::Path>>(from: U, to: V) -> Result<()> {
+pub fn copy_dir<U: AsRef<std::path::Path>, V: AsRef<std::path::Path>>(
+    from: U,
+    to: V,
+) -> Result<()> {
     let mut stack = Vec::new();
     stack.push(std::path::PathBuf::from(from.as_ref()));
 

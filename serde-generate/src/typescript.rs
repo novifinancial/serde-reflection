@@ -10,7 +10,11 @@ use std::{
 
 use serde_reflection::{ContainerFormat, Format, FormatHolder, Named, Registry, VariantFormat};
 
-use crate::{indent::{IndentConfig, IndentedWriter}, CodeGeneratorConfig, common};
+use crate::{
+    common,
+    indent::{IndentConfig, IndentedWriter},
+    CodeGeneratorConfig,
+};
 use heck::CamelCase;
 
 /// Main configuration object for code-generation in TypeScript.
@@ -82,7 +86,8 @@ where
 {
     fn output_preamble(&mut self) -> Result<()> {
         writeln!(
-            self.out,r#"
+            self.out,
+            r#"
 import {{BigNumber}} from '@ethersproject/bignumber';
 import {{Int64LE, Uint64LE}} from 'int64-buffer';
 import bytes from '@ethersproject/bytes';
@@ -99,7 +104,8 @@ import {{ Deserializer }} from '../serde/deserializer';
             )?;
         }
         writeln!(
-            self.out, r#"
+            self.out,
+            r#"
 export type Optional<T> = T | null;
 export type Seq<T> = T[];
 export type Tuple<T extends any[]> = T
@@ -152,7 +158,9 @@ export type ListTuple<T extends any[]> = Tuple<T>[]
 
             Option(format) => format!("Optional<{}>", self.quote_type(format)),
             Seq(format) => format!("Seq<{}>", self.quote_type(format)),
-            Map { key, value } => format!("Map<{},{}>", self.quote_type(key), self.quote_type(value)),
+            Map { key, value } => {
+                format!("Map<{},{}>", self.quote_type(key), self.quote_type(value))
+            }
             Tuple(formats) => format!("Tuple<[{}]>", self.quote_types(formats, ", ")),
             TupleArray {
                 content,
