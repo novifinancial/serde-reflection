@@ -227,7 +227,11 @@ import typing
         };
 
         // Regarding comments, we pretend the namespace is `[module, base, name]`.
-        writeln!(self.out, "\n@dataclass\nclass {0}__{1}({0}):", base, name)?;
+        writeln!(
+            self.out,
+            "\n@dataclass(frozen=True)\nclass {0}__{1}({0}):",
+            base, name
+        )?;
         self.out.indent();
         self.output_comment(&name)?;
         if self.generator.config.serialization {
@@ -339,7 +343,7 @@ def {0}_deserialize(input: bytes) -> '{1}':
             }
         };
         // Struct case.
-        writeln!(self.out, "\n@dataclass\nclass {}:", name)?;
+        writeln!(self.out, "\n@dataclass(frozen=True)\nclass {}:", name)?;
         self.out.indent();
         self.output_comment(name)?;
         self.current_namespace.push(name.to_string());
