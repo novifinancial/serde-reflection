@@ -58,7 +58,7 @@ generator.output(&mut source, &registry)?;
 assert!(
     String::from_utf8_lossy(&source).contains(
     r#"
-@dataclass
+@dataclass(frozen=True)
 class Test:
     a: typing.Sequence[st.uint64]
     b: typing.Tuple[st.uint32, st.uint32]
