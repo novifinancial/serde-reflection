@@ -46,7 +46,7 @@ provides (de)serialization in a particular <a href="https://serde.rs/#data-forma
 <span class="macro">assert</span><span class="macro">!</span>(
     <span class="ident">String</span>::<span class="ident">from_utf8_lossy</span>(<span class="kw-2">&amp;</span><span class="ident">source</span>).<span class="ident">contains</span>(
     <span class="string">r#&quot;
-@dataclass
+@dataclass(frozen=True)
 class Test:
     a: typing.Sequence[st.uint64]
     b: typing.Tuple[st.uint32, st.uint32]
