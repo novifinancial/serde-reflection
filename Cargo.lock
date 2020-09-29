@@ -250,7 +250,7 @@ checksum = "f2f96b10ec2560088a8e76961b00d47107b3a625fecb76dedb29ee7ccbf98235"
 [[package]]
 name = "libra-canonical-serialization"
 version = "0.1.0"
-source = "git+https://github.com/libra/libra.git?branch=auto#cc6bfdeb6d6931ef604b33115c9c1b028646ad7d"
+source = "git+https://github.com/libra/libra.git?branch=auto#257a3460ce9e11edba5cff4c976a2f9e47a4adfd"
 dependencies = [
  "libra-workspace-hack",
  "serde",
@@ -260,7 +260,7 @@ dependencies = [
 [[package]]
 name = "libra-workspace-hack"
 version = "0.1.0"
-source = "git+https://github.com/libra/libra.git?branch=auto#cc6bfdeb6d6931ef604b33115c9c1b028646ad7d"
+source = "git+https://github.com/libra/libra.git?branch=auto#257a3460ce9e11edba5cff4c976a2f9e47a4adfd"
 dependencies = [
  "bytes",
  "cc",
