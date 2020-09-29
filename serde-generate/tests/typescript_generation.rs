@@ -55,6 +55,53 @@ fn write_package_tsconfig_json_for_test_build(path: std::path::PathBuf) -> Resul
     Ok(())
 }
 
+pub fn copy_dir<U: AsRef<std::path::Path>, V: AsRef<std::path::Path>>(from: U, to: V) -> Result<()> {
+    let mut stack = Vec::new();
+    stack.push(std::path::PathBuf::from(from.as_ref()));
+
+    let output_root = std::path::PathBuf::from(to.as_ref());
+    let input_root = std::path::PathBuf::from(from.as_ref()).components().count();
+
+    while let Some(working_path) = stack.pop() {
+        println!("process: {:?}", &working_path);
+
+        // Generate a relative path
+        let src: std::path::PathBuf = working_path.components().skip(input_root).collect();
+
+        // Create a destination if missing
+        let dest = if src.components().count() == 0 {
+            output_root.clone()
+        } else {
+            output_root.join(&src)
+        };
+        if std::fs::metadata(&dest).is_err() {
+            println!(" mkdir: {:?}", dest);
+            std::fs::create_dir_all(&dest)?;
+        }
+
+        for entry in std::fs::read_dir(working_path)? {
+            let entry = entry?;
+            let path = entry.path();
+            if path.is_dir() {
+                stack.push(path);
+            } else {
+                match path.file_name() {
+                    Some(filename) => {
+                        let dest_path = dest.join(filename);
+                        println!("  copy: {:?} -> {:?}", &path, &dest_path);
+                        std::fs::copy(&path, &dest_path)?;
+                    }
+                    None => {
+                        println!("failed: {:?}", path);
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(())
+}
+
 fn test_that_ts_code_compiles_with_config(
     config: &CodeGeneratorConfig,
 ) -> (TempDir, std::path::PathBuf) {
@@ -72,6 +119,10 @@ fn test_that_ts_code_compiles_with_config(
     installer.install_serde_runtime().unwrap();
     installer.install_bincode_runtime().unwrap();
     installer.install_lcs_runtime().unwrap();
+
+    let copy_dir_path = std::path::Path::new("/tmp/shit/");
+    std::fs::create_dir_all(&copy_dir_path);
+    copy_dir(dir.path(), copy_dir_path);
 
     let npm_status = Command::new("npm")
         .arg("install")

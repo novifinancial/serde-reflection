@@ -10,10 +10,7 @@ use std::{
 
 use serde_reflection::{ContainerFormat, Format, FormatHolder, Named, Registry, VariantFormat};
 
-use crate::{
-    indent::{IndentConfig, IndentedWriter},
-    CodeGeneratorConfig,
-};
+use crate::{indent::{IndentConfig, IndentedWriter}, CodeGeneratorConfig, common};
 use heck::CamelCase;
 
 /// Main configuration object for code-generation in TypeScript.
@@ -85,21 +82,13 @@ where
 {
     fn output_preamble(&mut self) -> Result<()> {
         writeln!(
-            self.out,
-            "import {{BigNumber}} from '@ethersproject/bignumber';"
-        )?;
-        writeln!(
-            self.out,
-            "import {{Int64LE, Uint64LE}} from 'int64-buffer';\n"
-        )?;
-        writeln!(self.out, "import bytes from '@ethersproject/bytes';\n")?;
-        writeln!(
-            self.out,
-            "import {{ Serializer }} from '../serde/serializer';\n"
-        )?;
-        writeln!(
-            self.out,
-            "import {{ Deserializer }} from '../serde/deserializer';\n"
+            self.out,r#"
+import {{BigNumber}} from '@ethersproject/bignumber';
+import {{Int64LE, Uint64LE}} from 'int64-buffer';
+import bytes from '@ethersproject/bytes';
+import {{ Serializer }} from '../serde/serializer';
+import {{ Deserializer }} from '../serde/deserializer';
+"#
         )?;
         for namespace in self.generator.namespaces_to_import.iter() {
             writeln!(
@@ -109,6 +98,14 @@ where
                 namespace
             )?;
         }
+        writeln!(
+            self.out, r#"
+export type Optional<T> = T | null;
+export type Seq<T> = T[];
+export type Tuple<T extends any[]> = T
+export type ListTuple<T extends any[]> = Tuple<T>[]
+"#
+        )?;
 
         Ok(())
     }
@@ -153,24 +150,24 @@ where
             Str => "string".into(),
             Bytes => "Uint8Array".into(),
 
-            Option(format) => format!("Optional{}", self.quote_type(format)),
-            Seq(format) => format!("List{}", self.quote_type(format)),
-            Map { key, value } => format!("Map{}{}", self.quote_type(key), self.quote_type(value)),
-            Tuple(formats) => format!("Tuple{}", self.quote_types(formats)),
+            Option(format) => format!("Optional<{}>", self.quote_type(format)),
+            Seq(format) => format!("Seq<{}>", self.quote_type(format)),
+            Map { key, value } => format!("Map<{},{}>", self.quote_type(key), self.quote_type(value)),
+            Tuple(formats) => format!("Tuple<[{}]>", self.quote_types(formats, ", ")),
             TupleArray {
                 content,
                 size: _size,
-            } => format!("ListTuple{}", self.quote_type(content),),
+            } => format!("ListTuple<[{}]>", self.quote_type(content),),
             Variable(_) => panic!("unexpected value"),
         }
     }
 
-    fn quote_types(&self, formats: &[Format]) -> String {
+    fn quote_types(&self, formats: &[Format], sep: &str) -> String {
         formats
             .iter()
             .map(|f| self.quote_type(f))
             .collect::<Vec<_>>()
-            .join("")
+            .join(sep)
     }
 
     fn output_helpers(&mut self, registry: &Registry) -> Result<()> {
@@ -179,15 +176,11 @@ where
             format
                 .visit(&mut |f| {
                     if Self::needs_helper(f) {
-                        subtypes.insert(Self::mangle_type(f), f.clone());
+                        subtypes.insert(common::mangle_type(f), f.clone());
                     }
                     Ok(())
                 })
                 .unwrap();
-        }
-
-        for subtype in subtypes.values() {
-            self.output_typedef_helper(subtype)?;
         }
 
         writeln!(self.out, "export class Helpers {{")?;
@@ -199,49 +192,6 @@ where
         self.out.unindent();
         writeln!(self.out, "}}")?;
         writeln!(self.out)
-    }
-
-    fn mangle_type(format: &Format) -> String {
-        use Format::*;
-        match format {
-            TypeName(x) => x.to_string(),
-            Unit => "void".into(),
-            Bool => "boolean".into(),
-            I8 => "number".into(),
-            I16 => "number".into(),
-            I32 => "number".into(),
-            I64 => "Int64LE".into(),
-            I128 => "BigNumber".into(),
-            U8 => "number".into(),
-            U16 => "number".into(),
-            U32 => "number".into(),
-            U64 => "Uint64LE".into(),
-            U128 => "BigNumber".into(),
-            F32 => "number".into(),
-            F64 => "number".into(),
-            Char => "string".into(),
-            Str => "string".into(),
-            Bytes => "Uint8Array".into(),
-
-            Option(format) => format!("Optional{}", Self::mangle_type(format)),
-            Seq(format) => format!("List{}", Self::mangle_type(format)),
-            Map { key, value } => {
-                format!("Map{}{}", Self::mangle_type(key), Self::mangle_type(value))
-            }
-            Tuple(formats) => format!(
-                "Tuple{}",
-                formats
-                    .iter()
-                    .map(Self::mangle_type)
-                    .collect::<Vec<_>>()
-                    .join("")
-            ),
-            TupleArray {
-                content,
-                size: _size,
-            } => format!("ListTuple{}", Self::mangle_type(content)),
-            Variable(_) => panic!("unexpected value"),
-        }
     }
 
     fn needs_helper(format: &Format) -> bool {
@@ -277,7 +227,7 @@ where
             Bytes => format!("serializer.serializeBytes({}{});", this_str, value),
             _ => format!(
                 "Helpers.serialize{}({}{}, serializer);",
-                Self::mangle_type(format),
+                common::mangle_type(format),
                 this_str,
                 value
             ),
@@ -310,7 +260,7 @@ where
             Bytes => "deserializer.deserializeBytes()".to_string(),
             _ => format!(
                 "Helpers.deserialize{}(deserializer)",
-                Self::mangle_type(format),
+                common::mangle_type(format),
             ),
         }
     }
@@ -396,7 +346,7 @@ value.forEach((item) =>{{
     {}
 }});
 "#,
-                    self.quote_serialize_value("item", content, false)
+                    self.quote_serialize_value("item[0]", content, false)
                 )?;
             }
 
@@ -500,7 +450,7 @@ return [{}
                     r#"
 const list: {} = [];
 for (let i = 0; i < {}; i++) {{
-    list.push({});
+    list.push([{}]);
 }}
 return list;
 "#,
@@ -514,71 +464,6 @@ return list;
         }
         self.out.unindent();
         writeln!(self.out, "}}\n")
-    }
-
-    /// Make code more readable by using typedefs for complex types (e.g. instead of string | null as a type, we define OptionalString = string | null)
-    fn output_typedef_helper(&mut self, format0: &Format) -> Result<()> {
-        use Format::*;
-
-        match format0 {
-            Option(format) => {
-                writeln!(
-                    self.out,
-                    "export type Optional{0} = {0} | null;",
-                    self.quote_type(format)
-                )?;
-            }
-
-            Seq(format) => {
-                writeln!(
-                    self.out,
-                    "export type List{0} = {0}[];",
-                    self.quote_type(format)
-                )?;
-            }
-
-            Map { key, value } => {
-                writeln!(
-                    self.out,
-                    "export type Map{0}{1} = Map<{0}, {1}>;",
-                    self.quote_type(key),
-                    self.quote_type(value)
-                )?;
-            }
-
-            Tuple(formats) => {
-                write!(self.out, "export type Tuple")?;
-                for (_index, format) in formats.iter().enumerate() {
-                    write!(self.out, "{}", self.quote_type(format))?;
-                }
-                write!(
-                    self.out,
-                    " = [{}",
-                    formats
-                        .iter()
-                        .map(|f| self.quote_type(f))
-                        .collect::<Vec<_>>()
-                        .join(", ")
-                )?;
-                writeln!(self.out, "];")?;
-            }
-
-            TupleArray {
-                content,
-                size: _size,
-            } => {
-                // discover if import needed (key, value) might be primitives
-                writeln!(
-                    self.out,
-                    "export type ListTuple{} = {}[];",
-                    self.quote_type(content),
-                    self.quote_type(content)
-                )?;
-            }
-
-            _ => panic!("unexpected case"),
-        }
-        Ok(())
     }
 
     fn output_variant(
