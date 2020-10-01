@@ -1,23 +1,23 @@
-import { BigNumber } from '@ethersproject/bignumber';
-import { Int64LE, Uint64LE } from 'int64-buffer';
 import { Deserializer } from './deserializer';
-import { Readable } from 'stream';
 
 export abstract class BinaryDeserializer implements Deserializer {
-  public static readonly MAX_VALUE = 2147483647;
-  public data: Readable;
-  private readonly totalLength: number;
-
-  private static makeReadable(data: Uint8Array): Readable {
-    const r = new Readable();
-    r.push(Buffer.from(data));
-    r.push(null);
-    return r;
-  }
+  private static readonly BIG_32 = BigInt(32);
+  private static readonly BIG_64 = BigInt(64);
+  private static readonly textDecoder: TextDecoder = new TextDecoder();
+  public buffer: ArrayBuffer;
+  public offset: number;
 
   protected constructor(data: Uint8Array) {
-    this.data = BinaryDeserializer.makeReadable(data);
-    this.totalLength = this.data.readableLength;
+    this.buffer = data;
+    this.offset = 0;
+  }
+
+  private read(length: number): Uint8Array {
+    const bytes = new Uint8Array(
+        this.buffer.slice(this.offset, this.offset + length)
+    );
+    this.offset += length;
+    return bytes;
   }
 
   abstract deserializeLen(): number;
@@ -31,64 +31,80 @@ export abstract class BinaryDeserializer implements Deserializer {
 
   public deserializeStr(): string {
     const value = this.deserializeBytes();
-    return String.fromCharCode.apply(null, Array.from(value));
+    return BinaryDeserializer.textDecoder.decode(value);
   }
 
   public deserializeBytes(): Uint8Array {
     const len = this.deserializeLen();
-    if (len < 0 || len > BinaryDeserializer.MAX_VALUE) {
-      throw new Error('The length of a JavaScript array cannot exceed MAXINT');
+    if (len < 0) {
+      throw new Error("Length of a bytes array can't be negative");
     }
-    return this.data.read(len);
+    return this.read(len);
   }
 
   public deserializeBool(): boolean {
-    const bool = this.data.read(1);
-    return bool[0] == 1;
+    const bool = this.read(1)[0];
+    return bool == 1;
   }
 
-  public deserializeUnit(): any {
+  public deserializeUnit(): undefined {
     return;
   }
 
   public deserializeU8(): number {
-    return Buffer.from(this.data.read(1)).readUInt8(0);
+    return new DataView(this.read(1)).getUint8(0);
   }
 
   public deserializeU16(): number {
-    return Buffer.from(this.data.read(2)).readUInt16LE(0);
+    return new DataView(this.read(2)).getUint16(0, true);
   }
 
   public deserializeU32(): number {
-    return Buffer.from(this.data.read(4)).readUInt32LE(0);
+    return new DataView(this.read(4)).getUint32(0, true);
   }
 
-  public deserializeU64(): Uint64LE {
-    return new Uint64LE(Buffer.from(this.data.read(8)));
+  public deserializeU64(): BigInt {
+    const left = this.deserializeU32();
+    const right = this.deserializeU32();
+
+    // combine the two 32-bit values and return (right contain the high bits)
+    return (BigInt(right) << BinaryDeserializer.BIG_32) | BigInt(left);
   }
 
-  public deserializeU128(): BigNumber {
-    return BigNumber.from(this.data.read(16));
+  public deserializeU128(): BigInt {
+    const left = this.deserializeU64();
+    const right = this.deserializeU64();
+
+    // combine the two 64-bit values and return (right contain the high bits)
+    return (BigInt(right) << BinaryDeserializer.BIG_64) | BigInt(left);
   }
 
   public deserializeI8(): number {
-    return Buffer.from(this.data.read(1)).readInt8(0);
+    return new DataView(this.read(1)).getInt8(0);
   }
 
   public deserializeI16(): number {
-    return Buffer.from(this.data.read(2)).readInt16LE(0);
+    return new DataView(this.read(2)).getInt16(0, true);
   }
 
   public deserializeI32(): number {
-    return Buffer.from(this.data.read(4)).readInt32LE(0);
+    return new DataView(this.read(4)).getInt32(0, true);
   }
 
-  public deserializeI64(): Int64LE {
-    return new Int64LE(Buffer.from(this.data.read(8)));
+  public deserializeI64(): BigInt {
+    const left = this.deserializeI32();
+    const right = this.deserializeI32();
+
+    // combine the two 32-bit values and return (right contain the high bits)
+    return (BigInt(right) << BinaryDeserializer.BIG_32) | BigInt(left);
   }
 
-  public deserializeI128(): BigNumber {
-    return BigNumber.from(this.data.read(16));
+  public deserializeI128(): BigInt {
+    const left = this.deserializeI64();
+    const right = this.deserializeI64();
+
+    // combine the two 64-bit values and return (right contain the high bits)
+    return (BigInt(right) << BinaryDeserializer.BIG_64) | BigInt(left);
   }
 
   public deserializeOptionTag(): boolean {
@@ -96,18 +112,18 @@ export abstract class BinaryDeserializer implements Deserializer {
   }
 
   public getBufferOffset(): number {
-    return this.totalLength - this.data.readableLength;
+    return this.offset;
   }
 
   public deserializeChar(): string {
-    throw new Error('Method serializeChar not implemented.');
+    throw new Error('Method deserializeChar not implemented.');
   }
 
   public deserializeF32(): number {
-    throw new Error('Method serializeF32 not implemented.');
+    return new DataView(this.read(4)).getFloat32(0, true);
   }
 
   public deserializeF64(): number {
-    throw new Error('Method serializeF64 not implemented.');
+    return new DataView(this.read(8)).getFloat64(0, true);
   }
 }

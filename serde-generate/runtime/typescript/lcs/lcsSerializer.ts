@@ -1,9 +1,17 @@
-import leb from 'leb';
-import {BinarySerializer} from '../serde/binarySerializer';
+import { BinarySerializer } from '../serde/binarySerializer';
 
 export class LcsSerializer extends BinarySerializer {
+    constructor() {
+        super();
+    }
     public serializeU32AsUleb128(value: number): void {
-        this.concat(leb.encodeUInt32(value));
+        const valueArray = [];
+        while (value >>> 7 != 0) {
+            valueArray.push((value & 0x7f) | 0x80);
+            value = value >>> 7;
+        }
+        valueArray.push(value);
+        this.serialize(new Uint8Array(valueArray));
     }
 
     serializeLen(value: number): void {
@@ -17,15 +25,4 @@ export class LcsSerializer extends BinarySerializer {
     public sortMapEntries(offsets: number[]) {
         // leaving it empty for now, should be implemented soon
     }
-
-    public static hexString(value: string): Uint8Array {
-        const data = value.match(/.{1,2}/g)!.map((x) => parseInt(x, 16));
-        return new Uint8Array(data);
-    }
-
-    public getBytesAsHex(): string {
-        return Buffer.from(this.getBytes()).toString('hex');
-    }
-
-
 }

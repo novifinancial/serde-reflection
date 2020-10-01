@@ -21,10 +21,6 @@ fn write_package_tsconfig_json_for_test_build(path: std::path::PathBuf) -> Resul
     "build": "tsc"
   }},
   "dependencies": {{
-    "@ethersproject/bignumber": "^5.0.6",
-    "@ethersproject/bytes": "^5.0.4",
-    "int64-buffer": "^0.99.1007",
-    "leb": "^0.3.0"
   }},
   "devDependencies": {{
     "@types/node": "12.12.2",
@@ -46,7 +42,13 @@ fn write_package_tsconfig_json_for_test_build(path: std::path::PathBuf) -> Resul
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "lib": [
+      "es6",
+      "esnext.BigInt",
+      "dom"
+    ]
+
   }},
   "include": ["testing/*.ts"]
 }}
