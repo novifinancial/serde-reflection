@@ -88,9 +88,6 @@ where
         writeln!(
             self.out,
             r#"
-import {{BigNumber}} from '@ethersproject/bignumber';
-import {{Int64LE, Uint64LE}} from 'int64-buffer';
-import bytes from '@ethersproject/bytes';
 import {{ Serializer }} from '../serde/serializer';
 import {{ Deserializer }} from '../serde/deserializer';
 "#
@@ -143,13 +140,13 @@ export type ListTuple<T extends any[]> = Tuple<T>[]
             I8 => "number".into(),
             I16 => "number".into(),
             I32 => "number".into(),
-            I64 => "Int64LE".into(),
-            I128 => "BigNumber".into(),
+            I64 => "BigInt".into(),
+            I128 => "BigInt".into(),
             U8 => "number".into(),
             U16 => "number".into(),
             U32 => "number".into(),
-            U64 => "Uint64LE".into(),
-            U128 => "BigNumber".into(),
+            U64 => "BigInt".into(),
+            U128 => "BigInt".into(),
             F32 => "number".into(),
             F64 => "number".into(),
             Char => "string".into(),
