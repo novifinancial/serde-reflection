@@ -188,6 +188,18 @@ import typing
         Ok(())
     }
 
+    fn output_custom_code(&mut self, name: &str) -> std::io::Result<bool> {
+        let mut path = self.current_namespace.clone();
+        path.push(name.to_string());
+        match self.generator.config.custom_code.get(&path) {
+            Some(code) => {
+                writeln!(self.out, "\n{}", code)?;
+                Ok(true)
+            }
+            None => Ok(false),
+        }
+    }
+
     fn output_fields(&mut self, fields: &[Named<Format>]) -> Result<()> {
         if fields.is_empty() {
             writeln!(self.out, "pass")?;
@@ -239,8 +251,9 @@ import typing
         }
         self.current_namespace.push(name.to_string());
         self.output_fields(&fields)?;
-        self.out.unindent();
         self.current_namespace.pop();
+        self.output_custom_code(&name)?;
+        self.out.unindent();
         writeln!(self.out)
     }
 
@@ -262,7 +275,9 @@ import typing
                 self.output_serialize_method_for_encoding(name, *encoding)?;
                 self.output_deserialize_method_for_encoding(name, *encoding)?;
             }
-        } else {
+        }
+        let wrote_custom_code = self.output_custom_code(&name)?;
+        if !self.generator.config.serialization && !wrote_custom_code {
             writeln!(self.out, "pass")?;
         }
         writeln!(self.out)?;
@@ -353,6 +368,7 @@ def {0}_deserialize(input: bytes) -> '{1}':
             self.output_deserialize_method_for_encoding(name, *encoding)?;
         }
         self.current_namespace.pop();
+        self.output_custom_code(&name)?;
         self.out.unindent();
         writeln!(self.out)
     }
