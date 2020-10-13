@@ -260,10 +260,7 @@ where
 
     fn needs_helper(format: &Format) -> bool {
         use Format::*;
-        match format {
-            Option(_) | Seq(_) | Map { .. } | Tuple(_) | TupleArray { .. } => true,
-            _ => false,
-        }
+        matches!(format, Option(_) | Seq(_) | Map { .. } | Tuple(_) | TupleArray { .. })
     }
 
     fn quote_serialize_value(&self, value: &str, format: &Format) -> String {
