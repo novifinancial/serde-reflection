@@ -106,3 +106,20 @@ fn test_java_code_with_external_definitions() {
     let content = std::fs::read_to_string(dir.path().join("testing/SerdeData.java")).unwrap();
     assert!(content.contains("foo.TraitHelpers."));
 }
+
+#[test]
+fn test_that_java_code_compiles_with_custom_code() {
+    let comments = vec![(
+        vec!["testing".to_string(), "SerdeData".to_string()],
+        "SerdeData me() {{ return this; }}".to_string(),
+    )]
+    .into_iter()
+    .collect();
+    let config = CodeGeneratorConfig::new("testing".to_string()).with_comments(comments);
+
+    let (_dir, path) = test_that_java_code_compiles_with_config(&config);
+
+    // Comment was correctly generated.
+    let content = std::fs::read_to_string(path.join("SerdeData.java")).unwrap();
+    assert!(content.contains("me()"));
+}
