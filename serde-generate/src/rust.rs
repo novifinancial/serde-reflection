@@ -166,6 +166,15 @@ where
         Ok(())
     }
 
+    fn output_custom_code(&mut self, name: &str) -> std::io::Result<()> {
+        let mut path = self.current_namespace.clone();
+        path.push(name.to_string());
+        if let Some(code) = self.generator.config.custom_code.get(&path) {
+            write!(self.out, "\n{}", code)?;
+        }
+        Ok(())
+    }
+
     fn output_preamble(&mut self) -> Result<()> {
         let external_names = self
             .generator
@@ -340,7 +349,7 @@ where
 
         use ContainerFormat::*;
         match format {
-            UnitStruct => writeln!(self.out, "{}struct {};\n", prefix, name),
+            UnitStruct => writeln!(self.out, "{}struct {};\n", prefix, name)?,
             NewTypeStruct(format) => writeln!(
                 self.out,
                 "{}struct {}({}{});\n",
@@ -352,14 +361,14 @@ where
                     ""
                 },
                 Self::quote_type(format, Some(&self.known_sizes))
-            ),
+            )?,
             TupleStruct(formats) => writeln!(
                 self.out,
                 "{}struct {}({});\n",
                 prefix,
                 name,
                 Self::quote_types(formats, Some(&self.known_sizes))
-            ),
+            )?,
             Struct(fields) => {
                 writeln!(self.out, "{}struct {} {{", prefix, name)?;
                 self.current_namespace.push(name.to_string());
@@ -367,7 +376,7 @@ where
                 self.output_fields(&[name], fields)?;
                 self.out.unindent();
                 self.current_namespace.pop();
-                writeln!(self.out, "}}\n")
+                writeln!(self.out, "}}\n")?;
             }
             Enum(variants) => {
                 writeln!(self.out, "{}enum {} {{", prefix, name)?;
@@ -376,9 +385,10 @@ where
                 self.output_variants(name, variants)?;
                 self.out.unindent();
                 self.current_namespace.pop();
-                writeln!(self.out, "}}\n")
+                writeln!(self.out, "}}\n")?;
             }
         }
+        self.output_custom_code(name)
     }
 }
 
