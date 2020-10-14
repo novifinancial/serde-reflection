@@ -129,6 +129,34 @@ fn test_cpp_code_with_external_definitions() {
 }
 
 #[test]
+fn test_that_cpp_code_compiles_with_custom_code() {
+    let custom_code = vec![
+        (
+            vec!["testing".to_string(), "SerdeData".to_string()],
+            "virtual ~SerdeData() = default;".to_string(),
+        ),
+        (
+            vec![
+                "testing".to_string(),
+                "List".to_string(),
+                "Node".to_string(),
+            ],
+            "virtual ~Node() = default;".to_string(),
+        ),
+    ]
+    .into_iter()
+    .collect();
+    let config = CodeGeneratorConfig::new("testing".to_string()).with_custom_code(custom_code);
+
+    let (_dir, header_path) = test_that_cpp_code_compiles_with_config(&config);
+
+    // Comments were correctly generated.
+    let content = std::fs::read_to_string(&header_path).unwrap();
+    assert!(content.contains("~SerdeData"));
+    assert!(content.contains("~Node"));
+}
+
+#[test]
 fn test_that_cpp_code_links() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
