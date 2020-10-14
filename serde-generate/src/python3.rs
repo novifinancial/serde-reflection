@@ -188,10 +188,13 @@ import typing
         Ok(())
     }
 
-    fn output_custom_code(&mut self, name: &str) -> std::io::Result<bool> {
-        let mut path = self.current_namespace.clone();
-        path.push(name.to_string());
-        match self.generator.config.custom_code.get(&path) {
+    fn output_custom_code(&mut self) -> std::io::Result<bool> {
+        match self
+            .generator
+            .config
+            .custom_code
+            .get(&self.current_namespace)
+        {
             Some(code) => {
                 writeln!(self.out, "\n{}", code)?;
                 Ok(true)
@@ -251,8 +254,8 @@ import typing
         }
         self.current_namespace.push(name.to_string());
         self.output_fields(&fields)?;
+        self.output_custom_code()?;
         self.current_namespace.pop();
-        self.output_custom_code(&name)?;
         self.out.unindent();
         writeln!(self.out)
     }
@@ -265,6 +268,7 @@ import typing
         writeln!(self.out, "\nclass {}:", name)?;
         self.out.indent();
         self.output_comment(&name)?;
+        self.current_namespace.push(name.to_string());
         if self.generator.config.serialization {
             writeln!(
                 self.out,
@@ -276,14 +280,13 @@ import typing
                 self.output_deserialize_method_for_encoding(name, *encoding)?;
             }
         }
-        let wrote_custom_code = self.output_custom_code(&name)?;
+        let wrote_custom_code = self.output_custom_code()?;
         if !self.generator.config.serialization && !wrote_custom_code {
             writeln!(self.out, "pass")?;
         }
         writeln!(self.out)?;
         self.out.unindent();
 
-        self.current_namespace.push(name.to_string());
         for (index, variant) in variants {
             self.output_variant(name, &variant.name, *index, &variant.value)?;
         }
@@ -367,8 +370,8 @@ def {0}_deserialize(input: bytes) -> '{1}':
             self.output_serialize_method_for_encoding(name, *encoding)?;
             self.output_deserialize_method_for_encoding(name, *encoding)?;
         }
+        self.output_custom_code()?;
         self.current_namespace.pop();
-        self.output_custom_code(&name)?;
         self.out.unindent();
         writeln!(self.out)
     }
