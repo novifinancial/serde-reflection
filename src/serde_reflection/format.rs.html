@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `serde-reflection/src/format.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>format.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../serde_reflection/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `serde-reflection/src/format.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>format.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../serde_reflection/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><span class="help-button">?</span>
+                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -937,10 +938,10 @@
     <span class="doccomment">/// A struct with several unnamed parameters, e.g. `struct A(u16, u32)`</span>
     <span class="ident">TupleStruct</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Format</span><span class="op">&gt;</span>),
     <span class="doccomment">/// A struct with named parameters, e.g. `struct A { a: Foo }`.</span>
-    <span class="ident">Struct</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Named</span><span class="op">&lt;</span><span class="ident">Format</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+    <span class="ident">Struct</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Named</span><span class="op">&lt;</span><span class="ident">Format</span><span class="op">&gt;&gt;</span>),
     <span class="doccomment">/// An enum, that is, an enumeration of variants.</span>
     <span class="doccomment">/// Each variant has a unique name and index within the enum.</span>
-    <span class="ident">Enum</span>(<span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Named</span><span class="op">&lt;</span><span class="ident">VariantFormat</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+    <span class="ident">Enum</span>(<span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Named</span><span class="op">&lt;</span><span class="ident">VariantFormat</span><span class="op">&gt;&gt;</span>),
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Default</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>)]</span>
@@ -953,7 +954,7 @@
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Default</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="doccomment">/// A mutable holder for an initially unknown value.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Variable</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>);
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Variable</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;&gt;</span><span class="op">&gt;</span>);
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">rename_all</span> <span class="op">=</span> <span class="string">&quot;UPPERCASE&quot;</span>)]</span>
@@ -968,20 +969,20 @@
     <span class="doccomment">/// A struct with several unnamed parameters, e.g. `A` in `enum X { A(u16, u32) }`</span>
     <span class="ident">Tuple</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Format</span><span class="op">&gt;</span>),
     <span class="doccomment">/// A struct with named parameters, e.g. `A` in `enum X { A { a: Foo } }`</span>
-    <span class="ident">Struct</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Named</span><span class="op">&lt;</span><span class="ident">Format</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+    <span class="ident">Struct</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Named</span><span class="op">&lt;</span><span class="ident">Format</span><span class="op">&gt;&gt;</span>),
 }
 
 <span class="doccomment">/// Common methods for nodes in the AST of formats.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">FormatHolder</span> {
     <span class="doccomment">/// Visit all the formats in `self` in a depth-first way.</span>
     <span class="doccomment">/// Variables are not supported and will cause an error.</span>
-    <span class="kw">fn</span> <span class="ident">visit</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">visit</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Format</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Mutably visit all the formats in `self` in a depth-first way.</span>
     <span class="doccomment">/// * Replace variables (if any) with their known values then apply the</span>
     <span class="doccomment">/// visiting function `f`.</span>
     <span class="doccomment">/// * Return an error if any variable has still an unknown value (thus cannot be removed).</span>
-    <span class="kw">fn</span> <span class="ident">visit_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">visit_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Format</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Update variables and add missing enum variants so that the terms match.</span>
     <span class="doccomment">/// This is a special case of [term unification](https://en.wikipedia.org/wiki/Unification_(computer_science)):</span>
@@ -991,22 +992,22 @@
     <span class="doccomment">/// * If needed, enums in `self` will be extended with new variants taken from `other`.</span>
     <span class="doccomment">/// * Although the parameter `other` is consumed (i.e. taken by value), all</span>
     <span class="doccomment">///   variables occurring either in `self` or `other` are correctly updated.</span>
-    <span class="kw">fn</span> <span class="ident">unify</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">unify</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Finalize the formats within `self` by removing variables and making sure</span>
     <span class="doccomment">/// that all eligible tuples are compressed into a `TupleArray`. Return an error</span>
     <span class="doccomment">/// if any variable has an unknown value.</span>
-    <span class="kw">fn</span> <span class="ident">normalize</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">normalize</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">visit_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="op">|</span><span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Format</span><span class="op">|</span> {
             <span class="kw">let</span> <span class="ident">normalized</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">format</span> {
-                <span class="ident">Format</span>::<span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">Format</span>::<span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=&gt;</span> {
                     <span class="kw">let</span> <span class="ident">size</span> <span class="op">=</span> <span class="ident">formats</span>.<span class="ident">len</span>();
-                    <span class="kw">if</span> <span class="ident">size</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">1</span> {
+                    <span class="kw">if</span> <span class="ident">size</span> <span class="op">&lt;=</span> <span class="number">1</span> {
                         <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
                     }
                     <span class="kw">let</span> <span class="ident">format0</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">formats</span>[<span class="number">0</span>];
                     <span class="kw">for</span> <span class="ident">format</span> <span class="kw">in</span> <span class="ident">formats</span>.<span class="ident">iter</span>().<span class="ident">skip</span>(<span class="number">1</span>) {
-                        <span class="kw">if</span> <span class="ident">format</span> <span class="op">!</span><span class="op">=</span> <span class="ident">format0</span> {
+                        <span class="kw">if</span> <span class="ident">format</span> <span class="op">!=</span> <span class="ident">format0</span> {
                             <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
                         }
                     }
@@ -1015,7 +1016,7 @@
                         <span class="ident">size</span>,
                     }
                 }
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">_</span> <span class="op">=&gt;</span> {
                     <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
                 }
             };
@@ -1031,10 +1032,10 @@
     }
 
     <span class="doccomment">/// Whether this format is a variable with no known value yet.</span>
-    <span class="kw">fn</span> <span class="ident">is_unknown</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>;
+    <span class="kw">fn</span> <span class="ident">is_unknown</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span>;
 }
 
-<span class="kw">fn</span> <span class="ident">unification_error</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">v1</span>: <span class="ident">T</span>, <span class="ident">v2</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Error</span>
+<span class="kw">fn</span> <span class="ident">unification_error</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">v1</span>: <span class="ident">T</span>, <span class="ident">v2</span>: <span class="ident">T</span>) <span class="op">-&gt;</span> <span class="ident">Error</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">std</span>::<span class="ident">fmt</span>::<span class="ident">Debug</span>,
 {
@@ -1042,17 +1043,17 @@
 }
 
 <span class="kw">impl</span> <span class="ident">FormatHolder</span> <span class="kw">for</span> <span class="ident">VariantFormat</span> {
-    <span class="kw">fn</span> <span class="ident">visit</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">visit</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Format</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="self">Self</span>::<span class="ident">Variable</span>(<span class="ident">variable</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">variable</span>.<span class="ident">visit</span>(<span class="ident">f</span>)<span class="question-mark">?</span>,
-            <span class="self">Self</span>::<span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> (),
-            <span class="self">Self</span>::<span class="ident">NewType</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">format</span>.<span class="ident">visit</span>(<span class="ident">f</span>)<span class="question-mark">?</span>,
-            <span class="self">Self</span>::<span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="self">Self</span>::<span class="ident">Variable</span>(<span class="ident">variable</span>) <span class="op">=&gt;</span> <span class="ident">variable</span>.<span class="ident">visit</span>(<span class="ident">f</span>)<span class="question-mark">?</span>,
+            <span class="self">Self</span>::<span class="ident">Unit</span> <span class="op">=&gt;</span> (),
+            <span class="self">Self</span>::<span class="ident">NewType</span>(<span class="ident">format</span>) <span class="op">=&gt;</span> <span class="ident">format</span>.<span class="ident">visit</span>(<span class="ident">f</span>)<span class="question-mark">?</span>,
+            <span class="self">Self</span>::<span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=&gt;</span> {
                 <span class="kw">for</span> <span class="ident">format</span> <span class="kw">in</span> <span class="ident">formats</span> {
                     <span class="ident">format</span>.<span class="ident">visit</span>(<span class="ident">f</span>)<span class="question-mark">?</span>;
                 }
             }
-            <span class="self">Self</span>::<span class="ident">Struct</span>(<span class="ident">named_formats</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="self">Self</span>::<span class="ident">Struct</span>(<span class="ident">named_formats</span>) <span class="op">=&gt;</span> {
                 <span class="kw">for</span> <span class="ident">format</span> <span class="kw">in</span> <span class="ident">named_formats</span> {
                     <span class="ident">format</span>.<span class="ident">visit</span>(<span class="ident">f</span>)<span class="question-mark">?</span>;
                 }
@@ -1061,9 +1062,9 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">visit_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">visit_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Format</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="self">Self</span>::<span class="ident">Variable</span>(<span class="ident">variable</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="self">Self</span>::<span class="ident">Variable</span>(<span class="ident">variable</span>) <span class="op">=&gt;</span> {
                 <span class="ident">variable</span>.<span class="ident">visit_mut</span>(<span class="ident">f</span>)<span class="question-mark">?</span>;
                 <span class="comment">// At this point, `variable` is known and points to variable-free content.</span>
                 <span class="comment">// Remove the variable.</span>
@@ -1071,16 +1072,16 @@
                     .<span class="ident">into_inner</span>()
                     .<span class="ident">expect</span>(<span class="string">&quot;variable is known&quot;</span>);
             }
-            <span class="self">Self</span>::<span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> (),
-            <span class="self">Self</span>::<span class="ident">NewType</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="self">Self</span>::<span class="ident">Unit</span> <span class="op">=&gt;</span> (),
+            <span class="self">Self</span>::<span class="ident">NewType</span>(<span class="ident">format</span>) <span class="op">=&gt;</span> {
                 <span class="ident">format</span>.<span class="ident">visit_mut</span>(<span class="ident">f</span>)<span class="question-mark">?</span>;
             }
-            <span class="self">Self</span>::<span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="self">Self</span>::<span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=&gt;</span> {
                 <span class="kw">for</span> <span class="ident">format</span> <span class="kw">in</span> <span class="ident">formats</span> {
                     <span class="ident">format</span>.<span class="ident">visit_mut</span>(<span class="ident">f</span>)<span class="question-mark">?</span>;
                 }
             }
-            <span class="self">Self</span>::<span class="ident">Struct</span>(<span class="ident">named_formats</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="self">Self</span>::<span class="ident">Struct</span>(<span class="ident">named_formats</span>) <span class="op">=&gt;</span> {
                 <span class="kw">for</span> <span class="ident">format</span> <span class="kw">in</span> <span class="ident">named_formats</span> {
                     <span class="ident">format</span>.<span class="ident">visit_mut</span>(<span class="ident">f</span>)<span class="question-mark">?</span>;
                 }
@@ -1089,28 +1090,28 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">unify</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">format</span>: <span class="ident">VariantFormat</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">unify</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">format</span>: <span class="ident">VariantFormat</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="comment">// Matching `&amp;mut format` instead of `format` because of</span>
         <span class="comment">//   &quot;error[E0009]: cannot bind by-move and by-ref in the same pattern&quot;</span>
         <span class="comment">// See also https://github.com/rust-lang/rust/issues/68354</span>
         <span class="comment">// We make it work using std::mem::take (and the Default trait).</span>
         <span class="kw">match</span> (<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">format</span>) {
-            (<span class="kw">_</span>, <span class="self">Self</span>::<span class="ident">Variable</span>(<span class="ident">variable2</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+            (<span class="kw">_</span>, <span class="self">Self</span>::<span class="ident">Variable</span>(<span class="ident">variable2</span>)) <span class="op">=&gt;</span> {
                 <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">variable2</span>.<span class="ident">borrow</span>().<span class="ident">is_none</span>());
                 <span class="kw-2">*</span><span class="ident">variable2</span>.<span class="ident">borrow_mut</span>() <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">clone</span>());
             }
-            (<span class="self">Self</span>::<span class="ident">Variable</span>(<span class="ident">variable1</span>), <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            (<span class="self">Self</span>::<span class="ident">Variable</span>(<span class="ident">variable1</span>), <span class="kw">_</span>) <span class="op">=&gt;</span> {
                 <span class="kw">let</span> <span class="ident">format2</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">mem</span>::<span class="ident">take</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">format</span>);
                 <span class="kw">let</span> <span class="ident">inner_variable</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">variable1</span>.<span class="ident">borrow_mut</span>().<span class="ident">deref_mut</span>() {
-                    <span class="ident">value1</span> @ <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="ident">value1</span> @ <span class="prelude-val">None</span> <span class="op">=&gt;</span> {
                         <span class="kw-2">*</span><span class="ident">value1</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">format2</span>);
                         <span class="prelude-val">None</span>
                     }
-                    <span class="prelude-val">Some</span>(<span class="ident">format1</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">Some</span>(<span class="ident">format1</span>) <span class="op">=&gt;</span> {
                         <span class="ident">format1</span>.<span class="ident">unify</span>(<span class="ident">format2</span>)<span class="question-mark">?</span>;
                         <span class="kw">match</span> <span class="ident">format1</span> {
-                            <span class="self">Self</span>::<span class="ident">Variable</span>(<span class="ident">variable</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">variable</span>.<span class="ident">clone</span>()),
-                            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+                            <span class="self">Self</span>::<span class="ident">Variable</span>(<span class="ident">variable</span>) <span class="op">=&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">variable</span>.<span class="ident">clone</span>()),
+                            <span class="kw">_</span> <span class="op">=&gt;</span> <span class="prelude-val">None</span>,
                         }
                     }
                 };
@@ -1120,15 +1121,15 @@
                 }
             }
 
-            (<span class="self">Self</span>::<span class="ident">Unit</span>, <span class="self">Self</span>::<span class="ident">Unit</span>) <span class="op">=</span><span class="op">&gt;</span> (),
+            (<span class="self">Self</span>::<span class="ident">Unit</span>, <span class="self">Self</span>::<span class="ident">Unit</span>) <span class="op">=&gt;</span> (),
 
-            (<span class="self">Self</span>::<span class="ident">NewType</span>(<span class="ident">format1</span>), <span class="self">Self</span>::<span class="ident">NewType</span>(<span class="ident">format2</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+            (<span class="self">Self</span>::<span class="ident">NewType</span>(<span class="ident">format1</span>), <span class="self">Self</span>::<span class="ident">NewType</span>(<span class="ident">format2</span>)) <span class="op">=&gt;</span> {
                 <span class="kw">let</span> <span class="ident">format2</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">mem</span>::<span class="ident">take</span>(<span class="ident">format2</span>.<span class="ident">as_mut</span>());
                 <span class="ident">format1</span>.<span class="ident">as_mut</span>().<span class="ident">unify</span>(<span class="ident">format2</span>)<span class="question-mark">?</span>;
             }
 
-            (<span class="self">Self</span>::<span class="ident">Tuple</span>(<span class="ident">formats1</span>), <span class="self">Self</span>::<span class="ident">Tuple</span>(<span class="ident">formats2</span>)) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">if</span> <span class="ident">formats1</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">formats2</span>.<span class="ident">len</span>() {
+            (<span class="self">Self</span>::<span class="ident">Tuple</span>(<span class="ident">formats1</span>), <span class="self">Self</span>::<span class="ident">Tuple</span>(<span class="ident">formats2</span>)) <span class="op">=&gt;</span> {
+                <span class="kw">if</span> <span class="ident">formats1</span>.<span class="ident">len</span>() <span class="op">!=</span> <span class="ident">formats2</span>.<span class="ident">len</span>() {
                     <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">unification_error</span>(<span class="ident">formats1</span>, <span class="ident">formats2</span>));
                 }
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">formats2</span> <span class="op">=</span> <span class="ident">formats2</span>.<span class="ident">iter_mut</span>();
@@ -1138,8 +1139,8 @@
                 }
             }
 
-            (<span class="self">Self</span>::<span class="ident">Struct</span>(<span class="ident">formats1</span>), <span class="self">Self</span>::<span class="ident">Struct</span>(<span class="ident">formats2</span>)) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">if</span> <span class="ident">formats1</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">formats2</span>.<span class="ident">len</span>() {
+            (<span class="self">Self</span>::<span class="ident">Struct</span>(<span class="ident">formats1</span>), <span class="self">Self</span>::<span class="ident">Struct</span>(<span class="ident">formats2</span>)) <span class="op">=&gt;</span> {
+                <span class="kw">if</span> <span class="ident">formats1</span>.<span class="ident">len</span>() <span class="op">!=</span> <span class="ident">formats2</span>.<span class="ident">len</span>() {
                     <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">unification_error</span>(<span class="ident">formats1</span>, <span class="ident">formats2</span>));
                 }
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">formats2</span> <span class="op">=</span> <span class="ident">formats2</span>.<span class="ident">iter_mut</span>();
@@ -1149,14 +1150,14 @@
                 }
             }
 
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="kw">_</span> <span class="op">=&gt;</span> {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">unification_error</span>(<span class="self">self</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">format</span>));
             }
         }
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">is_unknown</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">is_unknown</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="self">Self</span>::<span class="ident">Variable</span>(<span class="ident">v</span>) <span class="op">=</span> <span class="self">self</span> {
             <span class="kw">return</span> <span class="ident">v</span>.<span class="ident">is_unknown</span>();
         }
@@ -1168,36 +1169,36 @@
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">FormatHolder</span> <span class="op">+</span> <span class="ident">std</span>::<span class="ident">fmt</span>::<span class="ident">Debug</span>,
 {
-    <span class="kw">fn</span> <span class="ident">visit</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">visit</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Format</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">value</span>.<span class="ident">visit</span>(<span class="ident">f</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">visit_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">visit_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Format</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">value</span>.<span class="ident">visit_mut</span>(<span class="ident">f</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">unify</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="ident">Named</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">name</span> <span class="op">!</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">name</span> {
+    <span class="kw">fn</span> <span class="ident">unify</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="ident">Named</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">name</span> <span class="op">!=</span> <span class="ident">other</span>.<span class="ident">name</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">unification_error</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="self">self</span>, <span class="kw-2">&amp;</span><span class="ident">other</span>));
         }
         <span class="self">self</span>.<span class="ident">value</span>.<span class="ident">unify</span>(<span class="ident">other</span>.<span class="ident">value</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">is_unknown</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">is_unknown</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
         <span class="bool-val">false</span>
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Variable</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">content</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">content</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span>(<span class="ident">Rc</span>::<span class="ident">new</span>(<span class="ident">RefCell</span>::<span class="ident">new</span>(<span class="ident">content</span>)))
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">borrow</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Ref</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">borrow</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">Ref</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;&gt;</span> {
         <span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ref</span>().<span class="ident">borrow</span>()
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">borrow_mut</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RefMut</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">borrow_mut</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">RefMut</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;&gt;</span> {
         <span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ref</span>().<span class="ident">borrow_mut</span>()
     }
 }
@@ -1206,16 +1207,16 @@
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Clone</span>,
 {
-    <span class="kw">fn</span> <span class="ident">into_inner</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">into_inner</span>(<span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="ident">Rc</span>::<span class="ident">try_unwrap</span>(<span class="self">self</span>.<span class="number">0</span>) {
-            <span class="prelude-val">Ok</span>(<span class="ident">cell</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">cell</span>.<span class="ident">into_inner</span>(),
-            <span class="prelude-val">Err</span>(<span class="ident">rc</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">rc</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>(),
+            <span class="prelude-val">Ok</span>(<span class="ident">cell</span>) <span class="op">=&gt;</span> <span class="ident">cell</span>.<span class="ident">into_inner</span>(),
+            <span class="prelude-val">Err</span>(<span class="ident">rc</span>) <span class="op">=&gt;</span> <span class="ident">rc</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>(),
         }
     }
 }
 
 <span class="kw">mod</span> <span class="ident">not_implemented</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">S</span><span class="op">&gt;</span>(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>, <span class="ident">_serializer</span>: <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S</span>::<span class="prelude-val">Ok</span>, <span class="ident">S</span>::<span class="ident">Error</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">S</span><span class="op">&gt;</span>(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>, <span class="ident">_serializer</span>: <span class="ident">S</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S</span>::<span class="prelude-val">Ok</span>, <span class="ident">S</span>::<span class="ident">Error</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">S</span>: <span class="ident">serde</span>::<span class="ident">ser</span>::<span class="ident">Serializer</span>,
     {
@@ -1223,7 +1224,7 @@
         <span class="prelude-val">Err</span>(<span class="ident">S</span>::<span class="ident">Error</span>::<span class="ident">custom</span>(<span class="string">&quot;Cannot serialize variables&quot;</span>))
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span>, <span class="ident">T</span>, <span class="ident">D</span><span class="op">&gt;</span>(<span class="ident">_deserializer</span>: <span class="ident">D</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span>::<span class="ident">Error</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span>, <span class="ident">T</span>, <span class="ident">D</span><span class="op">&gt;</span>(<span class="ident">_deserializer</span>: <span class="ident">D</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span>::<span class="ident">Error</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">D</span>: <span class="ident">serde</span>::<span class="ident">de</span>::<span class="ident">Deserializer</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
     {
@@ -1236,49 +1237,49 @@
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">FormatHolder</span> <span class="op">+</span> <span class="ident">std</span>::<span class="ident">fmt</span>::<span class="ident">Debug</span> <span class="op">+</span> <span class="ident">Clone</span>,
 {
-    <span class="kw">fn</span> <span class="ident">visit</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>, <span class="ident">_f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">visit</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>, <span class="ident">_f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Format</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">NotSupported</span>(
             <span class="string">&quot;Cannot immutability visit formats with variables&quot;</span>,
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">visit_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">visit_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Format</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">borrow_mut</span>().<span class="ident">deref_mut</span>() {
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">UnknownFormat</span>),
-            <span class="prelude-val">Some</span>(<span class="ident">value</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">value</span>.<span class="ident">visit_mut</span>(<span class="ident">f</span>),
+            <span class="prelude-val">None</span> <span class="op">=&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">UnknownFormat</span>),
+            <span class="prelude-val">Some</span>(<span class="ident">value</span>) <span class="op">=&gt;</span> <span class="ident">value</span>.<span class="ident">visit_mut</span>(<span class="ident">f</span>),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">unify</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_other</span>: <span class="ident">Variable</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">unify</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_other</span>: <span class="ident">Variable</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="comment">// Omitting this method because a correct implementation would require</span>
         <span class="comment">// additional assumptions on T (in order to create new variables of type `T`).</span>
         <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">NotSupported</span>(<span class="string">&quot;Cannot unify variables directly&quot;</span>))
     }
 
-    <span class="kw">fn</span> <span class="ident">is_unknown</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">is_unknown</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">borrow</span>().<span class="ident">as_ref</span>() {
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-            <span class="prelude-val">Some</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">format</span>.<span class="ident">is_unknown</span>(),
+            <span class="prelude-val">None</span> <span class="op">=&gt;</span> <span class="bool-val">true</span>,
+            <span class="prelude-val">Some</span>(<span class="ident">format</span>) <span class="op">=&gt;</span> <span class="ident">format</span>.<span class="ident">is_unknown</span>(),
         }
     }
 }
 
 <span class="kw">impl</span> <span class="ident">FormatHolder</span> <span class="kw">for</span> <span class="ident">ContainerFormat</span> {
-    <span class="kw">fn</span> <span class="ident">visit</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">visit</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Format</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="self">Self</span>::<span class="ident">UnitStruct</span> <span class="op">=</span><span class="op">&gt;</span> (),
-            <span class="self">Self</span>::<span class="ident">NewTypeStruct</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">format</span>.<span class="ident">visit</span>(<span class="ident">f</span>)<span class="question-mark">?</span>,
-            <span class="self">Self</span>::<span class="ident">TupleStruct</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="self">Self</span>::<span class="ident">UnitStruct</span> <span class="op">=&gt;</span> (),
+            <span class="self">Self</span>::<span class="ident">NewTypeStruct</span>(<span class="ident">format</span>) <span class="op">=&gt;</span> <span class="ident">format</span>.<span class="ident">visit</span>(<span class="ident">f</span>)<span class="question-mark">?</span>,
+            <span class="self">Self</span>::<span class="ident">TupleStruct</span>(<span class="ident">formats</span>) <span class="op">=&gt;</span> {
                 <span class="kw">for</span> <span class="ident">format</span> <span class="kw">in</span> <span class="ident">formats</span> {
                     <span class="ident">format</span>.<span class="ident">visit</span>(<span class="ident">f</span>)<span class="question-mark">?</span>;
                 }
             }
-            <span class="self">Self</span>::<span class="ident">Struct</span>(<span class="ident">named_formats</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="self">Self</span>::<span class="ident">Struct</span>(<span class="ident">named_formats</span>) <span class="op">=&gt;</span> {
                 <span class="kw">for</span> <span class="ident">format</span> <span class="kw">in</span> <span class="ident">named_formats</span> {
                     <span class="ident">format</span>.<span class="ident">visit</span>(<span class="ident">f</span>)<span class="question-mark">?</span>;
                 }
             }
-            <span class="self">Self</span>::<span class="ident">Enum</span>(<span class="ident">variants</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="self">Self</span>::<span class="ident">Enum</span>(<span class="ident">variants</span>) <span class="op">=&gt;</span> {
                 <span class="kw">for</span> <span class="ident">variant</span> <span class="kw">in</span> <span class="ident">variants</span> {
                     <span class="ident">variant</span>.<span class="number">1</span>.<span class="ident">visit</span>(<span class="ident">f</span>)<span class="question-mark">?</span>;
                 }
@@ -1287,21 +1288,21 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">visit_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">visit_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Format</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="self">Self</span>::<span class="ident">UnitStruct</span> <span class="op">=</span><span class="op">&gt;</span> (),
-            <span class="self">Self</span>::<span class="ident">NewTypeStruct</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">format</span>.<span class="ident">visit_mut</span>(<span class="ident">f</span>)<span class="question-mark">?</span>,
-            <span class="self">Self</span>::<span class="ident">TupleStruct</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="self">Self</span>::<span class="ident">UnitStruct</span> <span class="op">=&gt;</span> (),
+            <span class="self">Self</span>::<span class="ident">NewTypeStruct</span>(<span class="ident">format</span>) <span class="op">=&gt;</span> <span class="ident">format</span>.<span class="ident">visit_mut</span>(<span class="ident">f</span>)<span class="question-mark">?</span>,
+            <span class="self">Self</span>::<span class="ident">TupleStruct</span>(<span class="ident">formats</span>) <span class="op">=&gt;</span> {
                 <span class="kw">for</span> <span class="ident">format</span> <span class="kw">in</span> <span class="ident">formats</span> {
                     <span class="ident">format</span>.<span class="ident">visit_mut</span>(<span class="ident">f</span>)<span class="question-mark">?</span>;
                 }
             }
-            <span class="self">Self</span>::<span class="ident">Struct</span>(<span class="ident">named_formats</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="self">Self</span>::<span class="ident">Struct</span>(<span class="ident">named_formats</span>) <span class="op">=&gt;</span> {
                 <span class="kw">for</span> <span class="ident">format</span> <span class="kw">in</span> <span class="ident">named_formats</span> {
                     <span class="ident">format</span>.<span class="ident">visit_mut</span>(<span class="ident">f</span>)<span class="question-mark">?</span>;
                 }
             }
-            <span class="self">Self</span>::<span class="ident">Enum</span>(<span class="ident">variants</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="self">Self</span>::<span class="ident">Enum</span>(<span class="ident">variants</span>) <span class="op">=&gt;</span> {
                 <span class="kw">for</span> <span class="ident">variant</span> <span class="kw">in</span> <span class="ident">variants</span> {
                     <span class="ident">variant</span>.<span class="number">1</span>.<span class="ident">visit_mut</span>(<span class="ident">f</span>)<span class="question-mark">?</span>;
                 }
@@ -1310,19 +1311,19 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">unify</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">format</span>: <span class="ident">ContainerFormat</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">unify</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">format</span>: <span class="ident">ContainerFormat</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="comment">// Matching `&amp;mut format` instead of `format` because of</span>
         <span class="comment">// &quot;error[E0009]: cannot bind by-move and by-ref in the same pattern&quot;</span>
         <span class="kw">match</span> (<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">format</span>) {
-            (<span class="self">Self</span>::<span class="ident">UnitStruct</span>, <span class="self">Self</span>::<span class="ident">UnitStruct</span>) <span class="op">=</span><span class="op">&gt;</span> (),
+            (<span class="self">Self</span>::<span class="ident">UnitStruct</span>, <span class="self">Self</span>::<span class="ident">UnitStruct</span>) <span class="op">=&gt;</span> (),
 
-            (<span class="self">Self</span>::<span class="ident">NewTypeStruct</span>(<span class="ident">format1</span>), <span class="self">Self</span>::<span class="ident">NewTypeStruct</span>(<span class="ident">format2</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+            (<span class="self">Self</span>::<span class="ident">NewTypeStruct</span>(<span class="ident">format1</span>), <span class="self">Self</span>::<span class="ident">NewTypeStruct</span>(<span class="ident">format2</span>)) <span class="op">=&gt;</span> {
                 <span class="kw">let</span> <span class="ident">format2</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">mem</span>::<span class="ident">take</span>(<span class="ident">format2</span>.<span class="ident">as_mut</span>());
                 <span class="ident">format1</span>.<span class="ident">as_mut</span>().<span class="ident">unify</span>(<span class="ident">format2</span>)<span class="question-mark">?</span>;
             }
 
-            (<span class="self">Self</span>::<span class="ident">TupleStruct</span>(<span class="ident">formats1</span>), <span class="self">Self</span>::<span class="ident">TupleStruct</span>(<span class="ident">formats2</span>)) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">if</span> <span class="ident">formats1</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">formats2</span>.<span class="ident">len</span>() {
+            (<span class="self">Self</span>::<span class="ident">TupleStruct</span>(<span class="ident">formats1</span>), <span class="self">Self</span>::<span class="ident">TupleStruct</span>(<span class="ident">formats2</span>)) <span class="op">=&gt;</span> {
+                <span class="kw">if</span> <span class="ident">formats1</span>.<span class="ident">len</span>() <span class="op">!=</span> <span class="ident">formats2</span>.<span class="ident">len</span>() {
                     <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">unification_error</span>(<span class="self">self</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">format</span>));
                 }
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">formats2</span> <span class="op">=</span> <span class="ident">formats2</span>.<span class="ident">iter_mut</span>();
@@ -1332,8 +1333,8 @@
                 }
             }
 
-            (<span class="self">Self</span>::<span class="ident">Struct</span>(<span class="ident">named_formats1</span>), <span class="self">Self</span>::<span class="ident">Struct</span>(<span class="ident">named_formats2</span>)) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">if</span> <span class="ident">named_formats1</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">named_formats2</span>.<span class="ident">len</span>() {
+            (<span class="self">Self</span>::<span class="ident">Struct</span>(<span class="ident">named_formats1</span>), <span class="self">Self</span>::<span class="ident">Struct</span>(<span class="ident">named_formats2</span>)) <span class="op">=&gt;</span> {
+                <span class="kw">if</span> <span class="ident">named_formats1</span>.<span class="ident">len</span>() <span class="op">!=</span> <span class="ident">named_formats2</span>.<span class="ident">len</span>() {
                     <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">unification_error</span>(<span class="self">self</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">format</span>));
                 }
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">named_formats2</span> <span class="op">=</span> <span class="ident">named_formats2</span>.<span class="ident">iter_mut</span>();
@@ -1343,37 +1344,37 @@
                 }
             }
 
-            (<span class="self">Self</span>::<span class="ident">Enum</span>(<span class="ident">variants1</span>), <span class="self">Self</span>::<span class="ident">Enum</span>(<span class="ident">variants2</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+            (<span class="self">Self</span>::<span class="ident">Enum</span>(<span class="ident">variants1</span>), <span class="self">Self</span>::<span class="ident">Enum</span>(<span class="ident">variants2</span>)) <span class="op">=&gt;</span> {
                 <span class="kw">for</span> (<span class="ident">index2</span>, <span class="ident">variant2</span>) <span class="kw">in</span> <span class="ident">variants2</span>.<span class="ident">iter_mut</span>() {
                     <span class="kw">let</span> <span class="ident">variant2</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">mem</span>::<span class="ident">take</span>(<span class="ident">variant2</span>);
                     <span class="kw">match</span> <span class="ident">variants1</span>.<span class="ident">entry</span>(<span class="kw-2">*</span><span class="ident">index2</span>) {
-                        <span class="ident">Entry</span>::<span class="ident">Vacant</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                        <span class="ident">Entry</span>::<span class="ident">Vacant</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> {
                             <span class="comment">// Note that we do not check for name collisions.</span>
                             <span class="ident">e</span>.<span class="ident">insert</span>(<span class="ident">variant2</span>);
                         }
-                        <span class="ident">Entry</span>::<span class="ident">Occupied</span>(<span class="kw-2">mut</span> <span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                        <span class="ident">Entry</span>::<span class="ident">Occupied</span>(<span class="kw-2">mut</span> <span class="ident">e</span>) <span class="op">=&gt;</span> {
                             <span class="ident">e</span>.<span class="ident">get_mut</span>().<span class="ident">unify</span>(<span class="ident">variant2</span>)<span class="question-mark">?</span>;
                         }
                     }
                 }
             }
 
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="kw">_</span> <span class="op">=&gt;</span> {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">unification_error</span>(<span class="self">self</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">format</span>));
             }
         }
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">is_unknown</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">is_unknown</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
         <span class="bool-val">false</span>
     }
 }
 
 <span class="kw">impl</span> <span class="ident">FormatHolder</span> <span class="kw">for</span> <span class="ident">Format</span> {
-    <span class="kw">fn</span> <span class="ident">visit</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">visit</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Format</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="self">Self</span>::<span class="ident">Variable</span>(<span class="ident">variable</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">variable</span>.<span class="ident">visit</span>(<span class="ident">f</span>)<span class="question-mark">?</span>,
+            <span class="self">Self</span>::<span class="ident">Variable</span>(<span class="ident">variable</span>) <span class="op">=&gt;</span> <span class="ident">variable</span>.<span class="ident">visit</span>(<span class="ident">f</span>)<span class="question-mark">?</span>,
             <span class="self">Self</span>::<span class="ident">TypeName</span>(<span class="kw">_</span>)
             <span class="op">|</span> <span class="self">Self</span>::<span class="ident">Unit</span>
             <span class="op">|</span> <span class="self">Self</span>::<span class="ident">Bool</span>
@@ -1391,22 +1392,22 @@
             <span class="op">|</span> <span class="self">Self</span>::<span class="ident">F64</span>
             <span class="op">|</span> <span class="self">Self</span>::<span class="ident">Char</span>
             <span class="op">|</span> <span class="self">Self</span>::<span class="ident">Str</span>
-            <span class="op">|</span> <span class="self">Self</span>::<span class="ident">Bytes</span> <span class="op">=</span><span class="op">&gt;</span> (),
+            <span class="op">|</span> <span class="self">Self</span>::<span class="ident">Bytes</span> <span class="op">=&gt;</span> (),
 
             <span class="self">Self</span>::<span class="prelude-ty">Option</span>(<span class="ident">format</span>)
             <span class="op">|</span> <span class="self">Self</span>::<span class="ident">Seq</span>(<span class="ident">format</span>)
             <span class="op">|</span> <span class="self">Self</span>::<span class="ident">TupleArray</span> {
                 <span class="ident">content</span>: <span class="ident">format</span>, ..
-            } <span class="op">=</span><span class="op">&gt;</span> {
+            } <span class="op">=&gt;</span> {
                 <span class="ident">format</span>.<span class="ident">visit</span>(<span class="ident">f</span>)<span class="question-mark">?</span>;
             }
 
-            <span class="self">Self</span>::<span class="ident">Map</span> { <span class="ident">key</span>, <span class="ident">value</span> } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="self">Self</span>::<span class="ident">Map</span> { <span class="ident">key</span>, <span class="ident">value</span> } <span class="op">=&gt;</span> {
                 <span class="ident">key</span>.<span class="ident">visit</span>(<span class="ident">f</span>)<span class="question-mark">?</span>;
                 <span class="ident">value</span>.<span class="ident">visit</span>(<span class="ident">f</span>)<span class="question-mark">?</span>;
             }
 
-            <span class="self">Self</span>::<span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="self">Self</span>::<span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=&gt;</span> {
                 <span class="kw">for</span> <span class="ident">format</span> <span class="kw">in</span> <span class="ident">formats</span> {
                     <span class="ident">format</span>.<span class="ident">visit</span>(<span class="ident">f</span>)<span class="question-mark">?</span>;
                 }
@@ -1415,9 +1416,9 @@
         <span class="ident">f</span>(<span class="self">self</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">visit_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">visit_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Format</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="self">Self</span>::<span class="ident">Variable</span>(<span class="ident">variable</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="self">Self</span>::<span class="ident">Variable</span>(<span class="ident">variable</span>) <span class="op">=&gt;</span> {
                 <span class="ident">variable</span>.<span class="ident">visit_mut</span>(<span class="ident">f</span>)<span class="question-mark">?</span>;
                 <span class="comment">// At this point, `variable` is known and points to variable-free content.</span>
                 <span class="comment">// Remove the variable.</span>
@@ -1442,22 +1443,22 @@
             <span class="op">|</span> <span class="self">Self</span>::<span class="ident">F64</span>
             <span class="op">|</span> <span class="self">Self</span>::<span class="ident">Char</span>
             <span class="op">|</span> <span class="self">Self</span>::<span class="ident">Str</span>
-            <span class="op">|</span> <span class="self">Self</span>::<span class="ident">Bytes</span> <span class="op">=</span><span class="op">&gt;</span> (),
+            <span class="op">|</span> <span class="self">Self</span>::<span class="ident">Bytes</span> <span class="op">=&gt;</span> (),
 
             <span class="self">Self</span>::<span class="prelude-ty">Option</span>(<span class="ident">format</span>)
             <span class="op">|</span> <span class="self">Self</span>::<span class="ident">Seq</span>(<span class="ident">format</span>)
             <span class="op">|</span> <span class="self">Self</span>::<span class="ident">TupleArray</span> {
                 <span class="ident">content</span>: <span class="ident">format</span>, ..
-            } <span class="op">=</span><span class="op">&gt;</span> {
+            } <span class="op">=&gt;</span> {
                 <span class="ident">format</span>.<span class="ident">visit_mut</span>(<span class="ident">f</span>)<span class="question-mark">?</span>;
             }
 
-            <span class="self">Self</span>::<span class="ident">Map</span> { <span class="ident">key</span>, <span class="ident">value</span> } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="self">Self</span>::<span class="ident">Map</span> { <span class="ident">key</span>, <span class="ident">value</span> } <span class="op">=&gt;</span> {
                 <span class="ident">key</span>.<span class="ident">visit_mut</span>(<span class="ident">f</span>)<span class="question-mark">?</span>;
                 <span class="ident">value</span>.<span class="ident">visit_mut</span>(<span class="ident">f</span>)<span class="question-mark">?</span>;
             }
 
-            <span class="self">Self</span>::<span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="self">Self</span>::<span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=&gt;</span> {
                 <span class="kw">for</span> <span class="ident">format</span> <span class="kw">in</span> <span class="ident">formats</span> {
                     <span class="ident">format</span>.<span class="ident">visit_mut</span>(<span class="ident">f</span>)<span class="question-mark">?</span>;
                 }
@@ -1468,26 +1469,26 @@
 
     <span class="doccomment">/// Unify the newly &quot;traced&quot; value `format` into the current format.</span>
     <span class="doccomment">/// Note that there should be no `TupleArray`s at this point.</span>
-    <span class="kw">fn</span> <span class="ident">unify</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">format</span>: <span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">unify</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">format</span>: <span class="ident">Format</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="comment">// Matching `&amp;mut format` instead of `format` because of</span>
         <span class="comment">// &quot;error[E0009]: cannot bind by-move and by-ref in the same pattern&quot;</span>
         <span class="kw">match</span> (<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">format</span>) {
-            (<span class="kw">_</span>, <span class="self">Self</span>::<span class="ident">Variable</span>(<span class="ident">variable2</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+            (<span class="kw">_</span>, <span class="self">Self</span>::<span class="ident">Variable</span>(<span class="ident">variable2</span>)) <span class="op">=&gt;</span> {
                 <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">variable2</span>.<span class="ident">borrow</span>().<span class="ident">is_none</span>());
                 <span class="kw-2">*</span><span class="ident">variable2</span>.<span class="ident">borrow_mut</span>() <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">clone</span>());
             }
-            (<span class="self">Self</span>::<span class="ident">Variable</span>(<span class="ident">variable1</span>), <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            (<span class="self">Self</span>::<span class="ident">Variable</span>(<span class="ident">variable1</span>), <span class="kw">_</span>) <span class="op">=&gt;</span> {
                 <span class="kw">let</span> <span class="ident">format2</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">mem</span>::<span class="ident">take</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">format</span>);
                 <span class="kw">let</span> <span class="ident">inner_variable</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">variable1</span>.<span class="ident">borrow_mut</span>().<span class="ident">deref_mut</span>() {
-                    <span class="ident">value1</span> @ <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="ident">value1</span> @ <span class="prelude-val">None</span> <span class="op">=&gt;</span> {
                         <span class="kw-2">*</span><span class="ident">value1</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">format2</span>);
                         <span class="prelude-val">None</span>
                     }
-                    <span class="prelude-val">Some</span>(<span class="ident">format1</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">Some</span>(<span class="ident">format1</span>) <span class="op">=&gt;</span> {
                         <span class="ident">format1</span>.<span class="ident">unify</span>(<span class="ident">format2</span>)<span class="question-mark">?</span>;
                         <span class="kw">match</span> <span class="ident">format1</span> {
-                            <span class="self">Self</span>::<span class="ident">Variable</span>(<span class="ident">variable</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">variable</span>.<span class="ident">clone</span>()),
-                            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+                            <span class="self">Self</span>::<span class="ident">Variable</span>(<span class="ident">variable</span>) <span class="op">=&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">variable</span>.<span class="ident">clone</span>()),
+                            <span class="kw">_</span> <span class="op">=&gt;</span> <span class="prelude-val">None</span>,
                         }
                     }
                 };
@@ -1513,22 +1514,22 @@
             <span class="op">|</span> (<span class="self">Self</span>::<span class="ident">F64</span>, <span class="self">Self</span>::<span class="ident">F64</span>)
             <span class="op">|</span> (<span class="self">Self</span>::<span class="ident">Char</span>, <span class="self">Self</span>::<span class="ident">Char</span>)
             <span class="op">|</span> (<span class="self">Self</span>::<span class="ident">Str</span>, <span class="self">Self</span>::<span class="ident">Str</span>)
-            <span class="op">|</span> (<span class="self">Self</span>::<span class="ident">Bytes</span>, <span class="self">Self</span>::<span class="ident">Bytes</span>) <span class="op">=</span><span class="op">&gt;</span> (),
+            <span class="op">|</span> (<span class="self">Self</span>::<span class="ident">Bytes</span>, <span class="self">Self</span>::<span class="ident">Bytes</span>) <span class="op">=&gt;</span> (),
 
-            (<span class="self">Self</span>::<span class="ident">TypeName</span>(<span class="ident">name1</span>), <span class="self">Self</span>::<span class="ident">TypeName</span>(<span class="ident">name2</span>)) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">if</span> <span class="ident">name1</span> <span class="op">!</span><span class="op">=</span> <span class="ident">name2</span> {
+            (<span class="self">Self</span>::<span class="ident">TypeName</span>(<span class="ident">name1</span>), <span class="self">Self</span>::<span class="ident">TypeName</span>(<span class="ident">name2</span>)) <span class="op">=&gt;</span> {
+                <span class="kw">if</span> <span class="ident">name1</span> <span class="op">!=</span> <span class="ident">name2</span> {
                     <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">unification_error</span>(<span class="self">self</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">format</span>));
                 }
             }
 
             (<span class="self">Self</span>::<span class="prelude-ty">Option</span>(<span class="ident">format1</span>), <span class="self">Self</span>::<span class="prelude-ty">Option</span>(<span class="ident">format2</span>))
-            <span class="op">|</span> (<span class="self">Self</span>::<span class="ident">Seq</span>(<span class="ident">format1</span>), <span class="self">Self</span>::<span class="ident">Seq</span>(<span class="ident">format2</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="op">|</span> (<span class="self">Self</span>::<span class="ident">Seq</span>(<span class="ident">format1</span>), <span class="self">Self</span>::<span class="ident">Seq</span>(<span class="ident">format2</span>)) <span class="op">=&gt;</span> {
                 <span class="kw">let</span> <span class="ident">format2</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">mem</span>::<span class="ident">take</span>(<span class="ident">format2</span>.<span class="ident">as_mut</span>());
                 <span class="ident">format1</span>.<span class="ident">as_mut</span>().<span class="ident">unify</span>(<span class="ident">format2</span>)<span class="question-mark">?</span>;
             }
 
-            (<span class="self">Self</span>::<span class="ident">Tuple</span>(<span class="ident">formats1</span>), <span class="self">Self</span>::<span class="ident">Tuple</span>(<span class="ident">formats2</span>)) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">if</span> <span class="ident">formats1</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">formats2</span>.<span class="ident">len</span>() {
+            (<span class="self">Self</span>::<span class="ident">Tuple</span>(<span class="ident">formats1</span>), <span class="self">Self</span>::<span class="ident">Tuple</span>(<span class="ident">formats2</span>)) <span class="op">=&gt;</span> {
+                <span class="kw">if</span> <span class="ident">formats1</span>.<span class="ident">len</span>() <span class="op">!=</span> <span class="ident">formats2</span>.<span class="ident">len</span>() {
                     <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">unification_error</span>(<span class="self">self</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">format</span>));
                 }
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">formats2</span> <span class="op">=</span> <span class="ident">formats2</span>.<span class="ident">iter_mut</span>();
@@ -1547,21 +1548,21 @@
                     <span class="ident">key</span>: <span class="ident">key2</span>,
                     <span class="ident">value</span>: <span class="ident">value2</span>,
                 },
-            ) <span class="op">=</span><span class="op">&gt;</span> {
+            ) <span class="op">=&gt;</span> {
                 <span class="kw">let</span> <span class="ident">key2</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">mem</span>::<span class="ident">take</span>(<span class="ident">key2</span>.<span class="ident">as_mut</span>());
                 <span class="kw">let</span> <span class="ident">value2</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">mem</span>::<span class="ident">take</span>(<span class="ident">value2</span>.<span class="ident">as_mut</span>());
                 <span class="ident">key1</span>.<span class="ident">as_mut</span>().<span class="ident">unify</span>(<span class="ident">key2</span>)<span class="question-mark">?</span>;
                 <span class="ident">value1</span>.<span class="ident">as_mut</span>().<span class="ident">unify</span>(<span class="ident">value2</span>)<span class="question-mark">?</span>;
             }
 
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="kw">_</span> <span class="op">=&gt;</span> {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">unification_error</span>(<span class="self">self</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">format</span>));
             }
         }
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">is_unknown</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">is_unknown</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="self">Self</span>::<span class="ident">Variable</span>(<span class="ident">v</span>) <span class="op">=</span> <span class="self">self</span> {
             <span class="kw">return</span> <span class="ident">v</span>.<span class="ident">is_unknown</span>();
         }
@@ -1571,46 +1572,46 @@
 
 <span class="doccomment">/// Helper trait to update formats in maps.</span>
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">trait</span> <span class="ident">ContainerFormatEntry</span> {
-    <span class="kw">fn</span> <span class="ident">unify</span>(<span class="self">self</span>, <span class="ident">format</span>: <span class="ident">ContainerFormat</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">unify</span>(<span class="self">self</span>, <span class="ident">format</span>: <span class="ident">ContainerFormat</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K</span><span class="op">&gt;</span> <span class="ident">ContainerFormatEntry</span> <span class="kw">for</span> <span class="ident">Entry</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K</span>, <span class="ident">ContainerFormat</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">K</span>: <span class="ident">std</span>::<span class="ident">cmp</span>::<span class="ident">Ord</span>,
 {
-    <span class="kw">fn</span> <span class="ident">unify</span>(<span class="self">self</span>, <span class="ident">format</span>: <span class="ident">ContainerFormat</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">unify</span>(<span class="self">self</span>, <span class="ident">format</span>: <span class="ident">ContainerFormat</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">Entry</span>::<span class="ident">Vacant</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Entry</span>::<span class="ident">Vacant</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> {
                 <span class="ident">e</span>.<span class="ident">insert</span>(<span class="ident">format</span>);
                 <span class="prelude-val">Ok</span>(())
             }
-            <span class="ident">Entry</span>::<span class="ident">Occupied</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">e</span>.<span class="ident">into_mut</span>().<span class="ident">unify</span>(<span class="ident">format</span>),
+            <span class="ident">Entry</span>::<span class="ident">Occupied</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> <span class="ident">e</span>.<span class="ident">into_mut</span>().<span class="ident">unify</span>(<span class="ident">format</span>),
         }
     }
 }
 
 <span class="kw">impl</span> <span class="ident">Format</span> {
     <span class="doccomment">/// Return a format made of a fresh variable with no known value.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unknown</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unknown</span>() <span class="op">-&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span>::<span class="ident">Variable</span>(<span class="ident">Variable</span>::<span class="ident">new</span>(<span class="prelude-val">None</span>))
     }
 }
 
 <span class="kw">impl</span> <span class="ident">VariantFormat</span> {
     <span class="doccomment">/// Return a format made of a fresh variable with no known value.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unknown</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unknown</span>() <span class="op">-&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span>::<span class="ident">Variable</span>(<span class="ident">Variable</span>::<span class="ident">new</span>(<span class="prelude-val">None</span>))
     }
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Format</span> {
-    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span>::<span class="ident">unknown</span>()
     }
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">VariantFormat</span> {
-    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span>::<span class="ident">unknown</span>()
     }
 }
@@ -1621,7 +1622,7 @@
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Serialize</span>,
 {
-    <span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">serializer</span>: <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S</span>::<span class="prelude-val">Ok</span>, <span class="ident">S</span>::<span class="ident">Error</span><span class="op">&gt;</span>
+    <span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">serializer</span>: <span class="ident">S</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S</span>::<span class="prelude-val">Ok</span>, <span class="ident">S</span>::<span class="ident">Error</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">S</span>: <span class="ident">ser</span>::<span class="ident">Serializer</span>,
     {
@@ -1643,7 +1644,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">NamedVisitor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">marker</span>: <span class="ident">std</span>::<span class="ident">marker</span>::<span class="ident">PhantomData</span>,
         }
@@ -1656,17 +1657,17 @@
 {
     <span class="kw">type</span> <span class="ident">Value</span> <span class="op">=</span> <span class="ident">Named</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">expecting</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">formatter</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std</span>::<span class="ident">fmt</span>::<span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
+    <span class="kw">fn</span> <span class="ident">expecting</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">formatter</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std</span>::<span class="ident">fmt</span>::<span class="ident">Formatter</span>) <span class="op">-&gt;</span> <span class="ident">std</span>::<span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
         <span class="ident">formatter</span>.<span class="ident">write_str</span>(<span class="string">&quot;a single entry map&quot;</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">visit_map</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">access</span>: <span class="ident">M</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Value</span>, <span class="ident">M</span>::<span class="ident">Error</span><span class="op">&gt;</span>
+    <span class="kw">fn</span> <span class="ident">visit_map</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">access</span>: <span class="ident">M</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Value</span>, <span class="ident">M</span>::<span class="ident">Error</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">M</span>: <span class="ident">de</span>::<span class="ident">MapAccess</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
     {
         <span class="kw">let</span> <span class="ident">named_value</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">access</span>.<span class="ident">next_entry</span>::<span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">T</span><span class="op">&gt;</span>()<span class="question-mark">?</span> {
-            <span class="prelude-val">Some</span>((<span class="ident">name</span>, <span class="ident">value</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Named</span> { <span class="ident">name</span>, <span class="ident">value</span> },
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Some</span>((<span class="ident">name</span>, <span class="ident">value</span>)) <span class="op">=&gt;</span> <span class="ident">Named</span> { <span class="ident">name</span>, <span class="ident">value</span> },
+            <span class="kw">_</span> <span class="op">=&gt;</span> {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">de</span>::<span class="ident">Error</span>::<span class="ident">custom</span>(<span class="string">&quot;Missing entry&quot;</span>));
             }
         };
@@ -1689,7 +1690,7 @@
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
 {
-    <span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span>(<span class="ident">deserializer</span>: <span class="ident">D</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Named</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">D</span>::<span class="ident">Error</span><span class="op">&gt;</span>
+    <span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span>(<span class="ident">deserializer</span>: <span class="ident">D</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Named</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">D</span>::<span class="ident">Error</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">D</span>: <span class="ident">de</span>::<span class="ident">Deserializer</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
     {

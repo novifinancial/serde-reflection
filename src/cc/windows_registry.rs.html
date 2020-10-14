@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/cc-1.0.60/src/windows_registry.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>windows_registry.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../cc/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/cc-1.0.60/src/windows_registry.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>windows_registry.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../cc/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><span class="help-button">?</span>
+                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -827,7 +828,7 @@
 <span class="doccomment">/// tool with the appropriate environment variables set.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Note that this function always returns `None` for non-MSVC targets.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find</span>(<span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">tool</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Command</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find</span>(<span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">tool</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Command</span><span class="op">&gt;</span> {
     <span class="ident">find_tool</span>(<span class="ident">target</span>, <span class="ident">tool</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">c</span>.<span class="ident">to_command</span>())
 }
 
@@ -835,13 +836,13 @@
 <span class="doccomment">/// operation (finding a MSVC tool in a local install) but instead returns a</span>
 <span class="doccomment">/// `Tool` which may be introspected.</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">windows</span>))]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_tool</span>(<span class="ident">_target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">_tool</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_tool</span>(<span class="ident">_target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">_tool</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
     <span class="prelude-val">None</span>
 }
 
 <span class="doccomment">/// Documented above.</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_tool</span>(<span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">tool</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_tool</span>(<span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">tool</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
     <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">env</span>;
 
     <span class="comment">// This logic is all tailored for MSVC, if we&#39;re not that then bail out</span>
@@ -881,9 +882,9 @@
     <span class="comment">// the tool is actually usable.</span>
 
     <span class="kw">return</span> <span class="ident">impl_</span>::<span class="ident">find_msvc_15plus</span>(<span class="ident">tool</span>, <span class="ident">target</span>)
-        .<span class="ident">or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">impl_</span>::<span class="ident">find_msvc_14</span>(<span class="ident">tool</span>, <span class="ident">target</span>))
-        .<span class="ident">or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">impl_</span>::<span class="ident">find_msvc_12</span>(<span class="ident">tool</span>, <span class="ident">target</span>))
-        .<span class="ident">or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">impl_</span>::<span class="ident">find_msvc_11</span>(<span class="ident">tool</span>, <span class="ident">target</span>));
+        .<span class="ident">or_else</span>(<span class="op">||</span> <span class="ident">impl_</span>::<span class="ident">find_msvc_14</span>(<span class="ident">tool</span>, <span class="ident">target</span>))
+        .<span class="ident">or_else</span>(<span class="op">||</span> <span class="ident">impl_</span>::<span class="ident">find_msvc_12</span>(<span class="ident">tool</span>, <span class="ident">target</span>))
+        .<span class="ident">or_else</span>(<span class="op">||</span> <span class="ident">impl_</span>::<span class="ident">find_msvc_11</span>(<span class="ident">tool</span>, <span class="ident">target</span>));
 }
 
 <span class="doccomment">/// A version of Visual Studio</span>
@@ -911,22 +912,22 @@
 <span class="doccomment">/// This is used by the cmake crate to figure out the correct</span>
 <span class="doccomment">/// generator.</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">windows</span>))]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_vs_version</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">VsVers</span>, <span class="ident">String</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_vs_version</span>() <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">VsVers</span>, <span class="ident">String</span><span class="op">&gt;</span> {
     <span class="prelude-val">Err</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;not windows&quot;</span>))
 }
 
 <span class="doccomment">/// Documented above</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_vs_version</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">VsVers</span>, <span class="ident">String</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_vs_version</span>() <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">VsVers</span>, <span class="ident">String</span><span class="op">&gt;</span> {
     <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">env</span>;
 
     <span class="kw">match</span> <span class="ident">env</span>::<span class="ident">var</span>(<span class="string">&quot;VisualStudioVersion&quot;</span>) {
-        <span class="prelude-val">Ok</span>(<span class="ident">version</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">version</span>[..] {
-            <span class="string">&quot;16.0&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">VsVers</span>::<span class="ident">Vs16</span>),
-            <span class="string">&quot;15.0&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">VsVers</span>::<span class="ident">Vs15</span>),
-            <span class="string">&quot;14.0&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">VsVers</span>::<span class="ident">Vs14</span>),
-            <span class="string">&quot;12.0&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">VsVers</span>::<span class="ident">Vs12</span>),
-            <span class="ident">vers</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="macro">format</span><span class="macro">!</span>(
+        <span class="prelude-val">Ok</span>(<span class="ident">version</span>) <span class="op">=&gt;</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">version</span>[..] {
+            <span class="string">&quot;16.0&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">VsVers</span>::<span class="ident">Vs16</span>),
+            <span class="string">&quot;15.0&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">VsVers</span>::<span class="ident">Vs15</span>),
+            <span class="string">&quot;14.0&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">VsVers</span>::<span class="ident">Vs14</span>),
+            <span class="string">&quot;12.0&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">VsVers</span>::<span class="ident">Vs12</span>),
+            <span class="ident">vers</span> <span class="op">=&gt;</span> <span class="prelude-val">Err</span>(<span class="macro">format</span><span class="macro">!</span>(
                 <span class="string">&quot;\n\n\
                  unsupported or unknown VisualStudio version: {}\n\
                  if another version is installed consider running \
@@ -936,7 +937,7 @@
                 <span class="ident">vers</span>
             )),
         },
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="kw">_</span> <span class="op">=&gt;</span> {
             <span class="comment">// Check for the presense of a specific registry key</span>
             <span class="comment">// that indicates visual studio is installed.</span>
             <span class="kw">if</span> <span class="ident">impl_</span>::<span class="ident">has_msbuild_version</span>(<span class="string">&quot;16.0&quot;</span>) {
@@ -986,7 +987,7 @@
     }
 
     <span class="kw">impl</span> <span class="ident">MsvcTool</span> {
-        <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">tool</span>: <span class="ident">PathBuf</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">MsvcTool</span> {
+        <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">tool</span>: <span class="ident">PathBuf</span>) <span class="op">-&gt;</span> <span class="ident">MsvcTool</span> {
             <span class="ident">MsvcTool</span> {
                 <span class="ident">tool</span>: <span class="ident">tool</span>,
                 <span class="ident">libs</span>: <span class="ident">Vec</span>::<span class="ident">new</span>(),
@@ -995,7 +996,7 @@
             }
         }
 
-        <span class="kw">fn</span> <span class="ident">into_tool</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Tool</span> {
+        <span class="kw">fn</span> <span class="ident">into_tool</span>(<span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">Tool</span> {
             <span class="kw">let</span> <span class="ident">MsvcTool</span> {
                 <span class="ident">tool</span>,
                 <span class="ident">libs</span>,
@@ -1011,7 +1012,7 @@
     }
 
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">bare_trait_objects</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">vs16_instances</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">PathBuf</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">vs16_instances</span>() <span class="op">-&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">PathBuf</span><span class="op">&gt;&gt;</span> {
         <span class="kw">let</span> <span class="ident">instances</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">instances</span>) <span class="op">=</span> <span class="ident">vs15plus_instances</span>() {
             <span class="ident">instances</span>
         } <span class="kw">else</span> {
@@ -1033,7 +1034,7 @@
         }))
     }
 
-    <span class="kw">fn</span> <span class="ident">find_tool_in_vs16_path</span>(<span class="ident">tool</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">find_tool_in_vs16_path</span>(<span class="ident">tool</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
         <span class="ident">vs16_instances</span>()
             .<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">path</span><span class="op">|</span> {
                 <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">path</span>.<span class="ident">join</span>(<span class="ident">tool</span>);
@@ -1049,7 +1050,7 @@
             .<span class="ident">next</span>()
     }
 
-    <span class="kw">fn</span> <span class="ident">find_msbuild_vs16</span>(<span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">find_msbuild_vs16</span>(<span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
         <span class="ident">find_tool_in_vs16_path</span>(<span class="string">r&quot;MSBuild\Current\Bin\MSBuild.exe&quot;</span>, <span class="ident">target</span>)
     }
 
@@ -1062,7 +1063,7 @@
     <span class="comment">// [online]: https://blogs.msdn.microsoft.com/vcblog/2017/03/06/finding-the-visual-c-compiler-tools-in-visual-studio-2017/</span>
     <span class="comment">//</span>
     <span class="comment">// Returns MSVC 15+ instances (15, 16 right now), the order should be consider undefined.</span>
-    <span class="kw">fn</span> <span class="ident">vs15plus_instances</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">EnumSetupInstances</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">vs15plus_instances</span>() <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">EnumSetupInstances</span><span class="op">&gt;</span> {
         <span class="ident">com</span>::<span class="ident">initialize</span>().<span class="ident">ok</span>()<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">config</span> <span class="op">=</span> <span class="ident">SetupConfiguration</span>::<span class="ident">new</span>().<span class="ident">ok</span>()<span class="question-mark">?</span>;
@@ -1071,14 +1072,14 @@
 
     <span class="comment">// Inspired from official microsoft/vswhere ParseVersionString</span>
     <span class="comment">// i.e. at most four u16 numbers separated by &#39;.&#39;</span>
-    <span class="kw">fn</span> <span class="ident">parse_version</span>(<span class="ident">version</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">parse_version</span>(<span class="ident">version</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;&gt;</span> {
         <span class="ident">version</span>
             .<span class="ident">split</span>(<span class="string">&#39;.&#39;</span>)
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">chunk</span><span class="op">|</span> <span class="ident">u16</span>::<span class="ident">from_str</span>(<span class="ident">chunk</span>).<span class="ident">ok</span>())
             .<span class="ident">collect</span>()
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_msvc_15plus</span>(<span class="ident">tool</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_msvc_15plus</span>(<span class="ident">tool</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">iter</span> <span class="op">=</span> <span class="ident">vs15plus_instances</span>()<span class="question-mark">?</span>;
         <span class="ident">iter</span>.<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">instance</span><span class="op">|</span> {
             <span class="kw">let</span> <span class="ident">instance</span> <span class="op">=</span> <span class="ident">instance</span>.<span class="ident">ok</span>()<span class="question-mark">?</span>;
@@ -1097,9 +1098,9 @@
     <span class="comment">// we keep the registry method as a fallback option.</span>
     <span class="comment">//</span>
     <span class="comment">// [more reliable]: https://github.com/alexcrichton/cc-rs/pull/331</span>
-    <span class="kw">fn</span> <span class="ident">find_tool_in_vs15_path</span>(<span class="ident">tool</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">find_tool_in_vs15_path</span>(<span class="ident">tool</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">vs15plus_instances</span>() {
-            <span class="prelude-val">Some</span>(<span class="ident">instances</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">instances</span>
+            <span class="prelude-val">Some</span>(<span class="ident">instances</span>) <span class="op">=&gt;</span> <span class="ident">instances</span>
                 .<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">instance</span><span class="op">|</span> {
                     <span class="ident">instance</span>
                         .<span class="ident">ok</span>()
@@ -1107,7 +1108,7 @@
                 })
                 .<span class="ident">map</span>(<span class="op">|</span><span class="ident">path</span><span class="op">|</span> <span class="ident">PathBuf</span>::<span class="ident">from</span>(<span class="ident">path</span>).<span class="ident">join</span>(<span class="ident">tool</span>))
                 .<span class="ident">find</span>(<span class="op">|</span><span class="kw-2">ref</span> <span class="ident">path</span><span class="op">|</span> <span class="ident">path</span>.<span class="ident">is_file</span>()),
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="prelude-val">None</span> <span class="op">=&gt;</span> <span class="prelude-val">None</span>,
         };
 
         <span class="kw">if</span> <span class="ident">path</span>.<span class="ident">is_none</span>() {
@@ -1133,7 +1134,7 @@
         <span class="ident">tool</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
         <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
         <span class="ident">instance</span>: <span class="kw-2">&amp;</span><span class="ident">SetupInstance</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
+    ) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">bin_path</span>, <span class="ident">host_dylib_path</span>, <span class="ident">lib_path</span>, <span class="ident">include_path</span>) <span class="op">=</span>
             <span class="ident">vs15plus_vc_paths</span>(<span class="ident">target</span>, <span class="ident">instance</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">tool_path</span> <span class="op">=</span> <span class="ident">bin_path</span>.<span class="ident">join</span>(<span class="ident">tool</span>);
@@ -1160,7 +1161,7 @@
     <span class="kw">fn</span> <span class="ident">vs15plus_vc_paths</span>(
         <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
         <span class="ident">instance</span>: <span class="kw-2">&amp;</span><span class="ident">SetupInstance</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">PathBuf</span>, <span class="ident">PathBuf</span>, <span class="ident">PathBuf</span>, <span class="ident">PathBuf</span>)<span class="op">&gt;</span> {
+    ) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">PathBuf</span>, <span class="ident">PathBuf</span>, <span class="ident">PathBuf</span>, <span class="ident">PathBuf</span>)<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">instance_path</span>: <span class="ident">PathBuf</span> <span class="op">=</span> <span class="ident">instance</span>.<span class="ident">installation_path</span>().<span class="ident">ok</span>()<span class="question-mark">?</span>.<span class="ident">into</span>();
         <span class="kw">let</span> <span class="ident">version_path</span> <span class="op">=</span>
             <span class="ident">instance_path</span>.<span class="ident">join</span>(<span class="string">r&quot;VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt&quot;</span>);
@@ -1169,12 +1170,12 @@
         <span class="ident">version_file</span>.<span class="ident">read_to_string</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">version</span>).<span class="ident">ok</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">version</span> <span class="op">=</span> <span class="ident">version</span>.<span class="ident">trim</span>();
         <span class="kw">let</span> <span class="ident">host</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">host_arch</span>() {
-            <span class="ident">X86</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;X86&quot;</span>,
-            <span class="ident">X86_64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;X64&quot;</span>,
+            <span class="ident">X86</span> <span class="op">=&gt;</span> <span class="string">&quot;X86&quot;</span>,
+            <span class="ident">X86_64</span> <span class="op">=&gt;</span> <span class="string">&quot;X64&quot;</span>,
             <span class="comment">// There is no natively hosted compiler on ARM64.</span>
             <span class="comment">// Instead, use the x86 toolchain under emulation (there is no x64 emulation).</span>
-            <span class="ident">AARCH64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;X86&quot;</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">None</span>,
+            <span class="ident">AARCH64</span> <span class="op">=&gt;</span> <span class="string">&quot;X86&quot;</span>,
+            <span class="kw">_</span> <span class="op">=&gt;</span> <span class="kw">return</span> <span class="prelude-val">None</span>,
         };
         <span class="kw">let</span> <span class="ident">target</span> <span class="op">=</span> <span class="ident">lib_subdir</span>(<span class="ident">target</span>)<span class="question-mark">?</span>;
         <span class="comment">// The directory layout here is MSVC/bin/Host$host/$target/</span>
@@ -1197,7 +1198,7 @@
         <span class="prelude-val">Some</span>((<span class="ident">bin_path</span>, <span class="ident">host_dylib_path</span>, <span class="ident">lib_path</span>, <span class="ident">include_path</span>))
     }
 
-    <span class="kw">fn</span> <span class="ident">atl_paths</span>(<span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">PathBuf</span>, <span class="ident">PathBuf</span>)<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">atl_paths</span>(<span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">PathBuf</span>, <span class="ident">PathBuf</span>)<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">atl_path</span> <span class="op">=</span> <span class="ident">path</span>.<span class="ident">join</span>(<span class="string">&quot;atlfmc&quot;</span>);
         <span class="kw">let</span> <span class="ident">sub</span> <span class="op">=</span> <span class="ident">lib_subdir</span>(<span class="ident">target</span>)<span class="question-mark">?</span>;
         <span class="kw">if</span> <span class="ident">atl_path</span>.<span class="ident">exists</span>() {
@@ -1209,22 +1210,22 @@
 
     <span class="comment">// For MSVC 14 we need to find the Universal CRT as well as either</span>
     <span class="comment">// the Windows 10 SDK or Windows 8.1 SDK.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_msvc_14</span>(<span class="ident">tool</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_msvc_14</span>(<span class="ident">tool</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">vcdir</span> <span class="op">=</span> <span class="ident">get_vc_dir</span>(<span class="string">&quot;14.0&quot;</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tool</span> <span class="op">=</span> <span class="ident">get_tool</span>(<span class="ident">tool</span>, <span class="kw-2">&amp;</span><span class="ident">vcdir</span>, <span class="ident">target</span>)<span class="question-mark">?</span>;
         <span class="ident">add_sdks</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">tool</span>, <span class="ident">target</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Some</span>(<span class="ident">tool</span>.<span class="ident">into_tool</span>())
     }
 
-    <span class="kw">fn</span> <span class="ident">add_sdks</span>(<span class="ident">tool</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MsvcTool</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">add_sdks</span>(<span class="ident">tool</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MsvcTool</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">sub</span> <span class="op">=</span> <span class="ident">lib_subdir</span>(<span class="ident">target</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> (<span class="ident">ucrt</span>, <span class="ident">ucrt_version</span>) <span class="op">=</span> <span class="ident">get_ucrt_dir</span>()<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">host</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">host_arch</span>() {
-            <span class="ident">X86</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;x86&quot;</span>,
-            <span class="ident">X86_64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;x64&quot;</span>,
-            <span class="ident">AARCH64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;arm64&quot;</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">None</span>,
+            <span class="ident">X86</span> <span class="op">=&gt;</span> <span class="string">&quot;x86&quot;</span>,
+            <span class="ident">X86_64</span> <span class="op">=&gt;</span> <span class="string">&quot;x64&quot;</span>,
+            <span class="ident">AARCH64</span> <span class="op">=&gt;</span> <span class="string">&quot;arm64&quot;</span>,
+            <span class="kw">_</span> <span class="op">=&gt;</span> <span class="kw">return</span> <span class="prelude-val">None</span>,
         };
 
         <span class="ident">tool</span>.<span class="ident">path</span>
@@ -1259,7 +1260,7 @@
     }
 
     <span class="comment">// For MSVC 12 we need to find the Windows 8.1 SDK.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_msvc_12</span>(<span class="ident">tool</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_msvc_12</span>(<span class="ident">tool</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">vcdir</span> <span class="op">=</span> <span class="ident">get_vc_dir</span>(<span class="string">&quot;12.0&quot;</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tool</span> <span class="op">=</span> <span class="ident">get_tool</span>(<span class="ident">tool</span>, <span class="kw-2">&amp;</span><span class="ident">vcdir</span>, <span class="ident">target</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">sub</span> <span class="op">=</span> <span class="ident">lib_subdir</span>(<span class="ident">target</span>)<span class="question-mark">?</span>;
@@ -1275,7 +1276,7 @@
     }
 
     <span class="comment">// For MSVC 11 we need to find the Windows 8 SDK.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_msvc_11</span>(<span class="ident">tool</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_msvc_11</span>(<span class="ident">tool</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">vcdir</span> <span class="op">=</span> <span class="ident">get_vc_dir</span>(<span class="string">&quot;11.0&quot;</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tool</span> <span class="op">=</span> <span class="ident">get_tool</span>(<span class="ident">tool</span>, <span class="kw-2">&amp;</span><span class="ident">vcdir</span>, <span class="ident">target</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">sub</span> <span class="op">=</span> <span class="ident">lib_subdir</span>(<span class="ident">target</span>)<span class="question-mark">?</span>;
@@ -1300,7 +1301,7 @@
 
     <span class="comment">// Given a possible MSVC installation directory, we look for the linker and</span>
     <span class="comment">// then add the MSVC library path.</span>
-    <span class="kw">fn</span> <span class="ident">get_tool</span>(<span class="ident">tool</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MsvcTool</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">get_tool</span>(<span class="ident">tool</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MsvcTool</span><span class="op">&gt;</span> {
         <span class="ident">bin_subdir</span>(<span class="ident">target</span>)
             .<span class="ident">into_iter</span>()
             .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">sub</span>, <span class="ident">host</span>)<span class="op">|</span> {
@@ -1331,7 +1332,7 @@
 
     <span class="comment">// To find MSVC we look in a specific registry key for the version we are</span>
     <span class="comment">// trying to find.</span>
-    <span class="kw">fn</span> <span class="ident">get_vc_dir</span>(<span class="ident">ver</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">get_vc_dir</span>(<span class="ident">ver</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="string">r&quot;SOFTWARE\Microsoft\VisualStudio\SxS\VC7&quot;</span>;
         <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">LOCAL_MACHINE</span>.<span class="ident">open</span>(<span class="ident">key</span>.<span class="ident">as_ref</span>()).<span class="ident">ok</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">query_str</span>(<span class="ident">ver</span>).<span class="ident">ok</span>()<span class="question-mark">?</span>;
@@ -1344,7 +1345,7 @@
     <span class="comment">// what vcvars does so that&#39;s good enough for us.</span>
     <span class="comment">//</span>
     <span class="comment">// Returns a pair of (root, version) for the ucrt dir if found</span>
-    <span class="kw">fn</span> <span class="ident">get_ucrt_dir</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">PathBuf</span>, <span class="ident">String</span>)<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">get_ucrt_dir</span>() <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">PathBuf</span>, <span class="ident">String</span>)<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="string">r&quot;SOFTWARE\Microsoft\Windows Kits\Installed Roots&quot;</span>;
         <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">LOCAL_MACHINE</span>.<span class="ident">open</span>(<span class="ident">key</span>.<span class="ident">as_ref</span>()).<span class="ident">ok</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">root</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">query_str</span>(<span class="string">&quot;KitsRoot10&quot;</span>).<span class="ident">ok</span>()<span class="question-mark">?</span>;
@@ -1356,7 +1357,7 @@
                 <span class="ident">dir</span>.<span class="ident">components</span>()
                     .<span class="ident">last</span>()
                     .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">c</span>.<span class="ident">as_os_str</span>().<span class="ident">to_str</span>())
-                    .<span class="ident">map</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">c</span>.<span class="ident">starts_with</span>(<span class="string">&quot;10.&quot;</span>) <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="ident">dir</span>.<span class="ident">join</span>(<span class="string">&quot;ucrt&quot;</span>).<span class="ident">is_dir</span>())
+                    .<span class="ident">map</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">c</span>.<span class="ident">starts_with</span>(<span class="string">&quot;10.&quot;</span>) <span class="op">&amp;&amp;</span> <span class="ident">dir</span>.<span class="ident">join</span>(<span class="string">&quot;ucrt&quot;</span>).<span class="ident">is_dir</span>())
                     .<span class="ident">unwrap_or</span>(<span class="bool-val">false</span>)
             })
             .<span class="ident">max</span>()<span class="question-mark">?</span>;
@@ -1373,7 +1374,7 @@
     <span class="comment">// only need to bother checking x64, making this code a tiny bit simpler.</span>
     <span class="comment">// Like we do for the Universal CRT, we sort the possibilities</span>
     <span class="comment">// asciibetically to find the newest one as that is what vcvars does.</span>
-    <span class="kw">fn</span> <span class="ident">get_sdk10_dir</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">PathBuf</span>, <span class="ident">String</span>)<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">get_sdk10_dir</span>() <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">PathBuf</span>, <span class="ident">String</span>)<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="string">r&quot;SOFTWARE\Microsoft\Microsoft SDKs\Windows\v10.0&quot;</span>;
         <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">LOCAL_MACHINE</span>.<span class="ident">open</span>(<span class="ident">key</span>.<span class="ident">as_ref</span>()).<span class="ident">ok</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">root</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">query_str</span>(<span class="string">&quot;InstallationFolder&quot;</span>).<span class="ident">ok</span>()<span class="question-mark">?</span>;
@@ -1381,7 +1382,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">dirs</span> <span class="op">=</span> <span class="ident">readdir</span>
             .<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">dir</span><span class="op">|</span> <span class="ident">dir</span>.<span class="ident">ok</span>())
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">dir</span><span class="op">|</span> <span class="ident">dir</span>.<span class="ident">path</span>())
-            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
+            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;&gt;</span>();
         <span class="ident">dirs</span>.<span class="ident">sort</span>();
         <span class="kw">let</span> <span class="ident">dir</span> <span class="op">=</span> <span class="ident">dirs</span>
             .<span class="ident">into_iter</span>()
@@ -1397,14 +1398,14 @@
     <span class="comment">// `winv6.3`. Vcvars seems to only care about `winv6.3` though, so the same</span>
     <span class="comment">// applies to us. Note that if we were targetting kernel mode drivers</span>
     <span class="comment">// instead of user mode applications, we would care.</span>
-    <span class="kw">fn</span> <span class="ident">get_sdk81_dir</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">get_sdk81_dir</span>() <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="string">r&quot;SOFTWARE\Microsoft\Microsoft SDKs\Windows\v8.1&quot;</span>;
         <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">LOCAL_MACHINE</span>.<span class="ident">open</span>(<span class="ident">key</span>.<span class="ident">as_ref</span>()).<span class="ident">ok</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">root</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">query_str</span>(<span class="string">&quot;InstallationFolder&quot;</span>).<span class="ident">ok</span>()<span class="question-mark">?</span>;
         <span class="prelude-val">Some</span>(<span class="ident">root</span>.<span class="ident">into</span>())
     }
 
-    <span class="kw">fn</span> <span class="ident">get_sdk8_dir</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">get_sdk8_dir</span>() <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="string">r&quot;SOFTWARE\Microsoft\Microsoft SDKs\Windows\v8.0&quot;</span>;
         <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">LOCAL_MACHINE</span>.<span class="ident">open</span>(<span class="ident">key</span>.<span class="ident">as_ref</span>()).<span class="ident">ok</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">root</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">query_str</span>(<span class="string">&quot;InstallationFolder&quot;</span>).<span class="ident">ok</span>()<span class="question-mark">?</span>;
@@ -1430,44 +1431,44 @@
     <span class="comment">// linkers that can target the architecture we desire. The 64-bit host</span>
     <span class="comment">// linker is preferred, and hence first, due to 64-bit allowing it more</span>
     <span class="comment">// address space to work with and potentially being faster.</span>
-    <span class="kw">fn</span> <span class="ident">bin_subdir</span>(<span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>)<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">bin_subdir</span>(<span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>)<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">arch</span> <span class="op">=</span> <span class="ident">target</span>.<span class="ident">split</span>(<span class="string">&#39;-&#39;</span>).<span class="ident">next</span>().<span class="ident">unwrap</span>();
         <span class="kw">match</span> (<span class="ident">arch</span>, <span class="ident">host_arch</span>()) {
-            (<span class="string">&quot;i586&quot;</span>, <span class="ident">X86</span>) <span class="op">|</span> (<span class="string">&quot;i686&quot;</span>, <span class="ident">X86</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[(<span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>)],
-            (<span class="string">&quot;i586&quot;</span>, <span class="ident">X86_64</span>) <span class="op">|</span> (<span class="string">&quot;i686&quot;</span>, <span class="ident">X86_64</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[(<span class="string">&quot;amd64_x86&quot;</span>, <span class="string">&quot;amd64&quot;</span>), (<span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>)],
-            (<span class="string">&quot;x86_64&quot;</span>, <span class="ident">X86</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[(<span class="string">&quot;x86_amd64&quot;</span>, <span class="string">&quot;&quot;</span>)],
-            (<span class="string">&quot;x86_64&quot;</span>, <span class="ident">X86_64</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[(<span class="string">&quot;amd64&quot;</span>, <span class="string">&quot;amd64&quot;</span>), (<span class="string">&quot;x86_amd64&quot;</span>, <span class="string">&quot;&quot;</span>)],
-            (<span class="string">&quot;arm&quot;</span>, <span class="ident">X86</span>) <span class="op">|</span> (<span class="string">&quot;thumbv7a&quot;</span>, <span class="ident">X86</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[(<span class="string">&quot;x86_arm&quot;</span>, <span class="string">&quot;&quot;</span>)],
-            (<span class="string">&quot;arm&quot;</span>, <span class="ident">X86_64</span>) <span class="op">|</span> (<span class="string">&quot;thumbv7a&quot;</span>, <span class="ident">X86_64</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[(<span class="string">&quot;amd64_arm&quot;</span>, <span class="string">&quot;amd64&quot;</span>), (<span class="string">&quot;x86_arm&quot;</span>, <span class="string">&quot;&quot;</span>)],
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[],
+            (<span class="string">&quot;i586&quot;</span>, <span class="ident">X86</span>) <span class="op">|</span> (<span class="string">&quot;i686&quot;</span>, <span class="ident">X86</span>) <span class="op">=&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[(<span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>)],
+            (<span class="string">&quot;i586&quot;</span>, <span class="ident">X86_64</span>) <span class="op">|</span> (<span class="string">&quot;i686&quot;</span>, <span class="ident">X86_64</span>) <span class="op">=&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[(<span class="string">&quot;amd64_x86&quot;</span>, <span class="string">&quot;amd64&quot;</span>), (<span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>)],
+            (<span class="string">&quot;x86_64&quot;</span>, <span class="ident">X86</span>) <span class="op">=&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[(<span class="string">&quot;x86_amd64&quot;</span>, <span class="string">&quot;&quot;</span>)],
+            (<span class="string">&quot;x86_64&quot;</span>, <span class="ident">X86_64</span>) <span class="op">=&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[(<span class="string">&quot;amd64&quot;</span>, <span class="string">&quot;amd64&quot;</span>), (<span class="string">&quot;x86_amd64&quot;</span>, <span class="string">&quot;&quot;</span>)],
+            (<span class="string">&quot;arm&quot;</span>, <span class="ident">X86</span>) <span class="op">|</span> (<span class="string">&quot;thumbv7a&quot;</span>, <span class="ident">X86</span>) <span class="op">=&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[(<span class="string">&quot;x86_arm&quot;</span>, <span class="string">&quot;&quot;</span>)],
+            (<span class="string">&quot;arm&quot;</span>, <span class="ident">X86_64</span>) <span class="op">|</span> (<span class="string">&quot;thumbv7a&quot;</span>, <span class="ident">X86_64</span>) <span class="op">=&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[(<span class="string">&quot;amd64_arm&quot;</span>, <span class="string">&quot;amd64&quot;</span>), (<span class="string">&quot;x86_arm&quot;</span>, <span class="string">&quot;&quot;</span>)],
+            <span class="kw">_</span> <span class="op">=&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[],
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">lib_subdir</span>(<span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">lib_subdir</span>(<span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">arch</span> <span class="op">=</span> <span class="ident">target</span>.<span class="ident">split</span>(<span class="string">&#39;-&#39;</span>).<span class="ident">next</span>().<span class="ident">unwrap</span>();
         <span class="kw">match</span> <span class="ident">arch</span> {
-            <span class="string">&quot;i586&quot;</span> <span class="op">|</span> <span class="string">&quot;i686&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;x86&quot;</span>),
-            <span class="string">&quot;x86_64&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;x64&quot;</span>),
-            <span class="string">&quot;arm&quot;</span> <span class="op">|</span> <span class="string">&quot;thumbv7a&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;arm&quot;</span>),
-            <span class="string">&quot;aarch64&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;arm64&quot;</span>),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="string">&quot;i586&quot;</span> <span class="op">|</span> <span class="string">&quot;i686&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;x86&quot;</span>),
+            <span class="string">&quot;x86_64&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;x64&quot;</span>),
+            <span class="string">&quot;arm&quot;</span> <span class="op">|</span> <span class="string">&quot;thumbv7a&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;arm&quot;</span>),
+            <span class="string">&quot;aarch64&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;arm64&quot;</span>),
+            <span class="kw">_</span> <span class="op">=&gt;</span> <span class="prelude-val">None</span>,
         }
     }
 
     <span class="comment">// MSVC&#39;s x86 libraries are not in a subfolder</span>
-    <span class="kw">fn</span> <span class="ident">vc_lib_subdir</span>(<span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">vc_lib_subdir</span>(<span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">arch</span> <span class="op">=</span> <span class="ident">target</span>.<span class="ident">split</span>(<span class="string">&#39;-&#39;</span>).<span class="ident">next</span>().<span class="ident">unwrap</span>();
         <span class="kw">match</span> <span class="ident">arch</span> {
-            <span class="string">&quot;i586&quot;</span> <span class="op">|</span> <span class="string">&quot;i686&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;&quot;</span>),
-            <span class="string">&quot;x86_64&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;amd64&quot;</span>),
-            <span class="string">&quot;arm&quot;</span> <span class="op">|</span> <span class="string">&quot;thumbv7a&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;arm&quot;</span>),
-            <span class="string">&quot;aarch64&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;arm64&quot;</span>),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="string">&quot;i586&quot;</span> <span class="op">|</span> <span class="string">&quot;i686&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;&quot;</span>),
+            <span class="string">&quot;x86_64&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;amd64&quot;</span>),
+            <span class="string">&quot;arm&quot;</span> <span class="op">|</span> <span class="string">&quot;thumbv7a&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;arm&quot;</span>),
+            <span class="string">&quot;aarch64&quot;</span> <span class="op">=&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;arm64&quot;</span>),
+            <span class="kw">_</span> <span class="op">=&gt;</span> <span class="prelude-val">None</span>,
         }
     }
 
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">bad_style</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">host_arch</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u16</span> {
+    <span class="kw">fn</span> <span class="ident">host_arch</span>() <span class="op">-&gt;</span> <span class="ident">u16</span> {
         <span class="kw">type</span> <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">u32</span>;
         <span class="kw">type</span> <span class="ident">WORD</span> <span class="op">=</span> <span class="ident">u16</span>;
         <span class="kw">type</span> <span class="ident">LPVOID</span> <span class="op">=</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>;
@@ -1503,7 +1504,7 @@
     <span class="comment">// the maximal numeric value.</span>
     <span class="comment">//</span>
     <span class="comment">// Returns the name of the maximal key as well as the opened maximal key.</span>
-    <span class="kw">fn</span> <span class="ident">max_version</span>(<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">RegistryKey</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">OsString</span>, <span class="ident">RegistryKey</span>)<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">max_version</span>(<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">RegistryKey</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">OsString</span>, <span class="ident">RegistryKey</span>)<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">max_vers</span> <span class="op">=</span> <span class="number">0</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">max_key</span> <span class="op">=</span> <span class="prelude-val">None</span>;
         <span class="kw">for</span> <span class="ident">subkey</span> <span class="kw">in</span> <span class="ident">key</span>.<span class="ident">iter</span>().<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">k</span>.<span class="ident">ok</span>()) {
@@ -1511,8 +1512,8 @@
                 .<span class="ident">to_str</span>()
                 .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">trim_left_matches</span>(<span class="string">&quot;v&quot;</span>).<span class="ident">replace</span>(<span class="string">&quot;.&quot;</span>, <span class="string">&quot;&quot;</span>).<span class="ident">parse</span>().<span class="ident">ok</span>());
             <span class="kw">let</span> <span class="ident">val</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">val</span> {
-                <span class="prelude-val">Some</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>,
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">continue</span>,
+                <span class="prelude-val">Some</span>(<span class="ident">s</span>) <span class="op">=&gt;</span> <span class="ident">s</span>,
+                <span class="prelude-val">None</span> <span class="op">=&gt;</span> <span class="kw">continue</span>,
             };
             <span class="kw">if</span> <span class="ident">val</span> <span class="op">&gt;</span> <span class="ident">max_vers</span> {
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">k</span>) <span class="op">=</span> <span class="ident">key</span>.<span class="ident">open</span>(<span class="kw-2">&amp;</span><span class="ident">subkey</span>) {
@@ -1524,36 +1525,36 @@
         <span class="ident">max_key</span>
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">has_msbuild_version</span>(<span class="ident">version</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">has_msbuild_version</span>(<span class="ident">version</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
         <span class="kw">match</span> <span class="ident">version</span> {
-            <span class="string">&quot;16.0&quot;</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="string">&quot;16.0&quot;</span> <span class="op">=&gt;</span> {
                 <span class="ident">find_msbuild_vs16</span>(<span class="string">&quot;x86_64-pc-windows-msvc&quot;</span>).<span class="ident">is_some</span>()
-                    <span class="op">|</span><span class="op">|</span> <span class="ident">find_msbuild_vs16</span>(<span class="string">&quot;i686-pc-windows-msvc&quot;</span>).<span class="ident">is_some</span>()
+                    <span class="op">||</span> <span class="ident">find_msbuild_vs16</span>(<span class="string">&quot;i686-pc-windows-msvc&quot;</span>).<span class="ident">is_some</span>()
             }
-            <span class="string">&quot;15.0&quot;</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="string">&quot;15.0&quot;</span> <span class="op">=&gt;</span> {
                 <span class="ident">find_msbuild_vs15</span>(<span class="string">&quot;x86_64-pc-windows-msvc&quot;</span>).<span class="ident">is_some</span>()
-                    <span class="op">|</span><span class="op">|</span> <span class="ident">find_msbuild_vs15</span>(<span class="string">&quot;i686-pc-windows-msvc&quot;</span>).<span class="ident">is_some</span>()
+                    <span class="op">||</span> <span class="ident">find_msbuild_vs15</span>(<span class="string">&quot;i686-pc-windows-msvc&quot;</span>).<span class="ident">is_some</span>()
             }
-            <span class="string">&quot;12.0&quot;</span> <span class="op">|</span> <span class="string">&quot;14.0&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">LOCAL_MACHINE</span>
+            <span class="string">&quot;12.0&quot;</span> <span class="op">|</span> <span class="string">&quot;14.0&quot;</span> <span class="op">=&gt;</span> <span class="ident">LOCAL_MACHINE</span>
                 .<span class="ident">open</span>(<span class="kw-2">&amp;</span><span class="ident">OsString</span>::<span class="ident">from</span>(<span class="macro">format</span><span class="macro">!</span>(
                     <span class="string">&quot;SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\{}&quot;</span>,
                     <span class="ident">version</span>
                 )))
                 .<span class="ident">is_ok</span>(),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+            <span class="kw">_</span> <span class="op">=&gt;</span> <span class="bool-val">false</span>,
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_devenv</span>(<span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_devenv</span>(<span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
         <span class="ident">find_devenv_vs15</span>(<span class="kw-2">&amp;</span><span class="ident">target</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">find_devenv_vs15</span>(<span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">find_devenv_vs15</span>(<span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
         <span class="ident">find_tool_in_vs15_path</span>(<span class="string">r&quot;Common7\IDE\devenv.exe&quot;</span>, <span class="ident">target</span>)
     }
 
     <span class="comment">// see http://stackoverflow.com/questions/328017/path-to-msbuild</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_msbuild</span>(<span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_msbuild</span>(<span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
         <span class="comment">// VS 15 (2017) changed how to locate msbuild</span>
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">r</span>) <span class="op">=</span> <span class="ident">find_msbuild_vs16</span>(<span class="ident">target</span>) {
             <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">r</span>);
@@ -1564,11 +1565,11 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">find_msbuild_vs15</span>(<span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">find_msbuild_vs15</span>(<span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
         <span class="ident">find_tool_in_vs15_path</span>(<span class="string">r&quot;MSBuild\15.0\Bin\MSBuild.exe&quot;</span>, <span class="ident">target</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">find_old_msbuild</span>(<span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">find_old_msbuild</span>(<span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tool</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="string">r&quot;SOFTWARE\Microsoft\MSBuild\ToolsVersions&quot;</span>;
         <span class="ident">LOCAL_MACHINE</span>
             .<span class="ident">open</span>(<span class="ident">key</span>.<span class="ident">as_ref</span>())

@@ -1,3 +1,3 @@
 (function() {var implementors = {};
-implementors["sha1"] = [{"text":"impl <a class=\"trait\" href=\"digest/trait.Reset.html\" title=\"trait digest::Reset\">Reset</a> for <a class=\"struct\" href=\"sha1/struct.Sha1.html\" title=\"struct sha1::Sha1\">Sha1</a>","synthetic":false,"types":["sha1::Sha1"]}];
+implementors["sha1"] = [{"text":"impl Reset for Sha1","synthetic":false,"types":[]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

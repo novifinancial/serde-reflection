@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/petgraph-0.5.1/src/matrix_graph.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>matrix_graph.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../petgraph/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">   1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/petgraph-0.5.1/src/matrix_graph.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>matrix_graph.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../petgraph/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><span class="help-button">?</span>
+                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -1715,21 +1716,21 @@
 <span class="doccomment">/// defining a null element.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Note: this trait is currently *sealed* and cannot be implemented for types outside this crate.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Nullable</span>: <span class="ident">Default</span> <span class="op">+</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="ident">Nullable</span><span class="op">&gt;</span>::<span class="ident">Wrapped</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">private</span>::<span class="ident">Sealed</span> {
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Nullable</span>: <span class="ident">Default</span> <span class="op">+</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="ident">Nullable</span><span class="op">&gt;</span>::<span class="ident">Wrapped</span><span class="op">&gt;&gt;</span> <span class="op">+</span> <span class="ident">private</span>::<span class="ident">Sealed</span> {
     <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
     <span class="kw">type</span> <span class="ident">Wrapped</span>;
 
     <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">value</span>: <span class="self">Self</span>::<span class="ident">Wrapped</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
+    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">value</span>: <span class="self">Self</span>::<span class="ident">Wrapped</span>) <span class="op">-&gt;</span> <span class="self">Self</span>;
 
     <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">as_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="self">Self</span>::<span class="ident">Wrapped</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">as_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="self">Self</span>::<span class="ident">Wrapped</span><span class="op">&gt;</span>;
 
     <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">as_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span>::<span class="ident">Wrapped</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">as_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span>::<span class="ident">Wrapped</span><span class="op">&gt;</span>;
 
     <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">is_null</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">is_null</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">as_ref</span>().<span class="ident">is_none</span>()
     }
 }
@@ -1737,15 +1738,15 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Nullable</span> <span class="kw">for</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="kw">type</span> <span class="ident">Wrapped</span> <span class="op">=</span> <span class="ident">T</span>;
 
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">value</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">value</span>: <span class="ident">T</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
         <span class="prelude-val">Some</span>(<span class="ident">value</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">as_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="self">Self</span>::<span class="ident">Wrapped</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">as_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="self">Self</span>::<span class="ident">Wrapped</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">as_ref</span>()
     }
 
-    <span class="kw">fn</span> <span class="ident">as_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span>::<span class="ident">Wrapped</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">as_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span>::<span class="ident">Wrapped</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">as_mut</span>()
     }
 }
@@ -1760,7 +1761,7 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">NotZero</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">T</span>);
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Zero</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">NotZero</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-&gt;</span> <span class="self">Self</span> {
         <span class="ident">NotZero</span>(<span class="ident">T</span>::<span class="ident">zero</span>())
     }
 }
@@ -1768,17 +1769,17 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Zero</span><span class="op">&gt;</span> <span class="ident">Nullable</span> <span class="kw">for</span> <span class="ident">NotZero</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="kw">type</span> <span class="ident">Wrapped</span> <span class="op">=</span> <span class="ident">T</span>;
 
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">value</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">value</span>: <span class="ident">T</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
         <span class="macro">assert</span><span class="macro">!</span>(<span class="op">!</span><span class="ident">value</span>.<span class="ident">is_zero</span>());
         <span class="ident">NotZero</span>(<span class="ident">value</span>)
     }
 
     <span class="comment">// implemented here for optimization purposes</span>
-    <span class="kw">fn</span> <span class="ident">is_null</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">is_null</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="number">0</span>.<span class="ident">is_zero</span>()
     }
 
-    <span class="kw">fn</span> <span class="ident">as_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="self">Self</span>::<span class="ident">Wrapped</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">as_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="self">Self</span>::<span class="ident">Wrapped</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">is_null</span>() {
             <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>)
         } <span class="kw">else</span> {
@@ -1786,7 +1787,7 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">as_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span>::<span class="ident">Wrapped</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">as_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span>::<span class="ident">Wrapped</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">is_null</span>() {
             <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="number">0</span>)
         } <span class="kw">else</span> {
@@ -1795,8 +1796,8 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Zero</span><span class="op">&gt;</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">NotZero</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Zero</span><span class="op">&gt;</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;&gt;</span> <span class="kw">for</span> <span class="ident">NotZero</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">is_null</span>() {
             <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="number">0</span>)
         } <span class="kw">else</span> {
@@ -1813,28 +1814,28 @@
 <span class="doccomment">/// Note that this trait is already implemented for the base numeric types.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Zero</span> {
     <span class="doccomment">/// Return the singleton object which can be used as a sentinel value.</span>
-    <span class="kw">fn</span> <span class="ident">zero</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
+    <span class="kw">fn</span> <span class="ident">zero</span>() <span class="op">-&gt;</span> <span class="self">Self</span>;
 
     <span class="doccomment">/// Return true if `self` is equal to the sentinel value.</span>
-    <span class="kw">fn</span> <span class="ident">is_zero</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>;
+    <span class="kw">fn</span> <span class="ident">is_zero</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span>;
 }
 
 <span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">not_zero_impl</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">ty</span>,<span class="macro-nonterminal">$</span><span class="macro-nonterminal">z</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">ty</span>,<span class="macro-nonterminal">$</span><span class="macro-nonterminal">z</span>:<span class="ident">expr</span>) <span class="op">=&gt;</span> {
         <span class="kw">impl</span> <span class="ident">Zero</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span> {
-            <span class="kw">fn</span> <span class="ident">zero</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+            <span class="kw">fn</span> <span class="ident">zero</span>() <span class="op">-&gt;</span> <span class="self">Self</span> {
                 <span class="macro-nonterminal">$</span><span class="macro-nonterminal">z</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>
             }
 
-            <span class="kw">fn</span> <span class="ident">is_zero</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-                <span class="self">self</span> <span class="op">=</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">Self</span>::<span class="ident">zero</span>()
+            <span class="kw">fn</span> <span class="ident">is_zero</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
+                <span class="self">self</span> <span class="op">==</span> <span class="kw-2">&amp;</span><span class="self">Self</span>::<span class="ident">zero</span>()
             }
         }
     };
 }
 
 <span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">not_zero_impls</span> {
-    ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">ty</span>),<span class="kw-2">*</span>) <span class="op">=</span><span class="op">&gt;</span> {
+    ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">ty</span>),<span class="kw-2">*</span>) <span class="op">=&gt;</span> {
         $(
             <span class="macro">not_zero_impl</span><span class="macro">!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>, <span class="number">0</span>);
         )<span class="op">*</span>
@@ -1847,7 +1848,7 @@
 
 <span class="doccomment">/// Short version of `NodeIndex::new` (with Ix = `DefaultIx`)</span>
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">node_index</span>(<span class="ident">ax</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">NodeIndex</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">node_index</span>(<span class="ident">ax</span>: <span class="ident">usize</span>) <span class="op">-&gt;</span> <span class="ident">NodeIndex</span> {
     <span class="ident">NodeIndex</span>::<span class="ident">new</span>(<span class="ident">ax</span>)
 }
 
@@ -1891,7 +1892,7 @@
     <span class="ident">MatrixGraph</span><span class="op">&lt;</span><span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">Ty</span>, <span class="ident">Null</span>, <span class="ident">Ix</span><span class="op">&gt;</span>
 {
     <span class="doccomment">/// Create a new `MatrixGraph` with estimated capacity for nodes.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_capacity</span>(<span class="ident">node_capacity</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_capacity</span>(<span class="ident">node_capacity</span>: <span class="ident">usize</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">m</span> <span class="op">=</span> <span class="self">Self</span> {
             <span class="ident">node_adjacencies</span>: <span class="macro">vec</span><span class="macro">!</span>[],
             <span class="ident">node_capacity</span>: <span class="number">0</span>,
@@ -1901,14 +1902,14 @@
             <span class="ident">ix</span>: <span class="ident">PhantomData</span>,
         };
 
-        <span class="macro">debug_assert</span><span class="macro">!</span>(<span class="ident">node_capacity</span> <span class="op">&lt;</span><span class="op">=</span> <span class="op">&lt;</span><span class="ident">Ix</span> <span class="kw">as</span> <span class="ident">IndexType</span><span class="op">&gt;</span>::<span class="ident">max</span>().<span class="ident">index</span>());
+        <span class="macro">debug_assert</span><span class="macro">!</span>(<span class="ident">node_capacity</span> <span class="op">&lt;=</span> <span class="op">&lt;</span><span class="ident">Ix</span> <span class="kw">as</span> <span class="ident">IndexType</span><span class="op">&gt;</span>::<span class="ident">max</span>().<span class="ident">index</span>());
         <span class="ident">m</span>.<span class="ident">extend_capacity_for_node</span>(<span class="ident">NodeIndex</span>::<span class="ident">new</span>(<span class="ident">node_capacity</span>));
 
         <span class="ident">m</span>
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">to_edge_position</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">b</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">fn</span> <span class="ident">to_edge_position</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">b</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="ident">usize</span> {
         <span class="ident">to_linearized_matrix_position</span>::<span class="op">&lt;</span><span class="ident">Ty</span><span class="op">&gt;</span>(<span class="ident">a</span>.<span class="ident">index</span>(), <span class="ident">b</span>.<span class="ident">index</span>(), <span class="self">self</span>.<span class="ident">node_capacity</span>)
     }
 
@@ -1925,7 +1926,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Computes in **O(1)** time.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">node_count</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">node_count</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">usize</span> {
         <span class="self">self</span>.<span class="ident">nodes</span>.<span class="ident">len</span>()
     }
 
@@ -1933,13 +1934,13 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Computes in **O(1)** time.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">edge_count</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">edge_count</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">usize</span> {
         <span class="self">self</span>.<span class="ident">nb_edges</span>
     }
 
     <span class="doccomment">/// Return whether the graph has directed edges or not.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_directed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_directed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
         <span class="ident">Ty</span>::<span class="ident">is_directed</span>()
     }
 
@@ -1950,7 +1951,7 @@
     <span class="doccomment">/// Return the index of the new node.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// **Panics** if the MatrixGraph is at the maximum number of nodes for its index type.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_node</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">weight</span>: <span class="ident">N</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_node</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">weight</span>: <span class="ident">N</span>) <span class="op">-&gt;</span> <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span> {
         <span class="ident">NodeIndex</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">nodes</span>.<span class="ident">add</span>(<span class="ident">weight</span>))
     }
 
@@ -1959,7 +1960,7 @@
     <span class="doccomment">/// Computes in **O(V)** time, due to the removal of edges with other nodes.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// **Panics** if the node `a` does not exist.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">remove_node</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">N</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">remove_node</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="ident">N</span> {
         <span class="kw">for</span> <span class="ident">id</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">nodes</span>.<span class="ident">iter_ids</span>() {
             <span class="kw">let</span> <span class="ident">position</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">to_edge_position</span>(<span class="ident">a</span>, <span class="ident">NodeIndex</span>::<span class="ident">new</span>(<span class="ident">id</span>));
             <span class="self">self</span>.<span class="ident">node_adjacencies</span>[<span class="ident">position</span>] <span class="op">=</span> <span class="ident">Default</span>::<span class="ident">default</span>();
@@ -1985,7 +1986,7 @@
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">extend_capacity_for_edge</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">b</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) {
         <span class="kw">let</span> <span class="ident">min_node</span> <span class="op">=</span> <span class="ident">cmp</span>::<span class="ident">max</span>(<span class="ident">a</span>, <span class="ident">b</span>);
-        <span class="kw">if</span> <span class="ident">min_node</span>.<span class="ident">index</span>() <span class="op">&gt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">node_capacity</span> {
+        <span class="kw">if</span> <span class="ident">min_node</span>.<span class="ident">index</span>() <span class="op">&gt;=</span> <span class="self">self</span>.<span class="ident">node_capacity</span> {
             <span class="self">self</span>.<span class="ident">extend_capacity_for_node</span>(<span class="ident">min_node</span>);
         }
     }
@@ -1998,13 +1999,13 @@
     <span class="doccomment">/// Computes in **O(|V|^2)** time, worst case (matrix needs to be re-allocated).</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// **Panics** if any of the nodes don&#39;t exist.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">update_edge</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">b</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">weight</span>: <span class="ident">E</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">update_edge</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">b</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">weight</span>: <span class="ident">E</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">extend_capacity_for_edge</span>(<span class="ident">a</span>, <span class="ident">b</span>);
 
         <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">to_edge_position</span>(<span class="ident">a</span>, <span class="ident">b</span>);
         <span class="kw">let</span> <span class="ident">old_weight</span> <span class="op">=</span> <span class="ident">mem</span>::<span class="ident">replace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">node_adjacencies</span>[<span class="ident">p</span>], <span class="ident">Null</span>::<span class="ident">new</span>(<span class="ident">weight</span>));
         <span class="kw">if</span> <span class="ident">old_weight</span>.<span class="ident">is_null</span>() {
-            <span class="self">self</span>.<span class="ident">nb_edges</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+            <span class="self">self</span>.<span class="ident">nb_edges</span> <span class="op">+=</span> <span class="number">1</span>;
         }
         <span class="ident">old_weight</span>.<span class="ident">into</span>()
     }
@@ -2031,20 +2032,20 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// **Panics** if any of the nodes don&#39;t exist.</span>
     <span class="doccomment">/// **Panics** if no edge exists between `a` and `b`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">remove_edge</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">b</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">E</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">remove_edge</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">b</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="ident">E</span> {
         <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">to_edge_position</span>(<span class="ident">a</span>, <span class="ident">b</span>);
         <span class="kw">let</span> <span class="ident">old_weight</span> <span class="op">=</span> <span class="ident">mem</span>::<span class="ident">replace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">node_adjacencies</span>[<span class="ident">p</span>], <span class="ident">Default</span>::<span class="ident">default</span>())
             .<span class="ident">into</span>()
             .<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">old_weight</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">old_weight</span>.<span class="ident">into</span>();
-        <span class="self">self</span>.<span class="ident">nb_edges</span> <span class="op">-</span><span class="op">=</span> <span class="number">1</span>;
+        <span class="self">self</span>.<span class="ident">nb_edges</span> <span class="op">-=</span> <span class="number">1</span>;
         <span class="ident">old_weight</span>.<span class="ident">unwrap</span>()
     }
 
     <span class="doccomment">/// Return true if there is an edge between `a` and `b`.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// **Panics** if any of the nodes don&#39;t exist.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">has_edge</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">b</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">has_edge</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">b</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
         <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">to_edge_position</span>(<span class="ident">a</span>, <span class="ident">b</span>);
         <span class="op">!</span><span class="self">self</span>.<span class="ident">node_adjacencies</span>[<span class="ident">p</span>].<span class="ident">is_null</span>()
     }
@@ -2054,7 +2055,7 @@
     <span class="doccomment">/// Also available with indexing syntax: `&amp;graph[a]`.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// **Panics** if the node doesn&#39;t exist.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">node_weight</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">N</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">node_weight</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="ident">N</span> {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">nodes</span>[<span class="ident">a</span>.<span class="ident">index</span>()]
     }
 
@@ -2063,7 +2064,7 @@
     <span class="doccomment">/// Also available with indexing syntax: `&amp;mut graph[a]`.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// **Panics** if the node doesn&#39;t exist.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">node_weight_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">N</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">node_weight_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">N</span> {
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">nodes</span>[<span class="ident">a</span>.<span class="ident">index</span>()]
     }
 
@@ -2072,7 +2073,7 @@
     <span class="doccomment">/// Also available with indexing syntax: `&amp;graph[e]`.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// **Panics** if no edge exists between `a` and `b`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">edge_weight</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">b</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">E</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">edge_weight</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">b</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="ident">E</span> {
         <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">to_edge_position</span>(<span class="ident">a</span>, <span class="ident">b</span>);
         <span class="self">self</span>.<span class="ident">node_adjacencies</span>[<span class="ident">p</span>].<span class="ident">as_ref</span>().<span class="ident">unwrap</span>()
     }
@@ -2082,7 +2083,7 @@
     <span class="doccomment">/// Also available with indexing syntax: `&amp;mut graph[e]`.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// **Panics** if no edge exists between `a` and `b`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">edge_weight_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">b</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">E</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">edge_weight_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">b</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">E</span> {
         <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">to_edge_position</span>(<span class="ident">a</span>, <span class="ident">b</span>);
         <span class="self">self</span>.<span class="ident">node_adjacencies</span>[<span class="ident">p</span>].<span class="ident">as_mut</span>().<span class="ident">unwrap</span>()
     }
@@ -2094,7 +2095,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Produces an empty iterator if the node doesn&#39;t exist.&lt;br&gt;</span>
     <span class="doccomment">/// Iterator element type is [`NodeIndex&lt;Ix&gt;`](../graph/struct.NodeIndex.html).</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">neighbors</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Neighbors</span><span class="op">&lt;</span><span class="ident">Ty</span>, <span class="ident">Null</span>, <span class="ident">Ix</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">neighbors</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="ident">Neighbors</span><span class="op">&lt;</span><span class="ident">Ty</span>, <span class="ident">Null</span>, <span class="ident">Ix</span><span class="op">&gt;</span> {
         <span class="ident">Neighbors</span>(<span class="ident">Edges</span>::<span class="ident">on_columns</span>(
             <span class="ident">a</span>.<span class="ident">index</span>(),
             <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">node_adjacencies</span>,
@@ -2109,7 +2110,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Produces an empty iterator if the node doesn&#39;t exist.&lt;br&gt;</span>
     <span class="doccomment">/// Iterator element type is [`Edges&lt;E, Ix&gt;`](../graph/struct.Edges.html).</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">edges</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Edges</span><span class="op">&lt;</span><span class="ident">Ty</span>, <span class="ident">Null</span>, <span class="ident">Ix</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">edges</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="ident">Edges</span><span class="op">&lt;</span><span class="ident">Ty</span>, <span class="ident">Null</span>, <span class="ident">Ix</span><span class="op">&gt;</span> {
         <span class="ident">Edges</span>::<span class="ident">on_columns</span>(<span class="ident">a</span>.<span class="ident">index</span>(), <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">node_adjacencies</span>, <span class="self">self</span>.<span class="ident">node_capacity</span>)
     }
 
@@ -2130,11 +2131,11 @@
     <span class="doccomment">///     (2, 3),</span>
     <span class="doccomment">/// ]);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_edges</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">iterable</span>: <span class="ident">I</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_edges</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">iterable</span>: <span class="ident">I</span>) <span class="op">-&gt;</span> <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">I</span>: <span class="ident">IntoIterator</span>,
         <span class="ident">I</span>::<span class="ident">Item</span>: <span class="ident">IntoWeightedEdge</span><span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;</span>,
-        <span class="op">&lt;</span><span class="ident">I</span>::<span class="ident">Item</span> <span class="kw">as</span> <span class="ident">IntoWeightedEdge</span><span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;</span><span class="op">&gt;</span>::<span class="ident">NodeId</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+        <span class="op">&lt;</span><span class="ident">I</span>::<span class="ident">Item</span> <span class="kw">as</span> <span class="ident">IntoWeightedEdge</span><span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;&gt;</span>::<span class="ident">NodeId</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;&gt;</span>,
         <span class="ident">N</span>: <span class="ident">Default</span>,
     {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">g</span> <span class="op">=</span> <span class="self">Self</span>::<span class="ident">default</span>();
@@ -2153,14 +2154,14 @@
     <span class="kw">where</span>
         <span class="ident">I</span>: <span class="ident">IntoIterator</span>,
         <span class="ident">I</span>::<span class="ident">Item</span>: <span class="ident">IntoWeightedEdge</span><span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;</span>,
-        <span class="op">&lt;</span><span class="ident">I</span>::<span class="ident">Item</span> <span class="kw">as</span> <span class="ident">IntoWeightedEdge</span><span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;</span><span class="op">&gt;</span>::<span class="ident">NodeId</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+        <span class="op">&lt;</span><span class="ident">I</span>::<span class="ident">Item</span> <span class="kw">as</span> <span class="ident">IntoWeightedEdge</span><span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;&gt;</span>::<span class="ident">NodeId</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;&gt;</span>,
         <span class="ident">N</span>: <span class="ident">Default</span>,
     {
         <span class="kw">for</span> <span class="ident">elt</span> <span class="kw">in</span> <span class="ident">iterable</span> {
             <span class="kw">let</span> (<span class="ident">source</span>, <span class="ident">target</span>, <span class="ident">weight</span>) <span class="op">=</span> <span class="ident">elt</span>.<span class="ident">into_weighted_edge</span>();
             <span class="kw">let</span> (<span class="ident">source</span>, <span class="ident">target</span>) <span class="op">=</span> (<span class="ident">source</span>.<span class="ident">into</span>(), <span class="ident">target</span>.<span class="ident">into</span>());
             <span class="kw">let</span> <span class="ident">nx</span> <span class="op">=</span> <span class="ident">cmp</span>::<span class="ident">max</span>(<span class="ident">source</span>, <span class="ident">target</span>);
-            <span class="kw">while</span> <span class="ident">nx</span>.<span class="ident">index</span>() <span class="op">&gt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">node_count</span>() {
+            <span class="kw">while</span> <span class="ident">nx</span>.<span class="ident">index</span>() <span class="op">&gt;=</span> <span class="self">self</span>.<span class="ident">node_count</span>() {
                 <span class="self">self</span>.<span class="ident">add_node</span>(<span class="ident">N</span>::<span class="ident">default</span>());
             }
             <span class="self">self</span>.<span class="ident">add_edge</span>(<span class="ident">source</span>, <span class="ident">target</span>, <span class="ident">weight</span>);
@@ -2182,8 +2183,8 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>,
         <span class="ident">d</span>: <span class="ident">Direction</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Neighbors</span><span class="op">&lt;</span><span class="ident">Directed</span>, <span class="ident">Null</span>, <span class="ident">Ix</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">d</span> <span class="op">=</span><span class="op">=</span> <span class="ident">Outgoing</span> {
+    ) <span class="op">-&gt;</span> <span class="ident">Neighbors</span><span class="op">&lt;</span><span class="ident">Directed</span>, <span class="ident">Null</span>, <span class="ident">Ix</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="ident">d</span> <span class="op">==</span> <span class="ident">Outgoing</span> {
             <span class="self">self</span>.<span class="ident">neighbors</span>(<span class="ident">a</span>)
         } <span class="kw">else</span> {
             <span class="ident">Neighbors</span>(<span class="ident">Edges</span>::<span class="ident">on_rows</span>(
@@ -2201,8 +2202,8 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Produces an empty iterator if the node `a` doesn&#39;t exist.&lt;br&gt;</span>
     <span class="doccomment">/// Iterator element type is [`EdgeReference&lt;E, Ix&gt;`](../graph/struct.EdgeReference.html).</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">edges_directed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">d</span>: <span class="ident">Direction</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Edges</span><span class="op">&lt;</span><span class="ident">Directed</span>, <span class="ident">Null</span>, <span class="ident">Ix</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">d</span> <span class="op">=</span><span class="op">=</span> <span class="ident">Outgoing</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">edges_directed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">d</span>: <span class="ident">Direction</span>) <span class="op">-&gt;</span> <span class="ident">Edges</span><span class="op">&lt;</span><span class="ident">Directed</span>, <span class="ident">Null</span>, <span class="ident">Ix</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="ident">d</span> <span class="op">==</span> <span class="ident">Outgoing</span> {
             <span class="self">self</span>.<span class="ident">edges</span>(<span class="ident">a</span>)
         } <span class="kw">else</span> {
             <span class="ident">Edges</span>::<span class="ident">on_rows</span>(<span class="ident">a</span>.<span class="ident">index</span>(), <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">node_adjacencies</span>, <span class="self">self</span>.<span class="ident">node_capacity</span>)
@@ -2222,7 +2223,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Ix</span>: <span class="ident">IndexType</span><span class="op">&gt;</span> <span class="ident">NodeIdentifiers</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Ix</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">iter</span>: <span class="ident">IdIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">iter</span>: <span class="ident">IdIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">iter</span>,
             <span class="ident">ix</span>: <span class="ident">PhantomData</span>,
@@ -2233,7 +2234,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Ix</span>: <span class="ident">IndexType</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">NodeIdentifiers</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Ix</span><span class="op">&gt;</span> {
     <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Item</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Item</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">iter</span>.<span class="ident">next</span>().<span class="ident">map</span>(<span class="ident">NodeIndex</span>::<span class="ident">new</span>)
     }
 }
@@ -2251,7 +2252,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">N</span>: <span class="lifetime">&#39;a</span>, <span class="ident">Ix</span><span class="op">&gt;</span> <span class="ident">NodeReferences</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">N</span>, <span class="ident">Ix</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">nodes</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">IdStorage</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">nodes</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">IdStorage</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
         <span class="ident">NodeReferences</span> {
             <span class="ident">nodes</span>,
             <span class="ident">iter</span>: <span class="ident">nodes</span>.<span class="ident">iter_ids</span>(),
@@ -2263,7 +2264,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">N</span>: <span class="lifetime">&#39;a</span>, <span class="ident">Ix</span>: <span class="ident">IndexType</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">NodeReferences</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">N</span>, <span class="ident">Ix</span><span class="op">&gt;</span> {
     <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> (<span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">N</span>);
 
-    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Item</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Item</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">iter</span>
             .<span class="ident">next</span>()
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="ident">NodeIndex</span>::<span class="ident">new</span>(<span class="ident">i</span>), <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">nodes</span>[<span class="ident">i</span>]))
@@ -2286,7 +2287,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Ty</span>: <span class="ident">EdgeType</span>, <span class="ident">Null</span>: <span class="lifetime">&#39;a</span> <span class="op">+</span> <span class="ident">Nullable</span>, <span class="ident">Ix</span><span class="op">&gt;</span> <span class="ident">EdgeReferences</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Ty</span>, <span class="ident">Null</span>, <span class="ident">Ix</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">node_adjacencies</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">Null</span>], <span class="ident">node_capacity</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">node_adjacencies</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">Null</span>], <span class="ident">node_capacity</span>: <span class="ident">usize</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
         <span class="ident">EdgeReferences</span> {
             <span class="ident">row</span>: <span class="number">0</span>,
             <span class="ident">column</span>: <span class="number">0</span>,
@@ -2303,10 +2304,10 @@
 {
     <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> (<span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Null</span>::<span class="ident">Wrapped</span>);
 
-    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Item</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Item</span><span class="op">&gt;</span> {
         <span class="kw">loop</span> {
             <span class="kw">let</span> (<span class="ident">row</span>, <span class="ident">column</span>) <span class="op">=</span> (<span class="self">self</span>.<span class="ident">row</span>, <span class="self">self</span>.<span class="ident">column</span>);
-            <span class="kw">if</span> <span class="ident">row</span> <span class="op">&gt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">node_capacity</span> {
+            <span class="kw">if</span> <span class="ident">row</span> <span class="op">&gt;=</span> <span class="self">self</span>.<span class="ident">node_capacity</span> {
                 <span class="kw">return</span> <span class="prelude-val">None</span>;
             }
 
@@ -2314,15 +2315,15 @@
             <span class="comment">//</span>
             <span class="comment">// Note that for undirected graphs, we don&#39;t want to yield the same edge twice,</span>
             <span class="comment">// therefore the maximum column length should be the index new after the row index.</span>
-            <span class="self">self</span>.<span class="ident">column</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+            <span class="self">self</span>.<span class="ident">column</span> <span class="op">+=</span> <span class="number">1</span>;
             <span class="kw">let</span> <span class="ident">max_column_len</span> <span class="op">=</span> <span class="kw">if</span> <span class="op">!</span><span class="ident">Ty</span>::<span class="ident">is_directed</span>() {
                 <span class="ident">row</span> <span class="op">+</span> <span class="number">1</span>
             } <span class="kw">else</span> {
                 <span class="self">self</span>.<span class="ident">node_capacity</span>
             };
-            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">column</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">max_column_len</span> {
+            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">column</span> <span class="op">&gt;=</span> <span class="ident">max_column_len</span> {
                 <span class="self">self</span>.<span class="ident">column</span> <span class="op">=</span> <span class="number">0</span>;
-                <span class="self">self</span>.<span class="ident">row</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+                <span class="self">self</span>.<span class="ident">row</span> <span class="op">+=</span> <span class="number">1</span>;
             }
 
             <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">to_linearized_matrix_position</span>::<span class="op">&lt;</span><span class="ident">Ty</span><span class="op">&gt;</span>(<span class="ident">row</span>, <span class="ident">column</span>, <span class="self">self</span>.<span class="ident">node_capacity</span>);
@@ -2346,7 +2347,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Ty</span>: <span class="ident">EdgeType</span>, <span class="ident">Null</span>: <span class="ident">Nullable</span>, <span class="ident">Ix</span>: <span class="ident">IndexType</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">Neighbors</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Ty</span>, <span class="ident">Null</span>, <span class="ident">Ix</span><span class="op">&gt;</span> {
     <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Item</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Item</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="number">0</span>.<span class="ident">next</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">b</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">b</span>)
     }
 }
@@ -2373,7 +2374,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Ty</span>: <span class="ident">EdgeType</span>, <span class="ident">Null</span>: <span class="lifetime">&#39;a</span> <span class="op">+</span> <span class="ident">Nullable</span>, <span class="ident">Ix</span><span class="op">&gt;</span> <span class="ident">Edges</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Ty</span>, <span class="ident">Null</span>, <span class="ident">Ix</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">on_columns</span>(<span class="ident">row</span>: <span class="ident">usize</span>, <span class="ident">node_adjacencies</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">Null</span>], <span class="ident">node_capacity</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">on_columns</span>(<span class="ident">row</span>: <span class="ident">usize</span>, <span class="ident">node_adjacencies</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">Null</span>], <span class="ident">node_capacity</span>: <span class="ident">usize</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
         <span class="ident">Edges</span> {
             <span class="ident">iter_direction</span>: <span class="ident">NeighborIterDirection</span>::<span class="ident">Columns</span>,
             <span class="ident">node_adjacencies</span>,
@@ -2385,7 +2386,7 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">on_rows</span>(<span class="ident">column</span>: <span class="ident">usize</span>, <span class="ident">node_adjacencies</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">Null</span>], <span class="ident">node_capacity</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">on_rows</span>(<span class="ident">column</span>: <span class="ident">usize</span>, <span class="ident">node_adjacencies</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">Null</span>], <span class="ident">node_capacity</span>: <span class="ident">usize</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
         <span class="ident">Edges</span> {
             <span class="ident">iter_direction</span>: <span class="ident">NeighborIterDirection</span>::<span class="ident">Rows</span>,
             <span class="ident">node_adjacencies</span>,
@@ -2401,25 +2402,25 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Ty</span>: <span class="ident">EdgeType</span>, <span class="ident">Null</span>: <span class="ident">Nullable</span>, <span class="ident">Ix</span>: <span class="ident">IndexType</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">Edges</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Ty</span>, <span class="ident">Null</span>, <span class="ident">Ix</span><span class="op">&gt;</span> {
     <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> (<span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Null</span>::<span class="ident">Wrapped</span>);
 
-    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Item</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Item</span><span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="self">self</span>::<span class="ident">NeighborIterDirection</span>::<span class="kw-2">*</span>;
 
         <span class="kw">loop</span> {
             <span class="kw">let</span> (<span class="ident">row</span>, <span class="ident">column</span>) <span class="op">=</span> (<span class="self">self</span>.<span class="ident">row</span>, <span class="self">self</span>.<span class="ident">column</span>);
-            <span class="kw">if</span> <span class="ident">row</span> <span class="op">&gt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">node_capacity</span> <span class="op">|</span><span class="op">|</span> <span class="ident">column</span> <span class="op">&gt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">node_capacity</span> {
+            <span class="kw">if</span> <span class="ident">row</span> <span class="op">&gt;=</span> <span class="self">self</span>.<span class="ident">node_capacity</span> <span class="op">||</span> <span class="ident">column</span> <span class="op">&gt;=</span> <span class="self">self</span>.<span class="ident">node_capacity</span> {
                 <span class="kw">return</span> <span class="prelude-val">None</span>;
             }
 
             <span class="kw">match</span> <span class="self">self</span>.<span class="ident">iter_direction</span> {
-                <span class="ident">Rows</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">row</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>,
-                <span class="ident">Columns</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">column</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>,
+                <span class="ident">Rows</span> <span class="op">=&gt;</span> <span class="self">self</span>.<span class="ident">row</span> <span class="op">+=</span> <span class="number">1</span>,
+                <span class="ident">Columns</span> <span class="op">=&gt;</span> <span class="self">self</span>.<span class="ident">column</span> <span class="op">+=</span> <span class="number">1</span>,
             }
 
             <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">to_linearized_matrix_position</span>::<span class="op">&lt;</span><span class="ident">Ty</span><span class="op">&gt;</span>(<span class="ident">row</span>, <span class="ident">column</span>, <span class="self">self</span>.<span class="ident">node_capacity</span>);
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">node_adjacencies</span>[<span class="ident">p</span>].<span class="ident">as_ref</span>() {
                 <span class="kw">let</span> (<span class="ident">a</span>, <span class="ident">b</span>) <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">iter_direction</span> {
-                    <span class="ident">Rows</span> <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">column</span>, <span class="ident">row</span>),
-                    <span class="ident">Columns</span> <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">row</span>, <span class="ident">column</span>),
+                    <span class="ident">Rows</span> <span class="op">=&gt;</span> (<span class="ident">column</span>, <span class="ident">row</span>),
+                    <span class="ident">Columns</span> <span class="op">=&gt;</span> (<span class="ident">row</span>, <span class="ident">column</span>),
                 };
 
                 <span class="kw">return</span> <span class="prelude-val">Some</span>((<span class="ident">NodeIndex</span>::<span class="ident">new</span>(<span class="ident">a</span>), <span class="ident">NodeIndex</span>::<span class="ident">new</span>(<span class="ident">b</span>), <span class="ident">e</span>));
@@ -2429,7 +2430,7 @@
 }
 
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">to_linearized_matrix_position</span><span class="op">&lt;</span><span class="ident">Ty</span>: <span class="ident">EdgeType</span><span class="op">&gt;</span>(<span class="ident">row</span>: <span class="ident">usize</span>, <span class="ident">column</span>: <span class="ident">usize</span>, <span class="ident">width</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+<span class="kw">fn</span> <span class="ident">to_linearized_matrix_position</span><span class="op">&lt;</span><span class="ident">Ty</span>: <span class="ident">EdgeType</span><span class="op">&gt;</span>(<span class="ident">row</span>: <span class="ident">usize</span>, <span class="ident">column</span>: <span class="ident">usize</span>, <span class="ident">width</span>: <span class="ident">usize</span>) <span class="op">-&gt;</span> <span class="ident">usize</span> {
     <span class="kw">if</span> <span class="ident">Ty</span>::<span class="ident">is_directed</span>() {
         <span class="ident">to_flat_square_matrix_position</span>(<span class="ident">row</span>, <span class="ident">column</span>, <span class="ident">width</span>)
     } <span class="kw">else</span> {
@@ -2442,7 +2443,7 @@
     <span class="ident">node_adjacencies</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     <span class="ident">old_node_capacity</span>: <span class="ident">usize</span>,
     <span class="ident">min_node_capacity</span>: <span class="ident">usize</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+) <span class="op">-&gt;</span> <span class="ident">usize</span> {
     <span class="kw">if</span> <span class="ident">Ty</span>::<span class="ident">is_directed</span>() {
         <span class="ident">extend_flat_square_matrix</span>(<span class="ident">node_adjacencies</span>, <span class="ident">old_node_capacity</span>, <span class="ident">min_node_capacity</span>)
     } <span class="kw">else</span> {
@@ -2451,7 +2452,7 @@
 }
 
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">to_flat_square_matrix_position</span>(<span class="ident">row</span>: <span class="ident">usize</span>, <span class="ident">column</span>: <span class="ident">usize</span>, <span class="ident">width</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+<span class="kw">fn</span> <span class="ident">to_flat_square_matrix_position</span>(<span class="ident">row</span>: <span class="ident">usize</span>, <span class="ident">column</span>: <span class="ident">usize</span>, <span class="ident">width</span>: <span class="ident">usize</span>) <span class="op">-&gt;</span> <span class="ident">usize</span> {
     <span class="ident">row</span> <span class="op">*</span> <span class="ident">width</span> <span class="op">+</span> <span class="ident">column</span>
 }
 
@@ -2460,7 +2461,7 @@
     <span class="ident">node_adjacencies</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     <span class="ident">old_node_capacity</span>: <span class="ident">usize</span>,
     <span class="ident">min_node_capacity</span>: <span class="ident">usize</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+) <span class="op">-&gt;</span> <span class="ident">usize</span> {
     <span class="kw">let</span> <span class="ident">min_node_capacity</span> <span class="op">=</span> (<span class="ident">min_node_capacity</span> <span class="op">+</span> <span class="number">1</span>).<span class="ident">next_power_of_two</span>();
 
     <span class="comment">// Optimization: when resizing the matrix this way we skip the first few grows to make</span>
@@ -2487,7 +2488,7 @@
 }
 
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">to_lower_triangular_matrix_position</span>(<span class="ident">row</span>: <span class="ident">usize</span>, <span class="ident">column</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+<span class="kw">fn</span> <span class="ident">to_lower_triangular_matrix_position</span>(<span class="ident">row</span>: <span class="ident">usize</span>, <span class="ident">column</span>: <span class="ident">usize</span>) <span class="op">-&gt;</span> <span class="ident">usize</span> {
     <span class="kw">let</span> (<span class="ident">row</span>, <span class="ident">column</span>) <span class="op">=</span> <span class="kw">if</span> <span class="ident">row</span> <span class="op">&gt;</span> <span class="ident">column</span> {
         (<span class="ident">row</span>, <span class="ident">column</span>)
     } <span class="kw">else</span> {
@@ -2500,7 +2501,7 @@
 <span class="kw">fn</span> <span class="ident">extend_lower_triangular_matrix</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Default</span><span class="op">&gt;</span>(
     <span class="ident">node_adjacencies</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     <span class="ident">new_node_capacity</span>: <span class="ident">usize</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+) <span class="op">-&gt;</span> <span class="ident">usize</span> {
     <span class="kw">let</span> <span class="ident">max_pos</span> <span class="op">=</span> <span class="ident">to_lower_triangular_matrix_position</span>(<span class="ident">new_node_capacity</span>, <span class="ident">new_node_capacity</span>);
     <span class="ident">ensure_len</span>(<span class="ident">node_adjacencies</span>, <span class="ident">max_pos</span> <span class="op">+</span> <span class="number">1</span>);
     <span class="ident">new_node_capacity</span> <span class="op">+</span> <span class="number">1</span>
@@ -2518,13 +2519,13 @@
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
 <span class="kw">struct</span> <span class="ident">IdStorage</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="ident">elements</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">elements</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;&gt;</span>,
     <span class="ident">upper_bound</span>: <span class="ident">usize</span>,
     <span class="ident">removed_ids</span>: <span class="ident">IndexSet</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">IdStorage</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">with_capacity</span>(<span class="ident">capacity</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">with_capacity</span>(<span class="ident">capacity</span>: <span class="ident">usize</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
         <span class="ident">IdStorage</span> {
             <span class="ident">elements</span>: <span class="ident">Vec</span>::<span class="ident">with_capacity</span>(<span class="ident">capacity</span>),
             <span class="ident">upper_bound</span>: <span class="number">0</span>,
@@ -2532,12 +2533,12 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">add</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">element</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">fn</span> <span class="ident">add</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">element</span>: <span class="ident">T</span>) <span class="op">-&gt;</span> <span class="ident">usize</span> {
         <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">id</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">removed_ids</span>.<span class="ident">pop</span>() {
             <span class="ident">id</span>
         } <span class="kw">else</span> {
             <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">upper_bound</span>;
-            <span class="self">self</span>.<span class="ident">upper_bound</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+            <span class="self">self</span>.<span class="ident">upper_bound</span> <span class="op">+=</span> <span class="number">1</span>;
 
             <span class="ident">ensure_len</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">elements</span>, <span class="ident">id</span> <span class="op">+</span> <span class="number">1</span>);
 
@@ -2549,10 +2550,10 @@
         <span class="ident">id</span>
     }
 
-    <span class="kw">fn</span> <span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+    <span class="kw">fn</span> <span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">usize</span>) <span class="op">-&gt;</span> <span class="ident">T</span> {
         <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">elements</span>[<span class="ident">id</span>].<span class="ident">take</span>().<span class="ident">unwrap</span>();
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">upper_bound</span> <span class="op">-</span> <span class="ident">id</span> <span class="op">=</span><span class="op">=</span> <span class="number">1</span> {
-            <span class="self">self</span>.<span class="ident">upper_bound</span> <span class="op">-</span><span class="op">=</span> <span class="number">1</span>;
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">upper_bound</span> <span class="op">-</span> <span class="ident">id</span> <span class="op">==</span> <span class="number">1</span> {
+            <span class="self">self</span>.<span class="ident">upper_bound</span> <span class="op">-=</span> <span class="number">1</span>;
         } <span class="kw">else</span> {
             <span class="self">self</span>.<span class="ident">removed_ids</span>.<span class="ident">insert</span>(<span class="ident">id</span>);
         }
@@ -2566,11 +2567,11 @@
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">usize</span> {
         <span class="self">self</span>.<span class="ident">upper_bound</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">removed_ids</span>.<span class="ident">len</span>()
     }
 
-    <span class="kw">fn</span> <span class="ident">iter_ids</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">IdIterator</span> {
+    <span class="kw">fn</span> <span class="ident">iter_ids</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">IdIterator</span> {
         <span class="ident">IdIterator</span> {
             <span class="ident">upper_bound</span>: <span class="self">self</span>.<span class="ident">upper_bound</span>,
             <span class="ident">removed_ids</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">removed_ids</span>,
@@ -2581,13 +2582,13 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Index</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">IdStorage</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span>;
-    <span class="kw">fn</span> <span class="ident">index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">T</span> {
+    <span class="kw">fn</span> <span class="ident">index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="ident">T</span> {
         <span class="self">self</span>.<span class="ident">elements</span>[<span class="ident">index</span>].<span class="ident">as_ref</span>().<span class="ident">unwrap</span>()
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">IndexMut</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">IdStorage</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">index_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span> {
+    <span class="kw">fn</span> <span class="ident">index_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span> {
         <span class="self">self</span>.<span class="ident">elements</span>[<span class="ident">index</span>].<span class="ident">as_mut</span>().<span class="ident">unwrap</span>()
     }
 }
@@ -2601,7 +2602,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">IdIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="ident">usize</span>;
 
-    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Item</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Item</span><span class="op">&gt;</span> {
         <span class="comment">// initialize / advance</span>
         <span class="kw">let</span> <span class="ident">current</span> <span class="op">=</span> {
             <span class="kw">if</span> <span class="self">self</span>.<span class="ident">current</span>.<span class="ident">is_none</span>() {
@@ -2609,14 +2610,14 @@
                 <span class="self">self</span>.<span class="ident">current</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>()
             } <span class="kw">else</span> {
                 <span class="kw">let</span> <span class="ident">current</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">current</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>();
-                <span class="kw-2">*</span><span class="ident">current</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+                <span class="kw-2">*</span><span class="ident">current</span> <span class="op">+=</span> <span class="number">1</span>;
                 <span class="ident">current</span>
             }
         };
 
         <span class="comment">// skip removed ids</span>
-        <span class="kw">while</span> <span class="self">self</span>.<span class="ident">removed_ids</span>.<span class="ident">contains</span>(<span class="ident">current</span>) <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="kw-2">*</span><span class="ident">current</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">upper_bound</span> {
-            <span class="kw-2">*</span><span class="ident">current</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+        <span class="kw">while</span> <span class="self">self</span>.<span class="ident">removed_ids</span>.<span class="ident">contains</span>(<span class="ident">current</span>) <span class="op">&amp;&amp;</span> <span class="kw-2">*</span><span class="ident">current</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">upper_bound</span> {
+            <span class="kw-2">*</span><span class="ident">current</span> <span class="op">+=</span> <span class="number">1</span>;
         }
 
         <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">current</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">upper_bound</span> {
@@ -2631,7 +2632,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">Ty</span>: <span class="ident">EdgeType</span>, <span class="ident">Null</span>: <span class="ident">Nullable</span><span class="op">&lt;</span><span class="ident">Wrapped</span> <span class="op">=</span> <span class="ident">E</span><span class="op">&gt;</span>, <span class="ident">Ix</span>: <span class="ident">IndexType</span><span class="op">&gt;</span> <span class="ident">Default</span>
     <span class="kw">for</span> <span class="ident">MatrixGraph</span><span class="op">&lt;</span><span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">Ty</span>, <span class="ident">Null</span>, <span class="ident">Ix</span><span class="op">&gt;</span>
 {
-    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span>::<span class="ident">with_capacity</span>(<span class="number">0</span>)
     }
 }
@@ -2641,7 +2642,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// This is a convenience method. Use `MatrixGraph::with_capacity` or `MatrixGraph::default` for</span>
     <span class="doccomment">/// a constructor that is generic in all the type parameters of `MatrixGraph`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-&gt;</span> <span class="self">Self</span> {
         <span class="ident">MatrixGraph</span>::<span class="ident">default</span>()
     }
 }
@@ -2651,7 +2652,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// This is a convenience method. Use `MatrixGraph::with_capacity` or `MatrixGraph::default` for</span>
     <span class="doccomment">/// a constructor that is generic in all the type parameters of `MatrixGraph`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_undirected</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_undirected</span>() <span class="op">-&gt;</span> <span class="self">Self</span> {
         <span class="ident">MatrixGraph</span>::<span class="ident">default</span>()
     }
 }
@@ -2659,12 +2660,12 @@
 <span class="doccomment">/// Index the `MatrixGraph` by `NodeIndex` to access node weights.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// **Panics** if the node doesn&#39;t exist.</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">Ty</span>: <span class="ident">EdgeType</span>, <span class="ident">Null</span>: <span class="ident">Nullable</span><span class="op">&lt;</span><span class="ident">Wrapped</span> <span class="op">=</span> <span class="ident">E</span><span class="op">&gt;</span>, <span class="ident">Ix</span>: <span class="ident">IndexType</span><span class="op">&gt;</span> <span class="ident">Index</span><span class="op">&lt;</span><span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">Ty</span>: <span class="ident">EdgeType</span>, <span class="ident">Null</span>: <span class="ident">Nullable</span><span class="op">&lt;</span><span class="ident">Wrapped</span> <span class="op">=</span> <span class="ident">E</span><span class="op">&gt;</span>, <span class="ident">Ix</span>: <span class="ident">IndexType</span><span class="op">&gt;</span> <span class="ident">Index</span><span class="op">&lt;</span><span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;&gt;</span>
     <span class="kw">for</span> <span class="ident">MatrixGraph</span><span class="op">&lt;</span><span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">Ty</span>, <span class="ident">Null</span>, <span class="ident">Ix</span><span class="op">&gt;</span>
 {
     <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">N</span>;
 
-    <span class="kw">fn</span> <span class="ident">index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ax</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">N</span> {
+    <span class="kw">fn</span> <span class="ident">index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ax</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="ident">N</span> {
         <span class="self">self</span>.<span class="ident">node_weight</span>(<span class="ident">ax</span>)
     }
 }
@@ -2672,10 +2673,10 @@
 <span class="doccomment">/// Index the `MatrixGraph` by `NodeIndex` to access node weights.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// **Panics** if the node doesn&#39;t exist.</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">Ty</span>: <span class="ident">EdgeType</span>, <span class="ident">Null</span>: <span class="ident">Nullable</span><span class="op">&lt;</span><span class="ident">Wrapped</span> <span class="op">=</span> <span class="ident">E</span><span class="op">&gt;</span>, <span class="ident">Ix</span>: <span class="ident">IndexType</span><span class="op">&gt;</span> <span class="ident">IndexMut</span><span class="op">&lt;</span><span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">Ty</span>: <span class="ident">EdgeType</span>, <span class="ident">Null</span>: <span class="ident">Nullable</span><span class="op">&lt;</span><span class="ident">Wrapped</span> <span class="op">=</span> <span class="ident">E</span><span class="op">&gt;</span>, <span class="ident">Ix</span>: <span class="ident">IndexType</span><span class="op">&gt;</span> <span class="ident">IndexMut</span><span class="op">&lt;</span><span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;&gt;</span>
     <span class="kw">for</span> <span class="ident">MatrixGraph</span><span class="op">&lt;</span><span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">Ty</span>, <span class="ident">Null</span>, <span class="ident">Ix</span><span class="op">&gt;</span>
 {
-    <span class="kw">fn</span> <span class="ident">index_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">ax</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">N</span> {
+    <span class="kw">fn</span> <span class="ident">index_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">ax</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">N</span> {
         <span class="self">self</span>.<span class="ident">node_weight_mut</span>(<span class="ident">ax</span>)
     }
 }
@@ -2683,7 +2684,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">Ty</span>: <span class="ident">EdgeType</span>, <span class="ident">Null</span>: <span class="ident">Nullable</span><span class="op">&lt;</span><span class="ident">Wrapped</span> <span class="op">=</span> <span class="ident">E</span><span class="op">&gt;</span>, <span class="ident">Ix</span>: <span class="ident">IndexType</span><span class="op">&gt;</span> <span class="ident">NodeCount</span>
     <span class="kw">for</span> <span class="ident">MatrixGraph</span><span class="op">&lt;</span><span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">Ty</span>, <span class="ident">Null</span>, <span class="ident">Ix</span><span class="op">&gt;</span>
 {
-    <span class="kw">fn</span> <span class="ident">node_count</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">fn</span> <span class="ident">node_count</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">usize</span> {
         <span class="ident">MatrixGraph</span>::<span class="ident">node_count</span>(<span class="self">self</span>)
     }
 }
@@ -2698,7 +2699,7 @@
 {
     <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">E</span>;
 
-    <span class="kw">fn</span> <span class="ident">index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, (<span class="ident">ax</span>, <span class="ident">bx</span>): (<span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">E</span> {
+    <span class="kw">fn</span> <span class="ident">index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, (<span class="ident">ax</span>, <span class="ident">bx</span>): (<span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>)) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="ident">E</span> {
         <span class="self">self</span>.<span class="ident">edge_weight</span>(<span class="ident">ax</span>, <span class="ident">bx</span>)
     }
 }
@@ -2711,7 +2712,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">Ty</span>: <span class="ident">EdgeType</span>, <span class="ident">Null</span>: <span class="ident">Nullable</span><span class="op">&lt;</span><span class="ident">Wrapped</span> <span class="op">=</span> <span class="ident">E</span><span class="op">&gt;</span>, <span class="ident">Ix</span>: <span class="ident">IndexType</span><span class="op">&gt;</span>
     <span class="ident">IndexMut</span><span class="op">&lt;</span>(<span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>)<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MatrixGraph</span><span class="op">&lt;</span><span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">Ty</span>, <span class="ident">Null</span>, <span class="ident">Ix</span><span class="op">&gt;</span>
 {
-    <span class="kw">fn</span> <span class="ident">index_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, (<span class="ident">ax</span>, <span class="ident">bx</span>): (<span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">E</span> {
+    <span class="kw">fn</span> <span class="ident">index_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, (<span class="ident">ax</span>, <span class="ident">bx</span>): (<span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>)) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">E</span> {
         <span class="self">self</span>.<span class="ident">edge_weight_mut</span>(<span class="ident">ax</span>, <span class="ident">bx</span>)
     }
 }
@@ -2721,9 +2722,9 @@
 {
     <span class="kw">type</span> <span class="ident">AdjMatrix</span> <span class="op">=</span> ();
 
-    <span class="kw">fn</span> <span class="ident">adjacency_matrix</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">AdjMatrix</span> {}
+    <span class="kw">fn</span> <span class="ident">adjacency_matrix</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="self">Self</span>::<span class="ident">AdjMatrix</span> {}
 
-    <span class="kw">fn</span> <span class="ident">is_adjacent</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>::<span class="ident">AdjMatrix</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">b</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">is_adjacent</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>::<span class="ident">AdjMatrix</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">b</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
         <span class="ident">MatrixGraph</span>::<span class="ident">has_edge</span>(<span class="self">self</span>, <span class="ident">a</span>, <span class="ident">b</span>)
     }
 }
@@ -2733,7 +2734,7 @@
 {
     <span class="kw">type</span> <span class="ident">Map</span> <span class="op">=</span> <span class="ident">FixedBitSet</span>;
 
-    <span class="kw">fn</span> <span class="ident">visit_map</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">FixedBitSet</span> {
+    <span class="kw">fn</span> <span class="ident">visit_map</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">FixedBitSet</span> {
         <span class="ident">FixedBitSet</span>::<span class="ident">with_capacity</span>(<span class="self">self</span>.<span class="ident">node_count</span>())
     }
 
@@ -2768,7 +2769,7 @@
 {
     <span class="kw">type</span> <span class="ident">NodeIdentifiers</span> <span class="op">=</span> <span class="ident">NodeIdentifiers</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Ix</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">node_identifiers</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">NodeIdentifiers</span> {
+    <span class="kw">fn</span> <span class="ident">node_identifiers</span>(<span class="self">self</span>) <span class="op">-&gt;</span> <span class="self">Self</span>::<span class="ident">NodeIdentifiers</span> {
         <span class="ident">NodeIdentifiers</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">nodes</span>.<span class="ident">iter_ids</span>())
     }
 }
@@ -2778,7 +2779,7 @@
 {
     <span class="kw">type</span> <span class="ident">Neighbors</span> <span class="op">=</span> <span class="ident">Neighbors</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Ty</span>, <span class="ident">Null</span>, <span class="ident">Ix</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">neighbors</span>(<span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">Neighbors</span> {
+    <span class="kw">fn</span> <span class="ident">neighbors</span>(<span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="self">Self</span>::<span class="ident">Neighbors</span> {
         <span class="ident">MatrixGraph</span>::<span class="ident">neighbors</span>(<span class="self">self</span>, <span class="ident">a</span>)
     }
 }
@@ -2788,7 +2789,7 @@
 {
     <span class="kw">type</span> <span class="ident">NeighborsDirected</span> <span class="op">=</span> <span class="ident">Neighbors</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Directed</span>, <span class="ident">Null</span>, <span class="ident">Ix</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">neighbors_directed</span>(<span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">d</span>: <span class="ident">Direction</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">NeighborsDirected</span> {
+    <span class="kw">fn</span> <span class="ident">neighbors_directed</span>(<span class="self">self</span>, <span class="ident">a</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">d</span>: <span class="ident">Direction</span>) <span class="op">-&gt;</span> <span class="self">Self</span>::<span class="ident">NeighborsDirected</span> {
         <span class="ident">MatrixGraph</span>::<span class="ident">neighbors_directed</span>(<span class="self">self</span>, <span class="ident">a</span>, <span class="ident">d</span>)
     }
 }
@@ -2798,7 +2799,7 @@
 {
     <span class="kw">type</span> <span class="ident">NodeRef</span> <span class="op">=</span> (<span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">N</span>);
     <span class="kw">type</span> <span class="ident">NodeReferences</span> <span class="op">=</span> <span class="ident">NodeReferences</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">N</span>, <span class="ident">Ix</span><span class="op">&gt;</span>;
-    <span class="kw">fn</span> <span class="ident">node_references</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">NodeReferences</span> {
+    <span class="kw">fn</span> <span class="ident">node_references</span>(<span class="self">self</span>) <span class="op">-&gt;</span> <span class="self">Self</span>::<span class="ident">NodeReferences</span> {
         <span class="ident">NodeReferences</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">nodes</span>)
     }
 }
@@ -2808,7 +2809,7 @@
 {
     <span class="kw">type</span> <span class="ident">EdgeRef</span> <span class="op">=</span> (<span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">E</span>);
     <span class="kw">type</span> <span class="ident">EdgeReferences</span> <span class="op">=</span> <span class="ident">EdgeReferences</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Ty</span>, <span class="ident">Null</span>, <span class="ident">Ix</span><span class="op">&gt;</span>;
-    <span class="kw">fn</span> <span class="ident">edge_references</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">EdgeReferences</span> {
+    <span class="kw">fn</span> <span class="ident">edge_references</span>(<span class="self">self</span>) <span class="op">-&gt;</span> <span class="self">Self</span>::<span class="ident">EdgeReferences</span> {
         <span class="ident">EdgeReferences</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">node_adjacencies</span>, <span class="self">self</span>.<span class="ident">node_capacity</span>)
     }
 }
@@ -2817,7 +2818,7 @@
     <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">MatrixGraph</span><span class="op">&lt;</span><span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">Ty</span>, <span class="ident">Null</span>, <span class="ident">Ix</span><span class="op">&gt;</span>
 {
     <span class="kw">type</span> <span class="ident">Edges</span> <span class="op">=</span> <span class="ident">Edges</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Ty</span>, <span class="ident">Null</span>, <span class="ident">Ix</span><span class="op">&gt;</span>;
-    <span class="kw">fn</span> <span class="ident">edges</span>(<span class="self">self</span>, <span class="ident">a</span>: <span class="self">Self</span>::<span class="ident">NodeId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">Edges</span> {
+    <span class="kw">fn</span> <span class="ident">edges</span>(<span class="self">self</span>, <span class="ident">a</span>: <span class="self">Self</span>::<span class="ident">NodeId</span>) <span class="op">-&gt;</span> <span class="self">Self</span>::<span class="ident">Edges</span> {
         <span class="ident">MatrixGraph</span>::<span class="ident">edges</span>(<span class="self">self</span>, <span class="ident">a</span>)
     }
 }
@@ -2825,15 +2826,15 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">Ty</span>: <span class="ident">EdgeType</span>, <span class="ident">Null</span>: <span class="ident">Nullable</span><span class="op">&lt;</span><span class="ident">Wrapped</span> <span class="op">=</span> <span class="ident">E</span><span class="op">&gt;</span>, <span class="ident">Ix</span>: <span class="ident">IndexType</span><span class="op">&gt;</span> <span class="ident">NodeIndexable</span>
     <span class="kw">for</span> <span class="ident">MatrixGraph</span><span class="op">&lt;</span><span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">Ty</span>, <span class="ident">Null</span>, <span class="ident">Ix</span><span class="op">&gt;</span>
 {
-    <span class="kw">fn</span> <span class="ident">node_bound</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">fn</span> <span class="ident">node_bound</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">usize</span> {
         <span class="self">self</span>.<span class="ident">node_count</span>()
     }
 
-    <span class="kw">fn</span> <span class="ident">to_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ix</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">fn</span> <span class="ident">to_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ix</span>: <span class="ident">NodeIndex</span><span class="op">&lt;</span><span class="ident">Ix</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="ident">usize</span> {
         <span class="ident">ix</span>.<span class="ident">index</span>()
     }
 
-    <span class="kw">fn</span> <span class="ident">from_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ix</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">NodeId</span> {
+    <span class="kw">fn</span> <span class="ident">from_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ix</span>: <span class="ident">usize</span>) <span class="op">-&gt;</span> <span class="self">Self</span>::<span class="ident">NodeId</span> {
         <span class="ident">NodeIndex</span>::<span class="ident">new</span>(<span class="ident">ix</span>)
     }
 }
@@ -2846,7 +2847,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">Ty</span>: <span class="ident">EdgeType</span>, <span class="ident">Null</span>: <span class="ident">Nullable</span><span class="op">&lt;</span><span class="ident">Wrapped</span> <span class="op">=</span> <span class="ident">E</span><span class="op">&gt;</span>, <span class="ident">Ix</span>: <span class="ident">IndexType</span><span class="op">&gt;</span> <span class="ident">Build</span>
     <span class="kw">for</span> <span class="ident">MatrixGraph</span><span class="op">&lt;</span><span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">Ty</span>, <span class="ident">Null</span>, <span class="ident">Ix</span><span class="op">&gt;</span>
 {
-    <span class="kw">fn</span> <span class="ident">add_node</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">weight</span>: <span class="self">Self</span>::<span class="ident">NodeWeight</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">NodeId</span> {
+    <span class="kw">fn</span> <span class="ident">add_node</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">weight</span>: <span class="self">Self</span>::<span class="ident">NodeWeight</span>) <span class="op">-&gt;</span> <span class="self">Self</span>::<span class="ident">NodeId</span> {
         <span class="self">self</span>.<span class="ident">add_node</span>(<span class="ident">weight</span>)
     }
 
@@ -2855,7 +2856,7 @@
         <span class="ident">a</span>: <span class="self">Self</span>::<span class="ident">NodeId</span>,
         <span class="ident">b</span>: <span class="self">Self</span>::<span class="ident">NodeId</span>,
         <span class="ident">weight</span>: <span class="self">Self</span>::<span class="ident">EdgeWeight</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">EdgeId</span><span class="op">&gt;</span> {
+    ) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">EdgeId</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">has_edge</span>(<span class="ident">a</span>, <span class="ident">b</span>) {
             <span class="ident">MatrixGraph</span>::<span class="ident">update_edge</span>(<span class="self">self</span>, <span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">weight</span>);
             <span class="prelude-val">Some</span>((<span class="ident">a</span>, <span class="ident">b</span>))
@@ -2869,7 +2870,7 @@
         <span class="ident">a</span>: <span class="self">Self</span>::<span class="ident">NodeId</span>,
         <span class="ident">b</span>: <span class="self">Self</span>::<span class="ident">NodeId</span>,
         <span class="ident">weight</span>: <span class="self">Self</span>::<span class="ident">EdgeWeight</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">EdgeId</span> {
+    ) <span class="op">-&gt;</span> <span class="self">Self</span>::<span class="ident">EdgeId</span> {
         <span class="ident">MatrixGraph</span>::<span class="ident">update_edge</span>(<span class="self">self</span>, <span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">weight</span>);
         (<span class="ident">a</span>, <span class="ident">b</span>)
     }
@@ -2964,14 +2965,14 @@
 
     <span class="doccomment">/// Shorthand for `.collect::&lt;Vec&lt;_&gt;&gt;()`</span>
     <span class="kw">trait</span> <span class="ident">IntoVec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">fn</span> <span class="ident">into_vec</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
+        <span class="kw">fn</span> <span class="ident">into_vec</span>(<span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
     }
 
     <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">It</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">IntoVec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">It</span>
     <span class="kw">where</span>
         <span class="ident">It</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
     {
-        <span class="kw">fn</span> <span class="ident">into_vec</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="kw">fn</span> <span class="ident">into_vec</span>(<span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
             <span class="self">self</span>.<span class="ident">collect</span>()
         }
     }
@@ -3040,7 +3041,7 @@
 
     <span class="doccomment">/// Helper trait for always sorting before testing.</span>
     <span class="kw">trait</span> <span class="ident">IntoSortedVec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">fn</span> <span class="ident">into_sorted_vec</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
+        <span class="kw">fn</span> <span class="ident">into_sorted_vec</span>(<span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
     }
 
     <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">It</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">IntoSortedVec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">It</span>
@@ -3048,7 +3049,7 @@
         <span class="ident">It</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
         <span class="ident">T</span>: <span class="ident">Ord</span>,
     {
-        <span class="kw">fn</span> <span class="ident">into_sorted_vec</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="kw">fn</span> <span class="ident">into_sorted_vec</span>(<span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">v</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">collect</span>();
             <span class="ident">v</span>.<span class="ident">sort</span>();
             <span class="ident">v</span>
@@ -3057,7 +3058,7 @@
 
     <span class="doccomment">/// Helper macro for always sorting before testing.</span>
     <span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">sorted_vec</span> {
-        ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">x</span>:<span class="ident">expr</span>),<span class="kw-2">*</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">x</span>:<span class="ident">expr</span>),<span class="kw-2">*</span>) <span class="op">=&gt;</span> {
             {
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">v</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">x</span>,)<span class="kw-2">*</span>];
                 <span class="ident">v</span>.<span class="ident">sort</span>();
@@ -3271,7 +3272,7 @@
         <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">storage</span>.<span class="ident">add</span>(<span class="string">&#39;b&#39;</span>);
         <span class="kw">let</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">storage</span>.<span class="ident">add</span>(<span class="string">&#39;c&#39;</span>);
 
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">a</span> <span class="op">&lt;</span> <span class="ident">b</span> <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="ident">b</span> <span class="op">&lt;</span> <span class="ident">c</span>);
+        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">a</span> <span class="op">&lt;</span> <span class="ident">b</span> <span class="op">&amp;&amp;</span> <span class="ident">b</span> <span class="op">&lt;</span> <span class="ident">c</span>);
 
         <span class="comment">// list IDs</span>
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">storage</span>.<span class="ident">iter_ids</span>().<span class="ident">into_vec</span>(), <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">c</span>]);
@@ -3288,7 +3289,7 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_not_zero</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">g</span>: <span class="ident">MatrixGraph</span><span class="op">&lt;</span>(), <span class="ident">i32</span>, <span class="ident">Directed</span>, <span class="ident">NotZero</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">MatrixGraph</span>::<span class="ident">default</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">g</span>: <span class="ident">MatrixGraph</span><span class="op">&lt;</span>(), <span class="ident">i32</span>, <span class="ident">Directed</span>, <span class="ident">NotZero</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;&gt;</span> <span class="op">=</span> <span class="ident">MatrixGraph</span>::<span class="ident">default</span>();
 
         <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">g</span>.<span class="ident">add_node</span>(());
         <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">g</span>.<span class="ident">add_node</span>(());
@@ -3311,7 +3312,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="attribute">#[<span class="ident">should_panic</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_not_zero_asserted</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">g</span>: <span class="ident">MatrixGraph</span><span class="op">&lt;</span>(), <span class="ident">i32</span>, <span class="ident">Directed</span>, <span class="ident">NotZero</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">MatrixGraph</span>::<span class="ident">default</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">g</span>: <span class="ident">MatrixGraph</span><span class="op">&lt;</span>(), <span class="ident">i32</span>, <span class="ident">Directed</span>, <span class="ident">NotZero</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;&gt;</span> <span class="op">=</span> <span class="ident">MatrixGraph</span>::<span class="ident">default</span>();
 
         <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">g</span>.<span class="ident">add_node</span>(());
         <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">g</span>.<span class="ident">add_node</span>(());
@@ -3321,7 +3322,7 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_not_zero_float</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">g</span>: <span class="ident">MatrixGraph</span><span class="op">&lt;</span>(), <span class="ident">f32</span>, <span class="ident">Directed</span>, <span class="ident">NotZero</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">MatrixGraph</span>::<span class="ident">default</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">g</span>: <span class="ident">MatrixGraph</span><span class="op">&lt;</span>(), <span class="ident">f32</span>, <span class="ident">Directed</span>, <span class="ident">NotZero</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;&gt;</span> <span class="op">=</span> <span class="ident">MatrixGraph</span>::<span class="ident">default</span>();
 
         <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">g</span>.<span class="ident">add_node</span>(());
         <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">g</span>.<span class="ident">add_node</span>(());

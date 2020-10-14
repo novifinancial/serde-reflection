@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `serde-generate/src/test_utils.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>test_utils.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../serde_generate/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `serde-generate/src/test_utils.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>test_utils.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../serde_generate/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><span class="help-button">?</span>
+                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -946,7 +947,7 @@
     <span class="ident">C</span> { <span class="ident">x</span>: <span class="ident">u8</span> },
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_simple_registry</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Registry</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_simple_registry</span>() <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Registry</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tracer</span> <span class="op">=</span> <span class="ident">Tracer</span>::<span class="ident">new</span>(<span class="ident">TracerConfig</span>::<span class="ident">default</span>());
     <span class="kw">let</span> <span class="ident">samples</span> <span class="op">=</span> <span class="ident">Samples</span>::<span class="ident">new</span>();
     <span class="ident">tracer</span>.<span class="ident">trace_type</span>::<span class="op">&lt;</span><span class="ident">Test</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">samples</span>)<span class="question-mark">?</span>;
@@ -968,8 +969,8 @@
         <span class="ident">f2</span>: <span class="ident">TupleStruct</span>,
         <span class="ident">f3</span>: <span class="ident">Struct</span>,
     },
-    <span class="ident">ListWithMutualRecursion</span>(<span class="ident">List</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">SerdeData</span><span class="op">&gt;</span><span class="op">&gt;</span>),
-    <span class="ident">TreeWithMutualRecursion</span>(<span class="ident">Tree</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">SerdeData</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+    <span class="ident">ListWithMutualRecursion</span>(<span class="ident">List</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">SerdeData</span><span class="op">&gt;&gt;</span>),
+    <span class="ident">TreeWithMutualRecursion</span>(<span class="ident">Tree</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">SerdeData</span><span class="op">&gt;&gt;</span>),
     <span class="ident">TupleArray</span>([<span class="ident">u32</span>; <span class="number">3</span>]),
     <span class="ident">UnitVector</span>(<span class="ident">Vec</span><span class="op">&lt;</span>()<span class="op">&gt;</span>),
     <span class="ident">SimpleList</span>(<span class="ident">SimpleList</span>),
@@ -1025,31 +1026,31 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">List</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="ident">Empty</span>,
-    <span class="ident">Node</span>(<span class="ident">T</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">List</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+    <span class="ident">Node</span>(<span class="ident">T</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">List</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;&gt;</span>),
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Tree</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="ident">value</span>: <span class="ident">T</span>,
-    <span class="ident">children</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Tree</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">children</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Tree</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;&gt;</span>,
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SimpleList</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">SimpleList</span><span class="op">&gt;</span><span class="op">&gt;</span>);
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SimpleList</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">SimpleList</span><span class="op">&gt;&gt;</span>);
 
 <span class="doccomment">/// The registry corresponding to the test data structures above .</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_registry</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Registry</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_registry</span>() <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Registry</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tracer</span> <span class="op">=</span> <span class="ident">Tracer</span>::<span class="ident">new</span>(<span class="ident">TracerConfig</span>::<span class="ident">default</span>());
     <span class="kw">let</span> <span class="ident">samples</span> <span class="op">=</span> <span class="ident">Samples</span>::<span class="ident">new</span>();
     <span class="ident">tracer</span>.<span class="ident">trace_type</span>::<span class="op">&lt;</span><span class="ident">SerdeData</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">samples</span>)<span class="question-mark">?</span>;
-    <span class="ident">tracer</span>.<span class="ident">trace_type</span>::<span class="op">&lt;</span><span class="ident">List</span><span class="op">&lt;</span><span class="ident">SerdeData</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">samples</span>)<span class="question-mark">?</span>;
+    <span class="ident">tracer</span>.<span class="ident">trace_type</span>::<span class="op">&lt;</span><span class="ident">List</span><span class="op">&lt;</span><span class="ident">SerdeData</span><span class="op">&gt;&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">samples</span>)<span class="question-mark">?</span>;
     <span class="ident">tracer</span>.<span class="ident">registry</span>()
 }
 
 <span class="doccomment">/// Manually generate sample values.</span>
 <span class="doccomment">/// Avoid maps with more than one element when `has_canonical_maps` is false so that</span>
 <span class="doccomment">/// we can test re-serialization.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_sample_values</span>(<span class="ident">has_canonical_maps</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">SerdeData</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_sample_values</span>(<span class="ident">has_canonical_maps</span>: <span class="ident">bool</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">SerdeData</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">v0</span> <span class="op">=</span> <span class="ident">SerdeData</span>::<span class="ident">PrimitiveTypes</span>(<span class="ident">PrimitiveTypes</span> {
         <span class="ident">f_bool</span>: <span class="bool-val">false</span>,
         <span class="ident">f_u8</span>: <span class="number">6</span>,
@@ -1092,9 +1093,9 @@
         <span class="ident">f_seq</span>: <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Struct</span> { <span class="ident">x</span>: <span class="number">1</span>, <span class="ident">y</span>: <span class="number">3</span> }],
         <span class="ident">f_tuple</span>: (<span class="number">4</span>, <span class="number">5</span>),
         <span class="ident">f_stringmap</span>: <span class="kw">if</span> <span class="ident">has_canonical_maps</span> {
-            <span class="macro">btreemap</span><span class="macro">!</span> {<span class="string">&quot;foo&quot;</span>.<span class="ident">to_string</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="number">1</span>, <span class="string">&quot;bar&quot;</span>.<span class="ident">to_string</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="number">2</span>}
+            <span class="macro">btreemap</span><span class="macro">!</span> {<span class="string">&quot;foo&quot;</span>.<span class="ident">to_string</span>() <span class="op">=&gt;</span> <span class="number">1</span>, <span class="string">&quot;bar&quot;</span>.<span class="ident">to_string</span>() <span class="op">=&gt;</span> <span class="number">2</span>}
         } <span class="kw">else</span> {
-            <span class="macro">btreemap</span><span class="macro">!</span> {<span class="string">&quot;foo&quot;</span>.<span class="ident">to_string</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="number">1</span>}
+            <span class="macro">btreemap</span><span class="macro">!</span> {<span class="string">&quot;foo&quot;</span>.<span class="ident">to_string</span>() <span class="op">=&gt;</span> <span class="number">1</span>}
         },
         <span class="ident">f_intset</span>: <span class="ident">BTreeMap</span>::<span class="ident">new</span>(),
     });
@@ -1108,9 +1109,9 @@
         <span class="ident">f_tuple</span>: (<span class="number">4</span>, <span class="number">5</span>),
         <span class="ident">f_stringmap</span>: <span class="ident">BTreeMap</span>::<span class="ident">new</span>(),
         <span class="ident">f_intset</span>: <span class="kw">if</span> <span class="ident">has_canonical_maps</span> {
-            <span class="macro">btreemap</span><span class="macro">!</span> {<span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> (), <span class="number">5</span> <span class="op">=</span><span class="op">&gt;</span> (), <span class="number">16</span> <span class="op">=</span><span class="op">&gt;</span> (), <span class="number">64</span> <span class="op">=</span><span class="op">&gt;</span> (), <span class="number">257</span> <span class="op">=</span><span class="op">&gt;</span> (), <span class="number">1024</span> <span class="op">=</span><span class="op">&gt;</span> ()}
+            <span class="macro">btreemap</span><span class="macro">!</span> {<span class="number">1</span> <span class="op">=&gt;</span> (), <span class="number">5</span> <span class="op">=&gt;</span> (), <span class="number">16</span> <span class="op">=&gt;</span> (), <span class="number">64</span> <span class="op">=&gt;</span> (), <span class="number">257</span> <span class="op">=&gt;</span> (), <span class="number">1024</span> <span class="op">=&gt;</span> ()}
         } <span class="kw">else</span> {
-            <span class="macro">btreemap</span><span class="macro">!</span> {<span class="number">64</span> <span class="op">=</span><span class="op">&gt;</span> ()}
+            <span class="macro">btreemap</span><span class="macro">!</span> {<span class="number">64</span> <span class="op">=&gt;</span> ()}
         },
     });
 
@@ -1201,7 +1202,7 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-testing&quot;</span>)]</span>
 <span class="comment">// Used to test limits on &quot;container depth&quot;.</span>
-<span class="kw">fn</span> <span class="ident">get_sample_value_with_container_depth</span>(<span class="ident">depth</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SerdeData</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">get_sample_value_with_container_depth</span>(<span class="ident">depth</span>: <span class="ident">usize</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SerdeData</span><span class="op">&gt;</span> {
     <span class="kw">if</span> <span class="ident">depth</span> <span class="op">&lt;</span> <span class="number">2</span> {
         <span class="kw">return</span> <span class="prelude-val">None</span>;
     }
@@ -1215,7 +1216,7 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-testing&quot;</span>)]</span>
 <span class="comment">// Used to test limits on &quot;container depth&quot;.</span>
-<span class="kw">fn</span> <span class="ident">get_alternate_sample_value_with_container_depth</span>(<span class="ident">depth</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SerdeData</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">get_alternate_sample_value_with_container_depth</span>(<span class="ident">depth</span>: <span class="ident">usize</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SerdeData</span><span class="op">&gt;</span> {
     <span class="kw">if</span> <span class="ident">depth</span> <span class="op">&lt;</span> <span class="number">2</span> {
         <span class="kw">return</span> <span class="prelude-val">None</span>;
     }
@@ -1229,7 +1230,7 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-testing&quot;</span>)]</span>
 <span class="comment">// Used to test limits on sequence lengths and container depth.</span>
-<span class="kw">fn</span> <span class="ident">get_sample_value_with_long_sequence</span>(<span class="ident">length</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SerdeData</span> {
+<span class="kw">fn</span> <span class="ident">get_sample_value_with_long_sequence</span>(<span class="ident">length</span>: <span class="ident">usize</span>) <span class="op">-&gt;</span> <span class="ident">SerdeData</span> {
     <span class="ident">SerdeData</span>::<span class="ident">UnitVector</span>(<span class="macro">vec</span><span class="macro">!</span>[(); <span class="ident">length</span>])
 }
 
@@ -1241,52 +1242,52 @@
 }
 
 <span class="kw">impl</span> <span class="ident">std</span>::<span class="ident">convert</span>::<span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Encoding</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Runtime</span> {
-    <span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Encoding</span> {
+    <span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">Encoding</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">Runtime</span>::<span class="ident">Lcs</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Encoding</span>::<span class="ident">Lcs</span>,
-            <span class="ident">Runtime</span>::<span class="ident">Bincode</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Encoding</span>::<span class="ident">Bincode</span>,
+            <span class="ident">Runtime</span>::<span class="ident">Lcs</span> <span class="op">=&gt;</span> <span class="ident">Encoding</span>::<span class="ident">Lcs</span>,
+            <span class="ident">Runtime</span>::<span class="ident">Bincode</span> <span class="op">=&gt;</span> <span class="ident">Encoding</span>::<span class="ident">Bincode</span>,
         }
     }
 }
 
 <span class="kw">impl</span> <span class="ident">Runtime</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">name</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
-        <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="ident">std</span>::<span class="ident">convert</span>::<span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Encoding</span><span class="op">&gt;</span><span class="op">&gt;</span>::<span class="ident">into</span>(<span class="self">self</span>).<span class="ident">name</span>()
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">name</span>(<span class="self">self</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
+        <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="ident">std</span>::<span class="ident">convert</span>::<span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Encoding</span><span class="op">&gt;&gt;</span>::<span class="ident">into</span>(<span class="self">self</span>).<span class="ident">name</span>()
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rust_package</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rust_package</span>(<span class="self">self</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="self">Self</span>::<span class="ident">Lcs</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;lcs = { git = \&quot;https://github.com/libra/libra.git\&quot;, branch = \&quot;auto\&quot;, package = \&quot;libra-canonical-serialization\&quot; }&quot;</span>,
-            <span class="self">Self</span>::<span class="ident">Bincode</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;bincode = \&quot;1.3\&quot;&quot;</span>,
+            <span class="self">Self</span>::<span class="ident">Lcs</span> <span class="op">=&gt;</span> <span class="string">&quot;lcs = { git = \&quot;https://github.com/libra/libra.git\&quot;, branch = \&quot;auto\&quot;, package = \&quot;libra-canonical-serialization\&quot; }&quot;</span>,
+            <span class="self">Self</span>::<span class="ident">Bincode</span> <span class="op">=&gt;</span> <span class="string">&quot;bincode = \&quot;1.3\&quot;&quot;</span>,
         }
     }
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-testing&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">T</span>: <span class="ident">serde</span>::<span class="ident">Serialize</span>,
     {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="self">Self</span>::<span class="ident">Lcs</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">libra_canonical_serialization</span>::<span class="ident">to_bytes</span>(<span class="ident">value</span>).<span class="ident">unwrap</span>(),
-            <span class="self">Self</span>::<span class="ident">Bincode</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">bincode</span>::<span class="ident">serialize</span>(<span class="ident">value</span>).<span class="ident">unwrap</span>(),
+            <span class="self">Self</span>::<span class="ident">Lcs</span> <span class="op">=&gt;</span> <span class="ident">libra_canonical_serialization</span>::<span class="ident">to_bytes</span>(<span class="ident">value</span>).<span class="ident">unwrap</span>(),
+            <span class="self">Self</span>::<span class="ident">Bincode</span> <span class="op">=&gt;</span> <span class="ident">bincode</span>::<span class="ident">serialize</span>(<span class="ident">value</span>).<span class="ident">unwrap</span>(),
         }
     }
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-testing&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">T</span>: <span class="ident">serde</span>::<span class="ident">de</span>::<span class="ident">DeserializeOwned</span>,
     {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="self">Self</span>::<span class="ident">Lcs</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">libra_canonical_serialization</span>::<span class="ident">from_bytes</span>(<span class="ident">bytes</span>).<span class="ident">ok</span>(),
-            <span class="self">Self</span>::<span class="ident">Bincode</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">bincode</span>::<span class="ident">deserialize</span>(<span class="ident">bytes</span>).<span class="ident">ok</span>(),
+            <span class="self">Self</span>::<span class="ident">Lcs</span> <span class="op">=&gt;</span> <span class="ident">libra_canonical_serialization</span>::<span class="ident">from_bytes</span>(<span class="ident">bytes</span>).<span class="ident">ok</span>(),
+            <span class="self">Self</span>::<span class="ident">Bincode</span> <span class="op">=&gt;</span> <span class="ident">bincode</span>::<span class="ident">deserialize</span>(<span class="ident">bytes</span>).<span class="ident">ok</span>(),
         }
     }
 
     <span class="doccomment">/// Serialize a value then add noise to the serialized bits repeatedly. Additionally return</span>
     <span class="doccomment">/// `true` if the deserialization of each modified bitstring should succeed.</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-testing&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">serialize_with_noise_and_deserialize</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">bool</span>)<span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">serialize_with_noise_and_deserialize</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">bool</span>)<span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">T</span>: <span class="ident">serde</span>::<span class="ident">Serialize</span> <span class="op">+</span> <span class="ident">serde</span>::<span class="ident">de</span>::<span class="ident">DeserializeOwned</span>,
     {
@@ -1305,7 +1306,7 @@
             <span class="comment">// Flip the highest bit</span>
             {
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s2</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">clone</span>();
-                <span class="ident">s2</span>[<span class="ident">i</span>] <span class="op">^</span><span class="op">=</span> <span class="number">0x80</span>;
+                <span class="ident">s2</span>[<span class="ident">i</span>] <span class="op">^=</span> <span class="number">0x80</span>;
                 <span class="kw">let</span> <span class="ident">is_valid</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">deserialize</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">s2</span>).<span class="ident">is_some</span>();
                 <span class="ident">results</span>.<span class="ident">push</span>((<span class="ident">s2</span>, <span class="ident">is_valid</span>));
             }
@@ -1313,15 +1314,15 @@
             <span class="comment">// See if we can turn an (apparent) 4-byte UTF-8 codepoint into an invalid</span>
             <span class="comment">// 5-byte codepoint.</span>
             <span class="kw">if</span> (<span class="ident">i</span> <span class="op">+</span> <span class="number">4</span> <span class="op">&lt;</span> <span class="ident">s</span>.<span class="ident">len</span>())
-                <span class="kw-2">&amp;</span><span class="op">&amp;</span> (<span class="ident">s</span>[<span class="ident">i</span>] <span class="op">^</span> <span class="number">0xf0</span> <span class="op">&lt;</span> <span class="number">0x08</span>)
-                <span class="kw-2">&amp;</span><span class="op">&amp;</span> (<span class="ident">s</span>[<span class="ident">i</span> <span class="op">+</span> <span class="number">1</span>] <span class="op">^</span> <span class="number">0x80</span> <span class="op">&lt;</span> <span class="number">0x40</span>)
-                <span class="kw-2">&amp;</span><span class="op">&amp;</span> (<span class="ident">s</span>[<span class="ident">i</span> <span class="op">+</span> <span class="number">2</span>] <span class="op">^</span> <span class="number">0x80</span> <span class="op">&lt;</span> <span class="number">0x40</span>)
-                <span class="kw-2">&amp;</span><span class="op">&amp;</span> (<span class="ident">s</span>[<span class="ident">i</span> <span class="op">+</span> <span class="number">3</span>] <span class="op">^</span> <span class="number">0x80</span> <span class="op">&lt;</span> <span class="number">0x40</span>)
-                <span class="kw-2">&amp;</span><span class="op">&amp;</span> (<span class="ident">s</span>[<span class="ident">i</span> <span class="op">+</span> <span class="number">4</span>] <span class="op">&lt;</span> <span class="number">0x40</span>)
+                <span class="op">&amp;&amp;</span> (<span class="ident">s</span>[<span class="ident">i</span>] <span class="op">^</span> <span class="number">0xf0</span> <span class="op">&lt;</span> <span class="number">0x08</span>)
+                <span class="op">&amp;&amp;</span> (<span class="ident">s</span>[<span class="ident">i</span> <span class="op">+</span> <span class="number">1</span>] <span class="op">^</span> <span class="number">0x80</span> <span class="op">&lt;</span> <span class="number">0x40</span>)
+                <span class="op">&amp;&amp;</span> (<span class="ident">s</span>[<span class="ident">i</span> <span class="op">+</span> <span class="number">2</span>] <span class="op">^</span> <span class="number">0x80</span> <span class="op">&lt;</span> <span class="number">0x40</span>)
+                <span class="op">&amp;&amp;</span> (<span class="ident">s</span>[<span class="ident">i</span> <span class="op">+</span> <span class="number">3</span>] <span class="op">^</span> <span class="number">0x80</span> <span class="op">&lt;</span> <span class="number">0x40</span>)
+                <span class="op">&amp;&amp;</span> (<span class="ident">s</span>[<span class="ident">i</span> <span class="op">+</span> <span class="number">4</span>] <span class="op">&lt;</span> <span class="number">0x40</span>)
             {
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s2</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">clone</span>();
-                <span class="ident">s2</span>[<span class="ident">i</span>] <span class="op">^</span><span class="op">=</span> <span class="number">0x08</span>;
-                <span class="ident">s2</span>[<span class="ident">i</span> <span class="op">+</span> <span class="number">4</span>] <span class="op">^</span><span class="op">=</span> <span class="number">0x80</span>;
+                <span class="ident">s2</span>[<span class="ident">i</span>] <span class="op">^=</span> <span class="number">0x08</span>;
+                <span class="ident">s2</span>[<span class="ident">i</span> <span class="op">+</span> <span class="number">4</span>] <span class="op">^=</span> <span class="number">0x80</span>;
                 <span class="kw">let</span> <span class="ident">is_valid</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">deserialize</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">s2</span>).<span class="ident">is_some</span>();
                 <span class="ident">results</span>.<span class="ident">push</span>((<span class="ident">s2</span>, <span class="ident">is_valid</span>));
             }
@@ -1329,47 +1330,47 @@
         <span class="ident">results</span>
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">quote_serialize</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">quote_serialize</span>(<span class="self">self</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="self">Self</span>::<span class="ident">Lcs</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;lcs::to_bytes&quot;</span>,
-            <span class="self">Self</span>::<span class="ident">Bincode</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;bincode::serialize&quot;</span>,
+            <span class="self">Self</span>::<span class="ident">Lcs</span> <span class="op">=&gt;</span> <span class="string">&quot;lcs::to_bytes&quot;</span>,
+            <span class="self">Self</span>::<span class="ident">Bincode</span> <span class="op">=&gt;</span> <span class="string">&quot;bincode::serialize&quot;</span>,
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">quote_deserialize</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">quote_deserialize</span>(<span class="self">self</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="self">Self</span>::<span class="ident">Lcs</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;lcs::from_bytes&quot;</span>,
-            <span class="self">Self</span>::<span class="ident">Bincode</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;bincode::deserialize&quot;</span>,
+            <span class="self">Self</span>::<span class="ident">Lcs</span> <span class="op">=&gt;</span> <span class="string">&quot;lcs::from_bytes&quot;</span>,
+            <span class="self">Self</span>::<span class="ident">Bincode</span> <span class="op">=&gt;</span> <span class="string">&quot;bincode::deserialize&quot;</span>,
         }
     }
 
     <span class="doccomment">/// Whether the encoding enforces ordering of map keys.</span>
     <span class="doccomment">/// Note that both encodings are canonical on other data structures.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">has_canonical_maps</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">has_canonical_maps</span>(<span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="self">Self</span>::<span class="ident">Lcs</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-            <span class="self">Self</span>::<span class="ident">Bincode</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+            <span class="self">Self</span>::<span class="ident">Lcs</span> <span class="op">=&gt;</span> <span class="bool-val">true</span>,
+            <span class="self">Self</span>::<span class="ident">Bincode</span> <span class="op">=&gt;</span> <span class="bool-val">false</span>,
         }
     }
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-testing&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">maximum_length</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">maximum_length</span>(<span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="self">Self</span>::<span class="ident">Lcs</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">libra_canonical_serialization</span>::<span class="ident">MAX_SEQUENCE_LENGTH</span>),
-            <span class="self">Self</span>::<span class="ident">Bincode</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="self">Self</span>::<span class="ident">Lcs</span> <span class="op">=&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">libra_canonical_serialization</span>::<span class="ident">MAX_SEQUENCE_LENGTH</span>),
+            <span class="self">Self</span>::<span class="ident">Bincode</span> <span class="op">=&gt;</span> <span class="prelude-val">None</span>,
         }
     }
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-testing&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">maximum_container_depth</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">maximum_container_depth</span>(<span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="self">Self</span>::<span class="ident">Lcs</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">libra_canonical_serialization</span>::<span class="ident">MAX_CONTAINER_DEPTH</span>),
-            <span class="self">Self</span>::<span class="ident">Bincode</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="self">Self</span>::<span class="ident">Lcs</span> <span class="op">=&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">libra_canonical_serialization</span>::<span class="ident">MAX_CONTAINER_DEPTH</span>),
+            <span class="self">Self</span>::<span class="ident">Bincode</span> <span class="op">=&gt;</span> <span class="prelude-val">None</span>,
         }
     }
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-testing&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_positive_samples_quick</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_positive_samples_quick</span>(<span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;&gt;</span> {
         <span class="kw">let</span> <span class="ident">values</span> <span class="op">=</span> <span class="ident">get_sample_values</span>(<span class="self">self</span>.<span class="ident">has_canonical_maps</span>());
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">positive_samples</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">new</span>();
         <span class="kw">for</span> <span class="ident">value</span> <span class="kw">in</span> <span class="ident">values</span> {
@@ -1393,7 +1394,7 @@
     }
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-testing&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_positive_samples</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_positive_samples</span>(<span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">positive_samples</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_positive_samples_quick</span>();
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">length</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">maximum_length</span>() {
             <span class="ident">positive_samples</span>.<span class="ident">push</span>(<span class="self">self</span>.<span class="ident">get_sample_with_long_sequence</span>(<span class="ident">length</span>));
@@ -1402,7 +1403,7 @@
     }
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-testing&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_negative_samples</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_negative_samples</span>(<span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;&gt;</span> {
         <span class="kw">let</span> <span class="ident">values</span> <span class="op">=</span> <span class="ident">get_sample_values</span>(<span class="self">self</span>.<span class="ident">has_canonical_maps</span>());
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">negative_samples</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">new</span>();
         <span class="kw">for</span> <span class="ident">value</span> <span class="kw">in</span> <span class="ident">values</span> {
@@ -1434,11 +1435,11 @@
     <span class="comment">// Used to test limits on &quot;container depth&quot;.</span>
     <span class="comment">// Here we construct the serialized bytes directly to allow examples outside the limit.</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-testing&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_sample_with_container_depth</span>(<span class="self">self</span>, <span class="ident">depth</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_sample_with_container_depth</span>(<span class="self">self</span>, <span class="ident">depth</span>: <span class="ident">usize</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;&gt;</span> {
         <span class="kw">if</span> <span class="ident">depth</span> <span class="op">&lt;</span> <span class="number">2</span> {
             <span class="kw">return</span> <span class="prelude-val">None</span>;
         }
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">e</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">serialize</span>::<span class="op">&lt;</span><span class="ident">List</span><span class="op">&lt;</span><span class="ident">SerdeData</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">List</span>::<span class="ident">Empty</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">e</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">serialize</span>::<span class="op">&lt;</span><span class="ident">List</span><span class="op">&lt;</span><span class="ident">SerdeData</span><span class="op">&gt;&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">List</span>::<span class="ident">Empty</span>);
 
         <span class="kw">let</span> <span class="ident">f0</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">serialize</span>(<span class="kw-2">&amp;</span><span class="ident">List</span>::<span class="ident">Node</span>(
             <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">SerdeData</span>::<span class="ident">UnitVariant</span>),
@@ -1459,7 +1460,7 @@
     <span class="comment">// Used to test limits on &quot;container depth&quot;.</span>
     <span class="comment">// Here we construct the serialized bytes directly to allow examples outside the limit.</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-testing&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_alternate_sample_with_container_depth</span>(<span class="self">self</span>, <span class="ident">depth</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_alternate_sample_with_container_depth</span>(<span class="self">self</span>, <span class="ident">depth</span>: <span class="ident">usize</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;&gt;</span> {
         <span class="kw">if</span> <span class="ident">depth</span> <span class="op">&lt;</span> <span class="number">2</span> {
             <span class="kw">return</span> <span class="prelude-val">None</span>;
         }
@@ -1481,19 +1482,19 @@
     <span class="comment">// Used to test limits on sequence lengths and container depth.</span>
     <span class="comment">// Here we construct the serialized bytes directly to allow examples outside the limit.</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-testing&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_sample_with_long_sequence</span>(<span class="self">self</span>, <span class="ident">length</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">e</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">serialize</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>()<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">Vec</span>::<span class="ident">new</span>());
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_sample_with_long_sequence</span>(<span class="self">self</span>, <span class="ident">length</span>: <span class="ident">usize</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">e</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">serialize</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>()<span class="op">&gt;&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">Vec</span>::<span class="ident">new</span>());
         <span class="kw">let</span> <span class="ident">f0</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">serialize</span>(<span class="kw-2">&amp;</span><span class="ident">SerdeData</span>::<span class="ident">UnitVector</span>(<span class="ident">Vec</span>::<span class="ident">new</span>()));
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">f0</span>[..<span class="ident">f0</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="ident">e</span>.<span class="ident">len</span>()].<span class="ident">to_vec</span>();
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">Runtime</span>::<span class="ident">Bincode</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">result</span>.<span class="ident">append</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">serialize</span>(<span class="kw-2">&amp;</span>(<span class="ident">length</span> <span class="kw">as</span> <span class="ident">u64</span>))),
-            <span class="ident">Runtime</span>::<span class="ident">Lcs</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Runtime</span>::<span class="ident">Bincode</span> <span class="op">=&gt;</span> <span class="ident">result</span>.<span class="ident">append</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">serialize</span>(<span class="kw-2">&amp;</span>(<span class="ident">length</span> <span class="kw">as</span> <span class="ident">u64</span>))),
+            <span class="ident">Runtime</span>::<span class="ident">Lcs</span> <span class="op">=&gt;</span> {
                 <span class="comment">// ULEB-128 encoding of the length.</span>
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">value</span> <span class="op">=</span> <span class="ident">length</span>;
-                <span class="kw">while</span> <span class="ident">value</span> <span class="op">&gt;</span><span class="op">=</span> <span class="number">0x80</span> {
+                <span class="kw">while</span> <span class="ident">value</span> <span class="op">&gt;=</span> <span class="number">0x80</span> {
                     <span class="kw">let</span> <span class="ident">byte</span> <span class="op">=</span> (<span class="ident">value</span> <span class="op">&amp;</span> <span class="number">0x7f</span>) <span class="kw">as</span> <span class="ident">u8</span>;
                     <span class="ident">result</span>.<span class="ident">push</span>(<span class="ident">byte</span> <span class="op">|</span> <span class="number">0x80</span>);
-                    <span class="ident">value</span> <span class="op">&gt;</span><span class="op">&gt;</span><span class="op">=</span> <span class="number">7</span>;
+                    <span class="ident">value</span> <span class="op">&gt;&gt;</span><span class="op">=</span> <span class="number">7</span>;
                 }
                 <span class="ident">result</span>.<span class="ident">push</span>(<span class="ident">value</span> <span class="kw">as</span> <span class="ident">u8</span>);
             }
@@ -1797,7 +1798,7 @@ UnitStruct: UNITSTRUCT
 <span class="comment">// implementation.</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-testing&quot;</span>)]</span>
-<span class="kw">fn</span> <span class="ident">test_get_positive_samples</span>(<span class="ident">runtime</span>: <span class="ident">Runtime</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+<span class="kw">fn</span> <span class="ident">test_get_positive_samples</span>(<span class="ident">runtime</span>: <span class="ident">Runtime</span>) <span class="op">-&gt;</span> <span class="ident">usize</span> {
     <span class="kw">let</span> <span class="ident">samples</span> <span class="op">=</span> <span class="ident">runtime</span>.<span class="ident">get_positive_samples</span>();
     <span class="kw">let</span> <span class="ident">length</span> <span class="op">=</span> <span class="ident">samples</span>.<span class="ident">len</span>();
     <span class="kw">for</span> <span class="ident">sample</span> <span class="kw">in</span> <span class="ident">samples</span> {
@@ -1824,7 +1825,7 @@ UnitStruct: UNITSTRUCT
 <span class="comment">// implementation.</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-testing&quot;</span>)]</span>
-<span class="kw">fn</span> <span class="ident">test_get_negative_samples</span>(<span class="ident">runtime</span>: <span class="ident">Runtime</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+<span class="kw">fn</span> <span class="ident">test_get_negative_samples</span>(<span class="ident">runtime</span>: <span class="ident">Runtime</span>) <span class="op">-&gt;</span> <span class="ident">usize</span> {
     <span class="kw">let</span> <span class="ident">samples</span> <span class="op">=</span> <span class="ident">runtime</span>.<span class="ident">get_negative_samples</span>();
     <span class="kw">let</span> <span class="ident">length</span> <span class="op">=</span> <span class="ident">samples</span>.<span class="ident">len</span>();
     <span class="kw">for</span> <span class="ident">sample</span> <span class="kw">in</span> <span class="ident">samples</span> {
