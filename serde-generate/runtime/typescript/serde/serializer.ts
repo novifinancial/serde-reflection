@@ -5,7 +5,7 @@ export interface Serializer {
 
   serializeBool(value: boolean): void;
 
-  serializeUnit(value: any): void;
+  serializeUnit(value: null): void;
 
   serializeChar(value: string): void;
 

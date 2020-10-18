@@ -56,7 +56,7 @@ export abstract class BinarySerializer implements Serializer {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/explicit-module-boundary-types
-    public serializeUnit(value: never): void {
+    public serializeUnit(value: null): void {
         return;
     }
 
