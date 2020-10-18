@@ -5,7 +5,7 @@ export interface Deserializer {
 
   deserializeBool(): boolean;
 
-  deserializeUnit(): undefined;
+  deserializeUnit(): null;
 
   deserializeChar(): string;
 

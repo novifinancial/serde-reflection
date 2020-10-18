@@ -14,6 +14,9 @@
 //! * Rust 2018
 //! * Go >= 1.13
 //!
+//! ## Work in progres
+//! * TypeScript > 3.2 (make sure to enable `esnext.BigInt` and `dom` at tsconfig.json -> lib)
+//!
 //! ## Supported Encodings
 //!
 //! Type definitions in a target language are meant to be used together with a runtime library that

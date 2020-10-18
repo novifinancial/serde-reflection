@@ -59,7 +59,7 @@ impl<'a> CodeGenerator<'a> {
         }
     }
 
-    /// Output class definitions for ` registry` in a single source file.
+    /// Output class definitions for `registry` in a single source file.
     pub fn output(&self, out: &mut dyn Write, registry: &Registry) -> Result<()> {
         let mut emitter = TypeScriptEmitter {
             out: IndentedWriter::new(out, IndentConfig::Space(2)),
@@ -90,6 +90,7 @@ where
             r#"
 import {{ Serializer }} from '../serde/serializer';
 import {{ Deserializer }} from '../serde/deserializer';
+import {{ Optional, Seq, Tuple, ListTuple, unit, bool, int8, int16, int32, int64, int128, uint8, uint16, uint32, uint64, uint128, float32, float64, char, str, bytes}} from '../serde/types';
 "#
         )?;
         for namespace in self.generator.namespaces_to_import.iter() {
@@ -100,15 +101,6 @@ import {{ Deserializer }} from '../serde/deserializer';
                 namespace
             )?;
         }
-        writeln!(
-            self.out,
-            r#"
-export type Optional<T> = T | null;
-export type Seq<T> = T[];
-export type Tuple<T extends any[]> = T
-export type ListTuple<T extends any[]> = Tuple<T>[]
-"#
-        )?;
 
         Ok(())
     }
@@ -135,23 +127,23 @@ export type ListTuple<T extends any[]> = Tuple<T>[]
         use Format::*;
         match format {
             TypeName(x) => self.quote_qualified_name(x),
-            Unit => "void".into(),
-            Bool => "boolean".into(),
-            I8 => "number".into(),
-            I16 => "number".into(),
-            I32 => "number".into(),
-            I64 => "BigInt".into(),
-            I128 => "BigInt".into(),
-            U8 => "number".into(),
-            U16 => "number".into(),
-            U32 => "number".into(),
-            U64 => "BigInt".into(),
-            U128 => "BigInt".into(),
-            F32 => "number".into(),
-            F64 => "number".into(),
-            Char => "string".into(),
-            Str => "string".into(),
-            Bytes => "Uint8Array".into(),
+            Unit => "unit".into(),
+            Bool => "bool".into(),
+            I8 => "int8".into(),
+            I16 => "int16".into(),
+            I32 => "int32".into(),
+            I64 => "int64".into(),
+            I128 => "int128".into(),
+            U8 => "uint8".into(),
+            U16 => "uint16".into(),
+            U32 => "uint32".into(),
+            U64 => "uint64".into(),
+            U128 => "uint128".into(),
+            F32 => "float32".into(),
+            F64 => "float64".into(),
+            Char => "char".into(),
+            Str => "str".into(),
+            Bytes => "bytes".into(),
 
             Option(format) => format!("Optional<{}>", self.quote_type(format)),
             Seq(format) => format!("Seq<{}>", self.quote_type(format)),
@@ -232,7 +224,7 @@ export type ListTuple<T extends any[]> = Tuple<T>[]
             Bytes => format!("serializer.serializeBytes({}{});", this_str, value),
             _ => format!(
                 "Helpers.serialize{}({}{}, serializer);",
-                common::mangle_type(format),
+                common::mangle_type(format).to_camel_case(),
                 this_str,
                 value
             ),
@@ -265,7 +257,7 @@ export type ListTuple<T extends any[]> = Tuple<T>[]
             Bytes => "deserializer.deserializeBytes()".to_string(),
             _ => format!(
                 "Helpers.deserialize{}(deserializer)",
-                common::mangle_type(format),
+                common::mangle_type(format).to_camel_case(),
             ),
         }
     }
@@ -276,7 +268,7 @@ export type ListTuple<T extends any[]> = Tuple<T>[]
         write!(
             self.out,
             "static serialize{}(value: {}, serializer: Serializer): void {{",
-            name,
+            name.to_camel_case(),
             self.quote_type(format0)
         )?;
         self.out.indent();
@@ -367,7 +359,7 @@ value.forEach((item) =>{{
         write!(
             self.out,
             "static deserialize{}(deserializer: Deserializer): {} {{",
-            name,
+            name.to_camel_case(),
             self.quote_type(format0),
         )?;
         self.out.indent();
