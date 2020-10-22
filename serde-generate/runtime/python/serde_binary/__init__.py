@@ -26,6 +26,28 @@ class BinarySerializer:
 
     output: io.BytesIO
     container_depth_budget: typing.Optional[int]
+    primitive_type_serializer: typing.Mapping = dataclasses.field(init=False)
+
+    def __post_init__(self):
+        self.primitive_type_serializer = {
+            st.bool: self.serialize_bool,
+            st.uint8: self.serialize_u8,
+            st.uint16: self.serialize_u16,
+            st.uint32: self.serialize_u32,
+            st.uint64: self.serialize_u64,
+            st.uint128: self.serialize_u128,
+            st.int8: self.serialize_i8,
+            st.int16: self.serialize_i16,
+            st.int32: self.serialize_i32,
+            st.int64: self.serialize_i64,
+            st.int128: self.serialize_i128,
+            st.float32: self.serialize_f32,
+            st.float64: self.serialize_f64,
+            st.unit: self.serialize_unit,
+            st.char: self.serialize_char,
+            str: self.serialize_str,
+            bytes: self.serialize_bytes,
+        }
 
     def serialize_bytes(self, value: bytes):
         self.serialize_len(len(value))
@@ -104,30 +126,10 @@ class BinarySerializer:
     def sort_map_entries(self, offsets: typing.List[int]):
         raise NotImplementedError
 
-    PRIMITIVE_TYPE_SERIALIZER = {
-        st.bool: serialize_bool,
-        st.uint8: serialize_u8,
-        st.uint16: serialize_u16,
-        st.uint32: serialize_u32,
-        st.uint64: serialize_u64,
-        st.uint128: serialize_u128,
-        st.int8: serialize_i8,
-        st.int16: serialize_i16,
-        st.int32: serialize_i32,
-        st.int64: serialize_i64,
-        st.int128: serialize_i128,
-        st.float32: serialize_f32,
-        st.float64: serialize_f64,
-        st.unit: serialize_unit,
-        st.char: serialize_char,
-        str: serialize_str,
-        bytes: serialize_bytes,
-    }
-
     # noqa: C901
     def serialize_any(self, obj: typing.Any, obj_type):
-        if obj_type in self.PRIMITIVE_TYPE_SERIALIZER:
-            self.PRIMITIVE_TYPE_SERIALIZER[obj_type](self, obj)
+        if obj_type in self.primitive_type_serializer:
+            self.primitive_type_serializer[obj_type](obj)
 
         elif hasattr(obj_type, "__origin__"):  # Generic type
             types = getattr(obj_type, "__args__")
@@ -203,6 +205,28 @@ class BinaryDeserializer:
 
     input: io.BytesIO
     container_depth_budget: typing.Optional[int]
+    primitive_type_deserializer: typing.Mapping = dataclasses.field(init=False)
+
+    def __post_init__(self):
+        self.primitive_type_deserializer = {
+            st.bool: self.deserialize_bool,
+            st.uint8: self.deserialize_u8,
+            st.uint16: self.deserialize_u16,
+            st.uint32: self.deserialize_u32,
+            st.uint64: self.deserialize_u64,
+            st.uint128: self.deserialize_u128,
+            st.int8: self.deserialize_i8,
+            st.int16: self.deserialize_i16,
+            st.int32: self.deserialize_i32,
+            st.int64: self.deserialize_i64,
+            st.int128: self.deserialize_i128,
+            st.float32: self.deserialize_f32,
+            st.float64: self.deserialize_f64,
+            st.unit: self.deserialize_unit,
+            st.char: self.deserialize_char,
+            str: self.deserialize_str,
+            bytes: self.deserialize_bytes,
+        }
 
     def read(self, length: int) -> bytes:
         value = self.input.read(length)
@@ -303,30 +327,10 @@ class BinaryDeserializer:
     ) -> bool:
         raise NotImplementedError
 
-    PRIMITIVE_TYPE_DESERIALIZER = {
-        st.bool: deserialize_bool,
-        st.uint8: deserialize_u8,
-        st.uint16: deserialize_u16,
-        st.uint32: deserialize_u32,
-        st.uint64: deserialize_u64,
-        st.uint128: deserialize_u128,
-        st.int8: deserialize_i8,
-        st.int16: deserialize_i16,
-        st.int32: deserialize_i32,
-        st.int64: deserialize_i64,
-        st.int128: deserialize_i128,
-        st.float32: deserialize_f32,
-        st.float64: deserialize_f64,
-        st.unit: deserialize_unit,
-        st.char: deserialize_char,
-        str: deserialize_str,
-        bytes: deserialize_bytes,
-    }
-
     # noqa
     def deserialize_any(self, obj_type) -> typing.Any:
-        if obj_type in BinaryDeserializer.PRIMITIVE_TYPE_DESERIALIZER:
-            return BinaryDeserializer.PRIMITIVE_TYPE_DESERIALIZER[obj_type](self)
+        if obj_type in self.primitive_type_deserializer:
+            return self.primitive_type_deserializer[obj_type]()
 
         elif hasattr(obj_type, "__origin__"):  # Generic type
             types = getattr(obj_type, "__args__")
