@@ -217,7 +217,7 @@ uint8_t BinaryDeserializer<D>::read_byte() {
 
 inline bool is_valid_utf8(const std::string &input) {
     uint8_t trailing_digits = 0;
-    for(uint8_t byte : input) {
+    for (uint8_t byte : input) {
         if (trailing_digits == 0) {
             // Start new codepoint.
             if (byte >> 7 == 0) {
