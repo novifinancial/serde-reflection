@@ -126,7 +126,7 @@ pub fn get_registry() -> Result<Registry> {
 /// Manually generate sample values.
 /// Avoid maps with more than one element when `has_canonical_maps` is false so that
 /// we can test re-serialization.
-pub fn get_sample_values(has_canonical_maps: bool) -> Vec<SerdeData> {
+pub fn get_sample_values(has_canonical_maps: bool, has_floats: bool) -> Vec<SerdeData> {
     let v0 = SerdeData::PrimitiveTypes(PrimitiveTypes {
         f_bool: false,
         f_u8: 6,
@@ -139,8 +139,8 @@ pub fn get_sample_values(has_canonical_maps: bool) -> Vec<SerdeData> {
         f_i32: -1,
         f_i64: -2,
         f_i128: -3,
-        f_f32: None,
-        f_f64: None,
+        f_f32: if has_floats { Some(0.4) } else { None },
+        f_f64: if has_floats { Some(35.21) } else { None },
         f_char: None,
     });
 
@@ -156,8 +156,8 @@ pub fn get_sample_values(has_canonical_maps: bool) -> Vec<SerdeData> {
         f_i32: i32::MIN,
         f_i64: i64::MIN,
         f_i128: i128::MIN,
-        f_f32: None,
-        f_f64: None,
+        f_f32: if has_floats { Some(-4111.0) } else { None },
+        f_f64: if has_floats { Some(-0.0021) } else { None },
         f_char: None,
     });
 
@@ -429,6 +429,14 @@ impl Runtime {
         }
     }
 
+    /// Whether the encoding supports float32 and float64.
+    pub fn has_floats(self) -> bool {
+        match self {
+            Self::Lcs => false,
+            Self::Bincode => true,
+        }
+    }
+
     #[cfg(feature = "runtime-testing")]
     pub fn maximum_length(self) -> Option<usize> {
         match self {
@@ -447,7 +455,7 @@ impl Runtime {
 
     #[cfg(feature = "runtime-testing")]
     pub fn get_positive_samples_quick(self) -> Vec<Vec<u8>> {
-        let values = get_sample_values(self.has_canonical_maps());
+        let values = get_sample_values(self.has_canonical_maps(), self.has_floats());
         let mut positive_samples = Vec::new();
         for value in values {
             for (sample, result) in self.serialize_with_noise_and_deserialize(&value) {
@@ -480,7 +488,7 @@ impl Runtime {
 
     #[cfg(feature = "runtime-testing")]
     pub fn get_negative_samples(self) -> Vec<Vec<u8>> {
-        let values = get_sample_values(self.has_canonical_maps());
+        let values = get_sample_values(self.has_canonical_maps(), self.has_floats());
         let mut negative_samples = Vec::new();
         for value in values {
             for (sample, result) in self.serialize_with_noise_and_deserialize(&value) {
@@ -581,7 +589,7 @@ impl Runtime {
 
 #[test]
 fn test_get_sample_values() {
-    assert_eq!(get_sample_values(false).len(), 14);
+    assert_eq!(get_sample_values(false, true).len(), 14);
 }
 
 #[test]
