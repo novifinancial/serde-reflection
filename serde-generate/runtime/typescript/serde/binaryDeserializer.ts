@@ -65,19 +65,19 @@ export abstract class BinaryDeserializer implements Deserializer {
   }
 
   public deserializeU64(): BigInt {
-    const high = this.deserializeU32();
     const low = this.deserializeU32();
+    const high = this.deserializeU32();
 
     // combine the two 32-bit values and return (little endian)
-    return (BigInt(low) << BinaryDeserializer.BIG_32) | BigInt(high);
+    return (BigInt(high) << BinaryDeserializer.BIG_32) | BigInt(low);
   }
 
   public deserializeU128(): BigInt {
-    const high = this.deserializeU64();
     const low = this.deserializeU64();
+    const high = this.deserializeU64();
 
     // combine the two 64-bit values and return (little endian)
-    return (BigInt(low) << BinaryDeserializer.BIG_64) | BigInt(high);
+    return (BigInt(high) << BinaryDeserializer.BIG_64) | BigInt(low);
   }
 
   public deserializeI8(): number {
@@ -93,19 +93,19 @@ export abstract class BinaryDeserializer implements Deserializer {
   }
 
   public deserializeI64(): BigInt {
-    const high = this.deserializeI32();
     const low = this.deserializeI32();
+    const high = this.deserializeI32();
 
     // combine the two 32-bit values and return (little endian)
-    return (BigInt(low) << BinaryDeserializer.BIG_32) | BigInt(high);
+    return (BigInt(high) << BinaryDeserializer.BIG_32) | BigInt(low);
   }
 
   public deserializeI128(): BigInt {
-    const high = this.deserializeI64();
     const low = this.deserializeI64();
+    const high = this.deserializeI64();
 
     // combine the two 64-bit values and return (little endian)
-    return (BigInt(low) << BinaryDeserializer.BIG_64) | BigInt(high);
+    return (BigInt(high) << BinaryDeserializer.BIG_64) | BigInt(low);
   }
 
   public deserializeOptionTag(): boolean {
