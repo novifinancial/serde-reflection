@@ -14,9 +14,25 @@ import java.util.Objects;
 public final class Bytes {
     private final byte[] content;
 
+    private static final Bytes EMPTY = new Bytes(new byte[0]);
+
+    /// Low-level constructor (use with care).
     public Bytes(byte[] content) {
         Objects.requireNonNull(content, "content must not be null");
-        this.content = content.clone();
+        this.content = content;
+    }
+
+    public static Bytes empty() {
+        return EMPTY;
+    }
+
+    public static Bytes valueOf(byte[] content) {
+        Objects.requireNonNull(content, "content must not be null");
+        if (content.length == 0) {
+            return EMPTY;
+        } else {
+            return new Bytes(content.clone());
+        }
     }
 
     public byte[] content() {

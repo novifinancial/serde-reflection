@@ -157,6 +157,18 @@ where
         Ok(())
     }
 
+    fn output_custom_code(&mut self) -> std::io::Result<()> {
+        if let Some(code) = self
+            .generator
+            .config
+            .custom_code
+            .get(&self.current_namespace)
+        {
+            write!(self.out, "\n{}", code)?;
+        }
+        Ok(())
+    }
+
     /// Compute a fully qualified reference to the container type `name`.
     fn quote_qualified_name(&self, name: &str) -> String {
         self.generator
@@ -250,6 +262,7 @@ where
             writeln!(self.out)?;
         }
         self.output_class_method_declarations(name)?;
+        self.output_custom_code()?;
         self.leave_class();
         writeln!(self.out, "}};")
     }
@@ -300,6 +313,7 @@ where
         )?;
         writeln!(self.out)?;
         self.output_class_method_declarations(name)?;
+        self.output_custom_code()?;
         self.leave_class();
         writeln!(self.out, "}};")
     }

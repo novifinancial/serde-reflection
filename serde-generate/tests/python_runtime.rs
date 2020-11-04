@@ -51,7 +51,7 @@ v = Test.{0}_deserialize(s)
 assert v == value
 assert v.c.x == 7
 
-v.b = (3, 0)
+v = Test([4, 6], (3, 0), Choice__C(7))
 t = v.{0}_serialize()
 assert len(t) == len(s)
 assert t != s

@@ -187,6 +187,15 @@ where
         Ok(())
     }
 
+    fn output_custom_code(&mut self, name: &str) -> std::io::Result<()> {
+        let mut path = self.current_namespace.clone();
+        path.push(name.to_string());
+        if let Some(code) = self.generator.config.custom_code.get(&path) {
+            write!(self.out, "\n{}", code)?;
+        }
+        Ok(())
+    }
+
     fn quote_type(&self, format: &Format) -> String {
         use Format::*;
         match format {
@@ -260,10 +269,7 @@ where
 
     fn needs_helper(format: &Format) -> bool {
         use Format::*;
-        match format {
-            Option(_) | Seq(_) | Map { .. } | Tuple(_) | TupleArray { .. } => true,
-            _ => false,
-        }
+        matches!(format, Option(_) | Seq(_) | Map { .. } | Tuple(_) | TupleArray { .. })
     }
 
     fn quote_serialize_value(&self, value: &str, format: &Format) -> String {
@@ -678,6 +684,8 @@ return obj, nil
                 }
             }
         }
+        // Custom code
+        self.output_custom_code(name)?;
         Ok(())
     }
 
@@ -767,6 +775,8 @@ return obj, nil
                 }
             }
         }
+        // Custom code
+        self.output_custom_code(name)?;
         Ok(())
     }
 
@@ -889,6 +899,8 @@ switch index {{"#,
             self.output_variant(name, *index, &variant.name, &variant.value)?;
         }
         self.current_namespace.pop();
+        // Custom code
+        self.output_custom_code(name)?;
         Ok(())
     }
 

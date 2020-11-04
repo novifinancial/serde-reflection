@@ -34,7 +34,7 @@ struct JavaEmitter<'a, T> {
     current_namespace: Vec<String>,
     /// Current (non-qualified) generated class names that could clash with names in the registry
     /// (e.g. "Builder" or variant classes).
-    /// * We cound multiplicities to allow inplace backtracking.
+    /// * We count multiplicities to allow inplace backtracking.
     /// * Names in the registry (and a few base types such as "BigInteger") are assumed to never clash.
     current_reserved_names: HashMap<String, usize>,
 }
@@ -174,6 +174,18 @@ where
         Ok(())
     }
 
+    fn output_custom_code(&mut self) -> std::io::Result<()> {
+        if let Some(code) = self
+            .generator
+            .config
+            .custom_code
+            .get(&self.current_namespace)
+        {
+            writeln!(self.out, "\n{}", code)?;
+        }
+        Ok(())
+    }
+
     fn quote_type(&self, format: &Format) -> String {
         use Format::*;
         match format {
@@ -274,10 +286,7 @@ where
 
     fn needs_helper(format: &Format) -> bool {
         use Format::*;
-        match format {
-            Option(_) | Seq(_) | Map { .. } | Tuple(_) | TupleArray { .. } => true,
-            _ => false,
-        }
+        matches!(format, Option(_) | Seq(_) | Map { .. } | Tuple(_) | TupleArray { .. })
     }
 
     fn quote_serialize_value(&self, value: &str, format: &Format) -> String {
@@ -746,6 +755,8 @@ if (getClass() != obj.getClass()) return false;
         writeln!(self.out, "}}")?;
         // Builder
         self.output_struct_or_variant_container_builder(name, fields)?;
+        // Custom code
+        self.output_custom_code()?;
         // End of class
         self.leave_class(reserved_names);
         writeln!(self.out, "}}")
@@ -787,6 +798,8 @@ if (getClass() != obj.getClass()) return false;
                 .collect::<Vec<_>>()
                 .join(",")
         )?;
+        // Custom code
+        self.output_custom_code()?;
         // End of class
         self.leave_class(reserved_names);
         writeln!(self.out, "}}")

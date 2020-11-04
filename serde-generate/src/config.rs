@@ -11,6 +11,7 @@ pub struct CodeGeneratorConfig {
     pub(crate) encodings: BTreeSet<Encoding>,
     pub(crate) external_definitions: ExternalDefinitions,
     pub(crate) comments: DocComments,
+    pub(crate) custom_code: CustomCode,
 }
 
 #[derive(Clone, Copy, Debug, PartialOrd, Ord, PartialEq, Eq)]
@@ -26,6 +27,12 @@ pub type ExternalDefinitions =
 /// Track documentation to be attached to particular definitions.
 pub type DocComments =
     std::collections::BTreeMap</* qualified name */ Vec<String>, /* comment */ String>;
+
+/// Track custom code to be added to particular definitions (use with care!).
+pub type CustomCode = std::collections::BTreeMap<
+    /* qualified name */ Vec<String>,
+    /* custom code */ String,
+>;
 
 /// How to copy generated source code and available runtimes for a given language.
 pub trait SourceInstaller {
@@ -57,6 +64,7 @@ impl CodeGeneratorConfig {
             encodings: BTreeSet::new(),
             external_definitions: BTreeMap::new(),
             comments: BTreeMap::new(),
+            custom_code: BTreeMap::new(),
         }
     }
 
@@ -88,6 +96,12 @@ impl CodeGeneratorConfig {
             *comment = format!("{}\n", comment.trim());
         }
         self.comments = comments;
+        self
+    }
+
+    /// Custom code attached to particular entity.
+    pub fn with_custom_code(mut self, code: CustomCode) -> Self {
+        self.custom_code = code;
         self
     }
 }

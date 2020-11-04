@@ -165,3 +165,26 @@ fn test_golang_code_with_external_definitions() {
     let content = std::fs::read_to_string(source_path).unwrap();
     assert!(content.contains("foo.Tree"));
 }
+
+#[test]
+fn test_that_golang_code_compiles_with_custom_code() {
+    let custom_code = vec![
+        (
+            vec!["main".to_string(), "SerdeData".to_string()],
+            "// custom1".to_string(),
+        ),
+        (
+            vec!["main".to_string(), "List".to_string(), "Node".to_string()],
+            "// custom2".to_string(),
+        ),
+    ]
+    .into_iter()
+    .collect();
+    let config = CodeGeneratorConfig::new("main".to_string()).with_custom_code(custom_code);
+
+    let (_dir, source_path) = test_that_golang_code_compiles_with_config(&config);
+    // Comments were correctly generated.
+    let content = std::fs::read_to_string(&source_path).unwrap();
+    assert!(content.contains("// custom1"));
+    assert!(content.contains("// custom2"));
+}

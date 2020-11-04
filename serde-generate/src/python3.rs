@@ -188,6 +188,21 @@ import typing
         Ok(())
     }
 
+    fn output_custom_code(&mut self) -> std::io::Result<bool> {
+        match self
+            .generator
+            .config
+            .custom_code
+            .get(&self.current_namespace)
+        {
+            Some(code) => {
+                writeln!(self.out, "\n{}", code)?;
+                Ok(true)
+            }
+            None => Ok(false),
+        }
+    }
+
     fn output_fields(&mut self, fields: &[Named<Format>]) -> Result<()> {
         if fields.is_empty() {
             writeln!(self.out, "pass")?;
@@ -227,7 +242,11 @@ import typing
         };
 
         // Regarding comments, we pretend the namespace is `[module, base, name]`.
-        writeln!(self.out, "\n@dataclass\nclass {0}__{1}({0}):", base, name)?;
+        writeln!(
+            self.out,
+            "\n@dataclass(frozen=True)\nclass {0}__{1}({0}):",
+            base, name
+        )?;
         self.out.indent();
         self.output_comment(&name)?;
         if self.generator.config.serialization {
@@ -235,8 +254,9 @@ import typing
         }
         self.current_namespace.push(name.to_string());
         self.output_fields(&fields)?;
-        self.out.unindent();
+        self.output_custom_code()?;
         self.current_namespace.pop();
+        self.out.unindent();
         writeln!(self.out)
     }
 
@@ -248,6 +268,7 @@ import typing
         writeln!(self.out, "\nclass {}:", name)?;
         self.out.indent();
         self.output_comment(&name)?;
+        self.current_namespace.push(name.to_string());
         if self.generator.config.serialization {
             writeln!(
                 self.out,
@@ -258,13 +279,14 @@ import typing
                 self.output_serialize_method_for_encoding(name, *encoding)?;
                 self.output_deserialize_method_for_encoding(name, *encoding)?;
             }
-        } else {
+        }
+        let wrote_custom_code = self.output_custom_code()?;
+        if !self.generator.config.serialization && !wrote_custom_code {
             writeln!(self.out, "pass")?;
         }
         writeln!(self.out)?;
         self.out.unindent();
 
-        self.current_namespace.push(name.to_string());
         for (index, variant) in variants {
             self.output_variant(name, &variant.name, *index, &variant.value)?;
         }
@@ -339,7 +361,7 @@ def {0}_deserialize(input: bytes) -> '{1}':
             }
         };
         // Struct case.
-        writeln!(self.out, "\n@dataclass\nclass {}:", name)?;
+        writeln!(self.out, "\n@dataclass(frozen=True)\nclass {}:", name)?;
         self.out.indent();
         self.output_comment(name)?;
         self.current_namespace.push(name.to_string());
@@ -348,6 +370,7 @@ def {0}_deserialize(input: bytes) -> '{1}':
             self.output_serialize_method_for_encoding(name, *encoding)?;
             self.output_deserialize_method_for_encoding(name, *encoding)?;
         }
+        self.output_custom_code()?;
         self.current_namespace.pop();
         self.out.unindent();
         writeln!(self.out)

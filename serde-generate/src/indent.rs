@@ -29,9 +29,7 @@ impl<T> IndentedWriter<T> {
                 self.indentation.push(b'\t');
             }
             IndentConfig::Space(n) => {
-                for _ in 0..n {
-                    self.indentation.push(b' ');
-                }
+                self.indentation.resize(self.indentation.len() + n, b' ');
             }
         }
     }

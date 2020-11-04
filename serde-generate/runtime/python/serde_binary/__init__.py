@@ -9,403 +9,407 @@ Note: This internal module is currently only meant to share code between the LCS
 
 import dataclasses
 import collections
+import io
 import typing
 from typing import get_type_hints
 
 import serde_types as st
 
 
-EncodeInteger = typing.Callable[[int], bytes]
-DecodeInteger = typing.Callable[[bytes], typing.Tuple[int, bytes]]
-SortMapEntries = typing.Callable[[typing.Iterator[bytes]], typing.Sequence[bytes]]
-CheckThatKeySlicesAreIncreasing = typing.Callable[[bytes, bytes], None]
-
-
-@dataclasses.dataclass(init=False)
-class SerializationConfig:
-    """Configuration object for `serialize_with_config`.
+@dataclasses.dataclass
+class BinarySerializer:
+    """Serialization primitives for binary formats (abstract class).
 
     "Binary" serialization formats may differ in the way they encode sequence lengths, variant
-    index, and how they sort map entries (or not). These 3 elements are passed to the
-    constructor and the rest is deduced.
+    index, and how they sort map entries (or not).
     """
 
-    primitive_encode_map: typing.Dict[typing.Any, typing.Callable[[typing.Any], bytes]]
-    encode_length: EncodeInteger
-    encode_variant_index: EncodeInteger
-    sort_map_entries: SortMapEntries
-    max_container_depth: typing.Optional[int]
+    output: io.BytesIO
+    container_depth_budget: typing.Optional[int]
+    primitive_type_serializer: typing.Mapping = dataclasses.field(init=False)
 
-    def __init__(
-        self,
-        encode_length: EncodeInteger,
-        encode_variant_index: EncodeInteger,
-        sort_map_entries: SortMapEntries,
-        max_container_depth: typing.Optional[int],
-    ):
-        self.encode_length = encode_length
-        self.encode_variant_index = encode_variant_index
-        self.sort_map_entries = sort_map_entries
-        self.max_container_depth = max_container_depth
-        self.primitive_encode_map = {
-            st.bool: lambda x: int(x).to_bytes(1, "little", signed=False),
-            st.uint8: lambda x: int(x).to_bytes(1, "little", signed=False),
-            st.uint16: lambda x: int(x).to_bytes(2, "little", signed=False),
-            st.uint32: lambda x: int(x).to_bytes(4, "little", signed=False),
-            st.uint64: lambda x: int(x).to_bytes(8, "little", signed=False),
-            st.uint128: lambda x: int(x).to_bytes(16, "little", signed=False),
-            st.int8: lambda x: int(x).to_bytes(1, "little", signed=True),
-            st.int16: lambda x: int(x).to_bytes(2, "little", signed=True),
-            st.int32: lambda x: int(x).to_bytes(4, "little", signed=True),
-            st.int64: lambda x: int(x).to_bytes(8, "little", signed=True),
-            st.int128: lambda x: int(x).to_bytes(16, "little", signed=True),
-            st.float32: lambda x: _not_implemented(),
-            st.float64: lambda x: _not_implemented(),
-            st.unit: lambda x: b"",
-            st.char: lambda x: _not_implemented(),
-            str: lambda x: _encode_str(encode_length, x),
-            bytes: lambda x: _encode_bytes(encode_length, x),
+    def __post_init__(self):
+        self.primitive_type_serializer = {
+            st.bool: self.serialize_bool,
+            st.uint8: self.serialize_u8,
+            st.uint16: self.serialize_u16,
+            st.uint32: self.serialize_u32,
+            st.uint64: self.serialize_u64,
+            st.uint128: self.serialize_u128,
+            st.int8: self.serialize_i8,
+            st.int16: self.serialize_i16,
+            st.int32: self.serialize_i32,
+            st.int64: self.serialize_i64,
+            st.int128: self.serialize_i128,
+            st.float32: self.serialize_f32,
+            st.float64: self.serialize_f64,
+            st.unit: self.serialize_unit,
+            st.char: self.serialize_char,
+            str: self.serialize_str,
+            bytes: self.serialize_bytes,
         }
 
-    def increase_current_container_depth(self):
-        if self.max_container_depth is not None:
-            if self.max_container_depth == 0:
+    def serialize_bytes(self, value: bytes):
+        self.serialize_len(len(value))
+        self.output.write(value)
+
+    def serialize_str(self, value: str):
+        self.serialize_bytes(value.encode())
+
+    def serialize_unit(self, value: st.unit):
+        pass
+
+    def serialize_bool(self, value: st.bool):
+        self.output.write(int(value).to_bytes(1, "little", signed=False))
+
+    def serialize_u8(self, value: st.uint8):
+        self.output.write(int(value).to_bytes(1, "little", signed=False))
+
+    def serialize_u16(self, value: st.uint16):
+        self.output.write(int(value).to_bytes(2, "little", signed=False))
+
+    def serialize_u32(self, value: st.uint32):
+        self.output.write(int(value).to_bytes(4, "little", signed=False))
+
+    def serialize_u64(self, value: st.uint64):
+        self.output.write(int(value).to_bytes(8, "little", signed=False))
+
+    def serialize_u128(self, value: st.uint128):
+        self.output.write(int(value).to_bytes(16, "little", signed=False))
+
+    def serialize_i8(self, value: st.uint8):
+        self.output.write(int(value).to_bytes(1, "little", signed=True))
+
+    def serialize_i16(self, value: st.uint16):
+        self.output.write(int(value).to_bytes(2, "little", signed=True))
+
+    def serialize_i32(self, value: st.uint32):
+        self.output.write(int(value).to_bytes(4, "little", signed=True))
+
+    def serialize_i64(self, value: st.uint64):
+        self.output.write(int(value).to_bytes(8, "little", signed=True))
+
+    def serialize_i128(self, value: st.uint128):
+        self.output.write(int(value).to_bytes(16, "little", signed=True))
+
+    def serialize_f32(self, value: st.float32):
+        raise NotImplementedError
+
+    def serialize_f64(self, value: st.float64):
+        raise NotImplementedError
+
+    def serialize_char(self, value: st.char):
+        raise NotImplementedError
+
+    def get_buffer_offset(self) -> int:
+        return len(self.output.getbuffer())
+
+    def get_buffer(self) -> bytes:
+        return self.output.getvalue()
+
+    def increase_container_depth(self):
+        if self.container_depth_budget is not None:
+            if self.container_depth_budget == 0:
                 raise st.SerializationError("Exceeded maximum container depth")
-            self.max_container_depth -= 1
+            self.container_depth_budget -= 1
 
-    def decrease_current_container_depth(self):
-        if self.max_container_depth is not None:
-            self.max_container_depth += 1
+    def decrease_container_depth(self):
+        if self.container_depth_budget is not None:
+            self.container_depth_budget += 1
+
+    def serialize_len(self, value: int):
+        raise NotImplementedError
+
+    def serialize_variant_index(self, value: int):
+        raise NotImplementedError
+
+    def sort_map_entries(self, offsets: typing.List[int]):
+        raise NotImplementedError
+
+    # noqa: C901
+    def serialize_any(self, obj: typing.Any, obj_type):
+        if obj_type in self.primitive_type_serializer:
+            self.primitive_type_serializer[obj_type](obj)
+
+        elif hasattr(obj_type, "__origin__"):  # Generic type
+            types = getattr(obj_type, "__args__")
+
+            if getattr(obj_type, "__origin__") == collections.abc.Sequence:  # Sequence
+                assert len(types) == 1
+                item_type = types[0]
+                self.serialize_len(len(obj))
+                for item in obj:
+                    self.serialize_any(item, item_type)
+
+            elif getattr(obj_type, "__origin__") == tuple:  # Tuple
+                for i in range(len(obj)):
+                    self.serialize_any(obj[i], types[i])
+
+            elif getattr(obj_type, "__origin__") == typing.Union:  # Option
+                assert len(types) == 2 and types[1] == type(None)
+                if obj is None:
+                    self.output.write(b"\x00")
+                else:
+                    self.output.write(b"\x01")
+                    self.serialize_any(obj, types[0])
+
+            elif getattr(obj_type, "__origin__") == dict:  # Map
+                assert len(types) == 2
+                self.serialize_len(len(obj))
+                offsets = []
+                for key, value in obj.items():
+                    offsets.append(self.get_buffer_offset())
+                    self.serialize_any(key, types[0])
+                    self.serialize_any(value, types[1])
+                self.sort_map_entries(offsets)
+
+            else:
+                raise st.SerializationError("Unexpected type", obj_type)
+
+        else:
+            if not dataclasses.is_dataclass(obj_type):  # Enum
+                if not hasattr(obj_type, "VARIANTS"):
+                    raise st.SerializationError("Unexpected type", obj_type)
+                if not hasattr(obj, "INDEX"):
+                    raise st.SerializationError(
+                        "Wrong Value for the type", obj, obj_type
+                    )
+                self.serialize_variant_index(obj.__class__.INDEX)
+                # Proceed to variant
+                obj_type = obj_type.VARIANTS[obj.__class__.INDEX]
+                if not dataclasses.is_dataclass(obj_type):
+                    raise st.SerializationError("Unexpected type", obj_type)
+
+            # pyre-ignore
+            if not isinstance(obj, obj_type):
+                raise st.SerializationError("Wrong Value for the type", obj, obj_type)
+
+            # Content of struct or variant
+            fields = dataclasses.fields(obj_type)
+            types = get_type_hints(obj_type)
+            self.increase_container_depth()
+            for field in fields:
+                field_value = obj.__dict__[field.name]
+                field_type = types[field.name]
+                self.serialize_any(field_value, field_type)
+            self.decrease_container_depth()
 
 
-@dataclasses.dataclass(init=False)
-class DeserializationConfig:
-    """Configuration object for `deserialize_with_config`.
+@dataclasses.dataclass
+class BinaryDeserializer:
+    """Deserialization primitives for binary formats (abstract class).
 
     "Binary" serialization formats may differ in the way they encode sequence lengths, variant
-    index, and how they verify the ordering of keys in map entries (or not). These 3 elements
-    are passed to the constructor and the rest is deduced.
+    index, and how they verify the ordering of keys in map entries (or not).
     """
 
-    primitive_decode_map: typing.Dict[
-        typing.Any, typing.Callable[[bytes], typing.Tuple[bytes, typing.Any]]
-    ]
-    decode_length: DecodeInteger
-    decode_variant_index: DecodeInteger
-    check_that_key_slices_are_increasing: CheckThatKeySlicesAreIncreasing
-    max_container_depth: typing.Optional[int]
+    input: io.BytesIO
+    container_depth_budget: typing.Optional[int]
+    primitive_type_deserializer: typing.Mapping = dataclasses.field(init=False)
 
-    def __init__(
-        self,
-        decode_length: DecodeInteger,
-        decode_variant_index: DecodeInteger,
-        check_that_key_slices_are_increasing: CheckThatKeySlicesAreIncreasing,
-        max_container_depth: typing.Optional[int],
-    ):
-        self.decode_length = decode_length
-        self.decode_variant_index = decode_variant_index
-        self.check_that_key_slices_are_increasing = check_that_key_slices_are_increasing
-        self.max_container_depth = max_container_depth
-        self.primitive_decode_map = {
-            st.bool: _decode_bool,
-            st.uint8: lambda content: (
-                st.uint8(
-                    int.from_bytes(peek(content, 1), byteorder="little", signed=False)
-                ),
-                content[1:],
-            ),
-            st.uint16: lambda content: (
-                st.uint16(
-                    int.from_bytes(peek(content, 2), byteorder="little", signed=False)
-                ),
-                content[2:],
-            ),
-            st.uint32: lambda content: (
-                st.uint32(
-                    int.from_bytes(peek(content, 4), byteorder="little", signed=False)
-                ),
-                content[4:],
-            ),
-            st.uint64: lambda content: (
-                st.uint64(
-                    int.from_bytes(peek(content, 8), byteorder="little", signed=False)
-                ),
-                content[8:],
-            ),
-            st.uint128: lambda content: (
-                st.uint128(
-                    int.from_bytes(peek(content, 16), byteorder="little", signed=False)
-                ),
-                content[16:],
-            ),
-            st.int8: lambda content: (
-                st.int8(
-                    int.from_bytes(peek(content, 1), byteorder="little", signed=True)
-                ),
-                content[1:],
-            ),
-            st.int16: lambda content: (
-                st.int16(
-                    int.from_bytes(peek(content, 2), byteorder="little", signed=True)
-                ),
-                content[2:],
-            ),
-            st.int32: lambda content: (
-                st.int32(
-                    int.from_bytes(peek(content, 4), byteorder="little", signed=True)
-                ),
-                content[4:],
-            ),
-            st.int64: lambda content: (
-                st.int64(
-                    int.from_bytes(peek(content, 8), byteorder="little", signed=True)
-                ),
-                content[8:],
-            ),
-            st.int128: lambda content: (
-                st.int128(
-                    int.from_bytes(peek(content, 16), byteorder="little", signed=True)
-                ),
-                content[16:],
-            ),
-            st.float32: lambda content: _not_implemented(),
-            st.float64: lambda content: _not_implemented(),
-            st.unit: lambda content: (None, content),
-            st.char: lambda content: _not_implemented(),
-            str: lambda content: _decode_str(decode_length, content),
-            bytes: lambda content: _decode_bytes(decode_length, content),
+    def __post_init__(self):
+        self.primitive_type_deserializer = {
+            st.bool: self.deserialize_bool,
+            st.uint8: self.deserialize_u8,
+            st.uint16: self.deserialize_u16,
+            st.uint32: self.deserialize_u32,
+            st.uint64: self.deserialize_u64,
+            st.uint128: self.deserialize_u128,
+            st.int8: self.deserialize_i8,
+            st.int16: self.deserialize_i16,
+            st.int32: self.deserialize_i32,
+            st.int64: self.deserialize_i64,
+            st.int128: self.deserialize_i128,
+            st.float32: self.deserialize_f32,
+            st.float64: self.deserialize_f64,
+            st.unit: self.deserialize_unit,
+            st.char: self.deserialize_char,
+            str: self.deserialize_str,
+            bytes: self.deserialize_bytes,
         }
 
-    def increase_current_container_depth(self):
-        if self.max_container_depth is not None:
-            if self.max_container_depth == 0:
+    def read(self, length: int) -> bytes:
+        value = self.input.read(length)
+        if value is None or len(value) < length:
+            raise st.DeserializationError("Input is too short")
+        return value
+
+    def deserialize_bytes(self) -> bytes:
+        length = self.deserialize_len()
+        return self.read(length)
+
+    def deserialize_str(self) -> str:
+        content = self.deserialize_bytes()
+        try:
+            return content.decode()
+        except UnicodeDecodeError:
+            raise st.DeserializationError("Invalid unicode string:", content)
+
+    def deserialize_unit(self) -> st.unit:
+        pass
+
+    def deserialize_bool(self) -> st.bool:
+        b = int.from_bytes(self.read(1), byteorder="little", signed=False)
+        if b == 0:
+            return False
+        elif b == 1:
+            return True
+        else:
+            raise st.DeserializationError("Unexpected boolean value:", b)
+
+    def deserialize_u8(self) -> st.uint8:
+        return st.uint8(int.from_bytes(self.read(1), byteorder="little", signed=False))
+
+    def deserialize_u16(self) -> st.uint16:
+        return st.uint16(int.from_bytes(self.read(2), byteorder="little", signed=False))
+
+    def deserialize_u32(self) -> st.uint32:
+        return st.uint32(int.from_bytes(self.read(4), byteorder="little", signed=False))
+
+    def deserialize_u64(self) -> st.uint64:
+        return st.uint64(int.from_bytes(self.read(8), byteorder="little", signed=False))
+
+    def deserialize_u128(self) -> st.uint128:
+        return st.uint128(
+            int.from_bytes(self.read(16), byteorder="little", signed=False)
+        )
+
+    def deserialize_i8(self) -> st.int8:
+        return st.int8(int.from_bytes(self.read(1), byteorder="little", signed=True))
+
+    def deserialize_i16(self) -> st.int16:
+        return st.int16(int.from_bytes(self.read(2), byteorder="little", signed=True))
+
+    def deserialize_i32(self) -> st.int32:
+        return st.int32(int.from_bytes(self.read(4), byteorder="little", signed=True))
+
+    def deserialize_i64(self) -> st.int64:
+        return st.int64(int.from_bytes(self.read(8), byteorder="little", signed=True))
+
+    def deserialize_i128(self) -> st.int128:
+        return st.int128(int.from_bytes(self.read(16), byteorder="little", signed=True))
+
+    def deserialize_f32(self) -> st.float32:
+        raise NotImplementedError
+
+    def deserialize_f64(self) -> st.float64:
+        raise NotImplementedError
+
+    def deserialize_char(self) -> st.char:
+        raise NotImplementedError
+
+    def get_buffer_offset(self) -> int:
+        return self.input.tell()
+
+    def get_remaining_buffer(self) -> bytes:
+        buf = self.input.getbuffer()
+        offset = self.get_buffer_offset()
+        return bytes(buf[offset:])
+
+    def increase_container_depth(self):
+        if self.container_depth_budget is not None:
+            if self.container_depth_budget == 0:
                 raise st.DeserializationError("Exceeded maximum container depth")
-            self.max_container_depth -= 1
+            self.container_depth_budget -= 1
 
-    def decrease_current_container_depth(self):
-        if self.max_container_depth is not None:
-            self.max_container_depth += 1
+    def decrease_container_depth(self):
+        if self.container_depth_budget is not None:
+            self.container_depth_budget += 1
 
+    def deserialize_len(self) -> int:
+        raise NotImplementedError
 
-def peek(content: bytes, size: int) -> bytes:
-    if len(content) < size:
-        raise st.DeserializationError("Input is too short")
-    return content[:size]
+    def deserialize_variant_index(self) -> int:
+        raise NotImplementedError
 
+    def check_that_key_slices_are_increasing(
+        self, slice1: typing.Tuple[int, int], slice2: typing.Tuple[int, int]
+    ) -> bool:
+        raise NotImplementedError
 
-def _encode_bytes(encode_length: EncodeInteger, value: bytes) -> bytes:
-    return encode_length(len(value)) + value
+    # noqa
+    def deserialize_any(self, obj_type) -> typing.Any:
+        if obj_type in self.primitive_type_deserializer:
+            return self.primitive_type_deserializer[obj_type]()
 
+        elif hasattr(obj_type, "__origin__"):  # Generic type
+            types = getattr(obj_type, "__args__")
+            if getattr(obj_type, "__origin__") == collections.abc.Sequence:  # Sequence
+                assert len(types) == 1
+                item_type = types[0]
+                length = self.deserialize_len()
+                result = []
+                for i in range(0, length):
+                    item = self.deserialize_any(item_type)
+                    result.append(item)
 
-def _encode_str(encode_length: EncodeInteger, value: str) -> bytes:
-    b = value.encode()
-    return encode_length(len(b)) + b
+                return result
 
+            elif getattr(obj_type, "__origin__") == tuple:  # Tuple
+                result = []
+                for i in range(len(types)):
+                    item = self.deserialize_any(types[i])
+                    result.append(item)
+                return tuple(result)
 
-def _decode_bool(content: bytes) -> typing.Tuple[st.bool, bytes]:
-    b = int.from_bytes(peek(content, 1), byteorder="little", signed=False)
-    content = content[1:]
-    if b == 0:
-        val = False
-    elif b == 1:
-        val = True
-    else:
-        raise st.DeserializationError("Unexpected boolean value:", b)
-    return val, content
-
-
-def _decode_bytes(
-    decode_length: DecodeInteger, content: bytes
-) -> typing.Tuple[bytes, bytes]:
-    len, content = decode_length(content)
-    val, content = peek(content, len), content[len:]
-    return val, content
-
-
-def _decode_str(
-    decode_length: DecodeInteger, content: bytes
-) -> typing.Tuple[str, bytes]:
-    strlen, content = decode_length(content)
-    try:
-        val, content = peek(content, strlen).decode(), content[strlen:]
-    except UnicodeDecodeError:
-        raise st.DeserializationError("Invalid unicode string:", content)
-    return val, content
-
-
-def _not_implemented():
-    raise NotImplementedError
-
-
-# noqa: C901
-def serialize_with_config(
-    config: SerializationConfig,
-    obj: typing.Any,
-    obj_type,
-) -> bytes:
-    result = b""
-
-    if obj_type in config.primitive_encode_map:
-        result += config.primitive_encode_map[obj_type](obj)
-
-    elif hasattr(obj_type, "__origin__"):  # Generic type
-        types = getattr(obj_type, "__args__")
-
-        if getattr(obj_type, "__origin__") == collections.abc.Sequence:  # Sequence
-            assert len(types) == 1
-            item_type = types[0]
-            result += config.encode_length(len(obj))
-            result += b"".join(
-                [serialize_with_config(config, item, item_type) for item in obj]
-            )
-
-        elif getattr(obj_type, "__origin__") == tuple:  # Tuple
-            for i in range(len(obj)):
-                result += serialize_with_config(config, obj[i], types[i])
-
-        elif getattr(obj_type, "__origin__") == typing.Union:  # Option
-            assert len(types) == 2 and types[1] == type(None)
-            if obj is None:
-                result += b"\x00"
-            else:
-                result += b"\x01"
-                result += serialize_with_config(config, obj, types[0])
-
-        elif getattr(obj_type, "__origin__") == dict:  # Map
-            assert len(types) == 2
-            item_type = typing.Tuple[types[0], types[1]]
-            result += config.encode_length(len(obj))
-            serialized_items = config.sort_map_entries(
-                serialize_with_config(config, item, item_type) for item in obj.items()
-            )
-            for s in serialized_items:
-                result += s
-
-        else:
-            raise st.SerializationError("Unexpected type", obj_type)
-
-    else:
-        if not dataclasses.is_dataclass(obj_type):  # Enum
-            if not hasattr(obj_type, "VARIANTS"):
-                raise st.SerializationError("Unexpected type", obj_type)
-            if not hasattr(obj, "INDEX"):
-                raise st.SerializationError("Wrong Value for the type", obj, obj_type)
-            result += config.encode_variant_index(obj.__class__.INDEX)
-            # Proceed to variant
-            obj_type = obj_type.VARIANTS[obj.__class__.INDEX]
-            if not dataclasses.is_dataclass(obj_type):
-                raise st.SerializationError("Unexpected type", obj_type)
-
-        # pyre-ignore
-        if not isinstance(obj, obj_type):
-            raise st.SerializationError("Wrong Value for the type", obj, obj_type)
-
-        # Content of struct or variant
-        fields = dataclasses.fields(obj_type)
-        types = get_type_hints(obj_type)
-        config.increase_current_container_depth()
-        for field in fields:
-            field_type = types[field.name]
-            field_value = obj.__dict__[field.name]
-            result += serialize_with_config(config, field_value, field_type)
-        config.decrease_current_container_depth()
-
-    return result
-
-
-# noqa
-def deserialize_with_config(
-    config: DeserializationConfig,
-    content: bytes,
-    obj_type,
-) -> typing.Tuple[typing.Any, bytes]:
-    if obj_type in config.primitive_decode_map:
-        res, content = config.primitive_decode_map[obj_type](content)
-        return res, content
-
-    elif hasattr(obj_type, "__origin__"):  # Generic type
-        types = getattr(obj_type, "__args__")
-        if getattr(obj_type, "__origin__") == collections.abc.Sequence:  # Sequence
-            assert len(types) == 1
-            item_type = types[0]
-            seqlen, content = config.decode_length(content)
-            res = []
-            for i in range(0, seqlen):
-                item, content = deserialize_with_config(config, content, item_type)
-                res.append(item)
-
-            return res, content
-
-        elif getattr(obj_type, "__origin__") == tuple:  # Tuple
-            res = []
-            for i in range(len(types)):
-                item, content = deserialize_with_config(config, content, types[i])
-                res.append(item)
-            return tuple(res), content
-
-        elif getattr(obj_type, "__origin__") == typing.Union:  # Option
-            assert len(types) == 2 and types[1] == type(None)
-            tag = int.from_bytes(peek(content, 1), byteorder="little", signed=False)
-            content = content[1:]
-            if tag == 0:
-                return None, content
-            elif tag == 1:
-                return deserialize_with_config(config, content, types[0])
-            else:
-                raise st.DeserializationError("Wrong tag for Option value")
-
-        elif getattr(obj_type, "__origin__") == dict:  # Map
-            assert len(types) == 2
-            seqlen, content = config.decode_length(content)
-            res = dict()
-            previous_serialized_key = None
-            for i in range(0, seqlen):
-                previous_content = content
-                key, content = deserialize_with_config(
-                    config, previous_content, types[0]
-                )
-                if content:
-                    serialized_key = previous_content[: -len(content)]
+            elif getattr(obj_type, "__origin__") == typing.Union:  # Option
+                assert len(types) == 2 and types[1] == type(None)
+                tag = int.from_bytes(self.read(1), byteorder="little", signed=False)
+                if tag == 0:
+                    return None
+                elif tag == 1:
+                    return self.deserialize_any(types[0])
                 else:
-                    serialized_key = previous_content
-                value, content = deserialize_with_config(config, content, types[1])
-                if previous_serialized_key is not None:
-                    config.check_that_key_slices_are_increasing(
-                        previous_serialized_key, serialized_key
+                    raise st.DeserializationError("Wrong tag for Option value")
+
+            elif getattr(obj_type, "__origin__") == dict:  # Map
+                assert len(types) == 2
+                length = self.deserialize_len()
+                result = dict()
+                previous_key_slice = None
+                for i in range(0, length):
+                    key_start = self.get_buffer_offset()
+                    key = self.deserialize_any(types[0])
+                    key_end = self.get_buffer_offset()
+                    value = self.deserialize_any(types[1])
+
+                    key_slice = (key_start, key_end)
+                    if previous_key_slice is not None:
+                        self.check_that_key_slices_are_increasing(
+                            previous_key_slice, key_slice
+                        )
+                    previous_key_slice = key_slice
+
+                    result[key] = value
+
+                return result
+
+            else:
+                raise st.DeserializationError("Unexpected type", obj_type)
+
+        else:
+            # handle structs
+            if dataclasses.is_dataclass(obj_type):
+                values = []
+                fields = dataclasses.fields(obj_type)
+                typing_hints = get_type_hints(obj_type)
+                self.increase_container_depth()
+                for field in fields:
+                    field_type = typing_hints[field.name]
+                    field_value = self.deserialize_any(field_type)
+                    values.append(field_value)
+                self.decrease_container_depth()
+                return obj_type(*values)
+
+            # handle variant
+            elif hasattr(obj_type, "VARIANTS"):
+                variant_index = self.deserialize_variant_index()
+                if variant_index not in range(len(obj_type.VARIANTS)):
+                    raise st.DeserializationError(
+                        "Unexpected variant index", variant_index
                     )
-                previous_serialized_key = serialized_key
-                res[key] = value
+                new_type = obj_type.VARIANTS[variant_index]
+                return self.deserialize_any(new_type)
 
-            return res, content
-
-        else:
-            raise st.DeserializationError("Unexpected type", obj_type)
-
-    else:
-        # handle structs
-        if dataclasses.is_dataclass(obj_type):
-            values = []
-            fields = dataclasses.fields(obj_type)
-            typing_hints = get_type_hints(obj_type)
-            config.increase_current_container_depth()
-            for field in fields:
-                field_type = typing_hints[field.name]
-                field_value, content = deserialize_with_config(
-                    config, content, field_type
-                )
-                values.append(field_value)
-            config.decrease_current_container_depth()
-            res = obj_type(*values)
-            return res, content
-
-        # handle variant
-        elif hasattr(obj_type, "VARIANTS"):
-            variant_index, content = config.decode_variant_index(content)
-            if variant_index not in range(len(obj_type.VARIANTS)):
-                raise st.DeserializationError("Unexpected variant index", variant_index)
-            new_type = obj_type.VARIANTS[variant_index]
-            res, content = deserialize_with_config(config, content, new_type)
-            return res, content
-
-        else:
-            raise st.DeserializationError("Unexpected type", obj_type)
+            else:
+                raise st.DeserializationError("Unexpected type", obj_type)

@@ -81,6 +81,23 @@ class BincodeTestCase(unittest.TestCase):
             bincode.deserialize(b"\xff" * 16, st.int128), (st.int128(-1), b"")
         )
 
+    def test_bincode_f32(self):
+        self.assertEqual(bincode.serialize(0.3, st.float32), b"\x9a\x99\x99\x3e")
+        value, reminder = bincode.deserialize(b"\x9a\x99\x99\x3e", st.float32)
+        self.assertEqual(reminder, b"")
+        self.assertAlmostEqual(value, 0.3)
+
+    def test_bincode_f64(self):
+        self.assertEqual(
+            bincode.serialize(0.000000000003, st.float64),
+            b"\x1a\xdf\xc4\x41\x66\x63\x8a\x3d",
+        )
+        value, reminder = bincode.deserialize(
+            b"\x1a\xdf\xc4\x41\x66\x63\x8a\x3d", st.float64
+        )
+        self.assertEqual(reminder, b"")
+        self.assertAlmostEqual(value, 0.000000000003)
+
     def test_serialize_bytes(self):
         self.assertEqual(bincode.serialize(b"", bytes), b"\x00" * 8)
         self.assertEqual(
@@ -156,6 +173,11 @@ class BincodeTestCase(unittest.TestCase):
             bincode.deserialize(
                 b"\x02\x00\x00\x00\x00\x00\x00\x00\x01\x00\x05\x00\x01\x03", Map
             ),
+        )
+        m2 = OrderedDict([(1, 5), (256, 3)])
+        e2 = bincode.serialize(m2, Map)
+        self.assertEqual(
+            e2, b"\x02\x00\x00\x00\x00\x00\x00\x00\x01\x00\x05\x00\x01\x03"
         )
 
     def test_serialize_set(self):

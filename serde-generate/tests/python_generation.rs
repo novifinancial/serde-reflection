@@ -122,6 +122,34 @@ fn test_python_code_with_external_definitions() {
 }
 
 #[test]
+fn test_that_python_code_parses_with_custom_code() {
+    let custom_code = vec![
+        (
+            vec!["testing".to_string(), "SerdeData".to_string()],
+            "def nothing1(self):\n    pass".to_string(),
+        ),
+        (
+            vec![
+                "testing".to_string(),
+                "List".to_string(),
+                "Node".to_string(),
+            ],
+            "def nothing2(self):\n    pass".to_string(),
+        ),
+    ]
+    .into_iter()
+    .collect();
+
+    let config = CodeGeneratorConfig::new("testing".to_string()).with_custom_code(custom_code);
+    let (_dir, source_path) = test_that_python_code_parses_with_config(&config);
+
+    // Check that custom_code was added.
+    let content = std::fs::read_to_string(&source_path).unwrap();
+    assert!(content.contains("nothing1"));
+    assert!(content.contains("nothing2"));
+}
+
+#[test]
 fn test_that_installed_python_code_passes_pyre_check() {
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();

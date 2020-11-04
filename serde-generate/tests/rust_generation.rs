@@ -152,3 +152,19 @@ serde_bytes = "0.11"
         .unwrap();
     assert!(status.success());
 }
+
+#[test]
+fn test_that_rust_code_compiles_with_custom_code() {
+    let custom_code = vec![(
+        vec!["testing".to_string(), "SerdeData".to_string()],
+        "// custom code\n".to_string(),
+    )]
+    .into_iter()
+    .collect();
+    let config = CodeGeneratorConfig::new("testing".to_string())
+        .with_serialization(false)
+        .with_custom_code(custom_code);
+    let (_dir, source_path) = test_that_rust_code_compiles_with_config(&config);
+    let content = std::fs::read_to_string(&source_path).unwrap();
+    assert!(content.contains("// custom code\n"));
+}

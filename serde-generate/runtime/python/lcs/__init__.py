@@ -3,6 +3,7 @@
 
 import dataclasses
 import collections
+import io
 import typing
 from copy import copy
 from typing import get_type_hints
@@ -15,89 +16,101 @@ MAX_U32 = (1 << 32) - 1
 MAX_CONTAINER_DEPTH = 500
 
 
-def _encode_u32_as_uleb128(value: int) -> bytes:
-    res = b""
-    while value >= 0x80:
-        res += ((value & 0x7F) | 0x80).to_bytes(1, "little", signed=False)
-        value >>= 7
-    res += value.to_bytes(1, "little", signed=False)
-    return res
-
-
-def _encode_length(value: int) -> bytes:
-    if value > MAX_LENGTH:
-        raise st.SerializationError("Length exceeds the maximum supported value.")
-    return _encode_u32_as_uleb128(value)
-
-
-def _encode_variant_index(value: int) -> bytes:
-    if value > MAX_U32:
-        raise st.SerializationError(
-            "Variant index exceeds the maximum supported value."
+class LcsSerializer(sb.BinarySerializer):
+    def __init__(self):
+        super().__init__(
+            output=io.BytesIO(), container_depth_budget=MAX_CONTAINER_DEPTH
         )
-    return _encode_u32_as_uleb128(value)
 
+    def serialize_u32_as_uleb128(self, value: int):
+        while value >= 0x80:
+            b = (value & 0x7F) | 0x80
+            self.output.write(b.to_bytes(1, "little", signed=False))
+            value >>= 7
+        self.output.write(value.to_bytes(1, "little", signed=False))
 
-def _decode_uleb128_as_u32(content: bytes) -> typing.Tuple[int, bytes]:
-    value = 0
-    for shift in range(0, 32, 7):
-        byte = int.from_bytes(sb.peek(content, 1), "little", signed=False)
-        content = content[1:]
-        digit = byte & 0x7F
-        value |= digit << shift
+    def serialize_len(self, value: int):
+        if value > MAX_LENGTH:
+            raise st.SerializationError("Length exceeds the maximum supported value.")
+        self.serialize_u32_as_uleb128(value)
+
+    def serialize_variant_index(self, value: int):
         if value > MAX_U32:
-            raise st.DeserializationError(
-                "Overflow while parsing uleb128-encoded uint32 value"
+            raise st.SerializationError(
+                "Variant index exceeds the maximum supported value."
             )
-        if digit == byte:
-            if shift > 0 and digit == 0:
-                raise st.DeserializationError(
-                    "Invalid uleb128 number (unexpected zero digit)"
-                )
-            return value, content
+        self.serialize_u32_as_uleb128(value)
 
-    raise st.DeserializationError("Overflow while parsing uleb128-encoded uint32 value")
-
-
-def _decode_length(content: bytes) -> typing.Tuple[int, bytes]:
-    value, content = _decode_uleb128_as_u32(content)
-    if value > MAX_LENGTH:
-        raise st.DeserializationError("Length exceeds the maximum supported value.")
-    return value, content
-
-
-def _decode_variant_index(content: bytes) -> typing.Tuple[int, bytes]:
-    return _decode_uleb128_as_u32(content)
+    def sort_map_entries(self, offsets: typing.List[int]):
+        if len(offsets) < 1:
+            return
+        buf = self.output.getbuffer()
+        offsets.append(len(buf))
+        slices = []
+        for i in range(1, len(offsets)):
+            slices.append(bytes(buf[offsets[i - 1] : offsets[i]]))
+        buf.release()
+        slices.sort()
+        self.output.seek(offsets[0])
+        for s in slices:
+            self.output.write(s)
+        assert offsets[-1] == len(self.output.getbuffer())
 
 
-def _check_that_key_slices_are_increasing(key1: bytes, key2: bytes):
-    if key1 >= key2:
-        raise st.DeserializationError(
-            "Serialized keys in a map must be ordered by increasing lexicographic order"
+class LcsDeserializer(sb.BinaryDeserializer):
+    def __init__(self, content):
+        super().__init__(
+            input=io.BytesIO(content), container_depth_budget=MAX_CONTAINER_DEPTH
         )
 
+    def deserialize_uleb128_as_u32(self) -> int:
+        value = 0
+        for shift in range(0, 32, 7):
+            byte = int.from_bytes(self.read(1), "little", signed=False)
+            digit = byte & 0x7F
+            value |= digit << shift
+            if value > MAX_U32:
+                raise st.DeserializationError(
+                    "Overflow while parsing uleb128-encoded uint32 value"
+                )
+            if digit == byte:
+                if shift > 0 and digit == 0:
+                    raise st.DeserializationError(
+                        "Invalid uleb128 number (unexpected zero digit)"
+                    )
+                return value
 
-_lcs_serialization_config = sb.SerializationConfig(
-    encode_length=_encode_length,
-    encode_variant_index=_encode_variant_index,
-    sort_map_entries=lambda entries: sorted(entries),
-    max_container_depth=MAX_CONTAINER_DEPTH,
-)
+        raise st.DeserializationError(
+            "Overflow while parsing uleb128-encoded uint32 value"
+        )
 
+    def deserialize_len(self) -> int:
+        value = self.deserialize_uleb128_as_u32()
+        if value > MAX_LENGTH:
+            raise st.DeserializationError("Length exceeds the maximum supported value.")
+        return value
 
-_lcs_deserialization_config = sb.DeserializationConfig(
-    decode_length=_decode_length,
-    decode_variant_index=_decode_variant_index,
-    check_that_key_slices_are_increasing=_check_that_key_slices_are_increasing,
-    max_container_depth=MAX_CONTAINER_DEPTH,
-)
+    def deserialize_variant_index(self) -> int:
+        return self.deserialize_uleb128_as_u32()
+
+    def check_that_key_slices_are_increasing(
+        self, slice1: typing.Tuple[int, int], slice2: typing.Tuple[int, int]
+    ):
+        key1 = bytes(self.input.getbuffer()[slice1[0] : slice1[1]])
+        key2 = bytes(self.input.getbuffer()[slice2[0] : slice2[1]])
+        if key1 >= key2:
+            raise st.DeserializationError(
+                "Serialized keys in a map must be ordered by increasing lexicographic order"
+            )
 
 
 def serialize(obj: typing.Any, obj_type) -> bytes:
-    return sb.serialize_with_config(copy(_lcs_serialization_config), obj, obj_type)
+    serializer = LcsSerializer()
+    serializer.serialize_any(obj, obj_type)
+    return serializer.get_buffer()
 
 
 def deserialize(content: bytes, obj_type) -> typing.Tuple[typing.Any, bytes]:
-    return sb.deserialize_with_config(
-        copy(_lcs_deserialization_config), content, obj_type
-    )
+    deserializer = LcsDeserializer(content)
+    value = deserializer.deserialize_any(obj_type)
+    return value, deserializer.get_remaining_buffer()
