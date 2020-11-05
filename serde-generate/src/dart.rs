@@ -75,7 +75,8 @@ impl<'a> CodeGenerator<'a> {
 dependencies:
   optional: '5.0.0'
   tuple: '1.0.3'  
-  json_serializable: '3.4.1'   
+  json_serializable: '3.4.1'
+  hex: ^0.1.2
 dev_dependencies:
   mockito: '>=4.0.0 <5.0.0'
   test: '>=0.12.0 <2.0.0'
@@ -100,6 +101,7 @@ dev_dependencies:
 import 'package:test/test.dart';
 import 'dart:typed_data';
 import 'dart:convert';
+import 'package:hex/hex.dart';
 import 'package:{0}/{0}/{0}.dart';
 import 'package:{0}/serde/serde.dart';"#,
             self.config.module_name
@@ -117,6 +119,7 @@ import 'package:{0}/serde/serde.dart';"#,
         writeln!(
             &mut out,
             r#"part 'src/serde_test.dart';
+part 'src/starcoin_json_test.dart';
 part 'src/starcoin_test.dart';"#
         )?;
         for encoding in &self.config.encodings {
@@ -127,6 +130,7 @@ part 'src/starcoin_test.dart';"#
             &mut out,
             r#"void main() {{
   group('Serde', runSerdeTests);
+  group('starcoin_json', runStarcoinJsonTests);
   group('starcoin', runStarcoinTests);"#,
         )?;
         for encoding in &self.config.encodings {
@@ -240,16 +244,28 @@ where
     fn to_json(&self, format: &Named<Format>) -> String {
         use Format::*;
         match &format.value {
-            TypeName(_) => format!("\"{0}\" : {0} ,", format.name),
+            TypeName(_) => format!("\"{0}\" : {0}.toJson() ,", format.name),
             Unit | Bool | I8 | I16 | I32 | I64 | I128 | U8 | U16 | U32 | U64 | U128 | F32 | F64 => {
                 format!("\"{0}\" : {0} ,", format.name)
             }
-            Char | Str => format!("\"{0}\" : '{0}' ,", format.name),
+            Char | Str => format!("\"{0}\" : {0} ,", format.name),
             Bytes | Variable(_) | Map { key: _, value: _ } => {
-                format!("\"{0}\" : {0} ,", format.name)
+                format!("\"{0}\" : {0}.toJson() ,", format.name)
             }
             Option(_) => format!("\"{0}\" : {0}.isEmpty?null:{0}.value ,", format.name),
-            Seq(_) => format!("\"{0}\" : {0} ,", format.name),
+            Seq(t) => {
+                if let TypeName(name) = t.borrow() {
+                    format!(
+                        "'{0}' : {0}.map((f) => f.toJson()).toList(),",
+                        format.name
+                    )
+                } else {
+                    format!(
+                        "'{0}' : {0},",
+                        format.name
+                    )
+                }
+            },
             Tuple(_) => format!("\"{0}\" : {0} ,", format.name),
             TupleArray {
                 content: _,
