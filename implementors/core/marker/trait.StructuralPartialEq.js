@@ -5,6 +5,7 @@ implementors["cc"] = [{"text":"impl StructuralPartialEq for VsVers","synthetic":
 implementors["clap"] = [{"text":"impl StructuralPartialEq for AppSettings","synthetic":false,"types":[]},{"text":"impl StructuralPartialEq for ArgSettings","synthetic":false,"types":[]},{"text":"impl StructuralPartialEq for ErrorKind","synthetic":false,"types":[]}];
 implementors["fixedbitset"] = [{"text":"impl StructuralPartialEq for FixedBitSet","synthetic":false,"types":[]}];
 implementors["glob"] = [{"text":"impl StructuralPartialEq for Pattern","synthetic":false,"types":[]},{"text":"impl StructuralPartialEq for MatchOptions","synthetic":false,"types":[]}];
+implementors["hashbrown"] = [{"text":"impl StructuralPartialEq for TryReserveError","synthetic":false,"types":[]}];
 implementors["include_dir"] = [{"text":"impl&lt;'a&gt; StructuralPartialEq for Dir&lt;'a&gt;","synthetic":false,"types":[]},{"text":"impl&lt;'a&gt; StructuralPartialEq for File&lt;'a&gt;","synthetic":false,"types":[]},{"text":"impl&lt;'a&gt; StructuralPartialEq for DirEntry&lt;'a&gt;","synthetic":false,"types":[]}];
 implementors["libra_canonical_serialization"] = [{"text":"impl StructuralPartialEq for Error","synthetic":false,"types":[]}];
 implementors["log"] = [{"text":"impl&lt;'a&gt; StructuralPartialEq for Metadata&lt;'a&gt;","synthetic":false,"types":[]},{"text":"impl&lt;'a&gt; StructuralPartialEq for MetadataBuilder&lt;'a&gt;","synthetic":false,"types":[]},{"text":"impl StructuralPartialEq for ParseLevelError","synthetic":false,"types":[]}];
