@@ -8,7 +8,7 @@
 //! '''
 
 use serde_generate::{
-    cpp, csharp, dart, golang, java, python3, rust, typescript, CodeGeneratorConfig, Encoding,
+    cpp, dart, golang, java, python3, rust, typescript, CodeGeneratorConfig, Encoding,
     SourceInstaller,
 };
 use serde_reflection::Registry;
@@ -163,6 +163,7 @@ fn main() {
                     Language::Go => {
                         Box::new(golang::Installer::new(install_dir, serde_package_name_opt))
                     }
+                    Language::Dart => Box::new(dart::Installer::new(install_dir)),
                     Language::TypeScript => Box::new(typescript::Installer::new(install_dir)),
                     Language::CSharp => Box::new(csharp::Installer::new(install_dir)),
                 };
