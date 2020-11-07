@@ -8,7 +8,8 @@
 //! '''
 
 use serde_generate::{
-    cpp, dart, golang, java, python3, rust,typescript, CodeGeneratorConfig, Encoding, SourceInstaller,
+    cpp, dart, golang, java, python3, rust, typescript, CodeGeneratorConfig, Encoding,
+    SourceInstaller,
 };
 use serde_reflection::Registry;
 use std::path::PathBuf;
@@ -150,7 +151,7 @@ fn main() {
                     Language::Java => Box::new(java::Installer::new(install_dir)),
                     Language::Go => {
                         Box::new(golang::Installer::new(install_dir, serde_package_name_opt))
-                    },
+                    }
                     Language::Dart => Box::new(dart::Installer::new(install_dir)),
                     Language::TypeScript => Box::new(typescript::Installer::new(install_dir)),
                 };

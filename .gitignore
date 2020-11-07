@@ -4,3 +4,4 @@ __pycache__
 .class
 .o
 .idea
+serde-generate/tests/starcoin.yaml
