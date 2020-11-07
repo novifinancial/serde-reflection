@@ -244,33 +244,27 @@ where
     fn to_json(&self, format: &Named<Format>) -> String {
         use Format::*;
         match &format.value {
-            TypeName(_) => format!("\"{0}\" : {0}.toJson() ,", format.name),
+            TypeName(_) => format!("\"{0}\" : {0}.toJson() ", format.name),
             Unit | Bool | I8 | I16 | I32 | I64 | I128 | U8 | U16 | U32 | U64 | U128 | F32 | F64 => {
-                format!("\"{0}\" : {0} ,", format.name)
+                format!("\"{0}\" : {0} ", format.name)
             }
-            Char | Str => format!("\"{0}\" : {0} ,", format.name),
+            Char | Str => format!("\"{0}\" : {0} ", format.name),
             Bytes | Variable(_) | Map { key: _, value: _ } => {
-                format!("\"{0}\" : {0}.toJson() ,", format.name)
+                format!("\"{0}\" : {0}.toJson() ", format.name)
             }
-            Option(_) => format!("\"{0}\" : {0}.isEmpty?null:{0}.value ,", format.name),
+            Option(_) => format!("\"{0}\" : {0}.isEmpty?null:{0}.value ", format.name),
             Seq(t) => {
-                if let TypeName(name) = t.borrow() {
-                    format!(
-                        "'{0}' : {0}.map((f) => f.toJson()).toList(),",
-                        format.name
-                    )
+                if let TypeName(_) = t.borrow() {
+                    format!("'{0}' : {0}.map((f) => f.toJson()).toList()", format.name)
                 } else {
-                    format!(
-                        "'{0}' : {0},",
-                        format.name
-                    )
+                    format!("'{0}' : {0}", format.name)
                 }
-            },
-            Tuple(_) => format!("\"{0}\" : {0} ,", format.name),
+            }
+            Tuple(_) => format!("\"{0}\" : {0} ", format.name),
             TupleArray {
                 content: _,
                 size: _,
-            } => format!("\"{0}\" : {0} ,", format.name),
+            } => format!("\"{0}\" : {0} ", format.name),
         }
     }
 
@@ -648,13 +642,17 @@ return obj;
     }
 
     fn output_container(&mut self, name: &str, format: &ContainerFormat) -> Result<()> {
+        let mut redefine = false;
         use ContainerFormat::*;
         let fields = match format {
             UnitStruct => Vec::new(),
-            NewTypeStruct(format) => vec![Named {
-                name: "value".to_string(),
-                value: format.as_ref().clone(),
-            }],
+            NewTypeStruct(format) => {
+                redefine = true;
+                vec![Named {
+                    name: "value".to_string(),
+                    value: format.as_ref().clone(),
+                }]
+            }
             TupleStruct(formats) => formats
                 .iter()
                 .enumerate()
@@ -669,7 +667,7 @@ return obj;
                 return Ok(());
             }
         };
-        self.output_struct_or_variant_container(None, None, name, &fields)
+        self.output_struct_or_variant_container(None, None, name, &fields, redefine)
     }
 
     fn output_struct_or_variant_container(
@@ -678,6 +676,7 @@ return obj;
         variant_index: Option<u32>,
         name: &str,
         fields: &[Named<Format>],
+        redefine: bool,
     ) -> Result<()> {
         // Beginning of class
         writeln!(self.out)?;
@@ -845,42 +844,49 @@ if (other == null) return false;"#,
 
         if fields_num > 0 {
             if variant_index.is_none() {
-                writeln!(
-                    self.out,
-                    "\n{0}.fromJson(Map<String, dynamic> json) :",
-                    name
-                )?;
+                writeln!(self.out, "\n{0}.fromJson(dynamic json) :", name)?;
             } else {
-                writeln!(self.out, "\n{}.loadJson(Map<String, dynamic> json) :", name,)?;
+                //enum
+                writeln!(self.out, "\n{}.loadJson(dynamic json) :", name,)?;
             }
             self.out.indent();
-            for (index, field) in fields.iter().enumerate() {
-                if index == fields_num - 1 {
-                    writeln!(self.out, "{} ;", self.from_json(field))?;
-                } else {
-                    writeln!(self.out, "{} ,", self.from_json(field))?;
+            if redefine {
+                writeln!(self.out, "{} = json ;", &fields[0].name,)?;
+            } else {
+                for (index, field) in fields.iter().enumerate() {
+                    if index == fields_num - 1 {
+                        writeln!(self.out, "{} ;", self.from_json(field))?;
+                    } else {
+                        writeln!(self.out, "{} ,", self.from_json(field))?;
+                    }
                 }
             }
             self.out.unindent();
         } else if variant_index.is_none() {
-            writeln!(self.out, "\n{0}.fromJson(Map<String, dynamic> json);", name)?;
+            writeln!(self.out, "\n{0}.fromJson(dynamic json);", name)?;
         } else {
-            writeln!(self.out, "\n{0}.loadJson(Map<String, dynamic> json);", name)?;
+            writeln!(self.out, "\n{0}.loadJson(dynamic json);", name)?; //enum
         }
 
-        writeln!(self.out, "\nMap<String, dynamic> toJson() => {{")?;
+        if !redefine {
+            writeln!(self.out, "\ndynamic toJson() => {{")?;
 
-        self.out.indent();
+            self.out.indent();
 
-        for (_, field) in fields.iter().enumerate() {
-            writeln!(self.out, "{}", self.to_json(field))?;
+            for (_, field) in fields.iter().enumerate() {
+                writeln!(self.out, "{},", self.to_json(field))?;
+            }
+            if let Some(index) = variant_index {
+                writeln!(self.out, "\"type\" : {}", index)?;
+            }
+            self.out.unindent();
+            writeln!(self.out, "}};")?;
+        } else {
+            if fields_num > 0 {
+                writeln!(self.out, "\ndynamic toJson() => {};", &fields[0].name)?;
+            }
         }
-        if let Some(index) = variant_index {
-            writeln!(self.out, "\"type\" : {}", index)?;
-        }
 
-        self.out.unindent();
-        writeln!(self.out, "}};")?;
         self.out.unindent();
         // End of class
         self.leave_class();
@@ -974,7 +980,7 @@ switch (index) {{"#,
             writeln!(
                 self.out,
                 r#"
-static {} fromJson(Map<String, dynamic> json){{
+static {} fromJson(dynamic json){{
   final type = json['type'] as int;
   switch (type) {{"#,
                 name,
@@ -998,7 +1004,7 @@ static {} fromJson(Map<String, dynamic> json){{
             self.out.unindent();
             writeln!(self.out, "}}")?;
 
-            writeln!(self.out, "\nMap<String, dynamic> toJson();",)?;
+            writeln!(self.out, "\ndynamic toJson();",)?;
         }
         self.out.unindent();
         self.out.unindent();
@@ -1051,7 +1057,7 @@ static {} fromJson(Map<String, dynamic> json){{
             Struct(fields) => fields.clone(),
             Variable(_) => panic!("incorrect value"),
         };
-        self.output_struct_or_variant_container(Some(base), Some(index), name, &fields)
+        self.output_struct_or_variant_container(Some(base), Some(index), name, &fields, false)
     }
 }
 

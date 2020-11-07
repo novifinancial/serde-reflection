@@ -8,7 +8,7 @@
 //! '''
 
 use serde_generate::{
-    cpp, dart, golang, java, python3, rust, CodeGeneratorConfig, Encoding, SourceInstaller,
+    cpp, dart, golang, java, python3, rust,typescript, CodeGeneratorConfig, Encoding, SourceInstaller,
 };
 use serde_reflection::Registry;
 use std::path::PathBuf;
@@ -23,6 +23,7 @@ enum Language {
     Java,
     Go,
     Dart,
+    TypeScript,
 }
 }
 
@@ -131,6 +132,9 @@ fn main() {
                         .unwrap(),
                     Language::Java => panic!("Code generation in Java requires `--install-dir`"),
                     Language::Dart => panic!("Code generation in Dart requires `--install-dir`"),
+                    Language::TypeScript => typescript::CodeGenerator::new(&config)
+                        .output(&mut out, &registry)
+                        .unwrap(),
                 }
             }
         }
@@ -146,8 +150,9 @@ fn main() {
                     Language::Java => Box::new(java::Installer::new(install_dir)),
                     Language::Go => {
                         Box::new(golang::Installer::new(install_dir, serde_package_name_opt))
-                    }
+                    },
                     Language::Dart => Box::new(dart::Installer::new(install_dir)),
+                    Language::TypeScript => Box::new(typescript::Installer::new(install_dir)),
                 };
 
             if let Some((registry, name)) = named_registry_opt {

@@ -15,10 +15,10 @@ class Int128 {
     return Int128(high, low);
   }
 
-  BigInt toBigInt(){
-    final result = BigInt.from(high);
-    result<< 64;
-    result+BigInt.from(low);
+  BigInt toBigInt() {
+    var result = BigInt.from(high);
+    result << 64;
+    result = result + BigInt.from(low);
     return result;
   }
 
@@ -40,13 +40,12 @@ class Int128 {
     return "$high$low";
   }
 
-  Int128.fromJson(Map<String, dynamic> json){
-    final num=json['value'] as BigInt;
+  Int128.fromJson(String json) {
+    final num = BigInt.parse(json);
     high = (num >> 64).toInt();
     low = (num & BigInt.from(0xFFFFFFFFFFFFFFFF)).toInt();
   }
 
-  Map<String, dynamic> toJson() => {
-    "value": this.toBigInt(),
-  };
+  String toJson() => this.toBigInt().toString();
+
 }
