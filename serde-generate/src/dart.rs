@@ -434,10 +434,7 @@ where
 
     fn needs_helper(format: &Format) -> bool {
         use Format::*;
-        match format {
-            Option(_) | Seq(_) | Map { .. } | Tuple(_) | TupleArray { .. } => true,
-            _ => false,
-        }
+        matches!(format, Option(_) | Seq(_) | Map { .. } | Tuple(_) | TupleArray { .. })
     }
 
     fn output_serialization_helper(&mut self, name: &str, format0: &Format) -> Result<()> {
