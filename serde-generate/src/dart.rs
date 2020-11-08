@@ -881,10 +881,8 @@ if (other == null) return false;"#,
             }
             self.out.unindent();
             writeln!(self.out, "}};")?;
-        } else {
-            if fields_num > 0 {
-                writeln!(self.out, "\ndynamic toJson() => {};", &fields[0].name)?;
-            }
+        } else if fields_num > 0 {
+            writeln!(self.out, "\ndynamic toJson() => {};", &fields[0].name)?;
         }
 
         self.out.unindent();
