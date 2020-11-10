@@ -35,9 +35,7 @@ fn create_test_dir(test_name: &'static str) -> (PathBuf, Option<tempfile::TempDi
             } else {
                 format!("{}_{}", test_name, tries)
             };
-            let dir = Path::new("tests")
-                .join(test_dir_name)
-                .to_path_buf();
+            let dir = Path::new("tests").join(test_dir_name).to_path_buf();
             match std::fs::create_dir(&dir) {
                 Ok(()) => return (dir, None),
                 Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => tries += 1,

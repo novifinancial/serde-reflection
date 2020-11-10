@@ -243,14 +243,8 @@ using AD.FunctionalExtensions;"
             Str => "string".into(),
             Bytes => "Bytes".into(),
 
-            Option(format) => format!(
-                "Option<{}>",
-                self.quote_type(format)
-            ),
-            Seq(format) => format!(
-                "List<{}>",
-                self.quote_type(format)
-            ),
+            Option(format) => format!("Option<{}>", self.quote_type(format)),
+            Seq(format) => format!("List<{}>", self.quote_type(format)),
             Map { key, value } => format!(
                 "Dictionary<{}, {}>",
                 self.quote_type(key),
@@ -635,11 +629,7 @@ return obj;
         writeln!(self.out)?;
         let fn_mods = if let Some(base) = variant_base {
             self.output_comment(name)?;
-            writeln!(
-                self.out,
-                "public sealed class {}: {} {{",
-                name, base
-            )?;
+            writeln!(self.out, "public sealed class {}: {} {{", name, base)?;
             "override "
         } else {
             self.output_comment(name)?;
@@ -714,8 +704,7 @@ return obj;
                 writeln!(
                     self.out,
                     "\npublic static {}{} Deserialize(IDeserializer deserializer) {{",
-                    fn_mods,
-                    name,
+                    fn_mods, name,
                 )?;
             } else {
                 writeln!(
@@ -794,8 +783,7 @@ if (GetType() != obj.GetType()) return false;
         writeln!(self.out, "return value;")?;
         self.out.unindent();
         writeln!(self.out, "}}")?;
-        if fields.len() > 0
-        {
+        if fields.len() > 0 {
             self.output_struct_or_variant_container_builder(name, fields)?;
         }
         // Custom code
@@ -1009,10 +997,7 @@ impl crate::SourceInstaller for Installer {
     }
 
     fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.install_runtime(
-            include_directory!("runtime/csharp/Serde"),
-            "Serde",
-        )
+        self.install_runtime(include_directory!("runtime/csharp/Serde"), "Serde")
     }
 
     fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error> {
@@ -1023,9 +1008,6 @@ impl crate::SourceInstaller for Installer {
     }
 
     fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.install_runtime(
-            include_directory!("runtime/csharp/Serde/Lcs"),
-            "Serde/Lcs",
-        )
+        self.install_runtime(include_directory!("runtime/csharp/Serde/Lcs"), "Serde/Lcs")
     }
 }

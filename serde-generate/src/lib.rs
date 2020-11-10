@@ -111,6 +111,8 @@
 pub mod analyzer;
 /// Support for code-generation in C++
 pub mod cpp;
+/// Support for code-generationin C3
+pub mod csharp;
 /// Utility function to generate indented text
 pub mod golang;
 /// Support for code-generation in Go
@@ -123,8 +125,6 @@ pub mod python3;
 pub mod rust;
 /// Support for code-generation in TypeScript/JavaScript
 pub mod typescript;
-/// Support for code-generationin C3
-pub mod csharp;
 
 #[doc(hidden)]
 /// Utility functions to help testing code generators.
