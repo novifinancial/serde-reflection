@@ -52,15 +52,19 @@ fn test_that_csharp_code_compiles_with_lcs() {
 
 #[test]
 fn test_that_csharp_code_compiles_with_bincode() {
-    let config =
-        CodeGeneratorConfig::new("Serde.Generated".to_string()).with_encodings(vec![Encoding::Bincode]);
+    let config = CodeGeneratorConfig::new("Serde.Generated".to_string())
+        .with_encodings(vec![Encoding::Bincode]);
     test_that_csharp_code_compiles_with_config(&config);
 }
 
 #[test]
 fn test_that_csharp_code_compiles_with_comments() {
     let comments = vec![(
-        vec!["Serde".to_string(), "Generated".to_string(), "SerdeData".to_string()],
+        vec![
+            "Serde".to_string(),
+            "Generated".to_string(),
+            "SerdeData".to_string(),
+        ],
         "Some\ncomments".to_string(),
     )]
     .into_iter()
@@ -80,8 +84,8 @@ fn test_csharp_code_with_external_definitions() {
     // (wrongly) Declare TraitHelpers as external.
     let mut definitions = BTreeMap::new();
     definitions.insert("foo".to_string(), vec!["TraitHelpers".to_string()]);
-    let config =
-        CodeGeneratorConfig::new("Serde.Generated".to_string()).with_external_definitions(definitions);
+    let config = CodeGeneratorConfig::new("Serde.Generated".to_string())
+        .with_external_definitions(definitions);
     let generator = csharp::CodeGenerator::new(&config);
 
     generator
