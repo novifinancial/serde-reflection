@@ -8,7 +8,8 @@
 //! '''
 
 use serde_generate::{
-    cpp, golang, java, python3, rust, typescript, CodeGeneratorConfig, Encoding, SourceInstaller,
+    cpp, csharp, golang, java, python3, rust, typescript, CodeGeneratorConfig, Encoding,
+    SourceInstaller,
 };
 use serde_reflection::Registry;
 use std::path::PathBuf;
@@ -23,6 +24,7 @@ enum Language {
     Java,
     Go,
     TypeScript,
+    CSharp,
 }
 }
 
@@ -133,6 +135,7 @@ fn main() {
                     Language::TypeScript => typescript::CodeGenerator::new(&config)
                         .output(&mut out, &registry)
                         .unwrap(),
+                    Language::CSharp => panic!("Code generation in C# requires `--install-dir`"),
                 }
             }
         }
@@ -150,6 +153,7 @@ fn main() {
                         Box::new(golang::Installer::new(install_dir, serde_package_name_opt))
                     }
                     Language::TypeScript => Box::new(typescript::Installer::new(install_dir)),
+                    Language::CSharp => Box::new(csharp::Installer::new(install_dir)),
                 };
 
             if let Some((registry, name)) = named_registry_opt {
