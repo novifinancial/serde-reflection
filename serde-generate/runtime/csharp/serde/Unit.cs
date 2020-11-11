@@ -1,5 +1,6 @@
 
-namespace Serde {
+namespace Serde
+{
     public sealed class Unit {
         public Unit() {}
 

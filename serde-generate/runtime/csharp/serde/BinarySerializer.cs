@@ -3,7 +3,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Numerics;
 using System.Text;
@@ -41,11 +40,17 @@ namespace Serde
 
         public abstract void sort_map_entries(int[] offsets);
 
+        public virtual void serialize_char(char value) => throw new NotImplementedException();
+
+        public virtual void serialize_f32(float value) => throw new NotImplementedException();
+
+        public virtual void serialize_f64(double value) => throw new NotImplementedException();
+
         public byte[] get_bytes() => buffer.ToArray();
 
-        public void serialize_str([NotNull] string value) => serialize_bytes(utf8.GetBytes(value));
+        public void serialize_str(string value) => serialize_bytes(utf8.GetBytes(value));
 
-        public void serialize_bytes(ReadOnlySpan<byte> value) {
+        public void serialize_bytes(byte[] value) {
             serialize_len(value.Length);
             output.Write(value);
         }
@@ -53,12 +58,6 @@ namespace Serde
         public void serialize_bool(bool value) => output.Write(value);
 
         public void serialize_unit(Unit value) {}
-
-        public void serialize_char(Rune value) => throw new NotImplementedException();
-
-        public void serialize_f32(float value) => throw new NotImplementedException();
-
-        public void serialize_f64(double value) => throw new NotImplementedException();
 
         public void serialize_u8(byte value) => output.Write(value);
 
@@ -70,9 +69,9 @@ namespace Serde
 
         public void serialize_u128(BigInteger value) {
             if (value >> 128 != 0) {
-                throw new ArgumentOutOfRangeException("Invalid value for an unsigned int128");
+                throw new SerializationException("Invalid value for an unsigned int128");
             }
-            byte[] content = value.ToByteArray(true);
+            byte[] content = value.ToByteArray();
             // BigInteger.ToByteArray() may add a 16th most-significant zero
             // byte for signing purpose: ignore it.
             Debug.Assert(content.Length <= 16 || content[0] == 0);
@@ -97,12 +96,12 @@ namespace Serde
         public void serialize_i128(BigInteger value) {
             if (value >= 0) {
                 if (value >> 127 != 0) {
-                    throw new ArgumentOutOfRangeException("Invalid value for a signed int128");
+                    throw new SerializationException("Invalid value for a signed int128");
                 }
                 serialize_u128(value);
             } else {
                 if ((-(value + 1)) >> 127 != 0) {
-                    throw new ArgumentOutOfRangeException("Invalid value for a signed int128");
+                    throw new SerializationException("Invalid value for a signed int128");
                 }
                 serialize_u128(value + (BigInteger.One << 128));
             }

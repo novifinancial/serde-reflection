@@ -1,9 +1,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-using System;
 using System.Numerics;
-using System.Text;
 
 namespace Serde
 {
@@ -16,7 +14,7 @@ namespace Serde
 
         Unit deserialize_unit();
 
-        Rune deserialize_char();
+        char deserialize_char();
 
         float deserialize_f32();
 

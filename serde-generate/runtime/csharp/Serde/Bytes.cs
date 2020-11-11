@@ -19,7 +19,7 @@ namespace Serde
 
         public int Count => array.Length;
 
-        public byte this[int index] => throw new NotImplementedException();
+        public byte this[int index] => array[index];
 
         public Bytes(byte[] data) { 
             array = data ?? throw new ArgumentNullException(nameof(data));
@@ -35,8 +35,6 @@ namespace Serde
 
         public bool Equals(Bytes other) => Enumerable.SequenceEqual(array, other.array);
 
-        public override int GetHashCode() => HashCode.Combine(array);
-
         public static bool operator ==(Bytes left, Bytes right) => Equals(left, right);
 
         public static bool operator !=(Bytes left, Bytes right) => !Equals(left, right);
@@ -44,5 +42,16 @@ namespace Serde
         public IEnumerator<byte> GetEnumerator() => ((IEnumerable<byte>)array).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => array.GetEnumerator();
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = 2000097706;
+                foreach (byte b in array)
+                    hashCode = hashCode * 31 + b.GetHashCode();
+                return hashCode;
+            }
+        }
     }
 }

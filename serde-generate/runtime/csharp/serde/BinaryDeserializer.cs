@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Numerics;
 using System.Text;
@@ -15,7 +14,7 @@ namespace Serde
         protected readonly Encoding utf8 = Encoding.GetEncoding("utf-8", new EncoderExceptionFallback(), new DecoderExceptionFallback());
         private long containerDepthBudget;
 
-        public BinaryDeserializer([NotNull] byte[] _input, long maxContainerDepth) {
+        public BinaryDeserializer(byte[] _input, long maxContainerDepth) {
             input = _input;
             reader = new BinaryReader(new MemoryStream(input));
             containerDepthBudget = maxContainerDepth;
@@ -28,6 +27,12 @@ namespace Serde
         public abstract long deserialize_len();
         public abstract int deserialize_variant_index();
         public abstract void check_that_key_slices_are_increasing(Range key1, Range key2);
+
+        public virtual char deserialize_char() => throw new NotImplementedException();
+
+        public virtual float deserialize_f32() => throw new NotImplementedException();
+
+        public virtual double deserialize_f64() => throw new NotImplementedException();
 
         public void increase_container_depth() {
             if (containerDepthBudget == 0) {
@@ -72,12 +77,6 @@ namespace Serde
         }
 
         public Unit deserialize_unit() => new Unit();
-
-        public virtual Rune deserialize_char() => throw new NotImplementedException();
-
-        public virtual float deserialize_f32() => throw new NotImplementedException();
-
-        public virtual double deserialize_f64() => throw new NotImplementedException();
 
         public byte deserialize_u8() => reader.ReadByte();
 

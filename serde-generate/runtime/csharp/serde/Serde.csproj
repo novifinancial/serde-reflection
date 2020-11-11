@@ -1,9 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-       <TargetFramework>netcoreapp3.1</TargetFramework>
+       <TargetFramework>netstandard1.6</TargetFramework>
+       <LangVersion>7.2</LangVersion>
     </PropertyGroup>
-
     <ItemGroup>
-        <PackageReference Include="AD.FunctionalExtensions" Version="2.1.0" />
+      <PackageReference Include="System.Memory" Version="4.5.4" />
+      <PackageReference Include="System.ValueTuple" Version="4.5.0" />
     </ItemGroup>
 </Project>
