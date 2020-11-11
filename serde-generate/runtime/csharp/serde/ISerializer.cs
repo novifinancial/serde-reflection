@@ -1,22 +1,20 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-using System;
 using System.Numerics;
-using System.Text;
 
 namespace Serde
 {
     public interface ISerializer {
         void serialize_str(string value);
 
-        void serialize_bytes(ReadOnlySpan<byte> value);
+        void serialize_bytes(byte[] value);
 
         void serialize_bool(bool value);
 
         void serialize_unit(Unit value);
 
-        void serialize_char(Rune value);
+        void serialize_char(char value);
 
         void serialize_f32(float value);
 

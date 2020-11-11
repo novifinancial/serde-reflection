@@ -1,13 +1,10 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-using System;
-using System.Diagnostics.CodeAnalysis;
-
 namespace Serde.Lcs
 {
     public class LcsDeserializer: BinaryDeserializer {
-        public LcsDeserializer([NotNull] byte[] input) : base(input, LcsSerializer.MAX_CONTAINER_DEPTH) { }
+        public LcsDeserializer(byte[] input) : base(input, LcsSerializer.MAX_CONTAINER_DEPTH) { }
 
         private int deserialize_uleb128_as_u32() {
             long value = 0;
@@ -33,7 +30,7 @@ namespace Serde.Lcs
         public override int deserialize_variant_index() => deserialize_uleb128_as_u32();
 
         public override void check_that_key_slices_are_increasing(Range key1, Range key2) {
-            if (Verification.CompareLexicographic(input[key1], input[key2]) >= 0) {
+            if (Verification.CompareLexicographic(input.Slice(key1), input.Slice(key2)) >= 0) {
                 throw new DeserializationException("Error while decoding map: keys are not serialized in the expected order");
             }
         }
