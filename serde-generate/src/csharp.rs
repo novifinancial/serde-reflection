@@ -636,7 +636,7 @@ return obj;
             writeln!(self.out, "public sealed class {} {{", name)?;
             ""
         };
-        let reserved_names = &["Builder"];
+        let reserved_names = &[];
         self.enter_class(name, reserved_names);
         // Fields
         for field in fields {
@@ -714,22 +714,19 @@ return obj;
                 )?;
             }
             self.out.indent();
-            if fields.len() > 0 {
-                writeln!(self.out, "deserializer.increase_container_depth();")?;
-                writeln!(self.out, "Builder builder = new Builder();")?;
-                for field in fields {
-                    writeln!(
-                        self.out,
-                        "builder.{} = {};",
-                        field.name,
-                        self.quote_deserialize(&field.value)
-                    )?;
-                }
-                writeln!(self.out, "deserializer.decrease_container_depth();")?;
-                writeln!(self.out, "return builder.Build();")?;
-            } else {
-                writeln!(self.out, "return new {}();", name)?;
-            }
+            writeln!(self.out, "deserializer.increase_container_depth();")?;
+            writeln!(
+                self.out,
+                "{0} obj = new {0}(\n\t{1});",
+                name,
+                fields
+                    .iter()
+                    .map(|f| self.quote_deserialize(&f.value))
+                    .collect::<Vec<_>>()
+                    .join(",\n\t")
+            )?;
+            writeln!(self.out, "deserializer.decrease_container_depth();")?;
+            writeln!(self.out, "return obj;")?;
             self.out.unindent();
             writeln!(self.out, "}}")?;
 
@@ -783,52 +780,6 @@ if (GetType() != obj.GetType()) return false;
         writeln!(self.out, "return value;")?;
         self.out.unindent();
         writeln!(self.out, "}}")?;
-        if fields.len() > 0 {
-            self.output_struct_or_variant_container_builder(name, fields)?;
-        }
-        // Custom code
-        self.output_custom_code()?;
-        // End of class
-        self.leave_class(reserved_names);
-        writeln!(self.out, "}}")
-    }
-
-    fn output_struct_or_variant_container_builder(
-        &mut self,
-        name: &str,
-        fields: &[Named<Format>],
-    ) -> Result<()> {
-        // Beginning of builder class
-        writeln!(self.out)?;
-        writeln!(self.out, "public class Builder {{")?;
-        let reserved_names = &[];
-        self.enter_class("Builder", reserved_names);
-        // Fields
-        for field in fields {
-            writeln!(
-                self.out,
-                "public {} {};",
-                self.quote_type(&field.value),
-                field.name
-            )?;
-        }
-        if !fields.is_empty() {
-            writeln!(self.out)?;
-        }
-        // Finalization
-        writeln!(
-            self.out,
-            r#"public {0} Build() {{
-    return new {0}({1}
-    );
-}}"#,
-            name,
-            fields
-                .iter()
-                .map(|f| format!("\n        {}", f.name))
-                .collect::<Vec<_>>()
-                .join(",")
-        )?;
         // Custom code
         self.output_custom_code()?;
         // End of class
