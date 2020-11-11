@@ -846,6 +846,69 @@ switch (index) {{"#,
         writeln!(self.out, "}}\n")
     }
 
+    fn output_cstyle_enum(
+        &mut self,
+        name: &str,
+        variants: &BTreeMap<u32, Named<VariantFormat>>,
+    ) -> Result<()> {
+        writeln!(self.out)?;
+        self.output_comment(name)?;
+        writeln!(self.out, "public enum {} {{", name)?;
+        self.out.indent();
+        for (index, variant) in variants {
+            writeln!(self.out, "{} = {},", variant.name.to_camel_case(), index)?;
+        }
+        self.out.unindent();
+        writeln!(self.out, "}}")?;
+
+        if self.generator.config.serialization {
+            let ext_name = format!("{}Extensions", name.to_camel_case());
+            writeln!(self.out, "public static class {} {{", ext_name)?;
+            self.enter_class(&ext_name, &[]);
+
+            writeln!(
+                self.out,
+                r#"
+public static void Serialize(this {0} enum, ISerializer serializer) {{
+    serializer.increase_container_depth();
+    serializer.serialize_variant_index((int)enum);
+    serializer.decrease_container_depth();
+}}
+
+public static {0} Deserialize(IDeserializer deserializer) {{
+    deserializer.increase_container_depth();
+    int index = deserializer.deserialize_variant_index();
+    if (!Enum.IsDefined<{0}>(index))
+        throw new DeserializationException("Unknown variant index for {}: " + index);
+    {0} enum = ({0})index;
+    deserializer.decrease_container_depth();
+    return enum;
+}}"#,
+                name
+            )?;
+
+            for encoding in &self.generator.config.encodings {
+                writeln!(
+                    self.out,
+                    r#"
+public static byte[] {0}Serialize(this {1} enum)  {{
+    ISerializer serializer = new {0}.{0}Serializer();
+    Serialize(enum, serializer);
+    return serializer.get_bytes();
+}}"#,
+                    encoding.name().to_camel_case(),
+                    name
+                )?;
+                self.output_class_deserialize_for_encoding(name, *encoding)?;
+            }
+
+            self.leave_class(&[]);
+            writeln!(self.out, "}}")?;
+        }
+
+        Ok(())
+    }
+
     fn output_class_serialize_for_encoding(&mut self, encoding: Encoding) -> Result<()> {
         writeln!(
             self.out,
@@ -901,7 +964,14 @@ public static {0} {1}Deserialize(byte[] input) {{
                 .collect::<Vec<_>>(),
             Struct(fields) => fields.clone(),
             Enum(variants) => {
-                self.output_enum_container(name, variants)?;
+                if variants
+                    .iter()
+                    .all(|(_i, v)| v.value == VariantFormat::Unit)
+                {
+                    self.output_cstyle_enum(name, variants)?;
+                } else {
+                    self.output_enum_container(name, variants)?;
+                }
                 return Ok(());
             }
         };
