@@ -451,7 +451,7 @@ serializer.sort_map_entries(offsets);
                     self.out,
                     r#"
 if (value.Length != {0}) {{
-    throw new ArgumentException("Invalid length for fixed-size array: " + value.Length + " instead of "+ {0});
+    throw new ArgumentException("Invalid length for fixed-size array: " + value.Length + " instead of " + {0});
 }}
 foreach (var item in value) {{
     {1}
@@ -485,9 +485,9 @@ foreach (var item in value) {{
                     r#"
 bool tag = deserializer.deserialize_option_tag();
 if (!tag) {{
-    return Option<{}>.None;
+    return Option<{0}>.None;
 }} else {{
-    return Option.Some({});
+    return Option<{0}>.Some({1});
 }}
 "#,
                     self.quote_type(format),
@@ -557,16 +557,27 @@ return ({}
             }
 
             TupleArray { content, size } => {
+                // Special case jagged arrays becuase the indexing order is backwards
+                let mut jags = String::new();
+                let mut cptr = content;
+                while let TupleArray { content, size: _ } = &**cptr {
+                    jags += "[]";
+                    cptr = content;
+                }
+                let base_type = cptr;
+
+
                 write!(
                     self.out,
                     r#"
-{0}[] obj = new {0}[{1}];
-for (int i = 0; i < {1}; i++) {{
-    obj[i] = {2};
-}}
-return obj;
-"#,
-                    self.quote_type(content),
+    {0}{1}[] obj = new {0}[{2}]{1};
+    for (int i = 0; i < {2}; i++) {{
+        obj[i] = {3};
+    }}
+    return obj;
+    "#,
+                    self.quote_type(base_type),
+                    jags,
                     size,
                     self.quote_deserialize(content)
                 )?;
@@ -868,20 +879,20 @@ switch (index) {{"#,
             writeln!(
                 self.out,
                 r#"
-public static void Serialize(this {0} enum, ISerializer serializer) {{
+public static void Serialize(this {0} value, ISerializer serializer) {{
     serializer.increase_container_depth();
-    serializer.serialize_variant_index((int)enum);
+    serializer.serialize_variant_index((int)value);
     serializer.decrease_container_depth();
 }}
 
 public static {0} Deserialize(IDeserializer deserializer) {{
     deserializer.increase_container_depth();
     int index = deserializer.deserialize_variant_index();
-    if (!Enum.IsDefined<{0}>(index))
+    if (!Enum.IsDefined(typeof({0}), index))
         throw new DeserializationException("Unknown variant index for {}: " + index);
-    {0} enum = ({0})index;
+    {0} value = ({0})index;
     deserializer.decrease_container_depth();
-    return enum;
+    return value;
 }}"#,
                 name
             )?;
@@ -890,9 +901,9 @@ public static {0} Deserialize(IDeserializer deserializer) {{
                 writeln!(
                     self.out,
                     r#"
-public static byte[] {0}Serialize(this {1} enum)  {{
+public static byte[] {0}Serialize(this {1} value)  {{
     ISerializer serializer = new {0}.{0}Serializer();
-    Serialize(enum, serializer);
+    Serialize(value, serializer);
     return serializer.get_bytes();
 }}"#,
                     encoding.name().to_camel_case(),
