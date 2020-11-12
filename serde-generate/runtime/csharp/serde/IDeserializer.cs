@@ -8,7 +8,7 @@ namespace Serde
     public interface IDeserializer {
         string deserialize_str();
 
-        Bytes deserialize_bytes();
+        byte[] deserialize_bytes();
 
         bool deserialize_bool();
 

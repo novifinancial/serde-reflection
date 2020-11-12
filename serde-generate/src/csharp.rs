@@ -263,7 +263,7 @@ using System.Numerics;"
             F64 => "double".into(),
             Char => "char".into(),
             Str => "string".into(),
-            Bytes => "Bytes".into(),
+            Bytes => "byte[]".into(),
 
             Option(format) => format!("Option<{}>", self.quote_type(format)),
             Seq(format) => format!("List<{}>", self.quote_type(format)),
@@ -558,7 +558,8 @@ for (long i = 0; i < length; i++) {{
     int key_end = deserializer.get_buffer_offset();
     if (i > 0) {{
         deserializer.check_that_key_slices_are_increasing(
-            previous_key_start..previous_key_end, key_start..key_end);
+            new Range(previous_key_start, previous_key_end),
+            new Range(key_start, key_end));
     }}
     previous_key_start = key_start;
     previous_key_end = key_end;
@@ -671,11 +672,11 @@ return obj;
         writeln!(self.out)?;
         let fn_mods = if let Some(base) = variant_base {
             self.output_comment(name)?;
-            writeln!(self.out, "public sealed class {}: {} {{", name, base)?;
+            writeln!(self.out, "public sealed class {0}: {1}, IEquatable<{0}> {{", name, base)?;
             "override "
         } else {
             self.output_comment(name)?;
-            writeln!(self.out, "public sealed class {} {{", name)?;
+            writeln!(self.out, "public sealed class {0}: IEquatable<{0}> {{", name)?;
             ""
         };
         let reserved_names = &[];
@@ -779,17 +780,14 @@ return obj;
             }
         }
         // Equality
-        write!(self.out, "\npublic override bool Equals(object obj) {{")?;
+        writeln!(self.out, "public override bool Equals(object obj) => obj is {} other && Equals(other);\n", name)?;
+        writeln!(self.out, "public static bool operator ==({0} left, {0} right) => Equals(left, right);\n", name)?;
+        writeln!(self.out, "public static bool operator !=({0} left, {0} right) => !Equals(left, right);\n", name)?;
+
+        writeln!(self.out, "public bool Equals({} other) {{", name)?;
         self.out.indent();
-        writeln!(
-            self.out,
-            r#"
-if (obj == null) return false;
-if (ReferenceEquals(this, obj)) return true;
-if (GetType() != obj.GetType()) return false;
-{0} other = ({0}) obj;"#,
-            name,
-        )?;
+        writeln!(self.out, "if (other == null) return false;")?;
+        writeln!(self.out, "if (ReferenceEquals(this, other)) return true;")?;
         for field in fields {
             if let Format::Seq(_) = field.value {
                 writeln!(
@@ -836,7 +834,7 @@ if (GetType() != obj.GetType()) return false;
     ) -> Result<()> {
         writeln!(self.out)?;
         self.output_comment(name)?;
-        writeln!(self.out, "public abstract class {} {{", name)?;
+        writeln!(self.out, "public abstract class {0}: IEquatable<{0}> {{", name)?;
         let reserved_names = variants
             .values()
             .map(|v| v.name.as_str())
@@ -869,7 +867,7 @@ switch (index) {{"#,
             }
             writeln!(
                 self.out,
-                "default: throw new DeserializationException(\"Unknown variant index for {}: \" + index);",
+                r#"default: throw new DeserializationException("Unknown variant index for {}: " + index);"#,
                 name,
             )?;
             self.out.unindent();
@@ -882,6 +880,33 @@ switch (index) {{"#,
                 self.output_class_deserialize_for_encoding(name, *encoding)?;
             }
         }
+
+        writeln!(self.out, "public override int GetHashCode() {{")?;
+        self.out.indent();
+        writeln!(self.out, "switch (this) {{")?;
+        for (_index, variant) in variants {
+            writeln!(self.out, "case {} x: return x.GetHashCode();", variant.name)?;
+        }
+        writeln!(self.out, r#"default: throw new InvalidOperationException("Unknown variant type");"#)?;
+        writeln!(self.out, "}}")?;
+        self.out.unindent();
+        writeln!(self.out, "}}")?;
+
+        writeln!(self.out, "public override bool Equals(object obj) => obj is {} other && Equals(other);\n", name)?;
+
+        writeln!(self.out, "public bool Equals({} other) {{", name)?;
+        self.out.indent();
+        writeln!(self.out, "if (other == null) return true;")?;
+        writeln!(self.out, "if (ReferenceEquals(this, other)) return true;")?;
+        writeln!(self.out, "if (GetType() != other.GetType()) return false;")?;
+        writeln!(self.out, "switch (this) {{")?;
+        for (_index, variant) in variants {
+            writeln!(self.out, "case {0} x: return x.Equals(({0})other);", variant.name)?;
+        }
+        writeln!(self.out, r#"default: throw new InvalidOperationException("Unknown variant type");"#)?;
+        writeln!(self.out, "}}")?;
+        self.out.unindent();
+        writeln!(self.out, "}}\n")?;
 
         self.output_variants(name, variants)?;
         self.leave_class(&reserved_names);

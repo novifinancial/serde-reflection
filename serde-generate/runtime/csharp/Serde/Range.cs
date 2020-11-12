@@ -35,5 +35,7 @@ namespace Serde
     {
         public static Span<T> Slice<T>(this T[] array, Range range) =>
             new Span<T>(array, range.Start, range.Length);
+        public static Span<T> Slice<T>(this ArraySegment<T> array, Range range) =>
+            new ArraySegment<T>(array.Array, array.Offset + range.Start, range.Length);
     }
 }

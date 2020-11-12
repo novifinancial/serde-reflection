@@ -1,11 +1,13 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+using System;
 
 namespace Serde.Bincode
 {
     public class BincodeDeserializer : BinaryDeserializer {
         public BincodeDeserializer(byte[] input) : base(input, long.MaxValue) { }
+        public BincodeDeserializer(ArraySegment<byte> input) : base(input, long.MaxValue) { }
 
         public override long deserialize_len() {
             long value = reader.ReadInt64();
