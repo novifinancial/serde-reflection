@@ -484,7 +484,7 @@ serializer.sort_map_entries(offsets);
                     self.out,
                     r#"
 if (value.Length != {0}) {{
-    throw new ArgumentException("Invalid length for fixed-size array: " + value.Length + " instead of " + {0});
+    throw new SerializationException("Invalid length for fixed-size array: " + value.Length + " instead of " + {0});
 }}
 foreach (var item in value) {{
     {1}
