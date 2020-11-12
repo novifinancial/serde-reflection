@@ -261,7 +261,7 @@ using System.Numerics;"
             U128 => "BigInteger".into(),
             F32 => "float".into(),
             F64 => "double".into(),
-            Char => "Rune".into(),
+            Char => "char".into(),
             Str => "string".into(),
             Bytes => "Bytes".into(),
 
