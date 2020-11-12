@@ -61,16 +61,6 @@ func (s *BinarySerializer) SerializeChar(value rune) error {
 	return errors.New("unimplemented")
 }
 
-// SerializeF32 is unimplemented
-func (s *BinarySerializer) SerializeF32(value float32) error {
-	return errors.New("unimplemented")
-}
-
-// SerializeF64 is unimplemented
-func (s *BinarySerializer) SerializeF64(value float64) error {
-	return errors.New("unimplemented")
-}
-
 func (s *BinarySerializer) SerializeU8(value uint8) error {
 	s.Buffer.WriteByte(byte(value))
 	return nil
