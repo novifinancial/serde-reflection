@@ -15,6 +15,14 @@ public class LcsSerializer extends BinarySerializer {
         super(MAX_CONTAINER_DEPTH);
     }
 
+    public void serialize_f32(Float value) throws SerializationError {
+        throw new SerializationError("Not implemented: serialize_f32");
+    }
+
+    public void serialize_f64(Double value) throws SerializationError {
+        throw new SerializationError("Not implemented: serialize_f64");
+    }
+
     private void serialize_u32_as_uleb128(int value) {
         while ((value >>> 7) != 0) {
             output.write((value & 0x7f) | 0x80);

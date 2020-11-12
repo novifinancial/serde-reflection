@@ -12,6 +12,14 @@ public class BincodeDeserializer extends BinaryDeserializer {
         super(input, Long.MAX_VALUE);
     }
 
+    public Float deserialize_f32() throws DeserializationError {
+        return Float.valueOf(getFloat());
+    }
+
+    public Double deserialize_f64() throws DeserializationError {
+        return Double.valueOf(getDouble());
+    }
+
     public long deserialize_len() throws DeserializationError {
         long value = getLong();
         if (value < 0 || value > Integer.MAX_VALUE) {
