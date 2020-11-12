@@ -37,6 +37,9 @@ struct CsharpEmitter<'a, T> {
     /// * We count multiplicities to allow inplace backtracking.
     /// * Names in the registry (and a few base types such as "Decimal") are assumed to never clash.
     current_reserved_names: HashMap<String, usize>,
+    /// When we find an enum with all Unit variants, we ser/de as a regular C# enum.
+    /// We keep track of this so we can use the enum's extension class for ser/de since enums can't have methods.
+    cstyle_enum_names: Vec<String>,
 }
 
 impl<'a> CodeGenerator<'a> {
@@ -76,11 +79,27 @@ impl<'a> CodeGenerator<'a> {
         }
         std::fs::create_dir_all(&dir_path)?;
 
+        // When we find an enum with all Unit variants, we ser/de as a regular C# enum.
+        // We keep track of this so we can use the enum's extension class for ser/de since enums can't have methods.
+        let mut cstyle_enum_names = Vec::new();
         for (name, format) in registry {
-            self.write_container_class(&dir_path, current_namespace.clone(), name, format)?;
+            if let ContainerFormat::Enum(variants) = format {
+                if variants.values().all(|f| f.value == VariantFormat::Unit) {
+                    cstyle_enum_names.push(name.clone());
+                }
+            }
+        }
+        for (name, format) in registry {
+            self.write_container_class(
+                &dir_path,
+                current_namespace.clone(),
+                cstyle_enum_names.clone(),
+                name,
+                format,
+            )?;
         }
         if self.config.serialization {
-            self.write_helper_class(&dir_path, current_namespace, registry)?;
+            self.write_helper_class(&dir_path, current_namespace, cstyle_enum_names, registry)?;
         }
         Ok(())
     }
@@ -89,6 +108,7 @@ impl<'a> CodeGenerator<'a> {
         &self,
         dir_path: &std::path::Path,
         current_namespace: Vec<String>,
+        cstyle_enum_names: Vec<String>,
         name: &str,
         format: &ContainerFormat,
     ) -> Result<()> {
@@ -98,6 +118,7 @@ impl<'a> CodeGenerator<'a> {
             generator: self,
             current_namespace,
             current_reserved_names: HashMap::new(),
+            cstyle_enum_names,
         };
 
         emitter.output_preamble()?;
@@ -112,6 +133,7 @@ impl<'a> CodeGenerator<'a> {
         &self,
         dir_path: &std::path::Path,
         current_namespace: Vec<String>,
+        cstyle_enum_names: Vec<String>,
         registry: &Registry,
     ) -> Result<()> {
         let mut file = std::fs::File::create(dir_path.join("TraitHelpers.cs"))?;
@@ -120,6 +142,7 @@ impl<'a> CodeGenerator<'a> {
             generator: self,
             current_namespace,
             current_reserved_names: HashMap::new(),
+            cstyle_enum_names,
         };
 
         emitter.output_preamble()?;
@@ -170,7 +193,7 @@ using System.Numerics;"
 
     /// Compute a safe reference to the registry type `name` in the given context.
     /// If `name` is not marked as "reserved" (e.g. "Builder"), we compare the global
-    /// name `self.qualified_names[name]` with the current namespace and try to use the
+    /// name `self.external_qualified_names[name]` with the current namespace and try to use the
     /// short string `name` if possible.
     fn quote_qualified_name(&self, name: &str) -> String {
         let qname = self
@@ -351,10 +374,20 @@ using System.Numerics;"
     fn quote_deserialize(&self, format: &Format) -> String {
         use Format::*;
         match format {
-            TypeName(name) => format!(
-                "{}.Deserialize(deserializer)",
-                self.quote_qualified_name(name)
-            ),
+            TypeName(name) => {
+                if self.cstyle_enum_names.contains(name) {
+                    let extensions_name = format!("{}Extensions", name.to_camel_case());
+                    format!(
+                        "{}.Deserialize(deserializer)",
+                        self.quote_qualified_name(&extensions_name)
+                    )
+                } else {
+                    format!(
+                        "{}.Deserialize(deserializer)",
+                        self.quote_qualified_name(name)
+                    )
+                }
+            }
             Unit => "deserializer.deserialize_unit()".to_string(),
             Bool => "deserializer.deserialize_bool()".to_string(),
             I8 => "deserializer.deserialize_i8()".to_string(),
@@ -565,7 +598,6 @@ return ({}
                     cptr = content;
                 }
                 let base_type = cptr;
-
 
                 write!(
                     self.out,
@@ -866,7 +898,7 @@ switch (index) {{"#,
         writeln!(self.out, "public enum {} {{", name)?;
         self.out.indent();
         for (index, variant) in variants {
-            writeln!(self.out, "{} = {},", variant.name.to_camel_case(), index)?;
+            writeln!(self.out, "{} = {},", variant.name, index)?;
         }
         self.out.unindent();
         writeln!(self.out, "}}")?;
