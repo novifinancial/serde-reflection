@@ -980,6 +980,14 @@ public static byte[] {0}Serialize(this {1} value)  {{
         writeln!(
             self.out,
             r#"
+public int {0}Serialize(byte[] outputBuffer) => {0}Serialize(new ArraySegment<byte>(outputBuffer));
+
+public int {0}Serialize(ArraySegment<byte> outputBuffer) {{
+    ISerializer serializer = new {0}.{0}Serializer(outputBuffer);
+    Serialize(serializer);
+    return serializer.get_buffer_offset();
+}}
+
 public byte[] {0}Serialize()  {{
     ISerializer serializer = new {0}.{0}Serializer();
     Serialize(serializer);
@@ -997,13 +1005,15 @@ public byte[] {0}Serialize()  {{
         writeln!(
             self.out,
             r#"
-public static {0} {1}Deserialize(byte[] input) {{
+public static {0} {1}Deserialize(byte[] input) => {1}Deserialize(new ArraySegment<byte>(input));
+
+public static {0} {1}Deserialize(ArraySegment<byte> input) {{
     if (input == null) {{
          throw new DeserializationException("Cannot deserialize null array");
     }}
     IDeserializer deserializer = new {1}.{1}Deserializer(input);
     {0} value = Deserialize(deserializer);
-    if (deserializer.get_buffer_offset() < input.Length) {{
+    if (deserializer.get_buffer_offset() < input.Count) {{
          throw new DeserializationException("Some input bytes were not read");
     }}
     return value;
