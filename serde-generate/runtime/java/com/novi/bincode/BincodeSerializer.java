@@ -11,6 +11,14 @@ public class BincodeSerializer extends BinarySerializer {
         super(Long.MAX_VALUE);
     }
 
+    public void serialize_f32(Float value) throws SerializationError {
+        serialize_i32(Integer.valueOf(Float.floatToRawIntBits(value.floatValue())));
+    }
+
+    public void serialize_f64(Double value) throws SerializationError {
+        serialize_i64(Long.valueOf(Double.doubleToRawLongBits(value.doubleValue())));
+    }
+
     public void serialize_len(long value) throws SerializationError {
         serialize_u64(value);
     }

@@ -12,6 +12,14 @@ public class LcsDeserializer extends BinaryDeserializer {
         super(input, LcsSerializer.MAX_CONTAINER_DEPTH);
     }
 
+    public Float deserialize_f32() throws DeserializationError {
+        throw new DeserializationError("Not implemented: deserialize_f32");
+    }
+
+    public Double deserialize_f64() throws DeserializationError {
+        throw new DeserializationError("Not implemented: deserialize_f64");
+    }
+
     private int deserialize_uleb128_as_u32() throws DeserializationError {
         long value = 0;
         for (int shift = 0; shift < 32; shift += 7) {

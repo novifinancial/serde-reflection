@@ -46,14 +46,6 @@ public abstract class BinarySerializer implements Serializer {
         throw new SerializationError("Not implemented: serialize_char");
     }
 
-    public void serialize_f32(Float value) throws SerializationError {
-        throw new SerializationError("Not implemented: serialize_f32");
-    }
-
-    public void serialize_f64(Double value) throws SerializationError {
-        throw new SerializationError("Not implemented: serialize_f64");
-    }
-
     public void serialize_u8(@Unsigned Byte value) throws SerializationError {
         output.write(value.byteValue());
     }
