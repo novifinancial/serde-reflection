@@ -602,12 +602,12 @@ return ({}
                 write!(
                     self.out,
                     r#"
-    {0}{1}[] obj = new {0}[{2}]{1};
-    for (int i = 0; i < {2}; i++) {{
-        obj[i] = {3};
-    }}
-    return obj;
-    "#,
+{0}{1}[] obj = new {0}[{2}]{1};
+for (int i = 0; i < {2}; i++) {{
+    obj[i] = {3};
+}}
+return obj;
+"#,
                     self.quote_type(base_type),
                     jags,
                     size,
