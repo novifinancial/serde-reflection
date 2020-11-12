@@ -9,14 +9,16 @@ using System.Text;
 namespace Serde
 {
     public abstract class BinaryDeserializer: IDeserializer, IDisposable {
-        protected readonly byte[] input;
+        protected readonly ArraySegment<byte> input;
         protected readonly BinaryReader reader;
         protected readonly Encoding utf8 = Encoding.GetEncoding("utf-8", new EncoderExceptionFallback(), new DecoderExceptionFallback());
         private long containerDepthBudget;
 
-        public BinaryDeserializer(byte[] _input, long maxContainerDepth) {
+        public BinaryDeserializer(byte[] _input, long maxContainerDepth) : this(new ArraySegment<byte>(_input), maxContainerDepth) { }
+
+        public BinaryDeserializer(ArraySegment<byte> _input, long maxContainerDepth) {
             input = _input;
-            reader = new BinaryReader(new MemoryStream(input));
+            reader = new BinaryReader(new MemoryStream(input.Array, input.Offset, input.Count));
             containerDepthBudget = maxContainerDepth;
         }
 
@@ -56,7 +58,7 @@ namespace Serde
             return utf8.GetString(content);
         }
 
-        public Bytes deserialize_bytes() {
+        public byte[] deserialize_bytes() {
             long len = deserialize_len();
             if (len < 0 || len > int.MaxValue) {
                 throw new DeserializationException("Incorrect length value for C# array");
@@ -64,7 +66,7 @@ namespace Serde
             byte[] content = reader.ReadBytes((int)len);
             if (content.Length < len)
                 throw new DeserializationException($"Need {len - content.Length} more bytes for byte array");
-            return new Bytes(content);
+            return content;
         }
 
         public bool deserialize_bool() {

@@ -11,6 +11,9 @@ namespace Serde.Lcs
         public const long MAX_CONTAINER_DEPTH = 500;
 
         public LcsSerializer() : base(MAX_CONTAINER_DEPTH) {}
+        public LcsSerializer(byte[] buffer) : base(buffer, MAX_CONTAINER_DEPTH) {}
+        public LcsSerializer(ArraySegment<byte> buffer) : base(buffer, MAX_CONTAINER_DEPTH) {}
+
 
         private void serialize_u32_as_uleb128(uint value) {
             while ((value >> 7) != 0) {

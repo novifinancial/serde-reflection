@@ -21,6 +21,14 @@ namespace Serde
             containerDepthBudget = maxContainerDepth;
         }
 
+        public BinarySerializer(byte[] bufferArray, long maxContainerDepth) : this(new ArraySegment<byte>(bufferArray), maxContainerDepth) {}
+
+        public BinarySerializer(ArraySegment<byte> bufferArray, long maxContainerDepth) {
+            buffer = new MemoryStream(bufferArray.Array, bufferArray.Offset, bufferArray.Count);
+            output = new BinaryWriter(buffer);
+            containerDepthBudget = maxContainerDepth;
+        }
+
         public void Dispose() => output.Dispose();
 
         public void increase_container_depth() {

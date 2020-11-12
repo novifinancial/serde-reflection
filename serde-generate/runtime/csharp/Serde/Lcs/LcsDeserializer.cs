@@ -1,10 +1,13 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+using System;
+
 namespace Serde.Lcs
 {
     public class LcsDeserializer: BinaryDeserializer {
         public LcsDeserializer(byte[] input) : base(input, LcsSerializer.MAX_CONTAINER_DEPTH) { }
+        public LcsDeserializer(ArraySegment<byte> input) : base(input, LcsSerializer.MAX_CONTAINER_DEPTH) { }
 
         private int deserialize_uleb128_as_u32() {
             long value = 0;
