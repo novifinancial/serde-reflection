@@ -22,6 +22,16 @@ func NewDeserializer(input []byte) serde.Deserializer {
 	return &deserializer{*serde.NewBinaryDeserializer(input, math.MaxUint64)}
 }
 
+func (d *deserializer) DeserializeF32() (float32, error) {
+	ret, err := d.DeserializeU32()
+	return math.Float32frombits(ret), err
+}
+
+func (d *deserializer) DeserializeF64() (float64, error) {
+	ret, err := d.DeserializeU64()
+	return math.Float64frombits(ret), err
+}
+
 func (d *deserializer) DeserializeBytes() ([]byte, error) {
 	return d.BinaryDeserializer.DeserializeBytes(d.DeserializeLen)
 }

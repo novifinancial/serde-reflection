@@ -88,16 +88,6 @@ func (d *BinaryDeserializer) DeserializeChar() (rune, error) {
 	return 0, errors.New("unimplemented")
 }
 
-// DeserializeF32 is unimplemented.
-func (d *BinaryDeserializer) DeserializeF32() (float32, error) {
-	return 0, errors.New("unimplemented")
-}
-
-// DeserializeF64 is unimplemented.
-func (d *BinaryDeserializer) DeserializeF64() (float64, error) {
-	return 0, errors.New("unimplemented")
-}
-
 func (d *BinaryDeserializer) DeserializeU8() (uint8, error) {
 	ret, err := d.Buffer.ReadByte()
 	return uint8(ret), err

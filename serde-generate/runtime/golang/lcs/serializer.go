@@ -20,6 +20,16 @@ func NewSerializer() serde.Serializer {
 	return &serializer{*serde.NewBinarySerializer(MaxContainerDepth)}
 }
 
+// SerializeF32 is unimplemented
+func (s *serializer) SerializeF32(value float32) error {
+	return errors.New("unimplemented")
+}
+
+// SerializeF64 is unimplemented
+func (s *serializer) SerializeF64(value float64) error {
+	return errors.New("unimplemented")
+}
+
 func (s *serializer) SerializeStr(value string) error {
 	return s.BinarySerializer.SerializeStr(value, s.SerializeLen)
 }
