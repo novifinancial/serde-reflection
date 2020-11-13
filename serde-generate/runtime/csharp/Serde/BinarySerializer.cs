@@ -54,11 +54,11 @@ namespace Serde
 
         public abstract void sort_map_entries(int[] offsets);
 
-        public virtual void serialize_char(char value) => throw new NotImplementedException();
+        public void serialize_char(char value) => throw new SerializationException("Not implemented: char serialization");
 
-        public virtual void serialize_f32(float value) => throw new NotImplementedException();
+        public void serialize_f32(float value) => output.Write(value);
 
-        public virtual void serialize_f64(double value) => throw new NotImplementedException();
+        public void serialize_f64(double value) => output.Write(value);
 
         public byte[] get_bytes() => buffer.ToArray();
 
