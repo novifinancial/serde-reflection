@@ -315,6 +315,7 @@ dependencies = [
  "include_dir",
  "libra-canonical-serialization",
  "maplit",
+ "rand",
  "serde",
  "serde-reflection",
  "serde_bytes",

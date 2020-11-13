@@ -809,7 +809,9 @@ return obj;
         // Hashing
         writeln!(self.out, "\npublic override int GetHashCode() {{")?;
         self.out.indent();
-        writeln!(self.out, "int value = 7;",)?;
+        writeln!(self.out, "unchecked {{")?;
+        self.out.indent();
+        writeln!(self.out, "int value = {};", rand::random::<i32>())?;
         for field in fields {
             writeln!(
                 self.out,
@@ -818,6 +820,8 @@ return obj;
             )?;
         }
         writeln!(self.out, "return value;")?;
+        self.out.unindent();
+        writeln!(self.out, "}}")?;
         self.out.unindent();
         writeln!(self.out, "}}")?;
         // Custom code
