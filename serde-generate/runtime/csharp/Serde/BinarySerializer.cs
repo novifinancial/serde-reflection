@@ -9,21 +9,24 @@ using System.Text;
 
 namespace Serde
 {
-    public abstract class BinarySerializer: ISerializer, IDisposable {
+    public abstract class BinarySerializer : ISerializer, IDisposable
+    {
         protected readonly MemoryStream buffer;
         protected readonly BinaryWriter output;
         protected readonly Encoding utf8 = Encoding.GetEncoding("utf-8", new EncoderExceptionFallback(), new DecoderExceptionFallback());
         private long containerDepthBudget;
 
-        public BinarySerializer(long maxContainerDepth) {
+        public BinarySerializer(long maxContainerDepth)
+        {
             buffer = new MemoryStream();
             output = new BinaryWriter(buffer);
             containerDepthBudget = maxContainerDepth;
         }
 
-        public BinarySerializer(byte[] bufferArray, long maxContainerDepth) : this(new ArraySegment<byte>(bufferArray), maxContainerDepth) {}
+        public BinarySerializer(byte[] bufferArray, long maxContainerDepth) : this(new ArraySegment<byte>(bufferArray), maxContainerDepth) { }
 
-        public BinarySerializer(ArraySegment<byte> bufferArray, long maxContainerDepth) {
+        public BinarySerializer(ArraySegment<byte> bufferArray, long maxContainerDepth)
+        {
             buffer = new MemoryStream(bufferArray.Array, bufferArray.Offset, bufferArray.Count);
             output = new BinaryWriter(buffer);
             containerDepthBudget = maxContainerDepth;
@@ -31,14 +34,17 @@ namespace Serde
 
         public void Dispose() => output.Dispose();
 
-        public void increase_container_depth() {
-            if (containerDepthBudget == 0) {
+        public void increase_container_depth()
+        {
+            if (containerDepthBudget == 0)
+            {
                 throw new SerializationException("Exceeded maximum container depth");
             }
             containerDepthBudget -= 1;
         }
 
-        public void decrease_container_depth() {
+        public void decrease_container_depth()
+        {
             containerDepthBudget += 1;
         }
 
@@ -58,14 +64,15 @@ namespace Serde
 
         public void serialize_str(string value) => serialize_bytes(utf8.GetBytes(value));
 
-        public void serialize_bytes(byte[] value) {
+        public void serialize_bytes(byte[] value)
+        {
             serialize_len(value.Length);
             output.Write(value);
         }
 
         public void serialize_bool(bool value) => output.Write(value);
 
-        public void serialize_unit(Unit value) {}
+        public void serialize_unit(Unit value) { }
 
         public void serialize_u8(byte value) => output.Write(value);
 
@@ -75,8 +82,10 @@ namespace Serde
 
         public void serialize_u64(ulong value) => output.Write(value);
 
-        public void serialize_u128(BigInteger value) {
-            if (value >> 128 != 0) {
+        public void serialize_u128(BigInteger value)
+        {
+            if (value >> 128 != 0)
+            {
                 throw new SerializationException("Invalid value for an unsigned int128");
             }
             byte[] content = value.ToByteArray();
@@ -88,7 +97,8 @@ namespace Serde
             output.Write(content);
 
             // Complete with zeros if needed.
-            for (int i = len; i < 16; i++) {
+            for (int i = len; i < 16; i++)
+            {
                 output.Write((byte)0);
             }
         }
@@ -101,14 +111,20 @@ namespace Serde
 
         public void serialize_i64(long value) => output.Write(value);
 
-        public void serialize_i128(BigInteger value) {
-            if (value >= 0) {
-                if (value >> 127 != 0) {
+        public void serialize_i128(BigInteger value)
+        {
+            if (value >= 0)
+            {
+                if (value >> 127 != 0)
+                {
                     throw new SerializationException("Invalid value for a signed int128");
                 }
                 serialize_u128(value);
-            } else {
-                if ((-(value + 1)) >> 127 != 0) {
+            }
+            else
+            {
+                if ((-(value + 1)) >> 127 != 0)
+                {
                     throw new SerializationException("Invalid value for a signed int128");
                 }
                 serialize_u128(value + (BigInteger.One << 128));

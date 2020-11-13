@@ -1,8 +1,9 @@
 
 namespace Serde
 {
-    public sealed class Unit {
-        public Unit() {}
+    public sealed class Unit
+    {
+        public Unit() { }
 
         public override bool Equals(object obj)
         {
@@ -10,7 +11,7 @@ namespace Serde
                 return false;
             return true;
         }
-        
+
         public override int GetHashCode() => 7;
     }
 }

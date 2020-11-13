@@ -5,7 +5,8 @@ using System.Numerics;
 
 namespace Serde
 {
-    public interface ISerializer {
+    public interface ISerializer
+    {
         void serialize_str(string value);
 
         void serialize_bytes(byte[] value);
