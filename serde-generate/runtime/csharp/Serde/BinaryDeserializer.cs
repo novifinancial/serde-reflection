@@ -32,11 +32,11 @@ namespace Serde
         public abstract int deserialize_variant_index();
         public abstract void check_that_key_slices_are_increasing(Range key1, Range key2);
 
-        public virtual char deserialize_char() => throw new NotImplementedException();
+        public char deserialize_char() => throw new DeserializationException("Not implemented: char deserialization");
 
-        public virtual float deserialize_f32() => throw new NotImplementedException();
+        public float deserialize_f32() => reader.ReadSingle();
 
-        public virtual double deserialize_f64() => throw new NotImplementedException();
+        public double deserialize_f64() => reader.ReadDouble();
 
         public void increase_container_depth()
         {
