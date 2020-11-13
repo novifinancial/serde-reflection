@@ -913,7 +913,7 @@ switch (index) {{"#,
         writeln!(self.out, "public override int GetHashCode() {{")?;
         self.out.indent();
         writeln!(self.out, "switch (this) {{")?;
-        for (_index, variant) in variants {
+        for variant in variants.values() {
             writeln!(self.out, "case {} x: return x.GetHashCode();", variant.name)?;
         }
         writeln!(
@@ -936,7 +936,7 @@ switch (index) {{"#,
         writeln!(self.out, "if (ReferenceEquals(this, other)) return true;")?;
         writeln!(self.out, "if (GetType() != other.GetType()) return false;")?;
         writeln!(self.out, "switch (this) {{")?;
-        for (_index, variant) in variants {
+        for variant in variants.values() {
             writeln!(
                 self.out,
                 "case {0} x: return x.Equals(({0})other);",
