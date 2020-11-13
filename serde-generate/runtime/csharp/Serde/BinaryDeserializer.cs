@@ -8,7 +8,8 @@ using System.Text;
 
 namespace Serde
 {
-    public abstract class BinaryDeserializer: IDeserializer, IDisposable {
+    public abstract class BinaryDeserializer : IDeserializer, IDisposable
+    {
         protected readonly ArraySegment<byte> input;
         protected readonly BinaryReader reader;
         protected readonly Encoding utf8 = Encoding.GetEncoding("utf-8", new EncoderExceptionFallback(), new DecoderExceptionFallback());
@@ -16,7 +17,8 @@ namespace Serde
 
         public BinaryDeserializer(byte[] _input, long maxContainerDepth) : this(new ArraySegment<byte>(_input), maxContainerDepth) { }
 
-        public BinaryDeserializer(ArraySegment<byte> _input, long maxContainerDepth) {
+        public BinaryDeserializer(ArraySegment<byte> _input, long maxContainerDepth)
+        {
             input = _input;
             reader = new BinaryReader(new MemoryStream(input.Array, input.Offset, input.Count));
             containerDepthBudget = maxContainerDepth;
@@ -36,20 +38,25 @@ namespace Serde
 
         public virtual double deserialize_f64() => throw new NotImplementedException();
 
-        public void increase_container_depth() {
-            if (containerDepthBudget == 0) {
+        public void increase_container_depth()
+        {
+            if (containerDepthBudget == 0)
+            {
                 throw new DeserializationException("Exceeded maximum container depth");
             }
             containerDepthBudget -= 1;
         }
 
-        public void decrease_container_depth() {
+        public void decrease_container_depth()
+        {
             containerDepthBudget += 1;
         }
 
-        public string deserialize_str() {
+        public string deserialize_str()
+        {
             long len = deserialize_len();
-            if (len < 0 || len > int.MaxValue) {
+            if (len < 0 || len > int.MaxValue)
+            {
                 throw new DeserializationException("Incorrect length value for C# string");
             }
             byte[] content = reader.ReadBytes((int)len);
@@ -58,9 +65,11 @@ namespace Serde
             return utf8.GetString(content);
         }
 
-        public byte[] deserialize_bytes() {
+        public byte[] deserialize_bytes()
+        {
             long len = deserialize_len();
-            if (len < 0 || len > int.MaxValue) {
+            if (len < 0 || len > int.MaxValue)
+            {
                 throw new DeserializationException("Incorrect length value for C# array");
             }
             byte[] content = reader.ReadBytes((int)len);
@@ -69,12 +78,14 @@ namespace Serde
             return content;
         }
 
-        public bool deserialize_bool() {
+        public bool deserialize_bool()
+        {
             byte value = reader.ReadByte();
-            switch (value) {
-            case 0: return false;
-            case 1: return true;
-            default: throw new DeserializationException("Incorrect value for bool: " + value);
+            switch (value)
+            {
+                case 0: return false;
+                case 1: return true;
+                default: throw new DeserializationException("Incorrect value for bool: " + value);
             }
         }
 
@@ -88,11 +99,15 @@ namespace Serde
 
         public ulong deserialize_u64() => reader.ReadUInt64();
 
-        public BigInteger deserialize_u128() {
+        public BigInteger deserialize_u128()
+        {
             BigInteger signed = deserialize_i128();
-            if (signed >= 0) {
+            if (signed >= 0)
+            {
                 return signed;
-            } else {
+            }
+            else
+            {
                 return signed + (BigInteger.One << 128);
             }
         }
@@ -118,9 +133,9 @@ namespace Serde
             byte value = reader.ReadByte();
             switch (value)
             {
-            case 0: return false;
-            case 1: return true;
-            default: throw new DeserializationException("Incorrect value for Option tag: " + value);
+                case 0: return false;
+                case 1: return true;
+                default: throw new DeserializationException("Incorrect value for Option tag: " + value);
             }
         }
     }
