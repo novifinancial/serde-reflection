@@ -672,11 +672,19 @@ return obj;
         writeln!(self.out)?;
         let fn_mods = if let Some(base) = variant_base {
             self.output_comment(name)?;
-            writeln!(self.out, "public sealed class {0}: {1}, IEquatable<{0}> {{", name, base)?;
+            writeln!(
+                self.out,
+                "public sealed class {0}: {1}, IEquatable<{0}> {{",
+                name, base
+            )?;
             "override "
         } else {
             self.output_comment(name)?;
-            writeln!(self.out, "public sealed class {0}: IEquatable<{0}> {{", name)?;
+            writeln!(
+                self.out,
+                "public sealed class {0}: IEquatable<{0}> {{",
+                name
+            )?;
             ""
         };
         let reserved_names = &[];
@@ -780,9 +788,21 @@ return obj;
             }
         }
         // Equality
-        writeln!(self.out, "public override bool Equals(object obj) => obj is {} other && Equals(other);\n", name)?;
-        writeln!(self.out, "public static bool operator ==({0} left, {0} right) => Equals(left, right);\n", name)?;
-        writeln!(self.out, "public static bool operator !=({0} left, {0} right) => !Equals(left, right);\n", name)?;
+        writeln!(
+            self.out,
+            "public override bool Equals(object obj) => obj is {} other && Equals(other);\n",
+            name
+        )?;
+        writeln!(
+            self.out,
+            "public static bool operator ==({0} left, {0} right) => Equals(left, right);\n",
+            name
+        )?;
+        writeln!(
+            self.out,
+            "public static bool operator !=({0} left, {0} right) => !Equals(left, right);\n",
+            name
+        )?;
 
         writeln!(self.out, "public bool Equals({} other) {{", name)?;
         self.out.indent();
@@ -838,7 +858,11 @@ return obj;
     ) -> Result<()> {
         writeln!(self.out)?;
         self.output_comment(name)?;
-        writeln!(self.out, "public abstract class {0}: IEquatable<{0}> {{", name)?;
+        writeln!(
+            self.out,
+            "public abstract class {0}: IEquatable<{0}> {{",
+            name
+        )?;
         let reserved_names = variants
             .values()
             .map(|v| v.name.as_str())
@@ -891,12 +915,19 @@ switch (index) {{"#,
         for (_index, variant) in variants {
             writeln!(self.out, "case {} x: return x.GetHashCode();", variant.name)?;
         }
-        writeln!(self.out, r#"default: throw new InvalidOperationException("Unknown variant type");"#)?;
+        writeln!(
+            self.out,
+            r#"default: throw new InvalidOperationException("Unknown variant type");"#
+        )?;
         writeln!(self.out, "}}")?;
         self.out.unindent();
         writeln!(self.out, "}}")?;
 
-        writeln!(self.out, "public override bool Equals(object obj) => obj is {} other && Equals(other);\n", name)?;
+        writeln!(
+            self.out,
+            "public override bool Equals(object obj) => obj is {} other && Equals(other);\n",
+            name
+        )?;
 
         writeln!(self.out, "public bool Equals({} other) {{", name)?;
         self.out.indent();
@@ -905,9 +936,16 @@ switch (index) {{"#,
         writeln!(self.out, "if (GetType() != other.GetType()) return false;")?;
         writeln!(self.out, "switch (this) {{")?;
         for (_index, variant) in variants {
-            writeln!(self.out, "case {0} x: return x.Equals(({0})other);", variant.name)?;
+            writeln!(
+                self.out,
+                "case {0} x: return x.Equals(({0})other);",
+                variant.name
+            )?;
         }
-        writeln!(self.out, r#"default: throw new InvalidOperationException("Unknown variant type");"#)?;
+        writeln!(
+            self.out,
+            r#"default: throw new InvalidOperationException("Unknown variant type");"#
+        )?;
         writeln!(self.out, "}}")?;
         self.out.unindent();
         writeln!(self.out, "}}\n")?;
