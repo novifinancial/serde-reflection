@@ -18,6 +18,8 @@ The following target languages are currently supported:
 * Python 3
 * Rust 2018
 * Go >= 1.13
+
+### Work in progress
 * TypeScript > 3.2 (make sure to enable `esnext.BigInt` and `dom` at tsconfig.json -> lib)
 
 ### Supported Encodings
