@@ -809,7 +809,8 @@ return obj;
         writeln!(self.out, "if (other == null) return false;")?;
         writeln!(self.out, "if (ReferenceEquals(this, other)) return true;")?;
         for field in fields {
-            if let Format::Seq(_) = field.value {
+            if matches!(field.value, Format::Seq(_) | Format::Bytes | Format::Map { .. } | Format::TupleArray { .. })
+            {
                 writeln!(
                     self.out,
                     "if (!Enumerable.SequenceEqual({0}, other.{0})) return false;",
