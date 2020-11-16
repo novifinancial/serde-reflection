@@ -163,6 +163,7 @@ where
             self.out,
             r"using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -263,7 +264,7 @@ using System.Numerics;"
             F64 => "double".into(),
             Char => "char".into(),
             Str => "string".into(),
-            Bytes => "byte[]".into(),
+            Bytes => "ImmutableArray<byte>".into(),
 
             Option(format) => format!("Option<{}>", self.quote_type(format)),
             Seq(format) => format!("List<{}>", self.quote_type(format)),
