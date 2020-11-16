@@ -12,6 +12,12 @@ use std::fs::File;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::sync::Mutex;
+
+lazy_static::lazy_static! {
+    // `dotnet build` spuriously fails on linux if run concurrently
+    static ref MUTEX: Mutex<()> = Mutex::new(());
+}
 
 /// Set to `false` to have tests generate into non-temporary directories for inspection.
 /// NOTE: Set this to `true` before committing or merging!
@@ -47,6 +53,7 @@ fn create_test_dir(test_name: &'static str) -> (PathBuf, Option<tempfile::TempDi
 }
 
 fn dotnet_build(proj_dir: &Path) {
+    let _lock = MUTEX.lock();
     let status = Command::new("dotnet")
         .arg("build")
         .current_dir(proj_dir)
@@ -56,6 +63,7 @@ fn dotnet_build(proj_dir: &Path) {
 }
 
 fn run_nunit(proj_dir: &Path) {
+    let _lock = MUTEX.lock();
     let status = Command::new("dotnet")
         .arg("test")
         .current_dir(proj_dir)

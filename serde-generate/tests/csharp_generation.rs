@@ -4,7 +4,13 @@
 use serde_generate::{csharp, test_utils, CodeGeneratorConfig, Encoding};
 use std::collections::BTreeMap;
 use std::process::Command;
+use std::sync::Mutex;
 use tempfile::{tempdir, TempDir};
+
+lazy_static::lazy_static! {
+    // `dotnet build` spuriously fails on linux if run concurrently
+    static ref MUTEX: Mutex<()> = Mutex::new(());
+}
 
 fn test_that_csharp_code_compiles_with_config(
     config: &CodeGeneratorConfig,
@@ -21,12 +27,15 @@ fn test_that_csharp_code_compiles_with_config(
     installer.install_bincode_runtime().unwrap();
     installer.install_lcs_runtime().unwrap();
 
-    let status = Command::new("dotnet")
-        .arg("build")
-        .current_dir(dir_path.join("Serde"))
-        .status()
-        .unwrap();
-    assert!(status.success());
+    {
+        let _lock = MUTEX.lock();
+        let status = Command::new("dotnet")
+            .arg("build")
+            .current_dir(dir_path.join("Serde"))
+            .status()
+            .unwrap();
+        assert!(status.success());
+    }
 
     (dir, dir_path.join("Serde").join("Generated").to_path_buf())
 }

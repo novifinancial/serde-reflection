@@ -313,6 +313,7 @@ dependencies = [
  "heck",
  "hex",
  "include_dir",
+ "lazy_static",
  "libra-canonical-serialization",
  "maplit",
  "rand",
