@@ -82,13 +82,16 @@ impl<'a> CodeGenerator<'a> {
         // When we find an enum with all Unit variants, we ser/de as a regular C# enum.
         // We keep track of this so we can use the enum's extension class for ser/de since enums can't have methods.
         let mut cstyle_enum_names = Vec::new();
-        for (name, format) in registry {
-            if let ContainerFormat::Enum(variants) = format {
-                if variants.values().all(|f| f.value == VariantFormat::Unit) {
-                    cstyle_enum_names.push(name.clone());
+        if self.config.c_style_enums {
+            for (name, format) in registry {
+                if let ContainerFormat::Enum(variants) = format {
+                    if variants.values().all(|f| f.value == VariantFormat::Unit) {
+                        cstyle_enum_names.push(name.clone());
+                    }
                 }
             }
         }
+
         for (name, format) in registry {
             self.write_container_class(
                 &dir_path,
@@ -1088,6 +1091,7 @@ public static {0} {1}Deserialize(ArraySegment<byte> input) {{
                 if variants
                     .iter()
                     .all(|(_i, v)| v.value == VariantFormat::Unit)
+                    && self.cstyle_enum_names.contains(&name.into())
                 {
                     self.output_cstyle_enum(name, variants)?;
                 } else {

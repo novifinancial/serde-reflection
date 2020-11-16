@@ -44,6 +44,12 @@ fn test_that_csharp_code_compiles_without_serialization() {
 }
 
 #[test]
+fn test_that_csharp_code_compiles_with_c_style_enums() {
+    let config = CodeGeneratorConfig::new("Serde.Generated".to_string()).with_c_style_enums(true);
+    test_that_csharp_code_compiles_with_config(&config);
+}
+
+#[test]
 fn test_that_csharp_code_compiles_with_lcs() {
     let config =
         CodeGeneratorConfig::new("Serde.Generated".to_string()).with_encodings(vec![Encoding::Lcs]);
