@@ -12,6 +12,7 @@ pub struct CodeGeneratorConfig {
     pub(crate) external_definitions: ExternalDefinitions,
     pub(crate) comments: DocComments,
     pub(crate) custom_code: CustomCode,
+    pub(crate) c_style_enums: bool,
 }
 
 #[derive(Clone, Copy, Debug, PartialOrd, Ord, PartialEq, Eq)]
@@ -65,6 +66,7 @@ impl CodeGeneratorConfig {
             external_definitions: BTreeMap::new(),
             comments: BTreeMap::new(),
             custom_code: BTreeMap::new(),
+            c_style_enums: false,
         }
     }
 
@@ -102,6 +104,13 @@ impl CodeGeneratorConfig {
     /// Custom code attached to particular entity.
     pub fn with_custom_code(mut self, code: CustomCode) -> Self {
         self.custom_code = code;
+        self
+    }
+
+    /// Generate C-style enums (without variant data) as the target language
+    /// native enum type in supported languages.
+    pub fn with_c_style_enums(mut self, c_style_enums: bool) -> Self {
+        self.c_style_enums = c_style_enums;
         self
     }
 }
