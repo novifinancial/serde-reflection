@@ -1839,7 +1839,7 @@ func {2}Deserialize{0}(input []byte) ({0}, error) {{
 	}}
 	deserializer := {1}.NewDeserializer(input);
 	obj, err := Deserialize{0}(deserializer)
-	if deserializer.GetBufferOffset() &lt; uint64(len(input)) {{
+	if err == nil &amp;&amp; deserializer.GetBufferOffset() &lt; uint64(len(input)) {{
 		return obj, fmt.Errorf(&quot;Some input bytes were not read&quot;)
 	}}
 	return obj, err
