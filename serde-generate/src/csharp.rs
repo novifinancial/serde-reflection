@@ -836,7 +836,7 @@ return obj;
         self.out.indent();
         writeln!(self.out, "unchecked {{")?;
         self.out.indent();
-        writeln!(self.out, "int value = {};", rand::random::<i32>())?;
+        writeln!(self.out, "int value = 7;")?;
         for field in fields {
             writeln!(
                 self.out,
