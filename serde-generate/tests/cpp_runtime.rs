@@ -1,6 +1,5 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
-#![cfg(feature = "runtime-testing")]
 
 use serde_generate::{
     cpp, test_utils,
