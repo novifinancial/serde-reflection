@@ -221,9 +221,9 @@ where
                 self.quote_types(formats)
             ),
             TupleArray { content, size } => format!(
-                "{} @com.novi.serde.ArrayLen(length={}) []",
-                self.quote_type(content),
-                size
+                "java.util./*@com.novi.serde.ArrayLen(length={})*/List<{}>",
+                size,
+                self.quote_type(content)
             ),
             Variable(_) => panic!("unexpected value"),
         }
@@ -424,8 +424,8 @@ serializer.sort_map_entries(offsets);
                 write!(
                     self.out,
                     r#"
-if (value.length != {0}) {{
-    throw new java.lang.IllegalArgumentException("Invalid length for fixed-size array: " + value.length + " instead of "+ {0});
+if (value.size() != {0}) {{
+    throw new java.lang.IllegalArgumentException("Invalid length for fixed-size array: " + value.size() + " instead of "+ {0});
 }}
 for ({1} item : value) {{
     {2}
@@ -536,9 +536,9 @@ return new {}({}
                 write!(
                     self.out,
                     r#"
-{0}[] obj = new {0}[{1}];
-for (int i = 0; i < {1}; i++) {{
-    obj[i] = {2};
+java.util.List<{0}> obj = new java.util.ArrayList<{0}>({1});
+for (long i = 0; i < {1}; i++) {{
+    obj.add({2});
 }}
 return obj;
 "#,

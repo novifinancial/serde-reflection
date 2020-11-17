@@ -50,6 +50,7 @@ pub enum SerdeData {
     TupleArray([u32; 3]),
     UnitVector(Vec<()>),
     SimpleList(SimpleList),
+    ComplexMap(BTreeMap<([u32; 2], [u8; 4]), ()>),
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -270,8 +271,10 @@ pub fn get_sample_values(has_canonical_maps: bool, has_floats: bool) -> Vec<Serd
 
     let v11 = SerdeData::SimpleList(SimpleList(Some(Box::new(SimpleList(None)))));
 
+    let v12 = SerdeData::ComplexMap(btreemap! { ([1,2], [3,4,5,6]) => ()});
+
     vec![
-        v0, v1, v2, v2bis, v2ter, v3, v4, v5, v6, v7, v8, v9, v10, v11,
+        v0, v1, v2, v2bis, v2ter, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12,
     ]
 }
 
@@ -577,7 +580,7 @@ impl Runtime {
 
 #[test]
 fn test_get_sample_values() {
-    assert_eq!(get_sample_values(false, true).len(), 14);
+    assert_eq!(get_sample_values(false, true).len(), 15);
 }
 
 #[test]
@@ -614,9 +617,7 @@ Test:
 #[test]
 fn test_get_registry() {
     let registry = get_registry().unwrap();
-    assert_eq!(
-        serde_yaml::to_string(&registry).unwrap() + "\n",
-        r#"---
+    let expected = r#"---
 List:
   ENUM:
     0:
@@ -723,6 +724,19 @@ SerdeData:
       SimpleList:
         NEWTYPE:
           TYPENAME: SimpleList
+    11:
+      ComplexMap:
+        NEWTYPE:
+          MAP:
+            KEY:
+              TUPLE:
+                - TUPLEARRAY:
+                    CONTENT: U32
+                    SIZE: 2
+                - TUPLEARRAY:
+                    CONTENT: U8
+                    SIZE: 4
+            VALUE: UNIT
 SimpleList:
   NEWTYPESTRUCT:
     OPTION:
@@ -744,7 +758,14 @@ TupleStruct:
     - U64
 UnitStruct: UNITSTRUCT
 "#
-        .to_string()
+    .lines()
+    .collect::<Vec<_>>();
+    assert_eq!(
+        serde_yaml::to_string(&registry)
+            .unwrap()
+            .lines()
+            .collect::<Vec<_>>(),
+        expected
     );
 }
 
@@ -847,14 +868,14 @@ fn test_get_alternate_sample_with_container_depth(runtime: Runtime) {
 
 #[test]
 fn test_bincode_get_positive_samples() {
-    assert_eq!(test_get_positive_samples(Runtime::Bincode), 14);
+    assert_eq!(test_get_positive_samples(Runtime::Bincode), 15);
 }
 
 #[test]
 // This test requires --release because of deserialization of long (unit) vectors.
 #[cfg(not(debug_assertions))]
 fn test_lcs_get_positive_samples() {
-    assert_eq!(test_get_positive_samples(Runtime::Lcs), 87);
+    assert_eq!(test_get_positive_samples(Runtime::Lcs), 97);
 }
 
 // Make sure all the "positive" samples successfully deserialize with the reference Rust
@@ -878,7 +899,7 @@ fn test_bincode_get_negative_samples() {
 // This test requires --release because of deserialization of long (unit) vectors.
 #[cfg(not(debug_assertions))]
 fn test_lcs_get_negative_samples() {
-    assert_eq!(test_get_negative_samples(Runtime::Lcs), 57);
+    assert_eq!(test_get_negative_samples(Runtime::Lcs), 59);
 }
 
 // Make sure all the "negative" samples fail to deserialize with the reference Rust

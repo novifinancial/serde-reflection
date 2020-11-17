@@ -187,13 +187,17 @@ public class Main {{
 
             assert java.util.Arrays.equals(input, output);
 
+            // Test self-equality for the Java object.
+            SerdeData test2 = SerdeData.{2}Deserialize(input);
+            assert test.equals(test2);
+
             // Test simple mutations of the input.
             for (int i = 0; i < input.length; i++) {{
                 byte[] input2 = input.clone();
                 input2[i] ^= 0x80;
                 try {{
-                    SerdeData test2 = SerdeData.{2}Deserialize(input2);
-                    assert test2 != test;
+                    SerdeData test3 = SerdeData.{2}Deserialize(input2);
+                    assert !test3.equals(test);
                 }} catch (DeserializationError e) {{
                     // All good
                 }}
