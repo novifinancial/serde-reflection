@@ -111,7 +111,7 @@
 pub mod analyzer;
 /// Support for code-generation in C++
 pub mod cpp;
-/// Support for code-generationin C3
+/// Support for code-generation in C#
 pub mod csharp;
 /// Utility function to generate indented text
 pub mod golang;

@@ -417,6 +417,11 @@ using System.Numerics;"
         }
     }
 
+    fn is_nullable(&self, format: &Format) -> bool {
+        use Format::*;
+        matches!(format, Variable(_) | TypeName(_) | Unit | Str | Seq(_) | Map {..} | TupleArray { .. })
+    }
+
     fn output_serialization_helper(&mut self, name: &str, format0: &Format) -> Result<()> {
         use Format::*;
 
@@ -595,7 +600,7 @@ return ({}
             }
 
             TupleArray { content, size } => {
-                // Special case jagged arrays becuase the indexing order is backwards
+                // Special case jagged arrays because the indexing order is opposite the declaration order
                 let mut jags = String::new();
                 let mut cptr = content;
                 while let TupleArray { content, size: _ } = &**cptr {
@@ -718,9 +723,15 @@ return obj;
                 .join(", ")
         )?;
         self.out.indent();
-        // TODO: check arguments for null?
         for field in fields {
-            writeln!(self.out, "{} = _{};", &field.name, &field.name)?;
+            if self.is_nullable(&field.value) {
+                writeln!(
+                    self.out,
+                    "if (_{0} == null) throw new ArgumentNullException(nameof(_{0}));",
+                    &field.name
+                )?;
+            }
+            writeln!(self.out, "{0} = _{0};", &field.name)?;
         }
         self.out.unindent();
         writeln!(self.out, "}}")?;
