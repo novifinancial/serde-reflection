@@ -50,16 +50,16 @@ using namespace testing;
 
 int main() {{
     std::vector<uint8_t> input = {{{0}}};
-    auto test = Test::{1}Deserialize(input);
+    auto value = Test::{1}Deserialize(input);
 
     auto a = std::vector<uint32_t> {{4, 6}};
     auto b = std::tuple<int64_t, uint64_t> {{-3, 5}};
     auto c = Choice {{ Choice::C {{ 7 }} }};
-    auto test2 = Test {{a, b, c}};
+    auto value2 = Test {{a, b, c}};
 
-    assert(test == test2);
+    assert(value == value2);
 
-    auto output = test2.{1}Serialize();
+    auto output = value2.{1}Serialize();
 
     assert(input == output);
 
@@ -158,8 +158,8 @@ int main() {{
     std::vector<std::vector<uint8_t>> negative_inputs = {{{1}}};
     try {{
         for (auto input: positive_inputs) {{
-            auto test = SerdeData::{2}Deserialize(input);
-            auto output = test.{2}Serialize();
+            auto value = SerdeData::{2}Deserialize(input);
+            auto output = value.{2}Serialize();
             assert(input == output);
 
             // Test simple mutations of the input.
@@ -167,8 +167,8 @@ int main() {{
                 auto input2 = input;
                 input2[i] ^= 0x81;
                 try {{
-                    auto test2 = SerdeData::{2}Deserialize(input2);
-                    assert(!(test2 == test));
+                    auto value2 = SerdeData::{2}Deserialize(input2);
+                    assert(!(value2 == value));
                 }} catch (serde::deserialization_error e) {{
                     // All good
                 }} catch (std::bad_alloc const &e) {{

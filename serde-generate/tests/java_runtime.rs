@@ -54,16 +54,16 @@ public class Main {{
     public static void main(String[] args) throws java.lang.Exception {{
         byte[] input = new byte[] {{{0}}};
 
-        Test test = Test.{1}Deserialize(input);
+        Test value = Test.{1}Deserialize(input);
 
         List<@Unsigned Integer> a = Arrays.asList(4, 6);
         Tuple2<Long, @Unsigned Long> b = new Tuple2<>(Long.valueOf(-3), Long.valueOf(5));
         Choice c = new Choice.C(Byte.valueOf((byte) 7));
-        Test test2 = new Test(a, b, c);
+        Test value2 = new Test(a, b, c);
 
-        assert test.equals(test2);
+        assert value.equals(value2);
 
-        byte[] output = test2.{1}Serialize();
+        byte[] output = value2.{1}Serialize();
 
         assert java.util.Arrays.equals(input, output);
 
@@ -182,22 +182,22 @@ public class Main {{
 
     public static void main(String[] args) throws java.lang.Exception {{
         for (byte[] input : positive_inputs) {{
-            SerdeData test = SerdeData.{2}Deserialize(input);
-            byte[] output = test.{2}Serialize();
+            SerdeData value = SerdeData.{2}Deserialize(input);
+            byte[] output = value.{2}Serialize();
 
             assert java.util.Arrays.equals(input, output);
 
-            // Test self-equality for the Java object.
-            SerdeData test2 = SerdeData.{2}Deserialize(input);
-            assert test.equals(test2);
+            // Test self-equality for the Java value.
+            SerdeData value2 = SerdeData.{2}Deserialize(input);
+            assert value.equals(value2);
 
             // Test simple mutations of the input.
             for (int i = 0; i < input.length; i++) {{
                 byte[] input2 = input.clone();
                 input2[i] ^= 0x80;
                 try {{
-                    SerdeData test3 = SerdeData.{2}Deserialize(input2);
-                    assert !test3.equals(test);
+                    SerdeData value3 = SerdeData.{2}Deserialize(input2);
+                    assert !value3.equals(value);
                 }} catch (DeserializationError e) {{
                     // All good
                 }}
@@ -207,7 +207,7 @@ public class Main {{
 
         for (byte[] input : negative_inputs) {{
             try {{
-                SerdeData test = SerdeData.{2}Deserialize(input);
+                SerdeData value = SerdeData.{2}Deserialize(input);
                 Integer[] bytes = new Integer[input.length];
                 Arrays.setAll(bytes, n -> Math.floorMod(input[n], 256));
                 throw new Exception("Input should fail to deserialize: " + Arrays.asList(bytes));
