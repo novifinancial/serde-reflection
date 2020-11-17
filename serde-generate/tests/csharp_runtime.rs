@@ -19,21 +19,12 @@ lazy_static::lazy_static! {
     static ref MUTEX: Mutex<()> = Mutex::new(());
 }
 
-/// Set to `false` to have tests generate into non-temporary directories for inspection.
-/// NOTE: Set this to `true` before committing or merging!
-const TEST_USE_TEMP_DIRS: bool = true;
-
 /// Returns:
 /// 1. A `PathBuf` to the directory to write test data into
 /// 2. Optionally, a `tempfile::TempDir` which deletes the directory when it goes out of scope
 fn create_test_dir(test_name: &'static str) -> (PathBuf, Option<tempfile::TempDir>) {
-    if TEST_USE_TEMP_DIRS {
-        let tempdir = tempfile::Builder::new()
-            .suffix(&format!("_{}", test_name))
-            .tempdir()
-            .unwrap();
-        (tempdir.path().to_path_buf(), Some(tempdir))
-    } else {
+    // Set env var to generate into subdirectories for inspection
+    if std::env::var("TEST_USE_SUBDIR").is_ok() {
         let mut tries = 0;
         while tries < 20 {
             let test_dir_name = if tries == 0 {
@@ -49,6 +40,12 @@ fn create_test_dir(test_name: &'static str) -> (PathBuf, Option<tempfile::TempDi
             }
         }
         panic!("Error creating test directory: Too many existing test directories");
+    } else {
+        let tempdir = tempfile::Builder::new()
+            .suffix(&format!("_{}", test_name))
+            .tempdir()
+            .unwrap();
+        (tempdir.path().to_path_buf(), Some(tempdir))
     }
 }
 
