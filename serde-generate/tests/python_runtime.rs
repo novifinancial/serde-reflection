@@ -119,6 +119,10 @@ for encoding in positive_encodings:
     s = v.{0}_serialize()
     assert s == encoding
 
+    # Test self-equality for the Serde value.
+    assert v == SerdeData.{0}_deserialize(encoding)
+
+    # Test simple mutations of the input.
     for i in range(min(len(encoding), 20)):
         encoding2 = bytearray(encoding)
         encoding2[i] ^= 0x81

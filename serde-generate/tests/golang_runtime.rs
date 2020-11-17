@@ -196,6 +196,12 @@ func main() {{
 
 		if !cmp.Equal(input, output) {{ panic(fmt.Sprintf("input != output:\n  %v\n  %v", input, output)) }}
 
+		{{
+			value2, err := {2}DeserializeSerdeData(input)
+			if err != nil {{ panic(fmt.Sprintf("failed to deserialize input: %v", err)) }}
+			if !cmp.Equal(value, value2) {{ panic("Value should test equal to itself.") }}
+		}}
+
 		for i := 0; i < len(input); i++ {{
 			input2 := make([]byte, len(input))
 			copy(input2, input)
