@@ -1,6 +1,4 @@
 (function() {var implementors = {};
-implementors["bytes"] = [{"text":"impl Serialize for Bytes","synthetic":false,"types":[]},{"text":"impl Serialize for BytesMut","synthetic":false,"types":[]}];
-implementors["log"] = [{"text":"impl Serialize for Level","synthetic":false,"types":[]},{"text":"impl Serialize for LevelFilter","synthetic":false,"types":[]}];
 implementors["serde_bytes"] = [{"text":"impl Serialize for Bytes","synthetic":false,"types":[]},{"text":"impl Serialize for ByteBuf","synthetic":false,"types":[]}];
 implementors["serde_reflection"] = [{"text":"impl Serialize for Format","synthetic":false,"types":[]},{"text":"impl Serialize for ContainerFormat","synthetic":false,"types":[]},{"text":"impl Serialize for VariantFormat","synthetic":false,"types":[]},{"text":"impl&lt;T&gt; Serialize for Named&lt;T&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;T: Serialize,&nbsp;</span>","synthetic":false,"types":[]}];
 implementors["serde_yaml"] = [{"text":"impl Serialize for Mapping","synthetic":false,"types":[]},{"text":"impl Serialize for Number","synthetic":false,"types":[]},{"text":"impl Serialize for Value","synthetic":false,"types":[]}];

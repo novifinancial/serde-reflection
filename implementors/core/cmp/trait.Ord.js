@@ -1,18 +1,12 @@
 (function() {var implementors = {};
 implementors["byteorder"] = [{"text":"impl Ord for BigEndian","synthetic":false,"types":[]},{"text":"impl Ord for LittleEndian","synthetic":false,"types":[]}];
-implementors["bytes"] = [{"text":"impl Ord for Bytes","synthetic":false,"types":[]},{"text":"impl Ord for BytesMut","synthetic":false,"types":[]}];
-implementors["fixedbitset"] = [{"text":"impl Ord for FixedBitSet","synthetic":false,"types":[]}];
-implementors["generic_array"] = [{"text":"impl&lt;T:&nbsp;Ord, N&gt; Ord for GenericArray&lt;T, N&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;N: ArrayLength&lt;T&gt;,&nbsp;</span>","synthetic":false,"types":[]}];
 implementors["glob"] = [{"text":"impl Ord for Pattern","synthetic":false,"types":[]},{"text":"impl Ord for MatchOptions","synthetic":false,"types":[]}];
 implementors["linked_hash_map"] = [{"text":"impl&lt;K:&nbsp;Hash + Eq + Ord, V:&nbsp;Ord, S:&nbsp;BuildHasher&gt; Ord for LinkedHashMap&lt;K, V, S&gt;","synthetic":false,"types":[]}];
-implementors["log"] = [{"text":"impl Ord for Level","synthetic":false,"types":[]},{"text":"impl Ord for LevelFilter","synthetic":false,"types":[]},{"text":"impl&lt;'a&gt; Ord for Metadata&lt;'a&gt;","synthetic":false,"types":[]},{"text":"impl&lt;'a&gt; Ord for MetadataBuilder&lt;'a&gt;","synthetic":false,"types":[]}];
-implementors["petgraph"] = [{"text":"impl Ord for Time","synthetic":false,"types":[]},{"text":"impl&lt;Ix:&nbsp;Ord&gt; Ord for NodeIndex&lt;Ix&gt;","synthetic":false,"types":[]},{"text":"impl&lt;Ix:&nbsp;Ord&gt; Ord for EdgeIndex&lt;Ix&gt;","synthetic":false,"types":[]},{"text":"impl&lt;'b, T&gt; Ord for Ptr&lt;'b, T&gt;","synthetic":false,"types":[]},{"text":"impl Ord for Direction","synthetic":false,"types":[]}];
 implementors["proc_macro2"] = [{"text":"impl Ord for Ident","synthetic":false,"types":[]}];
 implementors["serde_bytes"] = [{"text":"impl Ord for Bytes","synthetic":false,"types":[]},{"text":"impl Ord for ByteBuf","synthetic":false,"types":[]}];
 implementors["serde_generate"] = [{"text":"impl Ord for Encoding","synthetic":false,"types":[]}];
 implementors["serdegen"] = [{"text":"impl Ord for Runtime","synthetic":false,"types":[]}];
 implementors["syn"] = [{"text":"impl Ord for Lifetime","synthetic":false,"types":[]}];
-implementors["typenum"] = [{"text":"impl Ord for B0","synthetic":false,"types":[]},{"text":"impl Ord for B1","synthetic":false,"types":[]},{"text":"impl&lt;U:&nbsp;Ord + Unsigned + NonZero&gt; Ord for PInt&lt;U&gt;","synthetic":false,"types":[]},{"text":"impl&lt;U:&nbsp;Ord + Unsigned + NonZero&gt; Ord for NInt&lt;U&gt;","synthetic":false,"types":[]},{"text":"impl Ord for Z0","synthetic":false,"types":[]},{"text":"impl Ord for UTerm","synthetic":false,"types":[]},{"text":"impl&lt;U:&nbsp;Ord, B:&nbsp;Ord&gt; Ord for UInt&lt;U, B&gt;","synthetic":false,"types":[]},{"text":"impl Ord for ATerm","synthetic":false,"types":[]},{"text":"impl&lt;V:&nbsp;Ord, A:&nbsp;Ord&gt; Ord for TArr&lt;V, A&gt;","synthetic":false,"types":[]},{"text":"impl Ord for Greater","synthetic":false,"types":[]},{"text":"impl Ord for Less","synthetic":false,"types":[]},{"text":"impl Ord for Equal","synthetic":false,"types":[]}];
 implementors["vec_map"] = [{"text":"impl&lt;V:&nbsp;Ord&gt; Ord for VecMap&lt;V&gt;","synthetic":false,"types":[]}];
 implementors["yaml_rust"] = [{"text":"impl Ord for Yaml","synthetic":false,"types":[]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
