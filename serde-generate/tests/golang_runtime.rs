@@ -168,7 +168,7 @@ fn test_golang_runtime_on_supported_types(runtime: Runtime) {
     generator.output(&mut source, &registry).unwrap();
 
     let positive_encodings = runtime
-        .get_positive_samples()
+        .get_positive_samples_quick()
         .iter()
         .map(|bytes| quote_bytes(bytes))
         .collect::<Vec<_>>()
