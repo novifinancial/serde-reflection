@@ -307,7 +307,7 @@ dependencies = [
 
 [[package]]
 name = "serde-generate"
-version = "0.15.3"
+version = "0.16.0"
 dependencies = [
  "bincode",
  "heck",
