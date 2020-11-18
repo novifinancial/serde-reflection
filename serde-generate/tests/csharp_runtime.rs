@@ -251,11 +251,14 @@ namespace Serde.Tests {{
 
             CollectionAssert.AreEqual(input, output);
 
+            // Test value equality
+            SerdeData test2 = SerdeData.{0}Deserialize(input);
+            Assert.AreEqual(test, test2);
+
             // Test simple mutations of the input.
             for (int i = 0; i < input.Length; i++) {{
                 byte[] input2 = input.ToArray();
                 input2[i] ^= 0x80;
-                SerdeData test2;
                 try {{
                     test2 = SerdeData.{0}Deserialize(input2);
                 }} 
