@@ -609,6 +609,7 @@
 <span id="608">608</span>
 <span id="609">609</span>
 <span id="610">610</span>
+<span id="611">611</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -796,8 +797,9 @@
             <span class="ident">TypeName</span>(<span class="ident">x</span>) <span class="op">=&gt;</span> {
                 <span class="kw">let</span> <span class="ident">qname</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">quote_qualified_name</span>(<span class="ident">x</span>);
                 <span class="kw">if</span> <span class="ident">require_known_size</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">known_sizes</span>.<span class="ident">contains</span>(<span class="ident">x</span>.<span class="ident">as_str</span>()) {
-                    <span class="comment">// Cannot use unique_ptr because we need a copy constructor (e.g. for vectors).</span>
-                    <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;std::shared_ptr&lt;{}&gt;&quot;</span>, <span class="ident">qname</span>)
+                    <span class="comment">// Cannot use unique_ptr because we need a copy constructor (e.g. for vectors)</span>
+                    <span class="comment">// and in-depth equality.</span>
+                    <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serde::value_ptr&lt;{}&gt;&quot;</span>, <span class="ident">qname</span>)
                 } <span class="kw">else</span> {
                     <span class="ident">qname</span>
                 }

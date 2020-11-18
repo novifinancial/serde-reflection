@@ -987,8 +987,6 @@
 <span id="986">986</span>
 <span id="987">987</span>
 <span id="988">988</span>
-<span id="989">989</span>
-<span id="990">990</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -1027,7 +1025,7 @@
     <span class="doccomment">/// Current (non-qualified) generated class names that could clash with names in the registry</span>
     <span class="doccomment">/// (e.g. &quot;Builder&quot; or variant classes).</span>
     <span class="doccomment">/// * We count multiplicities to allow inplace backtracking.</span>
-    <span class="doccomment">/// * Names in the registry (and a few base types such as &quot;BigInteger&quot;) are assumed to never clash.</span>
+    <span class="doccomment">/// * Names in the registry are assumed to never clash.</span>
     <span class="ident">current_reserved_names</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">usize</span><span class="op">&gt;</span>,
 }
 
@@ -1121,8 +1119,6 @@
 {
     <span class="kw">fn</span> <span class="ident">output_preamble</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;package {};\n&quot;</span>, <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">module_name</span>)<span class="question-mark">?</span>;
-        <span class="comment">// Java doesn&#39;t let us annotate fully-qualified class names.</span>
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;import java.math.BigInteger;\n&quot;</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -1188,12 +1184,12 @@
             <span class="ident">I16</span> <span class="op">=&gt;</span> <span class="string">&quot;Short&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">I32</span> <span class="op">=&gt;</span> <span class="string">&quot;Integer&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">I64</span> <span class="op">=&gt;</span> <span class="string">&quot;Long&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">I128</span> <span class="op">=&gt;</span> <span class="string">&quot;@com.novi.serde.Int128 BigInteger&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">I128</span> <span class="op">=&gt;</span> <span class="string">&quot;java.math.@com.novi.serde.Int128 BigInteger&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">U8</span> <span class="op">=&gt;</span> <span class="string">&quot;@com.novi.serde.Unsigned Byte&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">U16</span> <span class="op">=&gt;</span> <span class="string">&quot;@com.novi.serde.Unsigned Short&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">U32</span> <span class="op">=&gt;</span> <span class="string">&quot;@com.novi.serde.Unsigned Integer&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">U64</span> <span class="op">=&gt;</span> <span class="string">&quot;@com.novi.serde.Unsigned Long&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">U128</span> <span class="op">=&gt;</span> <span class="string">&quot;@com.novi.serde.Unsigned @com.novi.serde.Int128 BigInteger&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">U128</span> <span class="op">=&gt;</span> <span class="string">&quot;java.math.@com.novi.serde.Unsigned @com.novi.serde.Int128 BigInteger&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">F32</span> <span class="op">=&gt;</span> <span class="string">&quot;Float&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">F64</span> <span class="op">=&gt;</span> <span class="string">&quot;Double&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">Char</span> <span class="op">=&gt;</span> <span class="string">&quot;Character&quot;</span>.<span class="ident">into</span>(),
@@ -1213,9 +1209,9 @@
                 <span class="self">self</span>.<span class="ident">quote_types</span>(<span class="ident">formats</span>)
             ),
             <span class="ident">TupleArray</span> { <span class="ident">content</span>, <span class="ident">size</span> } <span class="op">=&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
-                <span class="string">&quot;{} @com.novi.serde.ArrayLen(length={}) []&quot;</span>,
-                <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">content</span>),
-                <span class="ident">size</span>
+                <span class="string">&quot;java.util.@com.novi.serde.ArrayLen(length={}) List&lt;{}&gt;&quot;</span>,
+                <span class="ident">size</span>,
+                <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">content</span>)
             ),
             <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;unexpected value&quot;</span>),
         }
@@ -1416,8 +1412,8 @@ serializer.sort_map_entries(offsets);
                 <span class="macro">write</span><span class="macro">!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">r#&quot;
-if (value.length != {0}) {{
-    throw new java.lang.IllegalArgumentException(&quot;Invalid length for fixed-size array: &quot; + value.length + &quot; instead of &quot;+ {0});
+if (value.size() != {0}) {{
+    throw new java.lang.IllegalArgumentException(&quot;Invalid length for fixed-size array: &quot; + value.size() + &quot; instead of &quot;+ {0});
 }}
 for ({1} item : value) {{
     {2}
@@ -1528,9 +1524,9 @@ return new {}({}
                 <span class="macro">write</span><span class="macro">!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">r#&quot;
-{0}[] obj = new {0}[{1}];
-for (int i = 0; i &lt; {1}; i++) {{
-    obj[i] = {2};
+java.util.List&lt;{0}&gt; obj = new java.util.ArrayList&lt;{0}&gt;({1});
+for (long i = 0; i &lt; {1}; i++) {{
+    obj.add({2});
 }}
 return obj;
 &quot;#</span>,
