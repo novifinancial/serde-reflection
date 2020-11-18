@@ -35,7 +35,7 @@ struct JavaEmitter<'a, T> {
     /// Current (non-qualified) generated class names that could clash with names in the registry
     /// (e.g. "Builder" or variant classes).
     /// * We count multiplicities to allow inplace backtracking.
-    /// * Names in the registry (and a few base types such as "BigInteger") are assumed to never clash.
+    /// * Names in the registry are assumed to never clash.
     current_reserved_names: HashMap<String, usize>,
 }
 
@@ -129,8 +129,6 @@ where
 {
     fn output_preamble(&mut self) -> Result<()> {
         writeln!(self.out, "package {};\n", self.generator.config.module_name)?;
-        // Java doesn't let us annotate fully-qualified class names.
-        writeln!(self.out, "import java.math.BigInteger;\n")?;
         Ok(())
     }
 
@@ -196,12 +194,12 @@ where
             I16 => "Short".into(),
             I32 => "Integer".into(),
             I64 => "Long".into(),
-            I128 => "@com.novi.serde.Int128 BigInteger".into(),
+            I128 => "java.math.@com.novi.serde.Int128 BigInteger".into(),
             U8 => "@com.novi.serde.Unsigned Byte".into(),
             U16 => "@com.novi.serde.Unsigned Short".into(),
             U32 => "@com.novi.serde.Unsigned Integer".into(),
             U64 => "@com.novi.serde.Unsigned Long".into(),
-            U128 => "@com.novi.serde.Unsigned @com.novi.serde.Int128 BigInteger".into(),
+            U128 => "java.math.@com.novi.serde.Unsigned @com.novi.serde.Int128 BigInteger".into(),
             F32 => "Float".into(),
             F64 => "Double".into(),
             Char => "Character".into(),
@@ -221,7 +219,7 @@ where
                 self.quote_types(formats)
             ),
             TupleArray { content, size } => format!(
-                "java.util./*@com.novi.serde.ArrayLen(length={})*/List<{}>",
+                "java.util.@com.novi.serde.ArrayLen(length={}) List<{}>",
                 size,
                 self.quote_type(content)
             ),
