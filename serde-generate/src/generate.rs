@@ -69,9 +69,13 @@ struct Options {
     /// Optional package name (Python) or module path (Go) where to find Serde runtime dependencies.
     #[structopt(long)]
     serde_package_name: Option<String>,
+
+    /// Translate enums without variant data (c-style enums) into their equivalent in the target language.
+    #[structopt(long)]
+    c_style_enums: bool,
 }
 
-fn get_codegen_config<'a, I>(name: String, runtimes: I) -> CodeGeneratorConfig
+fn get_codegen_config<'a, I>(name: String, runtimes: I, c_style_enums: bool) -> CodeGeneratorConfig
 where
     I: IntoIterator<Item = &'a Runtime>,
 {
@@ -87,7 +91,9 @@ where
             _ => (),
         }
     }
-    CodeGeneratorConfig::new(name).with_encodings(encodings)
+    CodeGeneratorConfig::new(name)
+        .with_encodings(encodings)
+        .with_c_style_enums(c_style_enums)
 }
 
 fn main() {
@@ -113,7 +119,7 @@ fn main() {
     match options.target_source_dir {
         None => {
             if let Some((registry, name)) = named_registry_opt {
-                let config = get_codegen_config(name, &runtimes);
+                let config = get_codegen_config(name, &runtimes, options.c_style_enums);
 
                 let stdout = std::io::stdout();
                 let mut out = stdout.lock();
@@ -157,7 +163,7 @@ fn main() {
                 };
 
             if let Some((registry, name)) = named_registry_opt {
-                let config = get_codegen_config(name, &runtimes);
+                let config = get_codegen_config(name, &runtimes, options.c_style_enums);
                 installer.install_module(&config, &registry).unwrap();
             }
 
