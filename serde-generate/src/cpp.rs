@@ -184,8 +184,9 @@ where
             TypeName(x) => {
                 let qname = self.quote_qualified_name(x);
                 if require_known_size && !self.known_sizes.contains(x.as_str()) {
-                    // Cannot use unique_ptr because we need a copy constructor (e.g. for vectors).
-                    format!("std::shared_ptr<{}>", qname)
+                    // Cannot use unique_ptr because we need a copy constructor (e.g. for vectors)
+                    // and in-depth equality.
+                    format!("serde::value_ptr<{}>", qname)
                 } else {
                     qname
                 }
