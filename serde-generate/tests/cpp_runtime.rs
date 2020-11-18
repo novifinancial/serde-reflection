@@ -162,6 +162,12 @@ int main() {{
             auto output = value.{2}Serialize();
             assert(input == output);
 
+            // Test self-equality for the Serde value.
+            {{
+                auto value2 = SerdeData::{2}Deserialize(input);
+                assert(value == value2);
+            }}
+
             // Test simple mutations of the input.
             for (int i = 0; i < std::min(input.size(), 20ul); i++) {{
                 auto input2 = input;
@@ -208,7 +214,7 @@ int main() {{
     let status = Command::new("clang++")
         .arg("--std=c++17")
         .arg("-g")
-        .arg("-O3")
+        .arg("-O3") // remove for debugging
         .arg("-o")
         .arg(dir.path().join("test"))
         .arg("-I")

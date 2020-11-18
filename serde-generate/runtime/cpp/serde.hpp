@@ -57,6 +57,56 @@ inline bool operator==(const int128_t &lhs, const int128_t &rhs) {
     return lhs.high == rhs.high && lhs.low == rhs.low;
 }
 
+// A copyable unique_ptr with value semantics.
+// Freely inspired by the following discussion:
+// https://codereview.stackexchange.com/questions/103744/deepptr-a-deep-copying-unique-ptr-wrapper-in-c
+template <typename T>
+class value_ptr {
+  public:
+    value_ptr() : ptr_(nullptr) {}
+
+    value_ptr(const T &value) : ptr_(new T{value}) {}
+
+    value_ptr(const value_ptr &other) : ptr_(nullptr) {
+        if (other) {
+            ptr_ = std::unique_ptr<T>{new T{*other}};
+        }
+    }
+
+    value_ptr &operator=(const value_ptr &other) {
+        value_ptr temp{other};
+        std::swap(ptr_, temp.ptr_);
+        return *this;
+    }
+
+    value_ptr(value_ptr &&other) = default;
+
+    value_ptr &operator=(value_ptr &&other) = default;
+
+    T &operator*() { return *ptr_; }
+
+    const T &operator*() const { return *ptr_; }
+
+    T *const operator->() { return ptr_.operator->(); }
+
+    const T *const operator->() const { return ptr_.operator->(); }
+
+    const T *const get() const { return ptr_.get(); }
+
+    operator bool() const { return (bool)ptr_; }
+
+    template <typename U>
+    friend bool operator==(const value_ptr<U> &, const value_ptr<U> &);
+
+  private:
+    std::unique_ptr<T> ptr_;
+};
+
+template <typename T>
+bool operator==(const value_ptr<T> &lhs, const value_ptr<T> &rhs) {
+    return *lhs == *rhs;
+}
+
 // Trait to enable serialization of values of type T.
 // This is similar to the `serde::Serialize` trait in Rust.
 template <typename T>
@@ -222,12 +272,11 @@ struct Serializable<int128_t> {
 
 // --- Derivation of Serializable for composite types ---
 
-// Unique pointers (non-nullable)
+// Value pointers (non-nullable)
 template <typename T>
-struct Serializable<std::shared_ptr<T>> {
+struct Serializable<value_ptr<T>> {
     template <typename Serializer>
-    static void serialize(const std::shared_ptr<T> &value,
-                          Serializer &serializer) {
+    static void serialize(const value_ptr<T> &value, Serializer &serializer) {
         Serializable<T>::serialize(*value, serializer);
     }
 };
@@ -474,13 +523,12 @@ struct Deserializable<int128_t> {
 
 // --- Derivation of Deserializable for composite types ---
 
-// Unique pointers
+// Value pointers
 template <typename T>
-struct Deserializable<std::shared_ptr<T>> {
+struct Deserializable<value_ptr<T>> {
     template <typename Deserializer>
-    static std::shared_ptr<T> deserialize(Deserializer &deserializer) {
-        return std::make_shared<T>(
-            Deserializable<T>::deserialize(deserializer));
+    static value_ptr<T> deserialize(Deserializer &deserializer) {
+        return value_ptr<T>(Deserializable<T>::deserialize(deserializer));
     }
 };
 
