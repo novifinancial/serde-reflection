@@ -84,6 +84,7 @@ pub struct OtherTypes {
     f_tuple: (u8, u16),
     f_stringmap: BTreeMap<String, u32>,
     f_intset: BTreeMap<u64, ()>, // Avoiding BTreeSet because Serde treats them as sequences.
+    f_nested_seq: Vec<Vec<Struct>>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -186,6 +187,10 @@ pub fn get_sample_values(has_canonical_maps: bool, has_floats: bool) -> Vec<Serd
             btreemap! {"foo".to_string() => 1}
         },
         f_intset: BTreeMap::new(),
+        f_nested_seq: vec![
+            vec![Struct { x: 4, y: 5 }, Struct { x: 6, y: 7 }],
+            vec![Struct { x: 8, y: 9 }],
+        ],
     });
 
     let v2bis = SerdeData::OtherTypes(OtherTypes {
@@ -201,6 +206,7 @@ pub fn get_sample_values(has_canonical_maps: bool, has_floats: bool) -> Vec<Serd
         } else {
             btreemap! {64 => ()}
         },
+        f_nested_seq: vec![],
     });
 
     let v2ter = SerdeData::OtherTypes(OtherTypes {
@@ -220,6 +226,7 @@ pub fn get_sample_values(has_canonical_maps: bool, has_floats: bool) -> Vec<Serd
         } else {
             BTreeMap::new()
         },
+        f_nested_seq: vec![],
     });
 
     let v3 = SerdeData::UnitVariant;
@@ -677,6 +684,10 @@ OtherTypes:
         MAP:
           KEY: U64
           VALUE: UNIT
+    - f_nested_seq:
+        SEQ:
+          SEQ:
+            TYPENAME: Struct
 PrimitiveTypes:
   STRUCT:
     - f_bool: BOOL
