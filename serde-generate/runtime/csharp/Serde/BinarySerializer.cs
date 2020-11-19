@@ -91,9 +91,9 @@ namespace Serde
                 throw new SerializationException("Invalid value for an unsigned int128");
             }
             byte[] content = value.ToByteArray();
-            // BigInteger.ToByteArray() may add a 16th most-significant zero
+            // BigInteger.ToByteArray() may add a 17th most-significant zero
             // byte for signing purpose: ignore it.
-            Debug.Assert(content.Length <= 16 || content[0] == 0);
+            Debug.Assert(content.Length <= 16 || content[16] == 0);
             int len = Math.Min(content.Length, 16);
 
             output.Write(content);
