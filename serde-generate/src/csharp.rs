@@ -947,7 +947,7 @@ switch (index) {{"#,
 
         writeln!(self.out, "public bool Equals({} other) {{", name)?;
         self.out.indent();
-        writeln!(self.out, "if (other == null) return true;")?;
+        writeln!(self.out, "if (other == null) return false;")?;
         writeln!(self.out, "if (ReferenceEquals(this, other)) return true;")?;
         writeln!(self.out, "if (GetType() != other.GetType()) return false;")?;
         writeln!(self.out, "switch (this) {{")?;
