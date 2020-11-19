@@ -904,7 +904,7 @@ fn test_bincode_get_positive_samples() {
 // This test requires --release because of deserialization of long (unit) vectors.
 #[cfg(not(debug_assertions))]
 fn test_lcs_get_positive_samples() {
-    assert_eq!(test_get_positive_samples(Runtime::Lcs), 97);
+    assert_eq!(test_get_positive_samples(Runtime::Lcs), 98);
 }
 
 // Make sure all the "positive" samples successfully deserialize with the reference Rust
@@ -928,7 +928,7 @@ fn test_bincode_get_negative_samples() {
 // This test requires --release because of deserialization of long (unit) vectors.
 #[cfg(not(debug_assertions))]
 fn test_lcs_get_negative_samples() {
-    assert_eq!(test_get_negative_samples(Runtime::Lcs), 59);
+    assert_eq!(test_get_negative_samples(Runtime::Lcs), 61);
 }
 
 // Make sure all the "negative" samples fail to deserialize with the reference Rust

@@ -64,6 +64,7 @@ fn test_on_larger_registry() {
     assert_eq!(
         map.get("SerdeData").unwrap(),
         &btreeset!(
+            "CStyleEnum",
             "List",
             "NewTypeStruct",
             "OtherTypes",
@@ -80,6 +81,7 @@ fn test_on_larger_registry() {
     assert_eq!(
         vector,
         vec![
+            "CStyleEnum",
             "List",
             "NewTypeStruct",
             "Struct",
