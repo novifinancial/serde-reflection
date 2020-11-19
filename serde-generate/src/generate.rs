@@ -70,9 +70,10 @@ struct Options {
     #[structopt(long)]
     serde_package_name: Option<String>,
 
-    /// Translate enums without variant data (c-style enums) into their equivalent in the target language.
+    /// Translate enums without variant data (c-style enums) into their equivalent in the target language,
+    /// if the target language and the generator code support them.
     #[structopt(long)]
-    c_style_enums: bool,
+    use_c_style_enums: bool,
 }
 
 fn get_codegen_config<'a, I>(name: String, runtimes: I, c_style_enums: bool) -> CodeGeneratorConfig
@@ -119,7 +120,7 @@ fn main() {
     match options.target_source_dir {
         None => {
             if let Some((registry, name)) = named_registry_opt {
-                let config = get_codegen_config(name, &runtimes, options.c_style_enums);
+                let config = get_codegen_config(name, &runtimes, options.use_c_style_enums);
 
                 let stdout = std::io::stdout();
                 let mut out = stdout.lock();
@@ -163,7 +164,7 @@ fn main() {
                 };
 
             if let Some((registry, name)) = named_registry_opt {
-                let config = get_codegen_config(name, &runtimes, options.c_style_enums);
+                let config = get_codegen_config(name, &runtimes, options.use_c_style_enums);
                 installer.install_module(&config, &registry).unwrap();
             }
 
