@@ -51,6 +51,7 @@ pub enum SerdeData {
     UnitVector(Vec<()>),
     SimpleList(SimpleList),
     ComplexMap(BTreeMap<([u32; 2], [u8; 4]), ()>),
+    CStyleEnum(CStyleEnum),
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -115,12 +116,22 @@ pub struct Tree<T> {
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct SimpleList(Option<Box<SimpleList>>);
 
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
+pub enum CStyleEnum {
+    A,
+    B,
+    C,
+    D,
+    E = 10,
+}
+
 /// The registry corresponding to the test data structures above .
 pub fn get_registry() -> Result<Registry> {
     let mut tracer = Tracer::new(TracerConfig::default());
     let samples = Samples::new();
     tracer.trace_type::<SerdeData>(&samples)?;
     tracer.trace_type::<List<SerdeData>>(&samples)?;
+    tracer.trace_type::<CStyleEnum>(&samples)?;
     tracer.registry()
 }
 
@@ -273,8 +284,10 @@ pub fn get_sample_values(has_canonical_maps: bool, has_floats: bool) -> Vec<Serd
 
     let v12 = SerdeData::ComplexMap(btreemap! { ([1,2], [3,4,5,6]) => ()});
 
+    let v13 = SerdeData::CStyleEnum(CStyleEnum::C);
+
     vec![
-        v0, v1, v2, v2bis, v2ter, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12,
+        v0, v1, v2, v2bis, v2ter, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13,
     ]
 }
 
@@ -580,7 +593,7 @@ impl Runtime {
 
 #[test]
 fn test_get_sample_values() {
-    assert_eq!(get_sample_values(false, true).len(), 15);
+    assert_eq!(get_sample_values(false, true).len(), 16);
 }
 
 #[test]
@@ -618,6 +631,18 @@ Test:
 fn test_get_registry() {
     let registry = get_registry().unwrap();
     let expected = r#"---
+CStyleEnum:
+  ENUM:
+    0:
+      A: UNIT
+    1:
+      B: UNIT
+    2:
+      C: UNIT
+    3:
+      D: UNIT
+    4:
+      E: UNIT
 List:
   ENUM:
     0:
@@ -737,6 +762,10 @@ SerdeData:
                     CONTENT: U8
                     SIZE: 4
             VALUE: UNIT
+    12:
+      CStyleEnum:
+        NEWTYPE:
+          TYPENAME: CStyleEnum
 SimpleList:
   NEWTYPESTRUCT:
     OPTION:
@@ -868,7 +897,7 @@ fn test_get_alternate_sample_with_container_depth(runtime: Runtime) {
 
 #[test]
 fn test_bincode_get_positive_samples() {
-    assert_eq!(test_get_positive_samples(Runtime::Bincode), 15);
+    assert_eq!(test_get_positive_samples(Runtime::Bincode), 16);
 }
 
 #[test]
