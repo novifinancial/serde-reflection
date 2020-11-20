@@ -247,6 +247,16 @@ using System.Numerics;"
         Ok(())
     }
 
+    fn is_nullable(&self, format: &Format) -> bool {
+        use Format::*;
+        match format {
+            TypeName(name) => !self.cstyle_enum_names.contains(name),
+            Unit | Str | Seq(_) | Map {..} | TupleArray { .. } => true,
+            Variable(_) => panic!("unexpected value"),
+            _ => false,
+        }
+    }
+
     fn quote_type(&self, format: &Format) -> String {
         use Format::*;
         match format {
@@ -415,11 +425,6 @@ using System.Numerics;"
                 common::mangle_type(format),
             ),
         }
-    }
-
-    fn is_nullable(&self, format: &Format) -> bool {
-        use Format::*;
-        matches!(format, Variable(_) | TypeName(_) | Unit | Str | Seq(_) | Map {..} | TupleArray { .. })
     }
 
     fn output_serialization_helper(&mut self, name: &str, format0: &Format) -> Result<()> {
