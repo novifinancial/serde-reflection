@@ -5,6 +5,7 @@ using Serde.Lcs;
 
 namespace Serde.Tests
 {
+    [TestFixture]
     public class TestLcs
     {
         [Test]
@@ -22,9 +23,9 @@ namespace Serde.Tests
             serializer.serialize_u128(BigInteger.Zero);
             CollectionAssert.AreEqual(serializer.get_bytes(), new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => serializer.serialize_u128(BigInteger.MinusOne));
+            Assert.Throws<SerializationException>(() => serializer.serialize_u128(BigInteger.MinusOne));
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => serializer.serialize_u128((BigInteger.One << 128) + 1));
+            Assert.Throws<SerializationException>(() => serializer.serialize_u128((BigInteger.One << 128) + 1));
         }
 
         [Test]
@@ -46,9 +47,9 @@ namespace Serde.Tests
             serializer.serialize_i128(-(BigInteger.One << 127));
             CollectionAssert.AreEqual(serializer.get_bytes(), new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x80 });
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => serializer.serialize_i128(BigInteger.One << 127));
+            Assert.Throws<SerializationException>(() => serializer.serialize_i128(BigInteger.One << 127));
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => serializer.serialize_i128(-((BigInteger.One << 127) + 1)));
+            Assert.Throws<SerializationException>(() => serializer.serialize_i128(-((BigInteger.One << 127) + 1)));
         }
 
         [Test]

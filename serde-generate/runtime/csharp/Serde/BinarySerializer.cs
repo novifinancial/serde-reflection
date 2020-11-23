@@ -94,14 +94,13 @@ namespace Serde
             // BigInteger.ToByteArray() may add a 17th most-significant zero
             // byte for signing purpose: ignore it.
             Debug.Assert(content.Length <= 16 || content[16] == 0);
-            int len = Math.Min(content.Length, 16);
-
-            output.Write(content);
-
-            // Complete with zeros if needed.
-            for (int i = len; i < 16; i++)
+            
+            for (int i = 0; i < 16; i++)
             {
-                output.Write((byte)0);
+                if (i < content.Length)
+                    output.Write(content[i]);
+                else
+                    output.Write((byte)0); // Complete with zeros if needed.
             }
         }
 
