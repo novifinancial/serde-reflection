@@ -1,17 +1,16 @@
 
+using System;
+
 namespace Serde
 {
-    public sealed class Unit
+    public sealed class Unit : IEquatable<Unit>
     {
         public Unit() { }
 
-        public override bool Equals(object obj)
-        {
-            if (obj == null || GetType() != obj.GetType())
-                return false;
-            return true;
-        }
+        public override bool Equals(object obj) => obj is Unit unit;
 
-        public override int GetHashCode() => 7;
+        public bool Equals(Unit other) => other != null;
+
+        public override int GetHashCode() => 793253941;
     }
 }

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 using System;
-using System.Collections.Immutable;
 using System.IO;
 using System.Numerics;
 using System.Text;
@@ -66,7 +65,7 @@ namespace Serde
             return utf8.GetString(content);
         }
 
-        public ImmutableArray<byte> deserialize_bytes()
+        public ValueArray<byte> deserialize_bytes()
         {
             long len = deserialize_len();
             if (len < 0 || len > int.MaxValue)
@@ -76,7 +75,7 @@ namespace Serde
             byte[] content = reader.ReadBytes((int)len);
             if (content.Length < len)
                 throw new DeserializationException($"Need {len - content.Length} more bytes for byte array");
-            return ImmutableArray.CreateRange<byte>(content);
+            return new ValueArray<byte>(content);
         }
 
         public bool deserialize_bool()
