@@ -23,8 +23,7 @@ lazy_static::lazy_static! {
 /// 2. Optionally, a `tempfile::TempDir` which deletes the directory when it goes out of scope
 fn create_test_dir(test_name: &'static str) -> (PathBuf, Option<tempfile::TempDir>) {
     // Set env var to generate into subdirectories for inspection
-    if true {
-        //std::env::var("TEST_USE_SUBDIR").is_ok() {
+    if std::env::var("TEST_USE_SUBDIR").is_ok() {
         let mut tries = 0;
         while tries < 20 {
             let test_dir_name = if tries == 0 {
@@ -155,7 +154,7 @@ namespace Serde.Tests {{
 
             Test test = Test.{1}Deserialize(input);
 
-            List<uint> a = new List<uint>(new uint[] {{ 4, 6 }});
+            var a = new ValueArray<uint>(new uint[] {{ 4, 6 }});
             var b = ((long)-3, (ulong)5);
             Choice c = new Choice.C((byte) 7);
             Test test2 = new Test(a, b, c);

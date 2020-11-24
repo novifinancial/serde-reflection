@@ -1,7 +1,6 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-using System.Collections.Immutable;
 using System.Numerics;
 
 namespace Serde
@@ -10,7 +9,7 @@ namespace Serde
     {
         string deserialize_str();
 
-        ImmutableArray<byte> deserialize_bytes();
+        ValueArray<byte> deserialize_bytes();
 
         bool deserialize_bool();
 

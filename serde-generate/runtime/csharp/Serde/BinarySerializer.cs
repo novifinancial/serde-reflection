@@ -2,10 +2,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 using System;
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Numerics;
 using System.Text;
 
@@ -64,12 +62,13 @@ namespace Serde
 
         public byte[] get_bytes() => buffer.ToArray();
 
-        public void serialize_str(string value) => serialize_bytes(ImmutableArray.CreateRange<byte>(utf8.GetBytes(value)));
+        public void serialize_str(string value) => serialize_bytes(new ValueArray<byte>(utf8.GetBytes(value)));
 
-        public void serialize_bytes(ImmutableArray<byte> value)
+        public void serialize_bytes(ValueArray<byte> value)
         {
-            serialize_len(value.Length);
-            output.Write(value.ToArray());
+            serialize_len(value.Count);
+            foreach (byte b in value)
+                output.Write(b);
         }
 
         public void serialize_bool(bool value) => output.Write(value);

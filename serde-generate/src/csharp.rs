@@ -166,7 +166,6 @@ where
             self.out,
             r"using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -251,7 +250,7 @@ using System.Numerics;"
         use Format::*;
         match format {
             TypeName(name) => !self.cstyle_enum_names.contains(name),
-            Unit | Str | Seq(_) | Map {..} | TupleArray { .. } => true,
+            Unit | Str | Seq(_) | Map { .. } | TupleArray { .. } => true,
             Variable(_) => panic!("unexpected value"),
             _ => false,
         }
@@ -277,12 +276,12 @@ using System.Numerics;"
             F64 => "double".into(),
             Char => "char".into(),
             Str => "string".into(),
-            Bytes => "ImmutableArray<byte>".into(),
+            Bytes => "ValueArray<byte>".into(),
 
             Option(format) => format!("Option<{}>", self.quote_type(format)),
-            Seq(format) => format!("List<{}>", self.quote_type(format)),
+            Seq(format) => format!("ValueArray<{}>", self.quote_type(format)),
             Map { key, value } => format!(
-                "Dictionary<{}, {}>",
+                "ValueDictionary<{}, {}>",
                 self.quote_type(key),
                 self.quote_type(value)
             ),
@@ -290,7 +289,7 @@ using System.Numerics;"
             TupleArray {
                 content,
                 size: _size,
-            } => format!("{}[]", self.quote_type(content),),
+            } => format!("ValueArray<{}>", self.quote_type(content),),
             Variable(_) => panic!("unexpected value"),
         }
     }
@@ -473,13 +472,15 @@ foreach (var item in value) {{
 serializer.serialize_len(value.Count);
 int[] offsets = new int[value.Count];
 int count = 0;
-foreach (var entry in value) {{
+foreach (KeyValuePair<{}, {}> entry in value) {{
     offsets[count++] = serializer.get_buffer_offset();
     {}
     {}
 }}
 serializer.sort_map_entries(offsets);
 "#,
+                    self.quote_type(key),
+                    self.quote_type(value),
                     self.quote_serialize_value("entry.Key", key),
                     self.quote_serialize_value("entry.Value", value)
                 )?;
@@ -497,8 +498,8 @@ serializer.sort_map_entries(offsets);
                 write!(
                     self.out,
                     r#"
-if (value.Length != {0}) {{
-    throw new SerializationException("Invalid length for fixed-size array: " + value.Length + " instead of " + {0});
+if (value.Count != {0}) {{
+    throw new SerializationException("Invalid length for fixed-size array: " + value.Count + " instead of " + {0});
 }}
 foreach (var item in value) {{
     {1}
@@ -547,11 +548,11 @@ if (!tag) {{
                     self.out,
                     r#"
 long length = deserializer.deserialize_len();
-var obj = new List<{0}>((int)length);
-for (long i = 0; i < length; i++) {{
-    obj.Add({1});
+{0}[] obj = new {0}[length];
+for (int i = 0; i < length; i++) {{
+    obj[i] = {1};
 }}
-return obj;
+return new ValueArray<{0}>(obj);
 "#,
                     self.quote_type(format),
                     self.quote_deserialize(format)
@@ -563,12 +564,12 @@ return obj;
                     self.out,
                     r#"
 long length = deserializer.deserialize_len();
-var obj = new Dictionary<{}, {}>();
+var obj = new Dictionary<{0}, {1}>();
 int previous_key_start = 0;
 int previous_key_end = 0;
 for (long i = 0; i < length; i++) {{
     int key_start = deserializer.get_buffer_offset();
-    var key = {};
+    var key = {2};
     int key_end = deserializer.get_buffer_offset();
     if (i > 0) {{
         deserializer.check_that_key_slices_are_increasing(
@@ -577,10 +578,10 @@ for (long i = 0; i < length; i++) {{
     }}
     previous_key_start = key_start;
     previous_key_end = key_end;
-    var value = {};
+    var value = {3};
     obj[key] = value;
 }}
-return obj;
+return new ValueDictionary<{0}, {1}>(obj);
 "#,
                     self.quote_type(key),
                     self.quote_type(value),
@@ -605,26 +606,16 @@ return ({}
             }
 
             TupleArray { content, size } => {
-                // Special case jagged arrays because the indexing order is opposite the declaration order
-                let mut jags = String::new();
-                let mut cptr = content;
-                while let TupleArray { content, size: _ } = &**cptr {
-                    jags += "[]";
-                    cptr = content;
-                }
-                let base_type = cptr;
-
                 write!(
                     self.out,
                     r#"
-{0}{1}[] obj = new {0}[{2}]{1};
-for (int i = 0; i < {2}; i++) {{
-    obj[i] = {3};
+{0}[] obj = new {0}[{1}];
+for (int i = 0; i < {1}; i++) {{
+    obj[i] = {2};
 }}
-return obj;
+return new ValueArray<{0}>(obj);
 "#,
-                    self.quote_type(base_type),
-                    jags,
+                    self.quote_type(content),
                     size,
                     self.quote_deserialize(content)
                 )?;
@@ -829,20 +820,11 @@ return obj;
         writeln!(self.out, "if (other == null) return false;")?;
         writeln!(self.out, "if (ReferenceEquals(this, other)) return true;")?;
         for field in fields {
-            if matches!(field.value, Format::Seq(_) | Format::Bytes | Format::Map { .. } | Format::TupleArray { .. })
-            {
-                writeln!(
-                    self.out,
-                    "if (!Enumerable.SequenceEqual({0}, other.{0})) return false;",
-                    &field.name,
-                )?;
-            } else {
-                writeln!(
-                    self.out,
-                    "if (!{0}.Equals(other.{0})) return false;",
-                    &field.name,
-                )?;
-            }
+            writeln!(
+                self.out,
+                "if (!{0}.Equals(other.{0})) return false;",
+                &field.name,
+            )?;
         }
         writeln!(self.out, "return true;")?;
         self.out.unindent();
