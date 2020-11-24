@@ -250,7 +250,7 @@ using System.Numerics;"
         use Format::*;
         match format {
             TypeName(name) => !self.cstyle_enum_names.contains(name),
-            Unit | Str | Seq(_) | Map { .. } | TupleArray { .. } => true,
+            Str | Seq(_) | Map { .. } | TupleArray { .. } => true,
             Variable(_) => panic!("unexpected value"),
             _ => false,
         }
