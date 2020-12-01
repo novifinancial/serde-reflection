@@ -281,7 +281,7 @@ namespace Serde.Tests {{
             SerdeData test2 = SerdeData.{2}Deserialize(input);
             Assert.AreEqual(test1, test2);
         }}
-        
+
         [Test, TestCaseSource("TestPositiveInputs")]
         public void TestChangedBytes(byte[] input) {{
             SerdeData test = SerdeData.{2}Deserialize(input);
@@ -291,12 +291,12 @@ namespace Serde.Tests {{
                 SerdeData test2;
                 try {{
                     test2 = SerdeData.{2}Deserialize(input2);
-                }} 
+                }}
                 catch (Exception) {{ continue; }}
                 Assert.AreNotEqual(test2, test);
             }}
         }}
-        
+
         [Test, TestCaseSource("TestNegativeInputs")]
         public void TestNegativeInputsFails(byte[] input) {{
             Assert.Catch(() => SerdeData.{2}Deserialize(input));
