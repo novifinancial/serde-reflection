@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `serde-generate/src/cpp.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>cpp.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../serde_generate/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><span class="help-button">?</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `serde-generate/src/cpp.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>cpp.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../serde_generate/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><span class="help-button">?</span>
                 <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
@@ -610,6 +612,9 @@
 <span id="609">609</span>
 <span id="610">610</span>
 <span id="611">611</span>
+<span id="612">612</span>
+<span id="613">613</span>
+<span id="614">614</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -650,7 +655,10 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">CodeGenerator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Create a C++ code generator for the given config.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">config</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">CodeGeneratorConfig</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">config</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">CodeGeneratorConfig</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">if</span> <span class="ident">config</span>.<span class="ident">c_style_enums</span> {
+            <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;C++ does not support generating c-style enums&quot;</span>);
+        }
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">external_qualified_names</span> <span class="op">=</span> <span class="ident">HashMap</span>::<span class="ident">new</span>();
         <span class="kw">for</span> (<span class="ident">namespace</span>, <span class="ident">names</span>) <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">config</span>.<span class="ident">external_definitions</span> {
             <span class="kw">for</span> <span class="ident">name</span> <span class="kw">in</span> <span class="ident">names</span> {
@@ -666,9 +674,9 @@
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">output</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Write</span>,
+        <span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">dyn</span> <span class="ident">Write</span>,
         <span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">Registry</span>,
-    ) <span class="op">-&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span><span class="op">&gt;&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">current_namespace</span> <span class="op">=</span> <span class="self">self</span>
             .<span class="ident">config</span>
             .<span class="ident">module_name</span>
@@ -715,7 +723,7 @@
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Write</span>,
 {
-    <span class="kw">fn</span> <span class="ident">output_preamble</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">output_preamble</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="macro">writeln</span><span class="macro">!</span>(
             <span class="self">self</span>.<span class="ident">out</span>,
             <span class="string">r#&quot;#pragma once
@@ -730,7 +738,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">output_open_namespace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">output_open_namespace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="macro">writeln</span><span class="macro">!</span>(
             <span class="self">self</span>.<span class="ident">out</span>,
             <span class="string">&quot;\nnamespace {} {{&quot;</span>,
@@ -740,7 +748,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">output_close_namespace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">output_close_namespace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
         <span class="macro">writeln</span><span class="macro">!</span>(
             <span class="self">self</span>.<span class="ident">out</span>,
@@ -760,7 +768,7 @@
         <span class="self">self</span>.<span class="ident">current_namespace</span>.<span class="ident">pop</span>();
     }
 
-    <span class="kw">fn</span> <span class="ident">output_comment</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">output_comment</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">current_namespace</span>.<span class="ident">clone</span>();
         <span class="ident">path</span>.<span class="ident">push</span>(<span class="ident">name</span>.<span class="ident">to_string</span>());
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">doc</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">comments</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>) {
@@ -770,7 +778,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">output_custom_code</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">output_custom_code</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">code</span>) <span class="op">=</span> <span class="self">self</span>
             .<span class="ident">generator</span>
             .<span class="ident">config</span>
@@ -783,18 +791,18 @@
     }
 
     <span class="doccomment">/// Compute a fully qualified reference to the container type `name`.</span>
-    <span class="kw">fn</span> <span class="ident">quote_qualified_name</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="ident">String</span> {
+    <span class="kw">fn</span> <span class="ident">quote_qualified_name</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
         <span class="self">self</span>.<span class="ident">generator</span>
             .<span class="ident">external_qualified_names</span>
             .<span class="ident">get</span>(<span class="ident">name</span>)
             .<span class="ident">cloned</span>()
-            .<span class="ident">unwrap_or_else</span>(<span class="op">||</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}::{}&quot;</span>, <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">module_name</span>, <span class="ident">name</span>))
+            .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}::{}&quot;</span>, <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">module_name</span>, <span class="ident">name</span>))
     }
 
-    <span class="kw">fn</span> <span class="ident">quote_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>, <span class="ident">require_known_size</span>: <span class="ident">bool</span>) <span class="op">-&gt;</span> <span class="ident">String</span> {
+    <span class="kw">fn</span> <span class="ident">quote_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>, <span class="ident">require_known_size</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
         <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
         <span class="kw">match</span> <span class="ident">format</span> {
-            <span class="ident">TypeName</span>(<span class="ident">x</span>) <span class="op">=&gt;</span> {
+            <span class="ident">TypeName</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">let</span> <span class="ident">qname</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">quote_qualified_name</span>(<span class="ident">x</span>);
                 <span class="kw">if</span> <span class="ident">require_known_size</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">known_sizes</span>.<span class="ident">contains</span>(<span class="ident">x</span>.<span class="ident">as_str</span>()) {
                     <span class="comment">// Cannot use unique_ptr because we need a copy constructor (e.g. for vectors)</span>
@@ -804,53 +812,53 @@
                     <span class="ident">qname</span>
                 }
             }
-            <span class="ident">Unit</span> <span class="op">=&gt;</span> <span class="string">&quot;std::monostate&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">Bool</span> <span class="op">=&gt;</span> <span class="string">&quot;bool&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">I8</span> <span class="op">=&gt;</span> <span class="string">&quot;int8_t&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">I16</span> <span class="op">=&gt;</span> <span class="string">&quot;int16_t&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">I32</span> <span class="op">=&gt;</span> <span class="string">&quot;int32_t&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">I64</span> <span class="op">=&gt;</span> <span class="string">&quot;int64_t&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">I128</span> <span class="op">=&gt;</span> <span class="string">&quot;serde::int128_t&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">U8</span> <span class="op">=&gt;</span> <span class="string">&quot;uint8_t&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">U16</span> <span class="op">=&gt;</span> <span class="string">&quot;uint16_t&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">U32</span> <span class="op">=&gt;</span> <span class="string">&quot;uint32_t&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">U64</span> <span class="op">=&gt;</span> <span class="string">&quot;uint64_t&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">U128</span> <span class="op">=&gt;</span> <span class="string">&quot;serde::uint128_t&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">F32</span> <span class="op">=&gt;</span> <span class="string">&quot;float&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">F64</span> <span class="op">=&gt;</span> <span class="string">&quot;double&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">Char</span> <span class="op">=&gt;</span> <span class="string">&quot;char32_t&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">Str</span> <span class="op">=&gt;</span> <span class="string">&quot;std::string&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">Bytes</span> <span class="op">=&gt;</span> <span class="string">&quot;std::vector&lt;uint8_t&gt;&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;std::monostate&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">Bool</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;bool&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">I8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;int8_t&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">I16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;int16_t&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">I32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;int32_t&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">I64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;int64_t&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">I128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;serde::int128_t&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">U8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;uint8_t&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">U16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;uint16_t&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">U32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;uint32_t&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">U64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;uint64_t&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">U128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;serde::uint128_t&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">F32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;float&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">F64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;double&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">Char</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;char32_t&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">Str</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;std::string&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">Bytes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;std::vector&lt;uint8_t&gt;&quot;</span>.<span class="ident">into</span>(),
 
-            <span class="prelude-ty">Option</span>(<span class="ident">format</span>) <span class="op">=&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
+            <span class="prelude-ty">Option</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
                 <span class="string">&quot;std::optional&lt;{}&gt;&quot;</span>,
                 <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format</span>, <span class="ident">require_known_size</span>)
             ),
-            <span class="ident">Seq</span>(<span class="ident">format</span>) <span class="op">=&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;std::vector&lt;{}&gt;&quot;</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format</span>, <span class="bool-val">false</span>)),
-            <span class="ident">Map</span> { <span class="ident">key</span>, <span class="ident">value</span> } <span class="op">=&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
+            <span class="ident">Seq</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;std::vector&lt;{}&gt;&quot;</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format</span>, <span class="bool-val">false</span>)),
+            <span class="ident">Map</span> { <span class="ident">key</span>, <span class="ident">value</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
                 <span class="string">&quot;std::map&lt;{}, {}&gt;&quot;</span>,
                 <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">key</span>, <span class="bool-val">false</span>),
                 <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">value</span>, <span class="bool-val">false</span>)
             ),
-            <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
+            <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
                 <span class="string">&quot;std::tuple&lt;{}&gt;&quot;</span>,
                 <span class="self">self</span>.<span class="ident">quote_types</span>(<span class="ident">formats</span>, <span class="ident">require_known_size</span>)
             ),
-            <span class="ident">TupleArray</span> { <span class="ident">content</span>, <span class="ident">size</span> } <span class="op">=&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
+            <span class="ident">TupleArray</span> { <span class="ident">content</span>, <span class="ident">size</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
                 <span class="string">&quot;std::array&lt;{}, {}&gt;&quot;</span>,
                 <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">content</span>, <span class="ident">require_known_size</span>),
                 <span class="kw-2">*</span><span class="ident">size</span>
             ),
 
-            <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;unexpected value&quot;</span>),
+            <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;unexpected value&quot;</span>),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">quote_types</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">formats</span>: <span class="kw-2">&amp;</span>[<span class="ident">Format</span>], <span class="ident">require_known_size</span>: <span class="ident">bool</span>) <span class="op">-&gt;</span> <span class="ident">String</span> {
+    <span class="kw">fn</span> <span class="ident">quote_types</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">formats</span>: <span class="kw-2">&amp;</span>[<span class="ident">Format</span>], <span class="ident">require_known_size</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
         <span class="ident">formats</span>
             .<span class="ident">iter</span>()
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">x</span>, <span class="ident">require_known_size</span>))
-            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;&gt;</span>()
+            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
             .<span class="ident">join</span>(<span class="string">&quot;, &quot;</span>)
     }
 
@@ -858,7 +866,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
         <span class="ident">fields</span>: <span class="kw-2">&amp;</span>[<span class="ident">Named</span><span class="op">&lt;</span><span class="ident">Format</span><span class="op">&gt;</span>],
-    ) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">output_comment</span>(<span class="ident">name</span>)<span class="question-mark">?</span>;
         <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;struct {} {{&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
@@ -881,33 +889,33 @@
         <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}};&quot;</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">output_variant</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">variant</span>: <span class="kw-2">&amp;</span><span class="ident">VariantFormat</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">output_variant</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">variant</span>: <span class="kw-2">&amp;</span><span class="ident">VariantFormat</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">VariantFormat</span>::<span class="kw-2">*</span>;
         <span class="kw">let</span> <span class="ident">fields</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">variant</span> {
-            <span class="ident">Unit</span> <span class="op">=&gt;</span> <span class="ident">Vec</span>::<span class="ident">new</span>(),
-            <span class="ident">NewType</span>(<span class="ident">format</span>) <span class="op">=&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Named</span> {
+            <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Vec</span>::<span class="ident">new</span>(),
+            <span class="ident">NewType</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Named</span> {
                 <span class="ident">name</span>: <span class="string">&quot;value&quot;</span>.<span class="ident">to_string</span>(),
                 <span class="ident">value</span>: <span class="ident">format</span>.<span class="ident">as_ref</span>().<span class="ident">clone</span>(),
             }],
-            <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Named</span> {
+            <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Named</span> {
                 <span class="ident">name</span>: <span class="string">&quot;value&quot;</span>.<span class="ident">to_string</span>(),
                 <span class="ident">value</span>: <span class="ident">Format</span>::<span class="ident">Tuple</span>(<span class="ident">formats</span>.<span class="ident">clone</span>()),
             }],
-            <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=&gt;</span> <span class="ident">fields</span>.<span class="ident">clone</span>(),
-            <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;incorrect value&quot;</span>),
+            <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">fields</span>.<span class="ident">clone</span>(),
+            <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;incorrect value&quot;</span>),
         };
         <span class="self">self</span>.<span class="ident">output_struct_or_variant_container</span>(<span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">fields</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">output_container_forward_definition</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">output_container_forward_definition</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\nstruct {};&quot;</span>, <span class="ident">name</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">output_enum_container</span>(
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-        <span class="ident">variants</span>: <span class="kw-2">&amp;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Named</span><span class="op">&lt;</span><span class="ident">VariantFormat</span><span class="op">&gt;&gt;</span>,
-    ) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="ident">variants</span>: <span class="kw-2">&amp;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Named</span><span class="op">&lt;</span><span class="ident">VariantFormat</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">output_comment</span>(<span class="ident">name</span>)<span class="question-mark">?</span>;
         <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;struct {} {{&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
@@ -922,7 +930,7 @@
             <span class="ident">variants</span>
                 .<span class="ident">iter</span>()
                 .<span class="ident">map</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">v</span>)<span class="op">|</span> <span class="ident">v</span>.<span class="ident">name</span>.<span class="ident">clone</span>())
-                .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;&gt;</span>()
+                .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
                 .<span class="ident">join</span>(<span class="string">&quot;, &quot;</span>),
         )<span class="question-mark">?</span>;
         <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
@@ -932,7 +940,7 @@
         <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}};&quot;</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">output_class_method_declarations</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">output_class_method_declarations</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="macro">writeln</span><span class="macro">!</span>(
             <span class="self">self</span>.<span class="ident">out</span>,
             <span class="string">&quot;friend bool operator==(const {}&amp;, const {}&amp;);&quot;</span>,
@@ -956,20 +964,20 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">output_container</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">ContainerFormat</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">output_container</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">ContainerFormat</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">ContainerFormat</span>::<span class="kw-2">*</span>;
         <span class="kw">let</span> <span class="ident">fields</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">format</span> {
-            <span class="ident">UnitStruct</span> <span class="op">=&gt;</span> <span class="ident">Vec</span>::<span class="ident">new</span>(),
-            <span class="ident">NewTypeStruct</span>(<span class="ident">format</span>) <span class="op">=&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Named</span> {
+            <span class="ident">UnitStruct</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Vec</span>::<span class="ident">new</span>(),
+            <span class="ident">NewTypeStruct</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Named</span> {
                 <span class="ident">name</span>: <span class="string">&quot;value&quot;</span>.<span class="ident">to_string</span>(),
                 <span class="ident">value</span>: <span class="ident">format</span>.<span class="ident">as_ref</span>().<span class="ident">clone</span>(),
             }],
-            <span class="ident">TupleStruct</span>(<span class="ident">formats</span>) <span class="op">=&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Named</span> {
+            <span class="ident">TupleStruct</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Named</span> {
                 <span class="ident">name</span>: <span class="string">&quot;value&quot;</span>.<span class="ident">to_string</span>(),
                 <span class="ident">value</span>: <span class="ident">Format</span>::<span class="ident">Tuple</span>(<span class="ident">formats</span>.<span class="ident">clone</span>()),
             }],
-            <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=&gt;</span> <span class="ident">fields</span>.<span class="ident">clone</span>(),
-            <span class="ident">Enum</span>(<span class="ident">variants</span>) <span class="op">=&gt;</span> {
+            <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">fields</span>.<span class="ident">clone</span>(),
+            <span class="ident">Enum</span>(<span class="ident">variants</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="self">self</span>.<span class="ident">output_enum_container</span>(<span class="ident">name</span>, <span class="ident">variants</span>)<span class="question-mark">?</span>;
                 <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
             }
@@ -977,7 +985,7 @@
         <span class="self">self</span>.<span class="ident">output_struct_or_variant_container</span>(<span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">fields</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">output_struct_equality_test</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">fields</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">str</span>]) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">output_struct_equality_test</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">fields</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">str</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="macro">writeln</span><span class="macro">!</span>(
             <span class="self">self</span>.<span class="ident">out</span>,
             <span class="string">&quot;\ninline bool operator==(const {0} &amp;lhs, const {0} &amp;rhs) {{&quot;</span>,
@@ -1000,7 +1008,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
         <span class="ident">encoding</span>: <span class="ident">Encoding</span>,
-    ) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="macro">writeln</span><span class="macro">!</span>(
             <span class="self">self</span>.<span class="ident">out</span>,
             <span class="string">r#&quot;
@@ -1020,7 +1028,7 @@ inline std::vector&lt;uint8_t&gt; {}::{}Serialize() const {{
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
         <span class="ident">encoding</span>: <span class="ident">Encoding</span>,
-    ) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="macro">writeln</span><span class="macro">!</span>(
             <span class="self">self</span>.<span class="ident">out</span>,
             <span class="string">r#&quot;
@@ -1045,7 +1053,7 @@ inline {} {}::{}Deserialize(std::vector&lt;uint8_t&gt; input) {{
         <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
         <span class="ident">fields</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">str</span>],
         <span class="ident">is_container</span>: <span class="ident">bool</span>,
-    ) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="macro">writeln</span><span class="macro">!</span>(
             <span class="self">self</span>.<span class="ident">out</span>,
             <span class="string">r#&quot;
@@ -1077,7 +1085,7 @@ void serde::Serializable&lt;{0}&gt;::serialize(const {0} &amp;obj, Serializer &a
         <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
         <span class="ident">fields</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">str</span>],
         <span class="ident">is_container</span>: <span class="ident">bool</span>,
-    ) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="macro">writeln</span><span class="macro">!</span>(
             <span class="self">self</span>.<span class="ident">out</span>,
             <span class="string">r#&quot;
@@ -1111,7 +1119,7 @@ template &lt;typename Deserializer&gt;
         <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
         <span class="ident">fields</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">str</span>],
         <span class="ident">is_container</span>: <span class="ident">bool</span>,
-    ) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">output_open_namespace</span>()<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">output_struct_equality_test</span>(<span class="ident">name</span>, <span class="ident">fields</span>)<span class="question-mark">?</span>;
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">serialization</span> {
@@ -1129,35 +1137,35 @@ template &lt;typename Deserializer&gt;
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">get_variant_fields</span>(<span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">VariantFormat</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">get_variant_fields</span>(<span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">VariantFormat</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">VariantFormat</span>::<span class="kw-2">*</span>;
         <span class="kw">match</span> <span class="ident">format</span> {
-            <span class="ident">Unit</span> <span class="op">=&gt;</span> <span class="ident">Vec</span>::<span class="ident">new</span>(),
-            <span class="ident">NewType</span>(<span class="ident">_format</span>) <span class="op">=&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;value&quot;</span>],
-            <span class="ident">Tuple</span>(<span class="ident">_formats</span>) <span class="op">=&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;value&quot;</span>],
-            <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=&gt;</span> <span class="ident">fields</span>
+            <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Vec</span>::<span class="ident">new</span>(),
+            <span class="ident">NewType</span>(<span class="ident">_format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;value&quot;</span>],
+            <span class="ident">Tuple</span>(<span class="ident">_formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;value&quot;</span>],
+            <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">fields</span>
                 .<span class="ident">iter</span>()
                 .<span class="ident">map</span>(<span class="op">|</span><span class="ident">field</span><span class="op">|</span> <span class="ident">field</span>.<span class="ident">name</span>.<span class="ident">as_str</span>())
-                .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;&gt;</span>(),
-            <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;incorrect value&quot;</span>),
+                .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>(),
+            <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;incorrect value&quot;</span>),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">output_container_traits</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">ContainerFormat</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">output_container_traits</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">ContainerFormat</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">ContainerFormat</span>::<span class="kw-2">*</span>;
         <span class="kw">match</span> <span class="ident">format</span> {
-            <span class="ident">UnitStruct</span> <span class="op">=&gt;</span> <span class="self">self</span>.<span class="ident">output_struct_traits</span>(<span class="ident">name</span>, <span class="kw-2">&amp;</span>[], <span class="bool-val">true</span>),
-            <span class="ident">NewTypeStruct</span>(<span class="ident">_format</span>) <span class="op">=&gt;</span> <span class="self">self</span>.<span class="ident">output_struct_traits</span>(<span class="ident">name</span>, <span class="kw-2">&amp;</span>[<span class="string">&quot;value&quot;</span>], <span class="bool-val">true</span>),
-            <span class="ident">TupleStruct</span>(<span class="ident">_formats</span>) <span class="op">=&gt;</span> <span class="self">self</span>.<span class="ident">output_struct_traits</span>(<span class="ident">name</span>, <span class="kw-2">&amp;</span>[<span class="string">&quot;value&quot;</span>], <span class="bool-val">true</span>),
-            <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=&gt;</span> <span class="self">self</span>.<span class="ident">output_struct_traits</span>(
+            <span class="ident">UnitStruct</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">output_struct_traits</span>(<span class="ident">name</span>, <span class="kw-2">&amp;</span>[], <span class="bool-val">true</span>),
+            <span class="ident">NewTypeStruct</span>(<span class="ident">_format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">output_struct_traits</span>(<span class="ident">name</span>, <span class="kw-2">&amp;</span>[<span class="string">&quot;value&quot;</span>], <span class="bool-val">true</span>),
+            <span class="ident">TupleStruct</span>(<span class="ident">_formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">output_struct_traits</span>(<span class="ident">name</span>, <span class="kw-2">&amp;</span>[<span class="string">&quot;value&quot;</span>], <span class="bool-val">true</span>),
+            <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">output_struct_traits</span>(
                 <span class="ident">name</span>,
                 <span class="kw-2">&amp;</span><span class="ident">fields</span>
                     .<span class="ident">iter</span>()
                     .<span class="ident">map</span>(<span class="op">|</span><span class="ident">field</span><span class="op">|</span> <span class="ident">field</span>.<span class="ident">name</span>.<span class="ident">as_str</span>())
-                    .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;&gt;</span>(),
+                    .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>(),
                 <span class="bool-val">true</span>,
             ),
-            <span class="ident">Enum</span>(<span class="ident">variants</span>) <span class="op">=&gt;</span> {
+            <span class="ident">Enum</span>(<span class="ident">variants</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="self">self</span>.<span class="ident">output_struct_traits</span>(<span class="ident">name</span>, <span class="kw-2">&amp;</span>[<span class="string">&quot;value&quot;</span>], <span class="bool-val">true</span>)<span class="question-mark">?</span>;
                 <span class="kw">for</span> <span class="ident">variant</span> <span class="kw">in</span> <span class="ident">variants</span>.<span class="ident">values</span>() {
                     <span class="self">self</span>.<span class="ident">output_struct_traits</span>(
@@ -1178,11 +1186,11 @@ template &lt;typename Deserializer&gt;
 }
 
 <span class="kw">impl</span> <span class="ident">Installer</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">install_dir</span>: <span class="ident">PathBuf</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">install_dir</span>: <span class="ident">PathBuf</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">Installer</span> { <span class="ident">install_dir</span> }
     }
 
-    <span class="kw">fn</span> <span class="ident">create_header_file</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">File</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">create_header_file</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">File</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">dir_path</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">install_dir</span>;
         <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">create_dir_all</span>(<span class="ident">dir_path</span>)<span class="question-mark">?</span>;
         <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">File</span>::<span class="ident">create</span>(<span class="ident">dir_path</span>.<span class="ident">join</span>(<span class="ident">name</span>.<span class="ident">to_string</span>() <span class="op">+</span> <span class="string">&quot;.hpp&quot;</span>))
@@ -1190,19 +1198,19 @@ template &lt;typename Deserializer&gt;
 }
 
 <span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">SourceInstaller</span> <span class="kw">for</span> <span class="ident">Installer</span> {
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span><span class="op">&gt;</span>;
+    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span><span class="op">&gt;</span>;
 
     <span class="kw">fn</span> <span class="ident">install_module</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">config</span>: <span class="kw-2">&amp;</span><span class="kw">crate</span>::<span class="ident">CodeGeneratorConfig</span>,
         <span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">Registry</span>,
-    ) <span class="op">-&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">create_header_file</span>(<span class="kw-2">&amp;</span><span class="ident">config</span>.<span class="ident">module_name</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">generator</span> <span class="op">=</span> <span class="ident">CodeGenerator</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="ident">config</span>);
         <span class="ident">generator</span>.<span class="ident">output</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">file</span>, <span class="kw-2">&amp;</span><span class="ident">registry</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">install_serde_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">install_serde_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">create_header_file</span>(<span class="string">&quot;serde&quot;</span>)<span class="question-mark">?</span>;
         <span class="macro">write</span><span class="macro">!</span>(<span class="ident">file</span>, <span class="string">&quot;{}&quot;</span>, <span class="macro">include_str</span><span class="macro">!</span>(<span class="string">&quot;../runtime/cpp/serde.hpp&quot;</span>))<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">create_header_file</span>(<span class="string">&quot;binary&quot;</span>)<span class="question-mark">?</span>;
@@ -1210,13 +1218,13 @@ template &lt;typename Deserializer&gt;
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">install_bincode_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">install_bincode_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">create_header_file</span>(<span class="string">&quot;bincode&quot;</span>)<span class="question-mark">?</span>;
         <span class="macro">write</span><span class="macro">!</span>(<span class="ident">file</span>, <span class="string">&quot;{}&quot;</span>, <span class="macro">include_str</span><span class="macro">!</span>(<span class="string">&quot;../runtime/cpp/bincode.hpp&quot;</span>))<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">install_lcs_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">install_lcs_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">create_header_file</span>(<span class="string">&quot;lcs&quot;</span>)<span class="question-mark">?</span>;
         <span class="macro">write</span><span class="macro">!</span>(<span class="ident">file</span>, <span class="string">&quot;{}&quot;</span>, <span class="macro">include_str</span><span class="macro">!</span>(<span class="string">&quot;../runtime/cpp/lcs.hpp&quot;</span>))<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())

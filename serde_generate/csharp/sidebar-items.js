@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["CodeGenerator","Main configuration object for code-generation in C#."],["Installer","Installer for generated source files in C#."]]});
