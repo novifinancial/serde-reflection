@@ -81,7 +81,7 @@ public abstract class BinarySerializer implements Serializer {
             throw new java.lang.IllegalArgumentException("Invalid value for an unsigned int128");
         }
         byte[] content = value.toByteArray();
-        // BigInteger.toByteArray() may add a 16th most-significant zero
+        // BigInteger.toByteArray() may add a most-significant zero
         // byte for signing purpose: ignore it.
         assert content.length <= 16 || content[0] == 0;
         int len = Math.min(content.length, 16);
