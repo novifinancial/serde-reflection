@@ -458,6 +458,6 @@ serde_bytes = "0.11"
     }
 
     fn install_bcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        Self::runtime_installation_message("binary-canonical-serialization")
+        Self::runtime_installation_message("bcs")
     }
 }

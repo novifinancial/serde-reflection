@@ -353,9 +353,7 @@ impl Runtime {
 
     pub fn rust_package(self) -> &'static str {
         match self {
-            Self::Bcs => {
-                "bcs = { version = \"0.1.0\", package = \"binary-canonical-serialization\" }"
-            }
+            Self::Bcs => "bcs = \"0.1.1\"",
             Self::Bincode => "bincode = \"1.3\"",
         }
     }
@@ -365,7 +363,7 @@ impl Runtime {
         T: serde::Serialize,
     {
         match self {
-            Self::Bcs => binary_canonical_serialization::to_bytes(value).unwrap(),
+            Self::Bcs => bcs::to_bytes(value).unwrap(),
             Self::Bincode => bincode::serialize(value).unwrap(),
         }
     }
@@ -375,7 +373,7 @@ impl Runtime {
         T: serde::de::DeserializeOwned,
     {
         match self {
-            Self::Bcs => binary_canonical_serialization::from_bytes(bytes).ok(),
+            Self::Bcs => bcs::from_bytes(bytes).ok(),
             Self::Bincode => bincode::deserialize(bytes).ok(),
         }
     }
@@ -458,14 +456,14 @@ impl Runtime {
 
     pub fn maximum_length(self) -> Option<usize> {
         match self {
-            Self::Bcs => Some(binary_canonical_serialization::MAX_SEQUENCE_LENGTH),
+            Self::Bcs => Some(bcs::MAX_SEQUENCE_LENGTH),
             Self::Bincode => None,
         }
     }
 
     pub fn maximum_container_depth(self) -> Option<usize> {
         match self {
-            Self::Bcs => Some(binary_canonical_serialization::MAX_CONTAINER_DEPTH),
+            Self::Bcs => Some(bcs::MAX_CONTAINER_DEPTH),
             Self::Bincode => None,
         }
     }
