@@ -27,6 +27,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "bcs"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "de93f2dbfb1c5259e38da712ab293659ef9139b496d5253478bc8a709c295610"
+dependencies = [
+ "serde",
+ "thiserror",
+]
+
+[[package]]
 name = "bincode"
 version = "1.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -157,16 +167,6 @@ name = "libc"
 version = "0.2.79"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2448f6066e80e3bfc792e9c98bf705b4b0fc6e8ef5b43e5889aff0eaa9c58743"
-
-[[package]]
-name = "binary-canonical-serialization"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7d8dddda30939e963210412740c920779b3b57d0b8ab58d94d562cc433d621f1"
-dependencies = [
- "serde",
- "thiserror",
-]
 
 [[package]]
 name = "linked-hash-map"
@@ -309,12 +309,12 @@ dependencies = [
 name = "serde-generate"
 version = "0.16.1"
 dependencies = [
+ "bcs",
  "bincode",
  "heck",
  "hex",
  "include_dir",
  "lazy_static",
- "binary-canonical-serialization",
  "maplit",
  "serde",
  "serde-reflection",
