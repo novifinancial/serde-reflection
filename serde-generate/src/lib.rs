@@ -26,7 +26,7 @@
 //! This crate provides easy-to-deploy runtime libraries for the following binary formats, in all supported languages:
 //!
 //! * [Bincode](https://docs.rs/bincode/1.3.1/bincode/),
-//! * [BCS](https://diem.github.io/diem/bcs/index.html) (short for "Binary Canonical Serialization" -- formerly known as "LCS" or "Libra Canonical Serialization").
+//! * [BCS](https://github.com/diem/bcs) (short for "Binary Canonical Serialization" -- formerly known as "LCS" or "Libra Canonical Serialization").
 //!
 //! ## Quick Start with Python and Bincode
 //!
