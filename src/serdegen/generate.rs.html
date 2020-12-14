@@ -217,7 +217,7 @@
 <span class="kw">enum</span> <span class="ident">Runtime</span> {
     <span class="ident">Serde</span>,
     <span class="ident">Bincode</span>,
-    <span class="ident">Lcs</span>,
+    <span class="ident">Bcs</span>,
 }
 }
 
@@ -270,8 +270,8 @@
             <span class="ident">Runtime</span>::<span class="ident">Bincode</span> <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="ident">encodings</span>.<span class="ident">push</span>(<span class="ident">Encoding</span>::<span class="ident">Bincode</span>);
             }
-            <span class="ident">Runtime</span>::<span class="ident">Lcs</span> <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="ident">encodings</span>.<span class="ident">push</span>(<span class="ident">Encoding</span>::<span class="ident">Lcs</span>);
+            <span class="ident">Runtime</span>::<span class="ident">Bcs</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">encodings</span>.<span class="ident">push</span>(<span class="ident">Encoding</span>::<span class="ident">Bcs</span>);
             }
             <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> (),
         }
@@ -356,7 +356,7 @@
                 <span class="kw">match</span> <span class="ident">runtime</span> {
                     <span class="ident">Runtime</span>::<span class="ident">Serde</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">installer</span>.<span class="ident">install_serde_runtime</span>().<span class="ident">unwrap</span>(),
                     <span class="ident">Runtime</span>::<span class="ident">Bincode</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">installer</span>.<span class="ident">install_bincode_runtime</span>().<span class="ident">unwrap</span>(),
-                    <span class="ident">Runtime</span>::<span class="ident">Lcs</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">installer</span>.<span class="ident">install_lcs_runtime</span>().<span class="ident">unwrap</span>(),
+                    <span class="ident">Runtime</span>::<span class="ident">Bcs</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">installer</span>.<span class="ident">install_bcs_runtime</span>().<span class="ident">unwrap</span>(),
                 }
             }
         }

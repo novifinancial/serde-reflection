@@ -930,12 +930,12 @@ def {0}_deserialize(input: bytes) -&gt; &#39;{1}&#39;:
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">install_lcs_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">create_module_init_file</span>(<span class="string">&quot;lcs&quot;</span>)<span class="question-mark">?</span>;
+    <span class="kw">fn</span> <span class="ident">install_bcs_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">create_module_init_file</span>(<span class="string">&quot;bcs&quot;</span>)<span class="question-mark">?</span>;
         <span class="macro">write</span><span class="macro">!</span>(
             <span class="ident">file</span>,
             <span class="string">&quot;{}&quot;</span>,
-            <span class="self">self</span>.<span class="ident">fix_serde_package</span>(<span class="macro">include_str</span><span class="macro">!</span>(<span class="string">&quot;../runtime/python/lcs/__init__.py&quot;</span>))
+            <span class="self">self</span>.<span class="ident">fix_serde_package</span>(<span class="macro">include_str</span><span class="macro">!</span>(<span class="string">&quot;../runtime/python/bcs/__init__.py&quot;</span>))
         )<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }

@@ -2,6 +2,7 @@ var N = null;var sourcesIndex = {};
 sourcesIndex["ansi_term"] = {"name":"","files":["ansi.rs","debug.rs","difference.rs","display.rs","lib.rs","style.rs","windows.rs","write.rs"]};
 sourcesIndex["anyhow"] = {"name":"","files":["backtrace.rs","chain.rs","context.rs","error.rs","fmt.rs","kind.rs","lib.rs","macros.rs","wrapper.rs"]};
 sourcesIndex["atty"] = {"name":"","files":["lib.rs"]};
+sourcesIndex["bcs"] = {"name":"","files":["de.rs","error.rs","lib.rs","ser.rs","test_helpers.rs"]};
 sourcesIndex["bincode"] = {"name":"","dirs":[{"name":"config","files":["endian.rs","int.rs","legacy.rs","limit.rs","mod.rs","trailing.rs"]},{"name":"de","files":["mod.rs","read.rs"]},{"name":"ser","files":["mod.rs"]}],"files":["error.rs","internal.rs","lib.rs"]};
 sourcesIndex["bitflags"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["byteorder"] = {"name":"","files":["io.rs","lib.rs"]};
@@ -13,7 +14,6 @@ sourcesIndex["include_dir"] = {"name":"","files":["dir.rs","file.rs","globs.rs",
 sourcesIndex["include_dir_impl"] = {"name":"","files":["dir.rs","file.rs","lib.rs"]};
 sourcesIndex["lazy_static"] = {"name":"","files":["inline_lazy.rs","lib.rs"]};
 sourcesIndex["libc"] = {"name":"","dirs":[{"name":"unix","dirs":[{"name":"linux_like","dirs":[{"name":"linux","dirs":[{"name":"gnu","dirs":[{"name":"b64","dirs":[{"name":"x86_64","files":["align.rs","mod.rs","not_x32.rs"]}],"files":["mod.rs"]}],"files":["align.rs","mod.rs"]}],"files":["align.rs","mod.rs"]}],"files":["mod.rs"]}],"files":["align.rs","mod.rs"]}],"files":["fixed_width_ints.rs","lib.rs","macros.rs"]};
-sourcesIndex["libra_canonical_serialization"] = {"name":"","files":["de.rs","error.rs","lib.rs","ser.rs","test_helpers.rs"]};
 sourcesIndex["linked_hash_map"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["maplit"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["proc_macro2"] = {"name":"","files":["detection.rs","fallback.rs","lib.rs","marker.rs","parse.rs","wrapper.rs"]};

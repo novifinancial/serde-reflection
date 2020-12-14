@@ -147,7 +147,7 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Encoding</span> {
     <span class="ident">Bincode</span>,
-    <span class="ident">Lcs</span>,
+    <span class="ident">Bcs</span>,
 }
 
 <span class="doccomment">/// Track types definitions provided by external modules.</span>
@@ -181,8 +181,8 @@
     <span class="doccomment">/// Install the bincode runtime.</span>
     <span class="kw">fn</span> <span class="ident">install_bincode_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span>;
 
-    <span class="doccomment">/// Install the Libra Canonical Serialization (LCS) runtime.</span>
-    <span class="kw">fn</span> <span class="ident">install_lcs_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// Install the Libra Canonical Serialization (BCS) runtime.</span>
+    <span class="kw">fn</span> <span class="ident">install_bcs_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span>;
 }
 
 <span class="kw">impl</span> <span class="ident">CodeGeneratorConfig</span> {
@@ -248,7 +248,7 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">name</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="ident">Encoding</span>::<span class="ident">Bincode</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;bincode&quot;</span>,
-            <span class="ident">Encoding</span>::<span class="ident">Lcs</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;lcs&quot;</span>,
+            <span class="ident">Encoding</span>::<span class="ident">Bcs</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;bcs&quot;</span>,
         }
     }
 }

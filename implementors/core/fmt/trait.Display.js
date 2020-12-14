@@ -1,10 +1,10 @@
 (function() {var implementors = {};
 implementors["ansi_term"] = [{"text":"impl Display for Prefix","synthetic":false,"types":[]},{"text":"impl Display for Infix","synthetic":false,"types":[]},{"text":"impl Display for Suffix","synthetic":false,"types":[]},{"text":"impl&lt;'a&gt; Display for ANSIString&lt;'a&gt;","synthetic":false,"types":[]},{"text":"impl&lt;'a&gt; Display for ANSIStrings&lt;'a&gt;","synthetic":false,"types":[]}];
 implementors["anyhow"] = [{"text":"impl Display for Error","synthetic":false,"types":[]}];
+implementors["bcs"] = [{"text":"impl Display for Error","synthetic":false,"types":[]}];
 implementors["bincode"] = [{"text":"impl Display for ErrorKind","synthetic":false,"types":[]}];
 implementors["clap"] = [{"text":"impl&lt;'n, 'e&gt; Display for App&lt;'n, 'e&gt;","synthetic":false,"types":[]},{"text":"impl Display for Shell","synthetic":false,"types":[]},{"text":"impl Display for Error","synthetic":false,"types":[]}];
 implementors["glob"] = [{"text":"impl Display for GlobError","synthetic":false,"types":[]},{"text":"impl Display for PatternError","synthetic":false,"types":[]},{"text":"impl Display for Pattern","synthetic":false,"types":[]}];
-implementors["libra_canonical_serialization"] = [{"text":"impl Display for Error","synthetic":false,"types":[]}];
 implementors["proc_macro2"] = [{"text":"impl Display for TokenStream","synthetic":false,"types":[]},{"text":"impl Display for LexError","synthetic":false,"types":[]},{"text":"impl Display for TokenTree","synthetic":false,"types":[]},{"text":"impl Display for Group","synthetic":false,"types":[]},{"text":"impl Display for Punct","synthetic":false,"types":[]},{"text":"impl Display for Ident","synthetic":false,"types":[]},{"text":"impl Display for Literal","synthetic":false,"types":[]}];
 implementors["serde"] = [{"text":"impl Display for Error","synthetic":false,"types":[]},{"text":"impl&lt;'a&gt; Display for Unexpected&lt;'a&gt;","synthetic":false,"types":[]},{"text":"impl&lt;'a&gt; Display for dyn Expected + 'a","synthetic":false,"types":[]}];
 implementors["serde_reflection"] = [{"text":"impl Display for Error","synthetic":false,"types":[]}];

@@ -1977,10 +1977,10 @@ public static {0} {1}Deserialize(byte[] input) throws com.novi.serde.Deserializa
         )
     }
 
-    <span class="kw">fn</span> <span class="ident">install_lcs_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">install_bcs_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">install_runtime</span>(
-            <span class="macro">include_directory</span><span class="macro">!</span>(<span class="string">&quot;runtime/java/com/novi/lcs&quot;</span>),
-            <span class="string">&quot;com/novi/lcs&quot;</span>,
+            <span class="macro">include_directory</span><span class="macro">!</span>(<span class="string">&quot;runtime/java/com/novi/bcs&quot;</span>),
+            <span class="string">&quot;com/novi/bcs&quot;</span>,
         )
     }
 }
