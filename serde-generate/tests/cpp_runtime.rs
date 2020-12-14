@@ -12,8 +12,8 @@ use std::process::Command;
 use tempfile::tempdir;
 
 #[test]
-fn test_cpp_lcs_runtime_on_simple_date() {
-    test_cpp_runtime_on_simple_date(Runtime::Lcs);
+fn test_cpp_bcs_runtime_on_simple_date() {
+    test_cpp_runtime_on_simple_date(Runtime::Bcs);
 }
 
 #[test]
@@ -97,8 +97,8 @@ int main() {{
 }
 
 #[test]
-fn test_cpp_lcs_runtime_on_supported_types() {
-    test_cpp_runtime_on_supported_types(Runtime::Lcs);
+fn test_cpp_bcs_runtime_on_supported_types() {
+    test_cpp_runtime_on_supported_types(Runtime::Bcs);
 }
 
 #[test]

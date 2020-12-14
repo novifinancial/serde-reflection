@@ -606,9 +606,9 @@ impl crate::SourceInstaller for Installer {
         Ok(())
     }
 
-    fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        let mut file = self.create_header_file("lcs")?;
-        write!(file, "{}", include_str!("../runtime/cpp/lcs.hpp"))?;
+    fn install_bcs_runtime(&self) -> std::result::Result<(), Self::Error> {
+        let mut file = self.create_header_file("bcs")?;
+        write!(file, "{}", include_str!("../runtime/cpp/bcs.hpp"))?;
         Ok(())
     }
 }

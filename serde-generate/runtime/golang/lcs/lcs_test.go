@@ -1,13 +1,13 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-package lcs_test
+package bcs_test
 
 import (
 	"fmt"
 	"testing"
 
-	"github.com/novifinancial/serde-reflection/serde-generate/runtime/golang/lcs"
+	"github.com/novifinancial/serde-reflection/serde-generate/runtime/golang/bcs"
 	"github.com/novifinancial/serde-reflection/serde-generate/runtime/golang/serde"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -30,8 +30,8 @@ func TestSerializeDeserializeBytes(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := lcs.NewSerializer()
-			d := lcs.NewDeserializer(tc.expected)
+			s := bcs.NewSerializer()
+			d := bcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeBytes(tc.target)
 			require.NoError(t, err)
@@ -44,7 +44,7 @@ func TestSerializeDeserializeBytes(t *testing.T) {
 		})
 	}
 	t.Run("deserialize error: EOF", func(t *testing.T) {
-		d := lcs.NewDeserializer([]byte{})
+		d := bcs.NewDeserializer([]byte{})
 		_, err := d.DeserializeBytes()
 		require.EqualError(t, err, "EOF")
 	})
@@ -67,8 +67,8 @@ func TestSerializeDeserializeStr(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.target, func(t *testing.T) {
-			s := lcs.NewSerializer()
-			d := lcs.NewDeserializer(tc.expected)
+			s := bcs.NewSerializer()
+			d := bcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeStr(tc.target)
 			require.NoError(t, err)
@@ -81,7 +81,7 @@ func TestSerializeDeserializeStr(t *testing.T) {
 		})
 	}
 	t.Run("deserialize error: EOF", func(t *testing.T) {
-		d := lcs.NewDeserializer([]byte{})
+		d := bcs.NewDeserializer([]byte{})
 		_, err := d.DeserializeStr()
 		require.EqualError(t, err, "EOF")
 	})
@@ -104,8 +104,8 @@ func TestSerializeDeserializeBool(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := lcs.NewSerializer()
-			d := lcs.NewDeserializer(tc.expected)
+			s := bcs.NewSerializer()
+			d := bcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeBool(tc.target)
 			require.NoError(t, err)
@@ -119,13 +119,13 @@ func TestSerializeDeserializeBool(t *testing.T) {
 	}
 
 	t.Run("deserialize error: EOF", func(t *testing.T) {
-		d := lcs.NewDeserializer([]byte{})
+		d := bcs.NewDeserializer([]byte{})
 		_, err := d.DeserializeBool()
 		require.EqualError(t, err, "EOF")
 	})
 
 	t.Run("deserialize error: invalid byte", func(t *testing.T) {
-		d := lcs.NewDeserializer([]byte{2})
+		d := bcs.NewDeserializer([]byte{2})
 		_, err := d.DeserializeBool()
 		require.EqualError(t, err, "invalid bool byte: expected 0 / 1, but got 2")
 	})
@@ -144,8 +144,8 @@ func TestSerializeDeserializeUnit(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := lcs.NewSerializer()
-			d := lcs.NewDeserializer(tc.expected)
+			s := bcs.NewSerializer()
+			d := bcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeUnit(tc.target)
 			require.NoError(t, err)
@@ -176,8 +176,8 @@ func TestSerializeDeserializeU8(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := lcs.NewSerializer()
-			d := lcs.NewDeserializer(tc.expected)
+			s := bcs.NewSerializer()
+			d := bcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeU8(tc.target)
 			require.NoError(t, err)
@@ -191,7 +191,7 @@ func TestSerializeDeserializeU8(t *testing.T) {
 	}
 
 	t.Run("deserialize error: EOF", func(t *testing.T) {
-		d := lcs.NewDeserializer([]byte{})
+		d := bcs.NewDeserializer([]byte{})
 		_, err := d.DeserializeU8()
 		require.EqualError(t, err, "EOF")
 	})
@@ -218,8 +218,8 @@ func TestSerializeDeserializeU16(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := lcs.NewSerializer()
-			d := lcs.NewDeserializer(tc.expected)
+			s := bcs.NewSerializer()
+			d := bcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeU16(tc.target)
 			require.NoError(t, err)
@@ -232,7 +232,7 @@ func TestSerializeDeserializeU16(t *testing.T) {
 		})
 	}
 	t.Run("deserialize error: EOF", func(t *testing.T) {
-		d := lcs.NewDeserializer([]byte{})
+		d := bcs.NewDeserializer([]byte{})
 		_, err := d.DeserializeU16()
 		require.EqualError(t, err, "EOF")
 	})
@@ -263,8 +263,8 @@ func TestSerializeDeserializeU32(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := lcs.NewSerializer()
-			d := lcs.NewDeserializer(tc.expected)
+			s := bcs.NewSerializer()
+			d := bcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeU32(tc.target)
 			require.NoError(t, err)
@@ -277,7 +277,7 @@ func TestSerializeDeserializeU32(t *testing.T) {
 		})
 	}
 	t.Run("deserialize error: EOF", func(t *testing.T) {
-		d := lcs.NewDeserializer([]byte{})
+		d := bcs.NewDeserializer([]byte{})
 		_, err := d.DeserializeU32()
 		require.EqualError(t, err, "EOF")
 	})
@@ -312,8 +312,8 @@ func TestSerializeDeserializeU64(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := lcs.NewSerializer()
-			d := lcs.NewDeserializer(tc.expected)
+			s := bcs.NewSerializer()
+			d := bcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeU64(tc.target)
 			require.NoError(t, err)
@@ -326,7 +326,7 @@ func TestSerializeDeserializeU64(t *testing.T) {
 		})
 	}
 	t.Run("deserialize error: EOF", func(t *testing.T) {
-		d := lcs.NewDeserializer([]byte{})
+		d := bcs.NewDeserializer([]byte{})
 		_, err := d.DeserializeU64()
 		require.EqualError(t, err, "EOF")
 	})
@@ -374,8 +374,8 @@ func TestSerializeDeserializeU128(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := lcs.NewSerializer()
-			d := lcs.NewDeserializer(tc.expected)
+			s := bcs.NewSerializer()
+			d := bcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeU128(tc.target)
 			require.NoError(t, err)
@@ -388,7 +388,7 @@ func TestSerializeDeserializeU128(t *testing.T) {
 		})
 	}
 	t.Run("deserialize error: EOF", func(t *testing.T) {
-		d := lcs.NewDeserializer([]byte{})
+		d := bcs.NewDeserializer([]byte{})
 		_, err := d.DeserializeU128()
 		require.EqualError(t, err, "EOF")
 	})
@@ -411,8 +411,8 @@ func TestSerializeDeserializeI8(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := lcs.NewSerializer()
-			d := lcs.NewDeserializer(tc.expected)
+			s := bcs.NewSerializer()
+			d := bcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeI8(tc.target)
 			require.NoError(t, err)
@@ -425,7 +425,7 @@ func TestSerializeDeserializeI8(t *testing.T) {
 		})
 	}
 	t.Run("deserialize error: EOF", func(t *testing.T) {
-		d := lcs.NewDeserializer([]byte{})
+		d := bcs.NewDeserializer([]byte{})
 		_, err := d.DeserializeI8()
 		require.EqualError(t, err, "EOF")
 	})
@@ -452,8 +452,8 @@ func TestSerializeDeserializeI16(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := lcs.NewSerializer()
-			d := lcs.NewDeserializer(tc.expected)
+			s := bcs.NewSerializer()
+			d := bcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeI16(tc.target)
 			require.NoError(t, err)
@@ -466,7 +466,7 @@ func TestSerializeDeserializeI16(t *testing.T) {
 		})
 	}
 	t.Run("deserialize error: EOF", func(t *testing.T) {
-		d := lcs.NewDeserializer([]byte{})
+		d := bcs.NewDeserializer([]byte{})
 		_, err := d.DeserializeI16()
 		require.EqualError(t, err, "EOF")
 	})
@@ -493,8 +493,8 @@ func TestSerializeDeserializeI32(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := lcs.NewSerializer()
-			d := lcs.NewDeserializer(tc.expected)
+			s := bcs.NewSerializer()
+			d := bcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeI32(tc.target)
 			require.NoError(t, err)
@@ -507,7 +507,7 @@ func TestSerializeDeserializeI32(t *testing.T) {
 		})
 	}
 	t.Run("deserialize error: EOF", func(t *testing.T) {
-		d := lcs.NewDeserializer([]byte{})
+		d := bcs.NewDeserializer([]byte{})
 		_, err := d.DeserializeI32()
 		require.EqualError(t, err, "EOF")
 	})
@@ -537,8 +537,8 @@ func TestSerializeDeserializeI64(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := lcs.NewSerializer()
-			d := lcs.NewDeserializer(tc.expected)
+			s := bcs.NewSerializer()
+			d := bcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeI64(tc.target)
 			require.NoError(t, err)
@@ -551,7 +551,7 @@ func TestSerializeDeserializeI64(t *testing.T) {
 		})
 	}
 	t.Run("deserialize error: EOF", func(t *testing.T) {
-		d := lcs.NewDeserializer([]byte{})
+		d := bcs.NewDeserializer([]byte{})
 		_, err := d.DeserializeI64()
 		require.EqualError(t, err, "EOF")
 	})
@@ -589,8 +589,8 @@ func TestSerializeDeserializeI128(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := lcs.NewSerializer()
-			d := lcs.NewDeserializer(tc.expected)
+			s := bcs.NewSerializer()
+			d := bcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeI128(tc.target)
 			require.NoError(t, err)
@@ -603,7 +603,7 @@ func TestSerializeDeserializeI128(t *testing.T) {
 		})
 	}
 	t.Run("deserialize error: EOF", func(t *testing.T) {
-		d := lcs.NewDeserializer([]byte{})
+		d := bcs.NewDeserializer([]byte{})
 		_, err := d.DeserializeI128()
 		require.EqualError(t, err, "EOF")
 	})
@@ -622,8 +622,8 @@ func TestSerializeDeserializeVariantIndex(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := lcs.NewSerializer()
-			d := lcs.NewDeserializer(tc.expected)
+			s := bcs.NewSerializer()
+			d := bcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeVariantIndex(tc.target)
 			require.NoError(t, err)
@@ -635,7 +635,7 @@ func TestSerializeDeserializeVariantIndex(t *testing.T) {
 		})
 	}
 	t.Run("deserialize error: EOF", func(t *testing.T) {
-		d := lcs.NewDeserializer([]byte{})
+		d := bcs.NewDeserializer([]byte{})
 		_, err := d.DeserializeVariantIndex()
 		require.EqualError(t, err, "EOF")
 	})
@@ -643,17 +643,17 @@ func TestSerializeDeserializeVariantIndex(t *testing.T) {
 
 func TestSerializeDeserializeLenLimit(t *testing.T) {
 	t.Run("SerializeLen: length is too large", func(t *testing.T) {
-		s := lcs.NewSerializer()
+		s := bcs.NewSerializer()
 		err := s.SerializeLen(^uint64(0))
 		assert.Error(t, err)
 		assert.Equal(t, "length is too large", err.Error())
 	})
 	t.Run("DeserializeLen: length is too large", func(t *testing.T) {
-		s := lcs.NewSerializer()
+		s := bcs.NewSerializer()
 		err := s.SerializeVariantIndex(^uint32(0))
 		assert.NoError(t, err)
 
-		d := lcs.NewDeserializer(s.GetBytes())
+		d := bcs.NewDeserializer(s.GetBytes())
 		ret, err := d.DeserializeLen()
 		assert.Equal(t, uint64(0), ret)
 		require.Error(t, err)
@@ -661,14 +661,14 @@ func TestSerializeDeserializeLenLimit(t *testing.T) {
 	})
 
 	t.Run("overflow while parsing uleb128-encoded uint32", func(t *testing.T) {
-		d := lcs.NewDeserializer([]byte{255, 255, 255, 255, 255, 255, 255, 255})
+		d := bcs.NewDeserializer([]byte{255, 255, 255, 255, 255, 255, 255, 255})
 		_, err := d.DeserializeLen()
 		require.Error(t, err)
 		assert.Equal(t, "overflow while parsing uleb128-encoded uint32 value", err.Error())
 	})
 
 	t.Run("deserialize error: EOF", func(t *testing.T) {
-		d := lcs.NewDeserializer([]byte{})
+		d := bcs.NewDeserializer([]byte{})
 		_, err := d.DeserializeLen()
 		require.EqualError(t, err, "EOF")
 	})
@@ -691,8 +691,8 @@ func TestSerializeDeserializeOptionTag(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%#v", tc.target), func(t *testing.T) {
-			s := lcs.NewSerializer()
-			d := lcs.NewDeserializer(tc.expected)
+			s := bcs.NewSerializer()
+			d := bcs.NewDeserializer(tc.expected)
 
 			err := s.SerializeOptionTag(tc.target)
 			require.NoError(t, err)
@@ -704,25 +704,25 @@ func TestSerializeDeserializeOptionTag(t *testing.T) {
 		})
 	}
 	t.Run("deserialize error: EOF", func(t *testing.T) {
-		d := lcs.NewDeserializer([]byte{})
+		d := bcs.NewDeserializer([]byte{})
 		_, err := d.DeserializeOptionTag()
 		require.EqualError(t, err, "EOF")
 	})
 }
 
 func TestGetBufferOffset(t *testing.T) {
-	s := lcs.NewSerializer()
+	s := bcs.NewSerializer()
 	s.SerializeU64(0)
 	assert.Equal(t, uint64(8), s.GetBufferOffset())
 
-	d := lcs.NewDeserializer([]byte{0, 0, 0, 0, 0, 0, 0, 0})
+	d := bcs.NewDeserializer([]byte{0, 0, 0, 0, 0, 0, 0, 0})
 	assert.Equal(t, uint64(0), d.GetBufferOffset())
 	d.DeserializeU64()
 	assert.Equal(t, uint64(8), d.GetBufferOffset())
 }
 
 func TestCheckThatKeySlicesAreIncreasing(t *testing.T) {
-	d := lcs.NewDeserializer([]byte{0, 1, 2, 0, 2})
+	d := bcs.NewDeserializer([]byte{0, 1, 2, 0, 2})
 	// Offsets are taken from the input bytes.
 	d.DeserializeU32()
 	require.NoError(t, d.CheckThatKeySlicesAreIncreasing(serde.Slice{0, 3}, serde.Slice{3, 5}))
@@ -731,7 +731,7 @@ func TestCheckThatKeySlicesAreIncreasing(t *testing.T) {
 }
 
 func TestSortMapEntries(t *testing.T) {
-	s := lcs.NewSerializer()
+	s := bcs.NewSerializer()
 	s.SerializeU8(255)
 	s.SerializeU32(1)
 	s.SerializeU32(1)

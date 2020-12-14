@@ -102,8 +102,8 @@ fn test_that_golang_code_compiles_without_serialization() {
 }
 
 #[test]
-fn test_that_golang_code_compiles_with_lcs() {
-    let config = CodeGeneratorConfig::new("main".to_string()).with_encodings(vec![Encoding::Lcs]);
+fn test_that_golang_code_compiles_with_bcs() {
+    let config = CodeGeneratorConfig::new("main".to_string()).with_encodings(vec![Encoding::Bcs]);
     test_that_golang_code_compiles_with_config(&config);
 }
 

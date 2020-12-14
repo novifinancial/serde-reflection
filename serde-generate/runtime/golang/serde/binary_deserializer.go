@@ -11,7 +11,7 @@ import (
 )
 
 // `BinaryDeserializer` is a partial implementation of the `Deserializer` interface.
-// It is used as an embedded struct by the Bincode and LCS deserializers.
+// It is used as an embedded struct by the Bincode and BCS deserializers.
 type BinaryDeserializer struct {
 	Buffer               *bytes.Buffer
 	Input                []byte

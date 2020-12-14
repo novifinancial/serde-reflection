@@ -1,15 +1,15 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-package com.novi.lcs;
+package com.novi.bcs;
 
 import com.novi.serde.DeserializationError;
 import com.novi.serde.Slice;
 import com.novi.serde.BinaryDeserializer;
 
-public class LcsDeserializer extends BinaryDeserializer {
-    public LcsDeserializer(byte[] input) {
-        super(input, LcsSerializer.MAX_CONTAINER_DEPTH);
+public class BcsDeserializer extends BinaryDeserializer {
+    public BcsDeserializer(byte[] input) {
+        super(input, BcsSerializer.MAX_CONTAINER_DEPTH);
     }
 
     public Float deserialize_f32() throws DeserializationError {

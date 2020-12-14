@@ -982,10 +982,10 @@ impl crate::SourceInstaller for Installer {
         )
     }
 
-    fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
+    fn install_bcs_runtime(&self) -> std::result::Result<(), Self::Error> {
         self.install_runtime(
-            include_directory!("runtime/java/com/novi/lcs"),
-            "com/novi/lcs",
+            include_directory!("runtime/java/com/novi/bcs"),
+            "com/novi/bcs",
         )
     }
 }

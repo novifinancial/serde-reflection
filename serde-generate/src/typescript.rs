@@ -733,7 +733,7 @@ impl crate::SourceInstaller for Installer {
         self.install_runtime(include_directory!("runtime/typescript/bincode"), "bincode")
     }
 
-    fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.install_runtime(include_directory!("runtime/typescript/lcs"), "lcs")
+    fn install_bcs_runtime(&self) -> std::result::Result<(), Self::Error> {
+        self.install_runtime(include_directory!("runtime/typescript/bcs"), "bcs")
     }
 }

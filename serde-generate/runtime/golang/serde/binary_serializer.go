@@ -9,7 +9,7 @@ import (
 )
 
 // `BinarySerializer` is a partial implementation of the `Serializer` interface.
-// It is used as an embedded struct by the Bincode and LCS serializers.
+// It is used as an embedded struct by the Bincode and BCS serializers.
 type BinarySerializer struct {
 	Buffer               bytes.Buffer
 	containerDepthBudget uint64

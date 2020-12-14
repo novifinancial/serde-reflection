@@ -30,8 +30,8 @@ fn test_golang_runtime_autotests() {
 }
 
 #[test]
-fn test_golang_lcs_runtime_on_simple_data() {
-    test_golang_runtime_on_simple_data(Runtime::Lcs);
+fn test_golang_bcs_runtime_on_simple_data() {
+    test_golang_runtime_on_simple_data(Runtime::Bcs);
 }
 
 #[test]
@@ -131,8 +131,8 @@ func main() {{
 }
 
 #[test]
-fn test_golang_lcs_runtime_on_supported_types() {
-    test_golang_runtime_on_supported_types(Runtime::Lcs);
+fn test_golang_bcs_runtime_on_supported_types() {
+    test_golang_runtime_on_supported_types(Runtime::Bcs);
 }
 
 #[test]

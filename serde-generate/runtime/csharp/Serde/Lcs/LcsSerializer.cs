@@ -4,16 +4,16 @@
 using System;
 using System.IO;
 
-namespace Serde.Lcs
+namespace Serde.Bcs
 {
-    public class LcsSerializer : BinarySerializer
+    public class BcsSerializer : BinarySerializer
     {
         public const long MAX_LENGTH = int.MaxValue;
         public const long MAX_CONTAINER_DEPTH = 500;
 
-        public LcsSerializer() : base(MAX_CONTAINER_DEPTH) { }
-        public LcsSerializer(byte[] buffer) : base(buffer, MAX_CONTAINER_DEPTH) { }
-        public LcsSerializer(ArraySegment<byte> buffer) : base(buffer, MAX_CONTAINER_DEPTH) { }
+        public BcsSerializer() : base(MAX_CONTAINER_DEPTH) { }
+        public BcsSerializer(byte[] buffer) : base(buffer, MAX_CONTAINER_DEPTH) { }
+        public BcsSerializer(ArraySegment<byte> buffer) : base(buffer, MAX_CONTAINER_DEPTH) { }
 
 
         private void serialize_u32_as_uleb128(uint value)

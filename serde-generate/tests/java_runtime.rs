@@ -12,8 +12,8 @@ use std::process::Command;
 use tempfile::tempdir;
 
 #[test]
-fn test_java_lcs_runtime_on_simple_data() {
-    test_java_runtime_on_simple_data(Runtime::Lcs);
+fn test_java_bcs_runtime_on_simple_data() {
+    test_java_runtime_on_simple_data(Runtime::Bcs);
 }
 
 #[test]
@@ -122,8 +122,8 @@ public class Main {{
 }
 
 #[test]
-fn test_java_lcs_runtime_on_supported_types() {
-    test_java_runtime_on_supported_types(Runtime::Lcs);
+fn test_java_bcs_runtime_on_supported_types() {
+    test_java_runtime_on_supported_types(Runtime::Bcs);
 }
 
 #[test]
@@ -262,11 +262,11 @@ public class Main {{
 }
 
 #[test]
-fn test_java_lcs_runtime_autotest() {
+fn test_java_bcs_runtime_autotest() {
     let dir = tempdir().unwrap();
     let paths = std::iter::empty()
         .chain(std::fs::read_dir("runtime/java/com/novi/serde").unwrap())
-        .chain(std::fs::read_dir("runtime/java/com/novi/lcs").unwrap())
+        .chain(std::fs::read_dir("runtime/java/com/novi/bcs").unwrap())
         .map(|e| e.unwrap().path());
     let status = Command::new("javac")
         .arg("-Xlint")
@@ -281,7 +281,7 @@ fn test_java_lcs_runtime_autotest() {
         .arg("-enableassertions")
         .arg("-cp")
         .arg(dir.path())
-        .arg("com.novi.lcs.LcsTest")
+        .arg("com.novi.bcs.BcsTest")
         .status()
         .unwrap();
     assert!(status.success());

@@ -47,9 +47,9 @@ fn test_that_python_code_parses_without_serialization() {
 }
 
 #[test]
-fn test_that_python_code_parses_with_lcs() {
+fn test_that_python_code_parses_with_bcs() {
     let config =
-        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![Encoding::Lcs]);
+        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![Encoding::Bcs]);
     test_that_python_code_parses_with_config(&config);
 }
 
@@ -155,19 +155,19 @@ fn test_that_installed_python_code_passes_pyre_check() {
     let dir = tempdir().unwrap();
 
     let config =
-        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![Encoding::Lcs]);
+        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![Encoding::Bcs]);
     let installer = python3::Installer::new(dir.path().join("src"), /* serde package */ None);
     installer.install_module(&config, &registry).unwrap();
     installer.install_serde_runtime().unwrap();
     installer.install_bincode_runtime().unwrap();
-    installer.install_lcs_runtime().unwrap();
+    installer.install_bcs_runtime().unwrap();
 
     // Copy test files manually to type-check them as well.
     // This should go away when python runtimes are properly packaged.
     let status = Command::new("cp")
         .arg("-r")
-        .arg("runtime/python/lcs/test_lcs.py")
-        .arg(dir.path().join("src/lcs"))
+        .arg("runtime/python/bcs/test_bcs.py")
+        .arg(dir.path().join("src/bcs"))
         .status()
         .unwrap();
     assert!(status.success());

@@ -1,25 +1,25 @@
 using System;
 using System.Numerics;
 using NUnit.Framework;
-using Serde.Lcs;
+using Serde.Bcs;
 
 namespace Serde.Tests
 {
     [TestFixture]
-    public class TestLcs
+    public class TestBcs
     {
         [Test]
         public void TestSerializeU128()
         {
-            LcsSerializer serializer = new LcsSerializer();
+            BcsSerializer serializer = new BcsSerializer();
             serializer.serialize_u128((BigInteger.One << 128) - 1);
             CollectionAssert.AreEqual(serializer.get_bytes(), new byte[] { 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255 });
 
-            serializer = new LcsSerializer();
+            serializer = new BcsSerializer();
             serializer.serialize_u128(BigInteger.One);
             CollectionAssert.AreEqual(serializer.get_bytes(), new byte[] { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
 
-            serializer = new LcsSerializer();
+            serializer = new BcsSerializer();
             serializer.serialize_u128(BigInteger.Zero);
             CollectionAssert.AreEqual(serializer.get_bytes(), new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
 
@@ -31,19 +31,19 @@ namespace Serde.Tests
         [Test]
         public void TestSerializeI128()
         {
-            LcsSerializer serializer = new LcsSerializer();
+            BcsSerializer serializer = new BcsSerializer();
             serializer.serialize_i128(BigInteger.MinusOne);
             CollectionAssert.AreEqual(serializer.get_bytes(), new byte[] { 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255 });
 
-            serializer = new LcsSerializer();
+            serializer = new BcsSerializer();
             serializer.serialize_i128(BigInteger.One);
             CollectionAssert.AreEqual(serializer.get_bytes(), new byte[] { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
 
-            serializer = new LcsSerializer();
+            serializer = new BcsSerializer();
             serializer.serialize_i128((BigInteger.One << 127) - 1);
             CollectionAssert.AreEqual(serializer.get_bytes(), new byte[] { 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 127 });
 
-            serializer = new LcsSerializer();
+            serializer = new BcsSerializer();
             serializer.serialize_i128(-(BigInteger.One << 127));
             CollectionAssert.AreEqual(serializer.get_bytes(), new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x80 });
 
@@ -55,7 +55,7 @@ namespace Serde.Tests
         [Test]
         public void TestSliceOrdering()
         {
-            LcsSerializer serializer = new LcsSerializer();
+            BcsSerializer serializer = new BcsSerializer();
             serializer.serialize_u8(255);
             serializer.serialize_u32(1);
             serializer.serialize_u32(1);
@@ -70,7 +70,7 @@ namespace Serde.Tests
         [Test]
         public void TestULEB128Encoding()
         {
-            LcsSerializer serializer = new LcsSerializer();
+            BcsSerializer serializer = new BcsSerializer();
             serializer.serialize_len(0);
             serializer.serialize_len(1);
             serializer.serialize_len(127);

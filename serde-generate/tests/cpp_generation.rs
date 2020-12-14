@@ -52,9 +52,9 @@ fn test_that_cpp_code_compiles() {
 }
 
 #[test]
-fn test_that_cpp_code_compiles_with_lcs() {
+fn test_that_cpp_code_compiles_with_bcs() {
     let config =
-        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![Encoding::Lcs]);
+        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![Encoding::Bcs]);
     test_that_cpp_code_compiles_with_config(&config);
 }
 
@@ -164,7 +164,7 @@ fn test_that_cpp_code_links() {
     let mut header = File::create(&header_path).unwrap();
 
     let config =
-        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![Encoding::Lcs]);
+        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![Encoding::Bcs]);
     let generator = cpp::CodeGenerator::new(&config);
     generator.output(&mut header, &registry).unwrap();
 
@@ -173,20 +173,20 @@ fn test_that_cpp_code_links() {
     writeln!(
         source,
         r#"
-#include "lcs.hpp"
+#include "bcs.hpp"
 #include "test.hpp"
 
 using namespace serde;
 using namespace testing;
 
 std::vector<uint8_t> serialize_data(SerdeData data) {{
-    auto serializer = LcsSerializer();
+    auto serializer = BcsSerializer();
     Serializable<SerdeData>::serialize(data, serializer);
     return std::move(serializer).bytes();
 }}
 
 SerdeData deserialize_data(const std::vector<uint8_t> &input) {{
-    auto deserializer = LcsDeserializer(input);
+    auto deserializer = BcsDeserializer(input);
     return Deserializable<SerdeData>::deserialize(deserializer);
 }}
 "#

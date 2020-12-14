@@ -33,7 +33,7 @@ arg_enum! {
 enum Runtime {
     Serde,
     Bincode,
-    Lcs,
+    Bcs,
 }
 }
 
@@ -86,8 +86,8 @@ where
             Runtime::Bincode => {
                 encodings.push(Encoding::Bincode);
             }
-            Runtime::Lcs => {
-                encodings.push(Encoding::Lcs);
+            Runtime::Bcs => {
+                encodings.push(Encoding::Bcs);
             }
             _ => (),
         }
@@ -172,7 +172,7 @@ fn main() {
                 match runtime {
                     Runtime::Serde => installer.install_serde_runtime().unwrap(),
                     Runtime::Bincode => installer.install_bincode_runtime().unwrap(),
-                    Runtime::Lcs => installer.install_lcs_runtime().unwrap(),
+                    Runtime::Bcs => installer.install_bcs_runtime().unwrap(),
                 }
             }
         }

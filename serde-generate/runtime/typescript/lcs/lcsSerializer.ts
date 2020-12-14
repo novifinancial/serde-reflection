@@ -1,6 +1,6 @@
 import { BinarySerializer } from '../serde/binarySerializer';
 
-export class LcsSerializer extends BinarySerializer {
+export class BcsSerializer extends BinarySerializer {
     constructor() {
         super();
     }

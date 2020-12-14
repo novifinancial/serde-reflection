@@ -20,7 +20,7 @@ fn test_that_java_code_compiles_with_config(
     let paths = std::iter::empty()
         .chain(std::fs::read_dir("runtime/java/com/novi/serde").unwrap())
         .chain(std::fs::read_dir("runtime/java/com/novi/bincode").unwrap())
-        .chain(std::fs::read_dir("runtime/java/com/novi/lcs").unwrap())
+        .chain(std::fs::read_dir("runtime/java/com/novi/bcs").unwrap())
         .chain(std::fs::read_dir(dir.path().join("testing")).unwrap())
         .map(|e| e.unwrap().path());
     let status = Command::new("javac")
@@ -49,9 +49,9 @@ fn test_that_java_code_compiles_without_serialization() {
 }
 
 #[test]
-fn test_that_java_code_compiles_with_lcs() {
+fn test_that_java_code_compiles_with_bcs() {
     let config =
-        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![Encoding::Lcs]);
+        CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![Encoding::Bcs]);
     test_that_java_code_compiles_with_config(&config);
 }
 

@@ -1,6 +1,6 @@
 import { BinaryDeserializer } from '../serde/binaryDeserializer';
 
-export class LcsDeserializer extends BinaryDeserializer {
+export class BcsDeserializer extends BinaryDeserializer {
   private static readonly MAX_UINT_32 = 2 ** 32 - 1;
 
   constructor(data: Uint8Array) {
@@ -13,7 +13,7 @@ export class LcsDeserializer extends BinaryDeserializer {
       const x = this.deserializeU8();
       const digit = x & 0x7f;
       value = value | (digit << shift);
-      if (value < 0 || value > LcsDeserializer.MAX_UINT_32) {
+      if (value < 0 || value > BcsDeserializer.MAX_UINT_32) {
         throw new Error('Overflow while parsing uleb128-encoded uint32 value');
       }
       if (digit == x) {
