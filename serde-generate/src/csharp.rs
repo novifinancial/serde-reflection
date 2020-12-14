@@ -1151,7 +1151,7 @@ impl crate::SourceInstaller for Installer {
         )
     }
 
-    fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.install_runtime(include_directory!("runtime/csharp/Serde/Lcs"), "Serde/Lcs")
+    fn install_bcs_runtime(&self) -> std::result::Result<(), Self::Error> {
+        self.install_runtime(include_directory!("runtime/csharp/Serde/Bcs"), "Serde/Bcs")
     }
 }

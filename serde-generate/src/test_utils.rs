@@ -67,7 +67,7 @@ pub struct PrimitiveTypes {
     f_i32: i32,
     f_i64: i64,
     f_i128: i128,
-    // The following types are not supported by our bincode and LCS runtimes, therefore
+    // The following types are not supported by our bincode and BCS runtimes, therefore
     // we don't populate them for testing.
     f_f32: Option<f32>,
     f_f64: Option<f64>,
@@ -333,14 +333,14 @@ fn get_sample_value_with_long_sequence(length: usize) -> SerdeData {
 /// Structure used to factorize code in runtime tests.
 #[derive(Copy, Clone)]
 pub enum Runtime {
-    Lcs,
+    Bcs,
     Bincode,
 }
 
 impl std::convert::Into<Encoding> for Runtime {
     fn into(self) -> Encoding {
         match self {
-            Runtime::Lcs => Encoding::Lcs,
+            Runtime::Bcs => Encoding::Bcs,
             Runtime::Bincode => Encoding::Bincode,
         }
     }
@@ -353,8 +353,8 @@ impl Runtime {
 
     pub fn rust_package(self) -> &'static str {
         match self {
-            Self::Lcs => {
-                "lcs = { version = \"0.1.0\", package = \"libra-canonical-serialization\" }"
+            Self::Bcs => {
+                "bcs = { version = \"0.1.0\", package = \"binary-canonical-serialization\" }"
             }
             Self::Bincode => "bincode = \"1.3\"",
         }
@@ -365,7 +365,7 @@ impl Runtime {
         T: serde::Serialize,
     {
         match self {
-            Self::Lcs => libra_canonical_serialization::to_bytes(value).unwrap(),
+            Self::Bcs => binary_canonical_serialization::to_bytes(value).unwrap(),
             Self::Bincode => bincode::serialize(value).unwrap(),
         }
     }
@@ -375,7 +375,7 @@ impl Runtime {
         T: serde::de::DeserializeOwned,
     {
         match self {
-            Self::Lcs => libra_canonical_serialization::from_bytes(bytes).ok(),
+            Self::Bcs => binary_canonical_serialization::from_bytes(bytes).ok(),
             Self::Bincode => bincode::deserialize(bytes).ok(),
         }
     }
@@ -427,14 +427,14 @@ impl Runtime {
 
     pub fn quote_serialize(self) -> &'static str {
         match self {
-            Self::Lcs => "lcs::to_bytes",
+            Self::Bcs => "bcs::to_bytes",
             Self::Bincode => "bincode::serialize",
         }
     }
 
     pub fn quote_deserialize(self) -> &'static str {
         match self {
-            Self::Lcs => "lcs::from_bytes",
+            Self::Bcs => "bcs::from_bytes",
             Self::Bincode => "bincode::deserialize",
         }
     }
@@ -443,7 +443,7 @@ impl Runtime {
     /// Note that both encodings are canonical on other data structures.
     pub fn has_canonical_maps(self) -> bool {
         match self {
-            Self::Lcs => true,
+            Self::Bcs => true,
             Self::Bincode => false,
         }
     }
@@ -451,21 +451,21 @@ impl Runtime {
     /// Whether the encoding supports float32 and float64.
     pub fn has_floats(self) -> bool {
         match self {
-            Self::Lcs => false,
+            Self::Bcs => false,
             Self::Bincode => true,
         }
     }
 
     pub fn maximum_length(self) -> Option<usize> {
         match self {
-            Self::Lcs => Some(libra_canonical_serialization::MAX_SEQUENCE_LENGTH),
+            Self::Bcs => Some(binary_canonical_serialization::MAX_SEQUENCE_LENGTH),
             Self::Bincode => None,
         }
     }
 
     pub fn maximum_container_depth(self) -> Option<usize> {
         match self {
-            Self::Lcs => Some(libra_canonical_serialization::MAX_CONTAINER_DEPTH),
+            Self::Bcs => Some(binary_canonical_serialization::MAX_CONTAINER_DEPTH),
             Self::Bincode => None,
         }
     }
@@ -521,7 +521,7 @@ impl Runtime {
                     .unwrap(),
             );
         }
-        if let Self::Lcs = self {
+        if let Self::Bcs = self {
             negative_samples.push(vec![0x09, 0x00, 0x00]);
             negative_samples.push(vec![0x09, 0x80, 0x00]);
             negative_samples.push(vec![0x09, 0xff, 0xff, 0xff, 0xff, 0x10]);
@@ -583,7 +583,7 @@ impl Runtime {
         let mut result = f0[..f0.len() - e.len()].to_vec();
         match self {
             Runtime::Bincode => result.append(&mut self.serialize(&(length as u64))),
-            Runtime::Lcs => {
+            Runtime::Bcs => {
                 // ULEB-128 encoding of the length.
                 let mut value = length;
                 while value >= 0x80 {
@@ -815,8 +815,8 @@ fn test_bincode_get_sample_with_long_sequence() {
 }
 
 #[test]
-fn test_lcs_get_sample_with_long_sequence() {
-    test_get_sample_with_long_sequence(Runtime::Lcs);
+fn test_bcs_get_sample_with_long_sequence() {
+    test_get_sample_with_long_sequence(Runtime::Bcs);
 }
 
 // Make sure the direct computation of the serialization of these test values
@@ -849,9 +849,9 @@ fn test_bincode_samples_with_container_depth() {
 }
 
 #[test]
-fn test_lcs_samples_with_container_depth() {
-    test_get_sample_with_container_depth(Runtime::Lcs);
-    test_get_alternate_sample_with_container_depth(Runtime::Lcs);
+fn test_bcs_samples_with_container_depth() {
+    test_get_sample_with_container_depth(Runtime::Bcs);
+    test_get_alternate_sample_with_container_depth(Runtime::Bcs);
 }
 
 // Make sure the direct computation of the serialization of these test values
@@ -914,8 +914,8 @@ fn test_bincode_get_positive_samples() {
 #[test]
 // This test requires --release because of deserialization of long (unit) vectors.
 #[cfg(not(debug_assertions))]
-fn test_lcs_get_positive_samples() {
-    assert_eq!(test_get_positive_samples(Runtime::Lcs), 98);
+fn test_bcs_get_positive_samples() {
+    assert_eq!(test_get_positive_samples(Runtime::Bcs), 98);
 }
 
 // Make sure all the "positive" samples successfully deserialize with the reference Rust
@@ -938,8 +938,8 @@ fn test_bincode_get_negative_samples() {
 #[test]
 // This test requires --release because of deserialization of long (unit) vectors.
 #[cfg(not(debug_assertions))]
-fn test_lcs_get_negative_samples() {
-    assert_eq!(test_get_negative_samples(Runtime::Lcs), 61);
+fn test_bcs_get_negative_samples() {
+    assert_eq!(test_get_negative_samples(Runtime::Bcs), 61);
 }
 
 // Make sure all the "negative" samples fail to deserialize with the reference Rust
@@ -955,9 +955,9 @@ fn test_get_negative_samples(runtime: Runtime) -> usize {
 }
 
 #[test]
-fn test_lcs_serialize_with_noise_and_deserialize() {
+fn test_bcs_serialize_with_noise_and_deserialize() {
     let value = "\u{10348}.".to_string();
-    let samples = Runtime::Lcs.serialize_with_noise_and_deserialize(&value);
+    let samples = Runtime::Bcs.serialize_with_noise_and_deserialize(&value);
     // 1 for original encoding
     // 1 for each byte in the serialization (value.len() + 1)
     // 1 for added incorrect 5-byte UTF8-like codepoint

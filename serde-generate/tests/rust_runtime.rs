@@ -8,8 +8,8 @@ use std::process::Command;
 use tempfile::tempdir;
 
 #[test]
-fn test_rust_lcs_runtime() {
-    test_rust_runtime(Runtime::Lcs);
+fn test_rust_bcs_runtime() {
+    test_rust_runtime(Runtime::Bcs);
 }
 
 #[test]

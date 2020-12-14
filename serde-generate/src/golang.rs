@@ -18,7 +18,7 @@ use std::{
 pub struct CodeGenerator<'a> {
     /// Language-independent configuration.
     config: &'a CodeGeneratorConfig,
-    /// Module path where to find the serde runtime packages (serde, lcs, bincode).
+    /// Module path where to find the serde runtime packages (serde, bcs, bincode).
     /// Default: "github.com/novifinancial/serde-reflection/serde-generate/runtime/golang".
     serde_module_path: String,
     /// Mapping from external type names to fully-qualified class names (e.g. "MyClass" -> "com.my_org.my_package.MyClass").
@@ -1017,7 +1017,7 @@ impl crate::SourceInstaller for Installer {
         self.runtime_installation_message("bincode")
     }
 
-    fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.runtime_installation_message("lcs")
+    fn install_bcs_runtime(&self) -> std::result::Result<(), Self::Error> {
+        self.runtime_installation_message("bcs")
     }
 }

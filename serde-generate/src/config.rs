@@ -18,7 +18,7 @@ pub struct CodeGeneratorConfig {
 #[derive(Clone, Copy, Debug, PartialOrd, Ord, PartialEq, Eq)]
 pub enum Encoding {
     Bincode,
-    Lcs,
+    Bcs,
 }
 
 /// Track types definitions provided by external modules.
@@ -52,8 +52,8 @@ pub trait SourceInstaller {
     /// Install the bincode runtime.
     fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error>;
 
-    /// Install the Libra Canonical Serialization (LCS) runtime.
-    fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error>;
+    /// Install the Libra Canonical Serialization (BCS) runtime.
+    fn install_bcs_runtime(&self) -> std::result::Result<(), Self::Error>;
 }
 
 impl CodeGeneratorConfig {
@@ -119,7 +119,7 @@ impl Encoding {
     pub fn name(self) -> &'static str {
         match self {
             Encoding::Bincode => "bincode",
-            Encoding::Lcs => "lcs",
+            Encoding::Bcs => "bcs",
         }
     }
 }

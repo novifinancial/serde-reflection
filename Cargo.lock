@@ -159,7 +159,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2448f6066e80e3bfc792e9c98bf705b4b0fc6e8ef5b43e5889aff0eaa9c58743"
 
 [[package]]
-name = "libra-canonical-serialization"
+name = "binary-canonical-serialization"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7d8dddda30939e963210412740c920779b3b57d0b8ab58d94d562cc433d621f1"
@@ -314,7 +314,7 @@ dependencies = [
  "hex",
  "include_dir",
  "lazy_static",
- "libra-canonical-serialization",
+ "binary-canonical-serialization",
  "maplit",
  "serde",
  "serde-reflection",

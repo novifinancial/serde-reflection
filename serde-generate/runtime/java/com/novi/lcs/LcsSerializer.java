@@ -1,17 +1,17 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-package com.novi.lcs;
+package com.novi.bcs;
 
 import com.novi.serde.SerializationError;
 import com.novi.serde.Slice;
 import com.novi.serde.BinarySerializer;
 
-public class LcsSerializer extends BinarySerializer {
+public class BcsSerializer extends BinarySerializer {
     public static final long MAX_LENGTH = Integer.MAX_VALUE;
     public static final long MAX_CONTAINER_DEPTH = 500;
 
-    public LcsSerializer() {
+    public BcsSerializer() {
         super(MAX_CONTAINER_DEPTH);
     }
 

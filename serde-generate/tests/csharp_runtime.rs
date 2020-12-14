@@ -80,8 +80,8 @@ fn copy_test_project(root_dir: &Path, copy_runtime_tests: bool) -> PathBuf {
 
     if copy_runtime_tests {
         std::fs::copy(
-            "runtime/csharp/Serde.Tests/TestLcs.cs",
-            &test_dir.join("TestLcs.cs"),
+            "runtime/csharp/Serde.Tests/TestBcs.cs",
+            &test_dir.join("TestBcs.cs"),
         )
         .unwrap();
     }
@@ -90,22 +90,22 @@ fn copy_test_project(root_dir: &Path, copy_runtime_tests: bool) -> PathBuf {
 }
 
 #[test]
-fn test_csharp_lcs_runtime_tests() {
-    let (dir, _tmp) = create_test_dir("test_csharp_lcs_runtime_tests");
+fn test_csharp_bcs_runtime_tests() {
+    let (dir, _tmp) = create_test_dir("test_csharp_bcs_runtime_tests");
     let test_dir = copy_test_project(&dir, true);
 
     let installer = csharp::Installer::new(dir);
     installer.install_serde_runtime().unwrap();
-    installer.install_lcs_runtime().unwrap();
+    installer.install_bcs_runtime().unwrap();
 
     dotnet_build(&test_dir);
     run_nunit(&test_dir);
 }
 
 #[test]
-fn test_csharp_lcs_runtime_on_simple_data() {
+fn test_csharp_bcs_runtime_on_simple_data() {
     let (dir, _tmp) = create_test_dir("test_csharp_runtime_on_simple_data");
-    test_csharp_runtime_on_simple_data(dir, Runtime::Lcs);
+    test_csharp_runtime_on_simple_data(dir, Runtime::Bcs);
 }
 
 #[test]
@@ -122,7 +122,7 @@ fn test_csharp_runtime_on_simple_data(dir: PathBuf, runtime: Runtime) {
     let installer = csharp::Installer::new(dir.clone());
     installer.install_serde_runtime().unwrap();
     installer.install_bincode_runtime().unwrap();
-    installer.install_lcs_runtime().unwrap();
+    installer.install_bcs_runtime().unwrap();
 
     // Generates code into `Serde/Tests`
     let config =
@@ -185,9 +185,9 @@ namespace Serde.Tests {{
 }
 
 #[test]
-fn test_csharp_lcs_runtime_on_supported_types() {
-    let (dir, _tmp) = create_test_dir("test_csharp_lcs_runtime_on_supported_types");
-    test_csharp_runtime_on_supported_types(dir, Runtime::Lcs);
+fn test_csharp_bcs_runtime_on_supported_types() {
+    let (dir, _tmp) = create_test_dir("test_csharp_bcs_runtime_on_supported_types");
+    test_csharp_runtime_on_supported_types(dir, Runtime::Bcs);
 }
 
 #[test]
@@ -215,7 +215,7 @@ fn test_csharp_runtime_on_supported_types(dir: PathBuf, runtime: Runtime) {
     let installer = csharp::Installer::new(dir.clone());
     installer.install_serde_runtime().unwrap();
     installer.install_bincode_runtime().unwrap();
-    installer.install_lcs_runtime().unwrap();
+    installer.install_bcs_runtime().unwrap();
 
     // Generates code into `Serde/Tests`
     let config =

@@ -3,12 +3,12 @@
 
 using System;
 
-namespace Serde.Lcs
+namespace Serde.Bcs
 {
-    public class LcsDeserializer : BinaryDeserializer
+    public class BcsDeserializer : BinaryDeserializer
     {
-        public LcsDeserializer(byte[] input) : base(input, LcsSerializer.MAX_CONTAINER_DEPTH) { }
-        public LcsDeserializer(ArraySegment<byte> input) : base(input, LcsSerializer.MAX_CONTAINER_DEPTH) { }
+        public BcsDeserializer(byte[] input) : base(input, BcsSerializer.MAX_CONTAINER_DEPTH) { }
+        public BcsDeserializer(ArraySegment<byte> input) : base(input, BcsSerializer.MAX_CONTAINER_DEPTH) { }
 
         private int deserialize_uleb128_as_u32()
         {

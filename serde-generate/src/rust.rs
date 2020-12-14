@@ -457,7 +457,7 @@ serde_bytes = "0.11"
         Self::runtime_installation_message("bincode")
     }
 
-    fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        Self::runtime_installation_message("libra-canonical-serialization")
+    fn install_bcs_runtime(&self) -> std::result::Result<(), Self::Error> {
+        Self::runtime_installation_message("binary-canonical-serialization")
     }
 }

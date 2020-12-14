@@ -26,7 +26,7 @@ fn test_that_installed_python_code_parses() {
         .arg("--with-runtimes")
         .arg("serde")
         .arg("bincode")
-        .arg("lcs")
+        .arg("bcs")
         .arg("--")
         .arg(yaml_path)
         .status()
@@ -40,7 +40,7 @@ fn test_that_installed_python_code_parses() {
     );
     let status = Command::new("python3")
         .arg("-c")
-        .arg("import serde_types; import bincode; import lcs; import test_types")
+        .arg("import serde_types; import bincode; import bcs; import test_types")
         .env("PYTHONPATH", python_path)
         .status()
         .unwrap();
@@ -70,7 +70,7 @@ fn test_that_installed_python_code_with_package_parses() {
         .arg("--with-runtimes")
         .arg("serde")
         .arg("bincode")
-        .arg("lcs")
+        .arg("bcs")
         .arg("--")
         .arg(yaml_path)
         .status()
@@ -80,7 +80,7 @@ fn test_that_installed_python_code_with_package_parses() {
     std::fs::write(
         dir.path().join("my_package").join("__init__.py"),
         r#"
-__all__ = ["lcs", "serde_types", "serde_binary", "bincode", "test_types"]
+__all__ = ["bcs", "serde_types", "serde_binary", "bincode", "test_types"]
 "#,
     )
     .unwrap();
@@ -92,7 +92,7 @@ __all__ = ["lcs", "serde_types", "serde_binary", "bincode", "test_types"]
     );
     let status = Command::new("python3")
         .arg("-c")
-        .arg("from my_package import serde_types; from my_package import bincode; from my_package import lcs; from my_package import test_types")
+        .arg("from my_package import serde_types; from my_package import bincode; from my_package import bcs; from my_package import test_types")
         .env("PYTHONPATH", python_path)
         .status()
         .unwrap();
@@ -154,7 +154,7 @@ fn test_that_installed_cpp_code_compiles() {
         .arg("--with-runtimes")
         .arg("serde")
         .arg("bincode")
-        .arg("lcs")
+        .arg("bcs")
         .arg("--")
         .status()
         .unwrap();

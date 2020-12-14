@@ -25,7 +25,7 @@ fn test_that_csharp_code_compiles_with_config(
     installer.install_module(&config, &registry).unwrap();
     installer.install_serde_runtime().unwrap();
     installer.install_bincode_runtime().unwrap();
-    installer.install_lcs_runtime().unwrap();
+    installer.install_bcs_runtime().unwrap();
 
     {
         let _lock = MUTEX.lock();
@@ -59,9 +59,9 @@ fn test_that_csharp_code_compiles_with_c_style_enums() {
 }
 
 #[test]
-fn test_that_csharp_code_compiles_with_lcs() {
+fn test_that_csharp_code_compiles_with_bcs() {
     let config =
-        CodeGeneratorConfig::new("Serde.Generated".to_string()).with_encodings(vec![Encoding::Lcs]);
+        CodeGeneratorConfig::new("Serde.Generated".to_string()).with_encodings(vec![Encoding::Bcs]);
     test_that_csharp_code_compiles_with_config(&config);
 }
 
