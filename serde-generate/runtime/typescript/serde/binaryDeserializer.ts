@@ -1,9 +1,11 @@
 import { Deserializer } from './deserializer';
+import util from 'util';
 
 export abstract class BinaryDeserializer implements Deserializer {
   private static readonly BIG_32 = BigInt(32);
   private static readonly BIG_64 = BigInt(64);
-  private static readonly textDecoder: TextDecoder = new TextDecoder();
+  private static readonly textDecoder =
+      typeof window === 'undefined' ? new util.TextDecoder() : new TextDecoder();
   public buffer: ArrayBuffer;
   public offset: number;
 
@@ -49,7 +51,7 @@ export abstract class BinaryDeserializer implements Deserializer {
   }
 
   public deserializeUnit(): null {
-    return;
+    return null;
   }
 
   public deserializeU8(): number {
