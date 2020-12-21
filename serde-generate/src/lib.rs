@@ -112,10 +112,10 @@
 pub mod analyzer;
 /// Support for code-generation in C++
 pub mod cpp;
-/// Support for code-generation in Dart
-pub mod dart;
 /// Support for code-generation in C#
 pub mod csharp;
+/// Support for code-generation in Dart
+pub mod dart;
 /// Utility function to generate indented text
 pub mod golang;
 /// Support for code-generation in Go

@@ -8,7 +8,7 @@
 //! '''
 
 use serde_generate::{
-    cpp, dart,csharp, golang, java, python3, rust, typescript, CodeGeneratorConfig, Encoding,
+    cpp, csharp, dart, golang, java, python3, rust, typescript, CodeGeneratorConfig, Encoding,
     SourceInstaller,
 };
 use serde_reflection::Registry;
