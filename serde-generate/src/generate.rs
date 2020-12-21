@@ -8,7 +8,7 @@
 //! '''
 
 use serde_generate::{
-    cpp, dart, golang, java, python3, rust, typescript, CodeGeneratorConfig, Encoding,
+    cpp, dart,csharp, golang, java, python3, rust, typescript, CodeGeneratorConfig, Encoding,
     SourceInstaller,
 };
 use serde_reflection::Registry;
@@ -25,6 +25,7 @@ enum Language {
     Go,
     Dart,
     TypeScript,
+    CSharp,
 }
 }
 
@@ -33,7 +34,7 @@ arg_enum! {
 enum Runtime {
     Serde,
     Bincode,
-    Lcs,
+    Bcs,
 }
 }
 
@@ -69,9 +70,14 @@ struct Options {
     /// Optional package name (Python) or module path (Go) where to find Serde runtime dependencies.
     #[structopt(long)]
     serde_package_name: Option<String>,
+
+    /// Translate enums without variant data (c-style enums) into their equivalent in the target language,
+    /// if the target language and the generator code support them.
+    #[structopt(long)]
+    use_c_style_enums: bool,
 }
 
-fn get_codegen_config<'a, I>(name: String, runtimes: I) -> CodeGeneratorConfig
+fn get_codegen_config<'a, I>(name: String, runtimes: I, c_style_enums: bool) -> CodeGeneratorConfig
 where
     I: IntoIterator<Item = &'a Runtime>,
 {
@@ -81,13 +87,15 @@ where
             Runtime::Bincode => {
                 encodings.push(Encoding::Bincode);
             }
-            Runtime::Lcs => {
-                encodings.push(Encoding::Lcs);
+            Runtime::Bcs => {
+                encodings.push(Encoding::Bcs);
             }
             _ => (),
         }
     }
-    CodeGeneratorConfig::new(name).with_encodings(encodings)
+    CodeGeneratorConfig::new(name)
+        .with_encodings(encodings)
+        .with_c_style_enums(c_style_enums)
 }
 
 fn main() {
@@ -113,7 +121,7 @@ fn main() {
     match options.target_source_dir {
         None => {
             if let Some((registry, name)) = named_registry_opt {
-                let config = get_codegen_config(name, &runtimes);
+                let config = get_codegen_config(name, &runtimes, options.use_c_style_enums);
 
                 let stdout = std::io::stdout();
                 let mut out = stdout.lock();
@@ -136,6 +144,7 @@ fn main() {
                     Language::TypeScript => typescript::CodeGenerator::new(&config)
                         .output(&mut out, &registry)
                         .unwrap(),
+                    Language::CSharp => panic!("Code generation in C# requires `--install-dir`"),
                 }
             }
         }
@@ -154,10 +163,11 @@ fn main() {
                     }
                     Language::Dart => Box::new(dart::Installer::new(install_dir)),
                     Language::TypeScript => Box::new(typescript::Installer::new(install_dir)),
+                    Language::CSharp => Box::new(csharp::Installer::new(install_dir)),
                 };
 
             if let Some((registry, name)) = named_registry_opt {
-                let config = get_codegen_config(name, &runtimes);
+                let config = get_codegen_config(name, &runtimes, options.use_c_style_enums);
                 installer.install_module(&config, &registry).unwrap();
             }
 
@@ -165,7 +175,7 @@ fn main() {
                 match runtime {
                     Runtime::Serde => installer.install_serde_runtime().unwrap(),
                     Runtime::Bincode => installer.install_bincode_runtime().unwrap(),
-                    Runtime::Lcs => installer.install_lcs_runtime().unwrap(),
+                    Runtime::Bcs => installer.install_bcs_runtime().unwrap(),
                 }
             }
         }

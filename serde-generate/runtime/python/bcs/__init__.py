@@ -16,7 +16,7 @@ MAX_U32 = (1 << 32) - 1
 MAX_CONTAINER_DEPTH = 500
 
 
-class LcsSerializer(sb.BinarySerializer):
+class BcsSerializer(sb.BinarySerializer):
     def __init__(self):
         super().__init__(
             output=io.BytesIO(), container_depth_budget=MAX_CONTAINER_DEPTH
@@ -57,7 +57,7 @@ class LcsSerializer(sb.BinarySerializer):
         assert offsets[-1] == len(self.output.getbuffer())
 
 
-class LcsDeserializer(sb.BinaryDeserializer):
+class BcsDeserializer(sb.BinaryDeserializer):
     def __init__(self, content):
         super().__init__(
             input=io.BytesIO(content), container_depth_budget=MAX_CONTAINER_DEPTH
@@ -105,12 +105,12 @@ class LcsDeserializer(sb.BinaryDeserializer):
 
 
 def serialize(obj: typing.Any, obj_type) -> bytes:
-    serializer = LcsSerializer()
+    serializer = BcsSerializer()
     serializer.serialize_any(obj, obj_type)
     return serializer.get_buffer()
 
 
 def deserialize(content: bytes, obj_type) -> typing.Tuple[typing.Any, bytes]:
-    deserializer = LcsDeserializer(content)
+    deserializer = BcsDeserializer(content)
     value = deserializer.deserialize_any(obj_type)
     return value, deserializer.get_remaining_buffer()

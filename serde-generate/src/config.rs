@@ -12,12 +12,13 @@ pub struct CodeGeneratorConfig {
     pub(crate) external_definitions: ExternalDefinitions,
     pub(crate) comments: DocComments,
     pub(crate) custom_code: CustomCode,
+    pub(crate) c_style_enums: bool,
 }
 
 #[derive(Clone, Copy, Debug, PartialOrd, Ord, PartialEq, Eq)]
 pub enum Encoding {
     Bincode,
-    Lcs,
+    Bcs,
 }
 
 /// Track types definitions provided by external modules.
@@ -51,8 +52,8 @@ pub trait SourceInstaller {
     /// Install the bincode runtime.
     fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error>;
 
-    /// Install the Libra Canonical Serialization (LCS) runtime.
-    fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error>;
+    /// Install the Libra Canonical Serialization (BCS) runtime.
+    fn install_bcs_runtime(&self) -> std::result::Result<(), Self::Error>;
 }
 
 impl CodeGeneratorConfig {
@@ -65,6 +66,7 @@ impl CodeGeneratorConfig {
             external_definitions: BTreeMap::new(),
             comments: BTreeMap::new(),
             custom_code: BTreeMap::new(),
+            c_style_enums: false,
         }
     }
 
@@ -104,13 +106,20 @@ impl CodeGeneratorConfig {
         self.custom_code = code;
         self
     }
+
+    /// Generate C-style enums (without variant data) as the target language
+    /// native enum type in supported languages.
+    pub fn with_c_style_enums(mut self, c_style_enums: bool) -> Self {
+        self.c_style_enums = c_style_enums;
+        self
+    }
 }
 
 impl Encoding {
     pub fn name(self) -> &'static str {
         match self {
             Encoding::Bincode => "bincode",
-            Encoding::Lcs => "lcs",
+            Encoding::Bcs => "bcs",
         }
     }
 }

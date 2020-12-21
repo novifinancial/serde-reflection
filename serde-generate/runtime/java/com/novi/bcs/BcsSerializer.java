@@ -1,18 +1,26 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-package com.novi.lcs;
+package com.novi.bcs;
 
 import com.novi.serde.SerializationError;
 import com.novi.serde.Slice;
 import com.novi.serde.BinarySerializer;
 
-public class LcsSerializer extends BinarySerializer {
+public class BcsSerializer extends BinarySerializer {
     public static final long MAX_LENGTH = Integer.MAX_VALUE;
     public static final long MAX_CONTAINER_DEPTH = 500;
 
-    public LcsSerializer() {
+    public BcsSerializer() {
         super(MAX_CONTAINER_DEPTH);
+    }
+
+    public void serialize_f32(Float value) throws SerializationError {
+        throw new SerializationError("Not implemented: serialize_f32");
+    }
+
+    public void serialize_f64(Double value) throws SerializationError {
+        throw new SerializationError("Not implemented: serialize_f64");
     }
 
     private void serialize_u32_as_uleb128(int value) {

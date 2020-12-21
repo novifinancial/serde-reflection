@@ -46,14 +46,6 @@ public abstract class BinarySerializer implements Serializer {
         throw new SerializationError("Not implemented: serialize_char");
     }
 
-    public void serialize_f32(Float value) throws SerializationError {
-        throw new SerializationError("Not implemented: serialize_f32");
-    }
-
-    public void serialize_f64(Double value) throws SerializationError {
-        throw new SerializationError("Not implemented: serialize_f64");
-    }
-
     public void serialize_u8(@Unsigned Byte value) throws SerializationError {
         output.write(value.byteValue());
     }
@@ -89,7 +81,7 @@ public abstract class BinarySerializer implements Serializer {
             throw new java.lang.IllegalArgumentException("Invalid value for an unsigned int128");
         }
         byte[] content = value.toByteArray();
-        // BigInteger.toByteArray() may add a 16th most-significant zero
+        // BigInteger.toByteArray() may add a most-significant zero
         // byte for signing purpose: ignore it.
         assert content.length <= 16 || content[0] == 0;
         int len = Math.min(content.length, 16);

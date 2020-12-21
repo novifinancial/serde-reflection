@@ -18,7 +18,7 @@ use std::{
 pub struct CodeGenerator<'a> {
     /// Language-independent configuration.
     config: &'a CodeGeneratorConfig,
-    /// Module path where to find the serde runtime packages (serde, lcs, bincode).
+    /// Module path where to find the serde runtime packages (serde, bcs, bincode).
     /// Default: "github.com/novifinancial/serde-reflection/serde-generate/runtime/golang".
     serde_module_path: String,
     /// Mapping from external type names to fully-qualified class names (e.g. "MyClass" -> "com.my_org.my_package.MyClass").
@@ -39,6 +39,9 @@ struct GoEmitter<'a, T> {
 impl<'a> CodeGenerator<'a> {
     /// Create a Go code generator for the given config.
     pub fn new(config: &'a CodeGeneratorConfig) -> Self {
+        if config.c_style_enums {
+            panic!("Go does not support generating c-style enums");
+        }
         let mut external_qualified_names = HashMap::new();
         for (namespace, names) in &config.external_definitions {
             let package_name = {
@@ -817,7 +820,7 @@ func {2}Deserialize{0}(input []byte) ({0}, error) {{
 	}}
 	deserializer := {1}.NewDeserializer(input);
 	obj, err := Deserialize{0}(deserializer)
-	if deserializer.GetBufferOffset() < uint64(len(input)) {{
+	if err == nil && deserializer.GetBufferOffset() < uint64(len(input)) {{
 		return obj, fmt.Errorf("Some input bytes were not read")
 	}}
 	return obj, err
@@ -1014,7 +1017,7 @@ impl crate::SourceInstaller for Installer {
         self.runtime_installation_message("bincode")
     }
 
-    fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.runtime_installation_message("lcs")
+    fn install_bcs_runtime(&self) -> std::result::Result<(), Self::Error> {
+        self.runtime_installation_message("bcs")
     }
 }

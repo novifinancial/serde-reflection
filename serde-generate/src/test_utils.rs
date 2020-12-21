@@ -50,6 +50,8 @@ pub enum SerdeData {
     TupleArray([u32; 3]),
     UnitVector(Vec<()>),
     SimpleList(SimpleList),
+    ComplexMap(BTreeMap<([u32; 2], [u8; 4]), ()>),
+    CStyleEnum(CStyleEnum),
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -65,7 +67,7 @@ pub struct PrimitiveTypes {
     f_i32: i32,
     f_i64: i64,
     f_i128: i128,
-    // The following types are not supported by our bincode and LCS runtimes, therefore
+    // The following types are not supported by our bincode and BCS runtimes, therefore
     // we don't populate them for testing.
     f_f32: Option<f32>,
     f_f64: Option<f64>,
@@ -82,6 +84,7 @@ pub struct OtherTypes {
     f_tuple: (u8, u16),
     f_stringmap: BTreeMap<String, u32>,
     f_intset: BTreeMap<u64, ()>, // Avoiding BTreeSet because Serde treats them as sequences.
+    f_nested_seq: Vec<Vec<Struct>>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -114,19 +117,29 @@ pub struct Tree<T> {
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct SimpleList(Option<Box<SimpleList>>);
 
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
+pub enum CStyleEnum {
+    A,
+    B,
+    C,
+    D,
+    E = 10,
+}
+
 /// The registry corresponding to the test data structures above .
 pub fn get_registry() -> Result<Registry> {
     let mut tracer = Tracer::new(TracerConfig::default());
     let samples = Samples::new();
     tracer.trace_type::<SerdeData>(&samples)?;
     tracer.trace_type::<List<SerdeData>>(&samples)?;
+    tracer.trace_type::<CStyleEnum>(&samples)?;
     tracer.registry()
 }
 
 /// Manually generate sample values.
 /// Avoid maps with more than one element when `has_canonical_maps` is false so that
 /// we can test re-serialization.
-pub fn get_sample_values(has_canonical_maps: bool) -> Vec<SerdeData> {
+pub fn get_sample_values(has_canonical_maps: bool, has_floats: bool) -> Vec<SerdeData> {
     let v0 = SerdeData::PrimitiveTypes(PrimitiveTypes {
         f_bool: false,
         f_u8: 6,
@@ -139,8 +152,8 @@ pub fn get_sample_values(has_canonical_maps: bool) -> Vec<SerdeData> {
         f_i32: -1,
         f_i64: -2,
         f_i128: -3,
-        f_f32: None,
-        f_f64: None,
+        f_f32: if has_floats { Some(0.4) } else { None },
+        f_f64: if has_floats { Some(35.21) } else { None },
         f_char: None,
     });
 
@@ -156,8 +169,8 @@ pub fn get_sample_values(has_canonical_maps: bool) -> Vec<SerdeData> {
         f_i32: i32::MIN,
         f_i64: i64::MIN,
         f_i128: i128::MIN,
-        f_f32: None,
-        f_f64: None,
+        f_f32: if has_floats { Some(-4111.0) } else { None },
+        f_f64: if has_floats { Some(-0.0021) } else { None },
         f_char: None,
     });
 
@@ -174,6 +187,10 @@ pub fn get_sample_values(has_canonical_maps: bool) -> Vec<SerdeData> {
             btreemap! {"foo".to_string() => 1}
         },
         f_intset: BTreeMap::new(),
+        f_nested_seq: vec![
+            vec![Struct { x: 4, y: 5 }, Struct { x: 6, y: 7 }],
+            vec![Struct { x: 8, y: 9 }],
+        ],
     });
 
     let v2bis = SerdeData::OtherTypes(OtherTypes {
@@ -189,6 +206,7 @@ pub fn get_sample_values(has_canonical_maps: bool) -> Vec<SerdeData> {
         } else {
             btreemap! {64 => ()}
         },
+        f_nested_seq: vec![],
     });
 
     let v2ter = SerdeData::OtherTypes(OtherTypes {
@@ -208,6 +226,7 @@ pub fn get_sample_values(has_canonical_maps: bool) -> Vec<SerdeData> {
         } else {
             BTreeMap::new()
         },
+        f_nested_seq: vec![],
     });
 
     let v3 = SerdeData::UnitVariant;
@@ -270,13 +289,16 @@ pub fn get_sample_values(has_canonical_maps: bool) -> Vec<SerdeData> {
 
     let v11 = SerdeData::SimpleList(SimpleList(Some(Box::new(SimpleList(None)))));
 
+    let v12 = SerdeData::ComplexMap(btreemap! { ([1,2], [3,4,5,6]) => ()});
+
+    let v13 = SerdeData::CStyleEnum(CStyleEnum::C);
+
     vec![
-        v0, v1, v2, v2bis, v2ter, v3, v4, v5, v6, v7, v8, v9, v10, v11,
+        v0, v1, v2, v2bis, v2ter, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13,
     ]
 }
 
 #[cfg(test)]
-#[cfg(feature = "runtime-testing")]
 // Used to test limits on "container depth".
 fn get_sample_value_with_container_depth(depth: usize) -> Option<SerdeData> {
     if depth < 2 {
@@ -290,7 +312,6 @@ fn get_sample_value_with_container_depth(depth: usize) -> Option<SerdeData> {
 }
 
 #[cfg(test)]
-#[cfg(feature = "runtime-testing")]
 // Used to test limits on "container depth".
 fn get_alternate_sample_value_with_container_depth(depth: usize) -> Option<SerdeData> {
     if depth < 2 {
@@ -304,7 +325,6 @@ fn get_alternate_sample_value_with_container_depth(depth: usize) -> Option<Serde
 }
 
 #[cfg(test)]
-#[cfg(feature = "runtime-testing")]
 // Used to test limits on sequence lengths and container depth.
 fn get_sample_value_with_long_sequence(length: usize) -> SerdeData {
     SerdeData::UnitVector(vec![(); length])
@@ -313,14 +333,14 @@ fn get_sample_value_with_long_sequence(length: usize) -> SerdeData {
 /// Structure used to factorize code in runtime tests.
 #[derive(Copy, Clone)]
 pub enum Runtime {
-    Lcs,
+    Bcs,
     Bincode,
 }
 
 impl std::convert::Into<Encoding> for Runtime {
     fn into(self) -> Encoding {
         match self {
-            Runtime::Lcs => Encoding::Lcs,
+            Runtime::Bcs => Encoding::Bcs,
             Runtime::Bincode => Encoding::Bincode,
         }
     }
@@ -333,36 +353,33 @@ impl Runtime {
 
     pub fn rust_package(self) -> &'static str {
         match self {
-            Self::Lcs => "lcs = { git = \"https://github.com/libra/libra.git\", branch = \"auto\", package = \"libra-canonical-serialization\" }",
+            Self::Bcs => "bcs = \"0.1.1\"",
             Self::Bincode => "bincode = \"1.3\"",
         }
     }
 
-    #[cfg(feature = "runtime-testing")]
     pub fn serialize<T>(self, value: &T) -> Vec<u8>
     where
         T: serde::Serialize,
     {
         match self {
-            Self::Lcs => libra_canonical_serialization::to_bytes(value).unwrap(),
+            Self::Bcs => bcs::to_bytes(value).unwrap(),
             Self::Bincode => bincode::serialize(value).unwrap(),
         }
     }
 
-    #[cfg(feature = "runtime-testing")]
     pub fn deserialize<T>(self, bytes: &[u8]) -> Option<T>
     where
         T: serde::de::DeserializeOwned,
     {
         match self {
-            Self::Lcs => libra_canonical_serialization::from_bytes(bytes).ok(),
+            Self::Bcs => bcs::from_bytes(bytes).ok(),
             Self::Bincode => bincode::deserialize(bytes).ok(),
         }
     }
 
     /// Serialize a value then add noise to the serialized bits repeatedly. Additionally return
     /// `true` if the deserialization of each modified bitstring should succeed.
-    #[cfg(feature = "runtime-testing")]
     pub fn serialize_with_noise_and_deserialize<T>(self, value: &T) -> Vec<(Vec<u8>, bool)>
     where
         T: serde::Serialize + serde::de::DeserializeOwned,
@@ -408,14 +425,14 @@ impl Runtime {
 
     pub fn quote_serialize(self) -> &'static str {
         match self {
-            Self::Lcs => "lcs::to_bytes",
+            Self::Bcs => "bcs::to_bytes",
             Self::Bincode => "bincode::serialize",
         }
     }
 
     pub fn quote_deserialize(self) -> &'static str {
         match self {
-            Self::Lcs => "lcs::from_bytes",
+            Self::Bcs => "bcs::from_bytes",
             Self::Bincode => "bincode::deserialize",
         }
     }
@@ -424,30 +441,35 @@ impl Runtime {
     /// Note that both encodings are canonical on other data structures.
     pub fn has_canonical_maps(self) -> bool {
         match self {
-            Self::Lcs => true,
+            Self::Bcs => true,
             Self::Bincode => false,
         }
     }
 
-    #[cfg(feature = "runtime-testing")]
+    /// Whether the encoding supports float32 and float64.
+    pub fn has_floats(self) -> bool {
+        match self {
+            Self::Bcs => false,
+            Self::Bincode => true,
+        }
+    }
+
     pub fn maximum_length(self) -> Option<usize> {
         match self {
-            Self::Lcs => Some(libra_canonical_serialization::MAX_SEQUENCE_LENGTH),
+            Self::Bcs => Some(bcs::MAX_SEQUENCE_LENGTH),
             Self::Bincode => None,
         }
     }
 
-    #[cfg(feature = "runtime-testing")]
     pub fn maximum_container_depth(self) -> Option<usize> {
         match self {
-            Self::Lcs => Some(libra_canonical_serialization::MAX_CONTAINER_DEPTH),
+            Self::Bcs => Some(bcs::MAX_CONTAINER_DEPTH),
             Self::Bincode => None,
         }
     }
 
-    #[cfg(feature = "runtime-testing")]
     pub fn get_positive_samples_quick(self) -> Vec<Vec<u8>> {
-        let values = get_sample_values(self.has_canonical_maps());
+        let values = get_sample_values(self.has_canonical_maps(), self.has_floats());
         let mut positive_samples = Vec::new();
         for value in values {
             for (sample, result) in self.serialize_with_noise_and_deserialize(&value) {
@@ -469,7 +491,6 @@ impl Runtime {
         positive_samples
     }
 
-    #[cfg(feature = "runtime-testing")]
     pub fn get_positive_samples(self) -> Vec<Vec<u8>> {
         let mut positive_samples = self.get_positive_samples_quick();
         if let Some(length) = self.maximum_length() {
@@ -478,9 +499,8 @@ impl Runtime {
         positive_samples
     }
 
-    #[cfg(feature = "runtime-testing")]
     pub fn get_negative_samples(self) -> Vec<Vec<u8>> {
-        let values = get_sample_values(self.has_canonical_maps());
+        let values = get_sample_values(self.has_canonical_maps(), self.has_floats());
         let mut negative_samples = Vec::new();
         for value in values {
             for (sample, result) in self.serialize_with_noise_and_deserialize(&value) {
@@ -499,7 +519,7 @@ impl Runtime {
                     .unwrap(),
             );
         }
-        if let Self::Lcs = self {
+        if let Self::Bcs = self {
             negative_samples.push(vec![0x09, 0x00, 0x00]);
             negative_samples.push(vec![0x09, 0x80, 0x00]);
             negative_samples.push(vec![0x09, 0xff, 0xff, 0xff, 0xff, 0x10]);
@@ -510,7 +530,6 @@ impl Runtime {
 
     // Used to test limits on "container depth".
     // Here we construct the serialized bytes directly to allow examples outside the limit.
-    #[cfg(feature = "runtime-testing")]
     pub fn get_sample_with_container_depth(self, depth: usize) -> Option<Vec<u8>> {
         if depth < 2 {
             return None;
@@ -535,7 +554,6 @@ impl Runtime {
 
     // Used to test limits on "container depth".
     // Here we construct the serialized bytes directly to allow examples outside the limit.
-    #[cfg(feature = "runtime-testing")]
     pub fn get_alternate_sample_with_container_depth(self, depth: usize) -> Option<Vec<u8>> {
         if depth < 2 {
             return None;
@@ -557,14 +575,13 @@ impl Runtime {
 
     // Used to test limits on sequence lengths and container depth.
     // Here we construct the serialized bytes directly to allow examples outside the limit.
-    #[cfg(feature = "runtime-testing")]
     pub fn get_sample_with_long_sequence(self, length: usize) -> Vec<u8> {
         let e = self.serialize::<Vec<()>>(&Vec::new());
         let f0 = self.serialize(&SerdeData::UnitVector(Vec::new()));
         let mut result = f0[..f0.len() - e.len()].to_vec();
         match self {
             Runtime::Bincode => result.append(&mut self.serialize(&(length as u64))),
-            Runtime::Lcs => {
+            Runtime::Bcs => {
                 // ULEB-128 encoding of the length.
                 let mut value = length;
                 while value >= 0x80 {
@@ -581,7 +598,7 @@ impl Runtime {
 
 #[test]
 fn test_get_sample_values() {
-    assert_eq!(get_sample_values(false).len(), 14);
+    assert_eq!(get_sample_values(false, true).len(), 16);
 }
 
 #[test]
@@ -618,9 +635,19 @@ Test:
 #[test]
 fn test_get_registry() {
     let registry = get_registry().unwrap();
-    assert_eq!(
-        serde_yaml::to_string(&registry).unwrap() + "\n",
-        r#"---
+    let expected = r#"---
+CStyleEnum:
+  ENUM:
+    0:
+      A: UNIT
+    1:
+      B: UNIT
+    2:
+      C: UNIT
+    3:
+      D: UNIT
+    4:
+      E: UNIT
 List:
   ENUM:
     0:
@@ -655,6 +682,10 @@ OtherTypes:
         MAP:
           KEY: U64
           VALUE: UNIT
+    - f_nested_seq:
+        SEQ:
+          SEQ:
+            TYPENAME: Struct
 PrimitiveTypes:
   STRUCT:
     - f_bool: BOOL
@@ -727,6 +758,23 @@ SerdeData:
       SimpleList:
         NEWTYPE:
           TYPENAME: SimpleList
+    11:
+      ComplexMap:
+        NEWTYPE:
+          MAP:
+            KEY:
+              TUPLE:
+                - TUPLEARRAY:
+                    CONTENT: U32
+                    SIZE: 2
+                - TUPLEARRAY:
+                    CONTENT: U8
+                    SIZE: 4
+            VALUE: UNIT
+    12:
+      CStyleEnum:
+        NEWTYPE:
+          TYPENAME: CStyleEnum
 SimpleList:
   NEWTYPESTRUCT:
     OPTION:
@@ -748,26 +796,30 @@ TupleStruct:
     - U64
 UnitStruct: UNITSTRUCT
 "#
-        .to_string()
+    .lines()
+    .collect::<Vec<_>>();
+    assert_eq!(
+        serde_yaml::to_string(&registry)
+            .unwrap()
+            .lines()
+            .collect::<Vec<_>>(),
+        expected
     );
 }
 
 #[test]
-#[cfg(feature = "runtime-testing")]
 fn test_bincode_get_sample_with_long_sequence() {
     test_get_sample_with_long_sequence(Runtime::Bincode);
 }
 
 #[test]
-#[cfg(feature = "runtime-testing")]
-fn test_lcs_get_sample_with_long_sequence() {
-    test_get_sample_with_long_sequence(Runtime::Lcs);
+fn test_bcs_get_sample_with_long_sequence() {
+    test_get_sample_with_long_sequence(Runtime::Bcs);
 }
 
 // Make sure the direct computation of the serialization of these test values
 // agrees with the usual serialization.
 #[cfg(test)]
-#[cfg(feature = "runtime-testing")]
 fn test_get_sample_with_long_sequence(runtime: Runtime) {
     let value = get_sample_value_with_long_sequence(0);
     assert_eq!(
@@ -789,23 +841,20 @@ fn test_get_sample_with_long_sequence(runtime: Runtime) {
 }
 
 #[test]
-#[cfg(feature = "runtime-testing")]
 fn test_bincode_samples_with_container_depth() {
     test_get_sample_with_container_depth(Runtime::Bincode);
     test_get_alternate_sample_with_container_depth(Runtime::Bincode);
 }
 
 #[test]
-#[cfg(feature = "runtime-testing")]
-fn test_lcs_samples_with_container_depth() {
-    test_get_sample_with_container_depth(Runtime::Lcs);
-    test_get_alternate_sample_with_container_depth(Runtime::Lcs);
+fn test_bcs_samples_with_container_depth() {
+    test_get_sample_with_container_depth(Runtime::Bcs);
+    test_get_alternate_sample_with_container_depth(Runtime::Bcs);
 }
 
 // Make sure the direct computation of the serialization of these test values
 // agrees with the usual serialization.
 #[cfg(test)]
-#[cfg(feature = "runtime-testing")]
 fn test_get_sample_with_container_depth(runtime: Runtime) {
     let value = get_sample_value_with_container_depth(2).unwrap();
     assert_eq!(
@@ -829,7 +878,6 @@ fn test_get_sample_with_container_depth(runtime: Runtime) {
 // Make sure the direct computation of the serialization of these test values
 // agrees with the usual serialization.
 #[cfg(test)]
-#[cfg(feature = "runtime-testing")]
 fn test_get_alternate_sample_with_container_depth(runtime: Runtime) {
     let value = get_alternate_sample_value_with_container_depth(2).unwrap();
     assert_eq!(
@@ -857,23 +905,20 @@ fn test_get_alternate_sample_with_container_depth(runtime: Runtime) {
 }
 
 #[test]
-#[cfg(feature = "runtime-testing")]
 fn test_bincode_get_positive_samples() {
-    assert_eq!(test_get_positive_samples(Runtime::Bincode), 14);
+    assert_eq!(test_get_positive_samples(Runtime::Bincode), 16);
 }
 
 #[test]
 // This test requires --release because of deserialization of long (unit) vectors.
 #[cfg(not(debug_assertions))]
-#[cfg(feature = "runtime-testing")]
-fn test_lcs_get_positive_samples() {
-    assert_eq!(test_get_positive_samples(Runtime::Lcs), 87);
+fn test_bcs_get_positive_samples() {
+    assert_eq!(test_get_positive_samples(Runtime::Bcs), 98);
 }
 
 // Make sure all the "positive" samples successfully deserialize with the reference Rust
 // implementation.
 #[cfg(test)]
-#[cfg(feature = "runtime-testing")]
 fn test_get_positive_samples(runtime: Runtime) -> usize {
     let samples = runtime.get_positive_samples();
     let length = samples.len();
@@ -884,7 +929,6 @@ fn test_get_positive_samples(runtime: Runtime) -> usize {
 }
 
 #[test]
-#[cfg(feature = "runtime-testing")]
 fn test_bincode_get_negative_samples() {
     assert_eq!(test_get_negative_samples(Runtime::Bincode), 0);
 }
@@ -892,15 +936,13 @@ fn test_bincode_get_negative_samples() {
 #[test]
 // This test requires --release because of deserialization of long (unit) vectors.
 #[cfg(not(debug_assertions))]
-#[cfg(feature = "runtime-testing")]
-fn test_lcs_get_negative_samples() {
-    assert_eq!(test_get_negative_samples(Runtime::Lcs), 57);
+fn test_bcs_get_negative_samples() {
+    assert_eq!(test_get_negative_samples(Runtime::Bcs), 61);
 }
 
 // Make sure all the "negative" samples fail to deserialize with the reference Rust
 // implementation.
 #[cfg(test)]
-#[cfg(feature = "runtime-testing")]
 fn test_get_negative_samples(runtime: Runtime) -> usize {
     let samples = runtime.get_negative_samples();
     let length = samples.len();
@@ -911,10 +953,9 @@ fn test_get_negative_samples(runtime: Runtime) -> usize {
 }
 
 #[test]
-#[cfg(feature = "runtime-testing")]
-fn test_lcs_serialize_with_noise_and_deserialize() {
+fn test_bcs_serialize_with_noise_and_deserialize() {
     let value = "\u{10348}.".to_string();
-    let samples = Runtime::Lcs.serialize_with_noise_and_deserialize(&value);
+    let samples = Runtime::Bcs.serialize_with_noise_and_deserialize(&value);
     // 1 for original encoding
     // 1 for each byte in the serialization (value.len() + 1)
     // 1 for added incorrect 5-byte UTF8-like codepoint

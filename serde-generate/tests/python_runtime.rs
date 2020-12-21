@@ -1,6 +1,5 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
-#![cfg(feature = "runtime-testing")]
 
 use serde_generate::{
     python3, test_utils,
@@ -13,8 +12,8 @@ use std::process::Command;
 use tempfile::tempdir;
 
 #[test]
-fn test_python_lcs_runtime_on_simple_data() {
-    test_python_runtime_on_simple_data(Runtime::Lcs);
+fn test_python_bcs_runtime_on_simple_data() {
+    test_python_runtime_on_simple_data(Runtime::Bcs);
 }
 
 #[test]
@@ -78,8 +77,8 @@ assert seen_error
 }
 
 #[test]
-fn test_python_lcs_runtime_on_supported_types() {
-    test_python_runtime_on_supported_types(Runtime::Lcs);
+fn test_python_bcs_runtime_on_supported_types() {
+    test_python_runtime_on_supported_types(Runtime::Bcs);
 }
 
 #[test]
@@ -107,10 +106,10 @@ fn test_python_runtime_on_supported_types(runtime: Runtime) {
 from copy import copy
 import serde_types as st
 import sys
-import lcs
+import bcs
 
 # Required to avoid RecursionError's in python.
-sys.setrecursionlimit(lcs.MAX_CONTAINER_DEPTH * 5)
+sys.setrecursionlimit(bcs.MAX_CONTAINER_DEPTH * 5)
 
 positive_encodings = [bytes(a) for a in {1:?}]
 negative_encodings = [bytes(a) for a in {2:?}]
@@ -120,6 +119,10 @@ for encoding in positive_encodings:
     s = v.{0}_serialize()
     assert s == encoding
 
+    # Test self-equality for the Serde value.
+    assert v == SerdeData.{0}_deserialize(encoding)
+
+    # Test simple mutations of the input.
     for i in range(min(len(encoding), 20)):
         encoding2 = bytearray(encoding)
         encoding2[i] ^= 0x81

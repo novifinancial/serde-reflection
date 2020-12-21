@@ -38,6 +38,9 @@ struct CppEmitter<'a, T> {
 impl<'a> CodeGenerator<'a> {
     /// Create a C++ code generator for the given config.
     pub fn new(config: &'a CodeGeneratorConfig) -> Self {
+        if config.c_style_enums {
+            panic!("C++ does not support generating c-style enums");
+        }
         let mut external_qualified_names = HashMap::new();
         for (namespace, names) in &config.external_definitions {
             for name in names {
@@ -184,8 +187,9 @@ where
             TypeName(x) => {
                 let qname = self.quote_qualified_name(x);
                 if require_known_size && !self.known_sizes.contains(x.as_str()) {
-                    // Cannot use unique_ptr because we need a copy constructor (e.g. for vectors).
-                    format!("std::shared_ptr<{}>", qname)
+                    // Cannot use unique_ptr because we need a copy constructor (e.g. for vectors)
+                    // and in-depth equality.
+                    format!("serde::value_ptr<{}>", qname)
                 } else {
                     qname
                 }
@@ -602,9 +606,9 @@ impl crate::SourceInstaller for Installer {
         Ok(())
     }
 
-    fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        let mut file = self.create_header_file("lcs")?;
-        write!(file, "{}", include_str!("../runtime/cpp/lcs.hpp"))?;
+    fn install_bcs_runtime(&self) -> std::result::Result<(), Self::Error> {
+        let mut file = self.create_header_file("bcs")?;
+        write!(file, "{}", include_str!("../runtime/cpp/bcs.hpp"))?;
         Ok(())
     }
 }

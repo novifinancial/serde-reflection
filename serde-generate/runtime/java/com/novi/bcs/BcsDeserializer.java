@@ -1,15 +1,23 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-package com.novi.lcs;
+package com.novi.bcs;
 
 import com.novi.serde.DeserializationError;
 import com.novi.serde.Slice;
 import com.novi.serde.BinaryDeserializer;
 
-public class LcsDeserializer extends BinaryDeserializer {
-    public LcsDeserializer(byte[] input) {
-        super(input, LcsSerializer.MAX_CONTAINER_DEPTH);
+public class BcsDeserializer extends BinaryDeserializer {
+    public BcsDeserializer(byte[] input) {
+        super(input, BcsSerializer.MAX_CONTAINER_DEPTH);
+    }
+
+    public Float deserialize_f32() throws DeserializationError {
+        throw new DeserializationError("Not implemented: deserialize_f32");
+    }
+
+    public Double deserialize_f64() throws DeserializationError {
+        throw new DeserializationError("Not implemented: deserialize_f64");
     }
 
     private int deserialize_uleb128_as_u32() throws DeserializationError {

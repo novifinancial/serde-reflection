@@ -6,23 +6,22 @@
 #include <algorithm>
 #include <cassert>
 
-#include "serde.hpp"
 #include "binary.hpp"
-
+#include "serde.hpp"
 
 namespace serde {
 
-// Maximum length supported for LCS sequences and maps.
-constexpr size_t LCS_MAX_LENGTH = (1ull << 31) - 1;
-constexpr size_t LCS_MAX_CONTAINER_DEPTH = 500;
+// Maximum length supported for BCS sequences and maps.
+constexpr size_t BCS_MAX_LENGTH = (1ull << 31) - 1;
+constexpr size_t BCS_MAX_CONTAINER_DEPTH = 500;
 
-class LcsSerializer : public BinarySerializer<LcsSerializer> {
-    using Parent = BinarySerializer<LcsSerializer>;
+class BcsSerializer : public BinarySerializer<BcsSerializer> {
+    using Parent = BinarySerializer<BcsSerializer>;
 
     void serialize_u32_as_uleb128(uint32_t);
 
   public:
-    LcsSerializer() : Parent(LCS_MAX_CONTAINER_DEPTH) {}
+    BcsSerializer() : Parent(BCS_MAX_CONTAINER_DEPTH) {}
 
     void serialize_len(size_t value);
     void serialize_variant_index(uint32_t value);
@@ -31,14 +30,14 @@ class LcsSerializer : public BinarySerializer<LcsSerializer> {
     void sort_last_entries(std::vector<size_t> offsets);
 };
 
-class LcsDeserializer : public BinaryDeserializer<LcsDeserializer> {
-    using Parent = BinaryDeserializer<LcsDeserializer>;
+class BcsDeserializer : public BinaryDeserializer<BcsDeserializer> {
+    using Parent = BinaryDeserializer<BcsDeserializer>;
 
     uint32_t deserialize_uleb128_as_u32();
 
   public:
-    LcsDeserializer(std::vector<uint8_t> bytes)
-        : Parent(std::move(bytes), LCS_MAX_CONTAINER_DEPTH) {}
+    BcsDeserializer(std::vector<uint8_t> bytes)
+        : Parent(std::move(bytes), BCS_MAX_CONTAINER_DEPTH) {}
 
     size_t deserialize_len();
     uint32_t deserialize_variant_index();
@@ -48,7 +47,7 @@ class LcsDeserializer : public BinaryDeserializer<LcsDeserializer> {
                                               std::tuple<size_t, size_t> key2);
 };
 
-inline void LcsSerializer::serialize_u32_as_uleb128(uint32_t value) {
+inline void BcsSerializer::serialize_u32_as_uleb128(uint32_t value) {
     while (value >= 0x80) {
         bytes_.push_back((uint8_t)((value & 0x7F) | 0x80));
         value = value >> 7;
@@ -56,18 +55,18 @@ inline void LcsSerializer::serialize_u32_as_uleb128(uint32_t value) {
     bytes_.push_back((uint8_t)value);
 }
 
-inline void LcsSerializer::serialize_len(size_t value) {
-    if (value > LCS_MAX_LENGTH) {
+inline void BcsSerializer::serialize_len(size_t value) {
+    if (value > BCS_MAX_LENGTH) {
         throw serde::serialization_error("Length is too large");
     }
     serialize_u32_as_uleb128((uint32_t)value);
 }
 
-inline void LcsSerializer::serialize_variant_index(uint32_t value) {
+inline void BcsSerializer::serialize_variant_index(uint32_t value) {
     serialize_u32_as_uleb128(value);
 }
 
-inline void LcsSerializer::sort_last_entries(std::vector<size_t> offsets) {
+inline void BcsSerializer::sort_last_entries(std::vector<size_t> offsets) {
     if (offsets.size() <= 1) {
         return;
     }
@@ -92,7 +91,7 @@ inline void LcsSerializer::sort_last_entries(std::vector<size_t> offsets) {
     assert(offsets.back() == bytes_.size());
 }
 
-inline uint32_t LcsDeserializer::deserialize_uleb128_as_u32() {
+inline uint32_t BcsDeserializer::deserialize_uleb128_as_u32() {
     uint64_t value = 0;
     for (int shift = 0; shift < 32; shift += 7) {
         auto byte = read_byte();
@@ -114,19 +113,19 @@ inline uint32_t LcsDeserializer::deserialize_uleb128_as_u32() {
         "Overflow while parsing uleb128-encoded uint32 value");
 }
 
-inline size_t LcsDeserializer::deserialize_len() {
+inline size_t BcsDeserializer::deserialize_len() {
     auto value = deserialize_uleb128_as_u32();
-    if (value > LCS_MAX_LENGTH) {
+    if (value > BCS_MAX_LENGTH) {
         throw serde::deserialization_error("Length is too large");
     }
     return (size_t)value;
 }
 
-inline uint32_t LcsDeserializer::deserialize_variant_index() {
+inline uint32_t BcsDeserializer::deserialize_variant_index() {
     return deserialize_uleb128_as_u32();
 }
 
-inline void LcsDeserializer::check_that_key_slices_are_increasing(
+inline void BcsDeserializer::check_that_key_slices_are_increasing(
     std::tuple<size_t, size_t> key1, std::tuple<size_t, size_t> key2) {
     if (!std::lexicographical_compare(bytes_.cbegin() + std::get<0>(key1),
                                       bytes_.cbegin() + std::get<1>(key1),

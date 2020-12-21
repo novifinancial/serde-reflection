@@ -9,7 +9,7 @@ import (
 )
 
 // `BinarySerializer` is a partial implementation of the `Serializer` interface.
-// It is used as an embedded struct by the Bincode and LCS serializers.
+// It is used as an embedded struct by the Bincode and BCS serializers.
 type BinarySerializer struct {
 	Buffer               bytes.Buffer
 	containerDepthBudget uint64
@@ -58,16 +58,6 @@ func (s *BinarySerializer) SerializeUnit(value struct{}) error {
 
 // SerializeChar is unimplemented.
 func (s *BinarySerializer) SerializeChar(value rune) error {
-	return errors.New("unimplemented")
-}
-
-// SerializeF32 is unimplemented
-func (s *BinarySerializer) SerializeF32(value float32) error {
-	return errors.New("unimplemented")
-}
-
-// SerializeF64 is unimplemented
-func (s *BinarySerializer) SerializeF64(value float64) error {
 	return errors.New("unimplemented")
 }
 

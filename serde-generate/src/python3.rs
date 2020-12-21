@@ -35,6 +35,9 @@ struct PythonEmitter<'a, T> {
 impl<'a> CodeGenerator<'a> {
     /// Create a Python code generator for the given config.
     pub fn new(config: &'a CodeGeneratorConfig) -> Self {
+        if config.c_style_enums {
+            panic!("Python 3 does not support generating c-style enums");
+        }
         let mut external_qualified_names = HashMap::new();
         for (module_path, names) in &config.external_definitions {
             let module = {
@@ -454,12 +457,12 @@ impl crate::SourceInstaller for Installer {
         Ok(())
     }
 
-    fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        let mut file = self.create_module_init_file("lcs")?;
+    fn install_bcs_runtime(&self) -> std::result::Result<(), Self::Error> {
+        let mut file = self.create_module_init_file("bcs")?;
         write!(
             file,
             "{}",
-            self.fix_serde_package(include_str!("../runtime/python/lcs/__init__.py"))
+            self.fix_serde_package(include_str!("../runtime/python/bcs/__init__.py"))
         )?;
         Ok(())
     }

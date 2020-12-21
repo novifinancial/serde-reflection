@@ -4,4 +4,10 @@ __pycache__
 .class
 .o
 .idea
+<<<<<<< HEAD
 serde-generate/tests/starcoin.yaml
+=======
+obj/
+bin/
+.vs/
+>>>>>>> 1fd02a932898b84869c740533a539a3e4fa6b34e

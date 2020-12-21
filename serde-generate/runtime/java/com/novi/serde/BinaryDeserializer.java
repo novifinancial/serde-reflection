@@ -76,14 +76,6 @@ public abstract class BinaryDeserializer implements Deserializer {
         throw new DeserializationError("Not implemented: deserialize_char");
     }
 
-    public Float deserialize_f32() throws DeserializationError {
-        throw new DeserializationError("Not implemented: deserialize_f32");
-    }
-
-    public Double deserialize_f64() throws DeserializationError {
-        throw new DeserializationError("Not implemented: deserialize_f64");
-    }
-
     public @Unsigned Byte deserialize_u8() throws DeserializationError {
         return Byte.valueOf(getByte());
     }
@@ -172,6 +164,22 @@ public abstract class BinaryDeserializer implements Deserializer {
     protected long getLong()  throws DeserializationError {
         try {
             return input.getLong();
+        } catch (java.nio.BufferUnderflowException e) {
+            throw new DeserializationError(INPUT_NOT_LARGE_ENOUGH);
+        }
+    }
+
+    protected float getFloat()  throws DeserializationError {
+        try {
+            return input.getFloat();
+        } catch (java.nio.BufferUnderflowException e) {
+            throw new DeserializationError(INPUT_NOT_LARGE_ENOUGH);
+        }
+    }
+
+    protected double getDouble()  throws DeserializationError {
+        try {
+            return input.getDouble();
         } catch (java.nio.BufferUnderflowException e) {
             throw new DeserializationError(INPUT_NOT_LARGE_ENOUGH);
         }

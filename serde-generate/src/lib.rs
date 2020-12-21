@@ -13,8 +13,9 @@
 //! * Python 3
 //! * Rust 2018
 //! * Go >= 1.13
+//! * C# (NetCoreApp >= 2.1)
 //!
-//! ## Work in progres
+//! ## Work in progress
 //! * TypeScript > 3.2 (make sure to enable `esnext.BigInt` and `dom` at tsconfig.json -> lib)
 //!
 //! ## Supported Encodings
@@ -25,7 +26,7 @@
 //! This crate provides easy-to-deploy runtime libraries for the following binary formats, in all supported languages:
 //!
 //! * [Bincode](https://docs.rs/bincode/1.3.1/bincode/),
-//! * [Libra Canonical Serialization](https://libra.github.io/libra/libra_canonical_serialization/index.html) ("LCS" for short).
+//! * [BCS](https://github.com/diem/bcs) (short for "Binary Canonical Serialization" -- formerly known as "LCS" or "Libra Canonical Serialization").
 //!
 //! ## Quick Start with Python and Bincode
 //!
@@ -113,6 +114,8 @@ pub mod analyzer;
 pub mod cpp;
 /// Support for code-generation in Dart
 pub mod dart;
+/// Support for code-generation in C#
+pub mod csharp;
 /// Utility function to generate indented text
 pub mod golang;
 /// Support for code-generation in Go

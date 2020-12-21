@@ -1,6 +1,5 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
-#![cfg(feature = "runtime-testing")]
 
 use heck::CamelCase;
 use serde_generate::{
@@ -31,8 +30,8 @@ fn test_golang_runtime_autotests() {
 }
 
 #[test]
-fn test_golang_lcs_runtime_on_simple_data() {
-    test_golang_runtime_on_simple_data(Runtime::Lcs);
+fn test_golang_bcs_runtime_on_simple_data() {
+    test_golang_runtime_on_simple_data(Runtime::Bcs);
 }
 
 #[test]
@@ -67,22 +66,22 @@ fn test_golang_runtime_on_simple_data(runtime: Runtime) {
         r#"
 func main() {{
 	input := []byte{{{0}}}
-	test, err := {1}DeserializeTest(input)
+	value, err := {1}DeserializeTest(input)
 	if err != nil {{ panic("failed to deserialize") }}
 
-        test2 := Test {{
+        value2 := Test {{
 		A: []uint32{{ 4, 6 }},
 		B: struct {{ Field0 int64; Field1 uint64 }} {{ -3, 5 }},
 		C: &Choice__C {{ X: 7 }},
 	}}
-	if !cmp.Equal(test, test2) {{ panic("test != test2") }}
+	if !cmp.Equal(value, value2) {{ panic("value != value2") }}
 
-	output, err := test2.{1}Serialize()
+	output, err := value2.{1}Serialize()
 	if err != nil {{ panic("failed to serialize") }}
 	if !cmp.Equal(input, output) {{ panic("input != output") }}
 
 	input2 := []byte{{{0}, 1}}
-	test2, err2 := {1}DeserializeTest(input2)
+	value2, err2 := {1}DeserializeTest(input2)
 	if err2 == nil {{ panic("was expecting an error") }}
 }}
 "#,
@@ -132,8 +131,8 @@ func main() {{
 }
 
 #[test]
-fn test_golang_lcs_runtime_on_supported_types() {
-    test_golang_runtime_on_supported_types(Runtime::Lcs);
+fn test_golang_bcs_runtime_on_supported_types() {
+    test_golang_runtime_on_supported_types(Runtime::Bcs);
 }
 
 #[test]
@@ -169,7 +168,7 @@ fn test_golang_runtime_on_supported_types(runtime: Runtime) {
     generator.output(&mut source, &registry).unwrap();
 
     let positive_encodings = runtime
-        .get_positive_samples()
+        .get_positive_samples_quick()
         .iter()
         .map(|bytes| quote_bytes(bytes))
         .collect::<Vec<_>>()
@@ -190,20 +189,27 @@ func main() {{
 	negative_inputs := [][]byte{{{1}}}
 
 	for _, input := range(positive_inputs) {{
-		test, err := {2}DeserializeSerdeData(input)
+		value, err := {2}DeserializeSerdeData(input)
 		if err != nil {{ panic(fmt.Sprintf("failed to deserialize input: %v", err)) }}
-		output, err := test.{2}Serialize()
+		output, err := value.{2}Serialize()
 		if err != nil {{ panic(fmt.Sprintf("failed to serialize: %v", err)) }}
-
 		if !cmp.Equal(input, output) {{ panic(fmt.Sprintf("input != output:\n  %v\n  %v", input, output)) }}
 
+		// Test self-equality for the Serde value.
+		{{
+			value2, err := {2}DeserializeSerdeData(input)
+			if err != nil {{ panic(fmt.Sprintf("failed to deserialize input: %v", err)) }}
+			if !cmp.Equal(value, value2) {{ panic("Value should test equal to itself.") }}
+		}}
+
+		// Test simple mutations of the input.
 		for i := 0; i < len(input); i++ {{
 			input2 := make([]byte, len(input))
 			copy(input2, input)
 			input2[i] ^= 0x80
-			test2, err := {2}DeserializeSerdeData(input2)
+			value2, err := {2}DeserializeSerdeData(input2)
 			if err != nil {{ continue }}
-			if cmp.Equal(test, test2) {{ panic("Modified input should give a different value.") }}
+			if cmp.Equal(value, value2) {{ panic("Modified input should give a different value.") }}
 		}}
 	}}
 

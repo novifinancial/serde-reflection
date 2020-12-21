@@ -1104,7 +1104,7 @@ impl crate::SourceInstaller for Installer {
         self.install_runtime(include_directory!("runtime/dart/bincode"), "lib/bincode")
     }
 
-    fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
+    fn install_bcs_runtime(&self) -> std::result::Result<(), Self::Error> {
         self.install_runtime(include_directory!("runtime/dart/lcs"), "lib/lcs")
     }
 }

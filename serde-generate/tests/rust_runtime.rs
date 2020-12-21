@@ -1,6 +1,5 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
-#![cfg(feature = "runtime-testing")]
 
 use serde_generate::{rust, test_utils, test_utils::Runtime, CodeGeneratorConfig};
 use std::fs::File;
@@ -9,8 +8,8 @@ use std::process::Command;
 use tempfile::tempdir;
 
 #[test]
-fn test_rust_lcs_runtime() {
-    test_rust_runtime(Runtime::Lcs);
+fn test_rust_bcs_runtime() {
+    test_rust_runtime(Runtime::Bcs);
 }
 
 #[test]

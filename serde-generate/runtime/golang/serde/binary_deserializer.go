@@ -11,7 +11,7 @@ import (
 )
 
 // `BinaryDeserializer` is a partial implementation of the `Deserializer` interface.
-// It is used as an embedded struct by the Bincode and LCS deserializers.
+// It is used as an embedded struct by the Bincode and BCS deserializers.
 type BinaryDeserializer struct {
 	Buffer               *bytes.Buffer
 	Input                []byte
@@ -85,16 +85,6 @@ func (d *BinaryDeserializer) DeserializeUnit() (struct{}, error) {
 
 // DeserializeChar is unimplemented.
 func (d *BinaryDeserializer) DeserializeChar() (rune, error) {
-	return 0, errors.New("unimplemented")
-}
-
-// DeserializeF32 is unimplemented.
-func (d *BinaryDeserializer) DeserializeF32() (float32, error) {
-	return 0, errors.New("unimplemented")
-}
-
-// DeserializeF64 is unimplemented.
-func (d *BinaryDeserializer) DeserializeF64() (float64, error) {
 	return 0, errors.New("unimplemented")
 }
 

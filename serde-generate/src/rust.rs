@@ -341,7 +341,7 @@ where
         }
         if let Some(text) = &self.generator.custom_derive_block {
             prefix.push_str(text);
-            prefix.push_str("\n");
+            prefix.push('\n');
         }
         if self.generator.track_visibility {
             prefix.push_str("pub ");
@@ -457,7 +457,7 @@ serde_bytes = "0.11"
         Self::runtime_installation_message("bincode")
     }
 
-    fn install_lcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        Self::runtime_installation_message("libra-canonical-serialization")
+    fn install_bcs_runtime(&self) -> std::result::Result<(), Self::Error> {
+        Self::runtime_installation_message("bcs")
     }
 }
