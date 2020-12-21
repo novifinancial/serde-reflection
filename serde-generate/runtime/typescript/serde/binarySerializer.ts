@@ -1,4 +1,5 @@
 import { Serializer } from './serializer';
+import util from 'util';
 
 export abstract class BinarySerializer implements Serializer {
     private static readonly BIG_32 = BigInt(32);
@@ -10,7 +11,8 @@ export abstract class BinarySerializer implements Serializer {
     private static readonly BIG_32Fs = BigInt('4294967295');
     private static readonly BIG_64Fs = BigInt('18446744073709551615');
 
-    private static readonly textEncoder: TextEncoder = new TextEncoder();
+    private static readonly textEncoder =
+        typeof window === 'undefined' ? new util.TextEncoder() : new TextEncoder();
 
     private buffer: ArrayBuffer;
     private offset: number;
@@ -21,12 +23,11 @@ export abstract class BinarySerializer implements Serializer {
     }
 
     private ensureBufferWillHandleSize(bytes: number) {
-        if (this.offset + bytes <= this.buffer.byteLength) {
-            return;
+        while (this.buffer.byteLength < this.offset + bytes) {
+            const newBuffer = new ArrayBuffer(this.buffer.byteLength * 2);
+            new Uint8Array(newBuffer).set(new Uint8Array(this.buffer));
+            this.buffer = newBuffer;
         }
-        const newBuffer = new ArrayBuffer(this.buffer.byteLength * 2);
-        new Uint8Array(newBuffer).set(new Uint8Array(this.buffer));
-        this.buffer = newBuffer;
     }
 
     protected serialize(values: Uint8Array) {
