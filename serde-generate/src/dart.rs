@@ -72,6 +72,10 @@ impl<'a> CodeGenerator<'a> {
         writeln!(
             &mut out,
             r#"name: {}
+            
+environment:
+  sdk: '>=2.10.0 <3.0.0'
+              
 dependencies:
   optional: '5.0.0'
   tuple: '1.0.3'  
@@ -96,12 +100,11 @@ dev_dependencies:
         let mut out = IndentedWriter::new(&mut file, IndentConfig::Space(2));
         writeln!(
             &mut out,
-            r#"library lcs_test;
+            r#"library bcs_test;
 
 import 'package:test/test.dart';
 import 'dart:typed_data';
 import 'dart:convert';
-import 'package:hex/hex.dart';
 import 'package:{0}/{0}/{0}.dart';
 import 'package:{0}/serde/serde.dart';"#,
             self.config.module_name
@@ -119,7 +122,6 @@ import 'package:{0}/serde/serde.dart';"#,
         writeln!(
             &mut out,
             r#"part 'src/serde_test.dart';
-part 'src/starcoin_json_test.dart';
 part 'src/starcoin_test.dart';"#
         )?;
         for encoding in &self.config.encodings {
@@ -130,7 +132,6 @@ part 'src/starcoin_test.dart';"#
             &mut out,
             r#"void main() {{
   group('Serde', runSerdeTests);
-  group('starcoin_json', runStarcoinJsonTests);
   group('starcoin', runStarcoinTests);"#,
         )?;
         for encoding in &self.config.encodings {
@@ -166,6 +167,7 @@ part 'src/starcoin_test.dart';"#
 import 'dart:typed_data';
 import 'package:optional/optional.dart';
 import 'package:tuple/tuple.dart';
+import 'package:hex/hex.dart';
 import 'package:{}/serde/serde.dart';"#,
             self.config.module_name, self.config.module_name,
         )?;
@@ -1105,6 +1107,6 @@ impl crate::SourceInstaller for Installer {
     }
 
     fn install_bcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.install_runtime(include_directory!("runtime/dart/lcs"), "lib/lcs")
+        self.install_runtime(include_directory!("runtime/dart/bcs"), "lib/bcs")
     }
 }

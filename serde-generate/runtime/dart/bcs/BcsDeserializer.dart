@@ -1,9 +1,9 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
-part of lcs;
+part of bcs;
 
-class LcsDeserializer extends BinaryDeserializer {
-  LcsDeserializer(Uint8List input) : super(input) {}
+class BcsDeserializer extends BinaryDeserializer {
+  BcsDeserializer(Uint8List input) : super(input) {}
 
   int deserialize_uleb128_as_u32() {
     int value = 0;

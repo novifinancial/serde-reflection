@@ -1,8 +1,8 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
-part of lcs;
+part of bcs;
 
-class LcsSerializer extends BinarySerializer {
+class BcsSerializer extends BinarySerializer {
   void serialize_u32_as_uleb128(int value) {
     while (((value & 0xFFFFFFFF) >> 7) != 0) {
       output.add((value & 0x7f) | 0x80);
