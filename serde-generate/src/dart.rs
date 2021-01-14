@@ -666,7 +666,7 @@ return obj;
                 return Ok(());
             }
         };
-        self.output_struct_or_variant_container(None, None, name, &fields, redefine)
+        self.output_struct_or_variant_container(None, None, name, &fields, redefine, name)
     }
 
     fn output_struct_or_variant_container(
@@ -676,6 +676,7 @@ return obj;
         name: &str,
         fields: &[Named<Format>],
         redefine: bool,
+        actual_name: &str,
     ) -> Result<()> {
         // Beginning of class
         writeln!(self.out)?;
@@ -876,7 +877,8 @@ if (other == null) return false;"#,
                 writeln!(self.out, "{},", self.to_json(field))?;
             }
             if let Some(index) = variant_index {
-                writeln!(self.out, "\"type\" : {}", index)?;
+                writeln!(self.out, "\"type\" : {},", index)?;
+                writeln!(self.out, "\"type_name\" : \"{}\"", actual_name)?;
             }
             self.out.unindent();
             writeln!(self.out, "}};")?;
@@ -1024,6 +1026,7 @@ static {} fromJson(dynamic json){{
                 *index,
                 &format!("{}{}Item", base, &variant.name),
                 &variant.value,
+                &variant.name,
             )?;
         }
         Ok(())
@@ -1035,6 +1038,7 @@ static {} fromJson(dynamic json){{
         index: u32,
         name: &str,
         variant: &VariantFormat,
+        actual_name: &str,
     ) -> Result<()> {
         use VariantFormat::*;
         let fields = match variant {
@@ -1054,7 +1058,14 @@ static {} fromJson(dynamic json){{
             Struct(fields) => fields.clone(),
             Variable(_) => panic!("incorrect value"),
         };
-        self.output_struct_or_variant_container(Some(base), Some(index), name, &fields, false)
+        self.output_struct_or_variant_container(
+            Some(base),
+            Some(index),
+            name,
+            &fields,
+            false,
+            actual_name,
+        )
     }
 }
 
