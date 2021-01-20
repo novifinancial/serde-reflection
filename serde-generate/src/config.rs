@@ -70,6 +70,10 @@ impl CodeGeneratorConfig {
         }
     }
 
+    pub fn module_name(&self) -> &str {
+        &self.module_name
+    }
+
     /// Whether to include serialization methods.
     pub fn with_serialization(mut self, serialization: bool) -> Self {
         self.serialization = serialization;

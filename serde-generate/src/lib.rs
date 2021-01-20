@@ -16,6 +16,7 @@
 //! * C# (NetCoreApp >= 2.1)
 //!
 //! ## Work in progress
+//!
 //! * TypeScript > 3.2 (make sure to enable `esnext.BigInt` and `dom` at tsconfig.json -> lib)
 //!
 //! ## Supported Encodings
