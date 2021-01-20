@@ -8,14 +8,14 @@ import typing
 
 class BincodeTestCase(unittest.TestCase):
     def test_bincode_bool(self):
-        self.assertEqual(bincode.serialize(False, st.bool), b"\x00")
-        self.assertEqual(bincode.serialize(True, st.bool), b"\x01")
-        self.assertEqual(bincode.deserialize(b"\x00", st.bool), (False, b""))
-        self.assertEqual(bincode.deserialize(b"\x01", st.bool), (True, b""))
+        self.assertEqual(bincode.serialize(False, bool), b"\x00")
+        self.assertEqual(bincode.serialize(True, bool), b"\x01")
+        self.assertEqual(bincode.deserialize(b"\x00", bool), (False, b""))
+        self.assertEqual(bincode.deserialize(b"\x01", bool), (True, b""))
         with self.assertRaises(st.DeserializationError):
-            bincode.deserialize(b"\x02", st.bool)
+            bincode.deserialize(b"\x02", bool)
         with self.assertRaises(st.DeserializationError):
-            bincode.deserialize(b"", st.bool)
+            bincode.deserialize(b"", bool)
 
     def test_bincode_u8(self):
         self.assertEqual(bincode.serialize(0x1, st.uint8), b"\x01")
