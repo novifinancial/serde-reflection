@@ -1,7 +1,7 @@
 using System;
 using System.Numerics;
 using NUnit.Framework;
-using Serde.Bcs;
+using Bcs;
 
 namespace Serde.Tests
 {

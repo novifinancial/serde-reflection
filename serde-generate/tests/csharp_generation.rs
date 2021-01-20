@@ -27,64 +27,68 @@ fn test_that_csharp_code_compiles_with_config(
     installer.install_bincode_runtime().unwrap();
     installer.install_bcs_runtime().unwrap();
 
+    let proj_path = dir_path.join(config.module_name().replace(".", "/"));
     {
         let _lock = MUTEX.lock();
         let status = Command::new("dotnet")
             .arg("build")
-            .current_dir(dir_path.join("Serde"))
+            .current_dir(&proj_path)
             .status()
             .unwrap();
         assert!(status.success());
     }
 
-    (dir, dir_path.join("Serde").join("Generated").to_path_buf())
+    (dir, proj_path)
 }
 
 #[test]
 fn test_that_csharp_code_compiles() {
-    let config = CodeGeneratorConfig::new("Serde.Generated".to_string());
+    let config = CodeGeneratorConfig::new("Generated".to_string());
     test_that_csharp_code_compiles_with_config(&config);
 }
 
 #[test]
 fn test_that_csharp_code_compiles_without_serialization() {
-    let config = CodeGeneratorConfig::new("Serde.Generated".to_string()).with_serialization(false);
+    let config = CodeGeneratorConfig::new("Generated".to_string()).with_serialization(false);
     test_that_csharp_code_compiles_with_config(&config);
 }
 
 #[test]
 fn test_that_csharp_code_compiles_with_c_style_enums() {
-    let config = CodeGeneratorConfig::new("Serde.Generated".to_string()).with_c_style_enums(true);
+    let config = CodeGeneratorConfig::new("Generated".to_string()).with_c_style_enums(true);
     test_that_csharp_code_compiles_with_config(&config);
 }
 
 #[test]
 fn test_that_csharp_code_compiles_with_bcs() {
     let config =
-        CodeGeneratorConfig::new("Serde.Generated".to_string()).with_encodings(vec![Encoding::Bcs]);
+        CodeGeneratorConfig::new("Generated".to_string()).with_encodings(vec![Encoding::Bcs]);
+    test_that_csharp_code_compiles_with_config(&config);
+}
+
+#[test]
+fn test_that_csharp_code_compiles_with_bcs_and_extra_nesting() {
+    let config = CodeGeneratorConfig::new("My.Generated.Project".to_string())
+        .with_encodings(vec![Encoding::Bcs]);
     test_that_csharp_code_compiles_with_config(&config);
 }
 
 #[test]
 fn test_that_csharp_code_compiles_with_bincode() {
-    let config = CodeGeneratorConfig::new("Serde.Generated".to_string())
-        .with_encodings(vec![Encoding::Bincode]);
+    let config =
+        CodeGeneratorConfig::new("Generated".to_string()).with_encodings(vec![Encoding::Bincode]);
     test_that_csharp_code_compiles_with_config(&config);
 }
 
 #[test]
 fn test_that_csharp_code_compiles_with_comments() {
     let comments = vec![(
-        vec![
-            "Serde".to_string(),
-            "Generated".to_string(),
-            "SerdeData".to_string(),
-        ],
+        vec!["Generated".to_string(), "SerdeData".to_string()],
         "Some\ncomments".to_string(),
     )]
     .into_iter()
     .collect();
-    let config = CodeGeneratorConfig::new("Serde.Generated".to_string()).with_comments(comments);
+    let config = CodeGeneratorConfig::new("Generated".to_string()).with_comments(comments);
 
     let (_dir, path) = test_that_csharp_code_compiles_with_config(&config);
     let content = std::fs::read_to_string(path.join("SerdeData.cs")).unwrap();
@@ -99,8 +103,8 @@ fn test_csharp_code_with_external_definitions() {
     // (wrongly) Declare TraitHelpers as external.
     let mut definitions = BTreeMap::new();
     definitions.insert("foo".to_string(), vec!["TraitHelpers".to_string()]);
-    let config = CodeGeneratorConfig::new("Serde.Generated".to_string())
-        .with_external_definitions(definitions);
+    let config =
+        CodeGeneratorConfig::new("Generated".to_string()).with_external_definitions(definitions);
     let generator = csharp::CodeGenerator::new(&config);
 
     generator
@@ -108,6 +112,6 @@ fn test_csharp_code_with_external_definitions() {
         .unwrap();
 
     // References were updated.
-    let content = std::fs::read_to_string(dir.path().join("Serde/Generated/SerdeData.cs")).unwrap();
+    let content = std::fs::read_to_string(dir.path().join("Generated/SerdeData.cs")).unwrap();
     assert!(content.contains("foo.TraitHelpers."));
 }
