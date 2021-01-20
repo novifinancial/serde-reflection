@@ -25,7 +25,7 @@ pub struct CodeGenerator<'a> {
 }
 
 /// Shared state for the code generation of a C# source file.
-struct CsharpEmitter<'a, T> {
+struct CSharpEmitter<'a, T> {
     /// Writer.
     out: IndentedWriter<T>,
     /// Generator.
@@ -60,7 +60,7 @@ impl<'a> CodeGenerator<'a> {
 
     /// Output class definitions for `registry` in separate source files.
     /// Source files will be created in a subdirectory of `install_dir` corresponding to the given
-    /// package name (if any, otherwise `install_dir` it self).
+    /// package name (if any, otherwise `install_dir` itself).
     pub fn write_source_files(
         &self,
         install_dir: std::path::PathBuf,
@@ -116,7 +116,7 @@ impl<'a> CodeGenerator<'a> {
         format: &ContainerFormat,
     ) -> Result<()> {
         let mut file = std::fs::File::create(dir_path.join(name.to_string() + ".cs"))?;
-        let mut emitter = CsharpEmitter {
+        let mut emitter = CSharpEmitter {
             out: IndentedWriter::new(&mut file, IndentConfig::Space(4)),
             generator: self,
             current_namespace,
@@ -140,7 +140,7 @@ impl<'a> CodeGenerator<'a> {
         registry: &Registry,
     ) -> Result<()> {
         let mut file = std::fs::File::create(dir_path.join("TraitHelpers.cs"))?;
-        let mut emitter = CsharpEmitter {
+        let mut emitter = CSharpEmitter {
             out: IndentedWriter::new(&mut file, IndentConfig::Space(4)),
             generator: self,
             current_namespace,
@@ -157,7 +157,7 @@ impl<'a> CodeGenerator<'a> {
     }
 }
 
-impl<'a, T> CsharpEmitter<'a, T>
+impl<'a, T> CSharpEmitter<'a, T>
 where
     T: Write,
 {
@@ -638,14 +638,14 @@ return new Serde.ValueArray<{0}>(obj);
         let fields = match variant {
             Unit => Vec::new(),
             NewType(format) => vec![Named {
-                name: "Value".to_string(),
+                name: "value".to_string(),
                 value: format.as_ref().clone(),
             }],
             Tuple(formats) => formats
                 .iter()
                 .enumerate()
                 .map(|(i, f)| Named {
-                    name: format!("Field{}", i),
+                    name: format!("field{}", i),
                     value: f.clone(),
                 })
                 .collect(),
