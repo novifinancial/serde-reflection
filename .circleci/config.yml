@@ -32,19 +32,15 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Setup Golang
-          command: |
-            wget https://golang.org/dl/go1.13.15.linux-amd64.tar.gz
-            sudo tar -C /usr/local -xzf go1.13.15.linux-amd64.tar.gz
-            mkdir -p ~/go/bin
-            echo 'export GOROOT="/usr/local/go"' >> $BASH_ENV
-            echo 'export GOBIN="$HOME/go/bin"' >> $BASH_ENV
-            echo 'export PATH=$PATH:$GOROOT/bin:$GOBIN' >> $BASH_ENV
-      - run:
           name: Setup Additional Languages
           command: |
+            echo "deb http://http.us.debian.org/debian/ buster-backports main" | sudo tee -a /etc/apt/sources.list
+            echo "deb-src http://http.us.debian.org/debian/ buster-backports main" | sudo tee -a /etc/apt/sources.list
             sudo apt-get update && sudo apt-get upgrade -y
-            sudo apt-get install -y apt-transport-https python3-all-dev python3-pip python3-numpy clang llvm default-jdk
+            sudo apt-get install -y apt-transport-https python3-all-dev python3-pip python3-numpy clang llvm default-jdk golang-1.14-go/buster-backports
+            echo 'export GOROOT="/usr/lib/go-1.14"' >> $BASH_ENV
+            echo 'export GOBIN="$HOME/go/bin"' >> $BASH_ENV
+            echo 'export PATH=$PATH:$GOROOT/bin:$GOBIN' >> $BASH_ENV
             python3 -m pip install pyre-check
             curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
             export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
