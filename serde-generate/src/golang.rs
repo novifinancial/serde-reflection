@@ -272,7 +272,10 @@ where
 
     fn needs_helper(format: &Format) -> bool {
         use Format::*;
-        matches!(format, Option(_) | Seq(_) | Map { .. } | Tuple(_) | TupleArray { .. })
+        matches!(
+            format,
+            Option(_) | Seq(_) | Map { .. } | Tuple(_) | TupleArray { .. }
+        )
     }
 
     fn quote_serialize_value(&self, value: &str, format: &Format) -> String {
@@ -972,10 +975,7 @@ impl Installer {
         }
     }
 
-    fn runtime_installation_message(
-        &self,
-        name: &str,
-    ) -> std::result::Result<(), Box<dyn std::error::Error>> {
+    fn runtime_installation_message(&self, name: &str) {
         eprintln!(
             "Not installing sources for published package {}{}",
             match &self.serde_module_path {
@@ -984,7 +984,6 @@ impl Installer {
             },
             name
         );
-        Ok(())
     }
 }
 
@@ -1010,14 +1009,17 @@ impl crate::SourceInstaller for Installer {
     }
 
     fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.runtime_installation_message("serde")
+        self.runtime_installation_message("serde");
+        Ok(())
     }
 
     fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.runtime_installation_message("bincode")
+        self.runtime_installation_message("bincode");
+        Ok(())
     }
 
     fn install_bcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.runtime_installation_message("bcs")
+        self.runtime_installation_message("bcs");
+        Ok(())
     }
 }

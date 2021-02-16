@@ -21,7 +21,7 @@ fn test_that_csharp_code_compiles_with_config(
     let dir = tempdir().unwrap();
     let dir_path = dir.path().to_path_buf();
 
-    let installer = csharp::Installer::new(dir_path.to_path_buf());
+    let installer = csharp::Installer::new(dir_path.clone());
     installer.install_module(&config, &registry).unwrap();
     installer.install_serde_runtime().unwrap();
     installer.install_bincode_runtime().unwrap();

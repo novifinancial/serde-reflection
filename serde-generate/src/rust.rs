@@ -402,11 +402,8 @@ impl Installer {
         Installer { install_dir }
     }
 
-    fn runtime_installation_message(
-        name: &str,
-    ) -> std::result::Result<(), Box<dyn std::error::Error>> {
+    fn runtime_installation_message(name: &str) {
         eprintln!("Not installing sources for published crate {}", name);
-        Ok(())
     }
 }
 
@@ -450,14 +447,17 @@ serde_bytes = "0.11"
     }
 
     fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {
-        Self::runtime_installation_message("serde")
+        Self::runtime_installation_message("serde");
+        Ok(())
     }
 
     fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error> {
-        Self::runtime_installation_message("bincode")
+        Self::runtime_installation_message("bincode");
+        Ok(())
     }
 
     fn install_bcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        Self::runtime_installation_message("bcs")
+        Self::runtime_installation_message("bcs");
+        Ok(())
     }
 }

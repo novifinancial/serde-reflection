@@ -220,7 +220,7 @@ fn test_that_installed_python_code_passes_pyre_check() {
 }
 
 #[test]
-fn test_python_autotest() -> std::io::Result<()> {
+fn test_python_autotest() {
     let status = Command::new("python3")
         .arg("-m")
         .arg("unittest")
@@ -230,5 +230,4 @@ fn test_python_autotest() -> std::io::Result<()> {
         .status()
         .unwrap();
     assert!(status.success());
-    Ok(())
 }
