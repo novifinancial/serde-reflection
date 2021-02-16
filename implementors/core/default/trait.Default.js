@@ -1,6 +1,6 @@
 (function() {var implementors = {};
 implementors["ansi_term"] = [{"text":"impl Default for Style","synthetic":false,"types":[]}];
-implementors["anyhow"] = [{"text":"impl&lt;'_&gt; Default for Chain&lt;'_&gt;","synthetic":false,"types":[]}];
+implementors["anyhow"] = [{"text":"impl Default for Chain&lt;'_&gt;","synthetic":false,"types":[]}];
 implementors["bincode"] = [{"text":"impl Default for DefaultOptions","synthetic":false,"types":[]}];
 implementors["byteorder"] = [{"text":"impl Default for BigEndian","synthetic":false,"types":[]},{"text":"impl Default for LittleEndian","synthetic":false,"types":[]}];
 implementors["clap"] = [{"text":"impl&lt;'a, 'b&gt; Default for Arg&lt;'a, 'b&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;'a: 'b,&nbsp;</span>","synthetic":false,"types":[]},{"text":"impl&lt;'a&gt; Default for ArgMatches&lt;'a&gt;","synthetic":false,"types":[]},{"text":"impl&lt;'a&gt; Default for Values&lt;'a&gt;","synthetic":false,"types":[]},{"text":"impl&lt;'a&gt; Default for OsValues&lt;'a&gt;","synthetic":false,"types":[]},{"text":"impl&lt;'a&gt; Default for ArgGroup&lt;'a&gt;","synthetic":false,"types":[]}];
