@@ -196,7 +196,10 @@ import {{ Optional, Seq, Tuple, ListTuple, unit, bool, int8, int16, int32, int64
 
     fn needs_helper(format: &Format) -> bool {
         use Format::*;
-        matches!(format, Option(_) | Seq(_) | Map { .. } | Tuple(_) | TupleArray { .. })
+        matches!(
+            format,
+            Option(_) | Seq(_) | Map { .. } | Tuple(_) | TupleArray { .. }
+        )
     }
 
     fn quote_serialize_value(&self, value: &str, format: &Format, use_this: bool) -> String {

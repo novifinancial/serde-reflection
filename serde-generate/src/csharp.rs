@@ -351,7 +351,10 @@ using System.Numerics;"
 
     fn needs_helper(format: &Format) -> bool {
         use Format::*;
-        matches!(format, Option(_) | Seq(_) | Map { .. } | Tuple(_) | TupleArray { .. })
+        matches!(
+            format,
+            Option(_) | Seq(_) | Map { .. } | Tuple(_) | TupleArray { .. }
+        )
     }
 
     fn quote_serialize_value(&self, value: &str, format: &Format) -> String {

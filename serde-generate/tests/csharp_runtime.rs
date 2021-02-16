@@ -74,7 +74,7 @@ fn make_test_project(
     test_name: &str,
     library_name: &str,
 ) -> std::io::Result<PathBuf> {
-    let test_dir = tmp_dir.join(test_name.replace(".", "/")).to_path_buf();
+    let test_dir = tmp_dir.join(test_name.replace(".", "/"));
     std::fs::create_dir(&test_dir)?;
     let mut proj = std::fs::File::create(test_dir.join(format!("{}.csproj", test_name)))?;
     write!(
@@ -133,7 +133,7 @@ fn test_csharp_runtime_on_simple_data(dir: PathBuf, runtime: Runtime) {
     let config =
         CodeGeneratorConfig::new("SimpleData".to_string()).with_encodings(vec![runtime.into()]);
 
-    let installer = csharp::Installer::new(dir.clone());
+    let installer = csharp::Installer::new(dir);
     installer.install_serde_runtime().unwrap();
     match runtime {
         Runtime::Bincode => installer.install_bincode_runtime().unwrap(),
@@ -226,7 +226,7 @@ fn test_csharp_runtime_on_supported_types(dir: PathBuf, runtime: Runtime) {
     let test_dir = make_test_project(&dir, runtime, "Testing", "Data").unwrap();
     let config = CodeGeneratorConfig::new("Data".to_string()).with_encodings(vec![runtime.into()]);
 
-    let installer = csharp::Installer::new(dir.clone());
+    let installer = csharp::Installer::new(dir);
     installer.install_serde_runtime().unwrap();
     match runtime {
         Runtime::Bincode => installer.install_bincode_runtime().unwrap(),
