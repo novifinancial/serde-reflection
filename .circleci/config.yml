@@ -36,7 +36,7 @@ jobs:
           command: |
             echo "deb http://http.us.debian.org/debian/ buster-backports main" | sudo tee -a /etc/apt/sources.list
             echo "deb-src http://http.us.debian.org/debian/ buster-backports main" | sudo tee -a /etc/apt/sources.list
-            sudo apt-get update && sudo apt-get upgrade -y
+            sudo apt-get update
             sudo apt-get install -y apt-transport-https python3-all-dev python3-pip clang llvm default-jdk golang-1.14-go/buster-backports
             echo 'export GOROOT="/usr/lib/go-1.14"' >> $BASH_ENV
             echo 'export GOBIN="$HOME/go/bin"' >> $BASH_ENV
