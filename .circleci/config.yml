@@ -38,9 +38,7 @@ jobs:
             echo "deb-src http://http.us.debian.org/debian/ buster-backports main" | sudo tee -a /etc/apt/sources.list
             sudo apt-get update
             sudo apt-get install -y apt-transport-https python3-all-dev python3-pip clang llvm default-jdk nodejs npm golang-1.14-go/buster-backports
-            echo 'export GOROOT="/usr/lib/go-1.14"' >> $BASH_ENV
-            echo 'export GOBIN="$HOME/go/bin"' >> $BASH_ENV
-            echo 'export PATH=$PATH:$GOROOT/bin:$GOBIN' >> $BASH_ENV
+            echo 'export PATH=$PATH:/usr/lib/go-1.14/bin' >> $BASH_ENV
             python3 -m pip install pyre-check==0.0.59
             python3 -m pip install numpy==1.20.1
             wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
