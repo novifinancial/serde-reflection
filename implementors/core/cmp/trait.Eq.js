@@ -9,6 +9,7 @@ implementors["serde_reflection"] = [{"text":"impl Eq for Format","synthetic":fal
 implementors["serde_yaml"] = [{"text":"impl Eq for Mapping","synthetic":false,"types":[]},{"text":"impl Eq for Value","synthetic":false,"types":[]}];
 implementors["serdegen"] = [{"text":"impl Eq for Runtime","synthetic":false,"types":[]}];
 implementors["syn"] = [{"text":"impl Eq for Member","synthetic":false,"types":[]},{"text":"impl Eq for Index","synthetic":false,"types":[]},{"text":"impl Eq for Lifetime","synthetic":false,"types":[]},{"text":"impl&lt;'a&gt; Eq for Cursor&lt;'a&gt;","synthetic":false,"types":[]}];
+implementors["textwrap"] = [{"text":"impl&lt;'a&gt; Eq for Word&lt;'a&gt;","synthetic":false,"types":[]},{"text":"impl Eq for WrapAlgorithm","synthetic":false,"types":[]}];
 implementors["unicode_segmentation"] = [{"text":"impl Eq for GraphemeIncomplete","synthetic":false,"types":[]}];
 implementors["vec_map"] = [{"text":"impl&lt;V:&nbsp;Eq&gt; Eq for VecMap&lt;V&gt;","synthetic":false,"types":[]}];
 implementors["yaml_rust"] = [{"text":"impl Eq for Event","synthetic":false,"types":[]},{"text":"impl Eq for TEncoding","synthetic":false,"types":[]},{"text":"impl Eq for TScalarStyle","synthetic":false,"types":[]},{"text":"impl Eq for Marker","synthetic":false,"types":[]},{"text":"impl Eq for ScanError","synthetic":false,"types":[]},{"text":"impl Eq for TokenType","synthetic":false,"types":[]},{"text":"impl Eq for Token","synthetic":false,"types":[]},{"text":"impl Eq for Yaml","synthetic":false,"types":[]}];

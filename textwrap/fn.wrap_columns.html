@@ -1,0 +1,49 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `wrap_columns` fn in crate `textwrap`."><meta name="keywords" content="rust, rustlang, rust-lang, wrap_columns"><title>textwrap::wrap_columns - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings"></script><script src="../storage.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc fn"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../textwrap/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><div class="sidebar-elems"><p class="location"><a href="index.html">textwrap</a></p><script>window.sidebarCurrent = {name: "wrap_columns", ty: "fn", relpath: ""};</script><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/textwrap/lib.rs.html#1033-1085" title="goto source code">[src]</a></span><span class="in-band">Function <a href="index.html">textwrap</a>::<wbr><a class="fn" href="">wrap_columns</a></span></h1><pre class="rust fn">pub fn wrap_columns&lt;'a, S, Opt&gt;(<br>&nbsp;&nbsp;&nbsp;&nbsp;text: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>, <br>&nbsp;&nbsp;&nbsp;&nbsp;columns: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>, <br>&nbsp;&nbsp;&nbsp;&nbsp;total_width_or_options: Opt, <br>&nbsp;&nbsp;&nbsp;&nbsp;left_gap: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>, <br>&nbsp;&nbsp;&nbsp;&nbsp;mid_gap: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>, <br>&nbsp;&nbsp;&nbsp;&nbsp;right_gap: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a><br>) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>&gt; <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;S: <a class="trait" href="../textwrap/trait.WordSplitter.html" title="trait textwrap::WordSplitter">WordSplitter</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;Opt: <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="../textwrap/struct.Options.html" title="struct textwrap::Options">Options</a>&lt;'a, S&gt;&gt;,&nbsp;</span></pre><div class="docblock"><p>Wrap text into columns with a given total width.</p>
+<p>The <code>left_gap</code>, <code>mid_gap</code> and <code>right_gap</code> arguments specify the
+strings to insert before, between, and after the columns. The
+total width of all columns and all gaps is specified using the
+<code>total_width_or_options</code> argument. This argument can simply be an
+integer if you want to use default settings when wrapping, or it
+can be a <a href="../textwrap/struct.Options.html" title="Options"><code>Options</code></a> value if you want to customize the wrapping.</p>
+<p>If the columns are narrow, it is recommended to set
+<a href="../textwrap/struct.Options.html#method.break_words" title="Options::break_words"><code>Options::break_words</code></a> to <code>true</code> to prevent words from
+protruding into the margins.</p>
+<p>The per-column width is computed like this:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">let</span> <span class="ident">inner_width</span> <span class="op">=</span> <span class="ident">options</span>.<span class="ident">width</span>
+    <span class="op">-</span> <span class="ident">textwrap</span>::<span class="ident">core</span>::<span class="ident">display_width</span>(<span class="ident">left_gap</span>)
+    <span class="op">-</span> <span class="ident">textwrap</span>::<span class="ident">core</span>::<span class="ident">display_width</span>(<span class="ident">right_gap</span>)
+    <span class="op">-</span> <span class="ident">textwrap</span>::<span class="ident">core</span>::<span class="ident">display_width</span>(<span class="ident">middle_gap</span>) <span class="op">*</span> (<span class="ident">columns</span> <span class="op">-</span> <span class="number">1</span>);
+<span class="kw">let</span> <span class="ident">column_width</span> <span class="op">=</span> <span class="ident">inner_width</span> <span class="op">/</span> <span class="ident">columns</span>;</pre></div>
+<p>The <code>text</code> is wrapped using <a href="../textwrap/fn.wrap.html" title="wrap"><code>wrap</code></a> and the given <code>options</code>
+argument, but the width is overwritten to the computed
+<code>column_width</code>.</p>
+<h1 id="panics" class="section-header"><a href="#panics">Panics</a></h1>
+<p>Panics if <code>columns</code> is zero.</p>
+<h1 id="examples" class="section-header"><a href="#examples">Examples</a></h1>
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">use</span> <span class="ident">textwrap</span>::<span class="ident">wrap_columns</span>;
+
+<span class="kw">let</span> <span class="ident">text</span> <span class="op">=</span> <span class="string">&quot;\
+This is an example text, which is wrapped into three columns. \
+Notice how the final column can be shorter than the others.&quot;</span>;
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;smawk&quot;</span>)]</span>
+<span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap_columns</span>(<span class="ident">text</span>, <span class="number">3</span>, <span class="number">50</span>, <span class="string">&quot;| &quot;</span>, <span class="string">&quot; | &quot;</span>, <span class="string">&quot; |&quot;</span>),
+           <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;| This is       | into three    | column can be  |&quot;</span>,
+                <span class="string">&quot;| an example    | columns.      | shorter than   |&quot;</span>,
+                <span class="string">&quot;| text, which   | Notice how    | the others.    |&quot;</span>,
+                <span class="string">&quot;| is wrapped    | the final     |                |&quot;</span>]);
+
+<span class="comment">// Without the `smawk` feature, the middle column is a little more uneven:</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;smawk&quot;</span>))]</span>
+<span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap_columns</span>(<span class="ident">text</span>, <span class="number">3</span>, <span class="number">50</span>, <span class="string">&quot;| &quot;</span>, <span class="string">&quot; | &quot;</span>, <span class="string">&quot; |&quot;</span>),
+           <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;| This is an    | three         | column can be  |&quot;</span>,
+                <span class="string">&quot;| example text, | columns.      | shorter than   |&quot;</span>,
+                <span class="string">&quot;| which is      | Notice how    | the others.    |&quot;</span>,
+                <span class="string">&quot;| wrapped into  | the final     |                |&quot;</span>]);</pre></div>
+</div></section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../";window.currentCrate = "textwrap";</script><script src="../main.js"></script><script defer src="../search-index.js"></script></body></html>

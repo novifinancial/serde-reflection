@@ -1,0 +1,61 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `wrap_optimal_fit` fn in crate `textwrap`."><meta name="keywords" content="rust, rustlang, rust-lang, wrap_optimal_fit"><title>textwrap::core::wrap_optimal_fit - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc fn"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../textwrap/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a><div class="sidebar-elems"><p class="location"><a href="../index.html">textwrap</a>::<wbr><a href="index.html">core</a></p><script>window.sidebarCurrent = {name: "wrap_optimal_fit", ty: "fn", relpath: ""};</script><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../src/textwrap/core/optimal_fit.rs.html#156-228" title="goto source code">[src]</a></span><span class="in-band">Function <a href="../index.html">textwrap</a>::<wbr><a href="index.html">core</a>::<wbr><a class="fn" href="">wrap_optimal_fit</a></span></h1><pre class="rust fn">pub fn wrap_optimal_fit&lt;'a, T:&nbsp;<a class="trait" href="../../textwrap/core/trait.Fragment.html" title="trait textwrap::core::Fragment">Fragment</a>, F:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/ops/function/trait.Fn.html" title="trait core::ops::function::Fn">Fn</a>(<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>&gt;(<br>&nbsp;&nbsp;&nbsp;&nbsp;fragments: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">&amp;'a [T]</a>, <br>&nbsp;&nbsp;&nbsp;&nbsp;line_widths: F<br>) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">&amp;'a [T]</a>&gt;</pre><div class="docblock"><p>Wrap abstract fragments into lines with an optimal-fit algorithm.</p>
+<p>The <code>line_widths</code> map line numbers (starting from 0) to a target
+line width. This can be used to implement hanging indentation.</p>
+<p>The fragments must already have been split into the desired
+widths, this function will not (and cannot) attempt to split them
+further when arranging them into lines.</p>
+<h1 id="optimal-fit-algorithm" class="section-header"><a href="#optimal-fit-algorithm">Optimal-Fit Algorithm</a></h1>
+<p>The algorithm considers all possible break points and picks the
+breaks which minimizes the gaps at the end of each line. More
+precisely, the algorithm assigns a cost or penalty to each break
+point, determined by <code>cost = gap * gap</code> where <code>gap = target_width - line_width</code>. Shorter lines are thus penalized more heavily since
+they leave behind a larger gap.</p>
+<p>We can illustrate this with the text “To be, or not to be: that is
+the question”. We will be wrapping it in a narrow column with room
+for only 10 characters. The <a href="../../textwrap/core/fn.wrap_first_fit.html">greedy
+algorithm</a> will produce these lines, each
+annotated with the corresponding penalty:</p>
+<pre><code class="language-text">&quot;To be, or&quot;   1² =  1
+&quot;not to be:&quot;  0² =  0
+&quot;that is&quot;     3² =  9
+&quot;the&quot;         7² = 49
+&quot;question&quot;    2² =  4
+</code></pre>
+<p>We see that line four with “the” leaves a gap of 7 columns, which
+gives it a penalty of 49. The sum of the penalties is 63.</p>
+<p>There are 10 words, which means that there are <code>2_u32.pow(9)</code> or
+512 different ways to typeset it. We can compute
+the sum of the penalties for each possible line break and search
+for the one with the lowest sum:</p>
+<pre><code class="language-text">&quot;To be,&quot;     4² = 16
+&quot;or not to&quot;  1² =  1
+&quot;be: that&quot;   2² =  4
+&quot;is the&quot;     4² = 16
+&quot;question&quot;   2² =  4
+</code></pre>
+<p>The sum of the penalties is 41, which is better than what the
+greedy algorithm produced.</p>
+<p>Searching through all possible combinations would normally be
+prohibitively slow. However, it turns out that the problem can be
+formulated as the task of finding column minima in a cost matrix.
+This matrix has a special form (totally monotone) which lets us
+use a <a href="https://lib.rs/crates/smawk">linear-time algorithm called
+SMAWK</a> to find the optimal break
+points.</p>
+<p>This means that the time complexity remains O(<em>n</em>) where <em>n</em> is
+the number of words. Compared to
+<a href="../../textwrap/core/fn.wrap_first_fit.html"><code>wrap_first_fit</code></a>, this function is about
+4 times slower.</p>
+<p>The optimization of per-line costs over the entire paragraph is
+inspired by the line breaking algorithm used in TeX, as described
+in the 1981 article <a href="http://www.eprg.org/G53DOC/pdfs/knuth-plass-breaking.pdf"><em>Breaking Paragraphs into
+Lines</em></a>
+by Knuth and Plass. The implementation here is based on <a href="https://github.com/jfinkels/PADS/blob/master/pads/wrap.py">Python
+code by David
+Eppstein</a>.</p>
+<p><strong>Note:</strong> Only available when the <code>smawk</code> Cargo feature is
+enabled.</p>
+</div></section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "textwrap";</script><script src="../../main.js"></script><script defer src="../../search-index.js"></script></body></html>

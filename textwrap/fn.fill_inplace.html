@@ -1,0 +1,43 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `fill_inplace` fn in crate `textwrap`."><meta name="keywords" content="rust, rustlang, rust-lang, fill_inplace"><title>textwrap::fill_inplace - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings"></script><script src="../storage.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc fn"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../textwrap/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><div class="sidebar-elems"><p class="location"><a href="index.html">textwrap</a></p><script>window.sidebarCurrent = {name: "fill_inplace", ty: "fn", relpath: ""};</script><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/textwrap/lib.rs.html#1137-1168" title="goto source code">[src]</a></span><span class="in-band">Function <a href="index.html">textwrap</a>::<wbr><a class="fn" href="">fill_inplace</a></span></h1><pre class="rust fn">pub fn fill_inplace(text: &amp;mut <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>, width: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>)</pre><div class="docblock"><p>Fill <code>text</code> in-place without reallocating the input string.</p>
+<p>This function works by modifying the input string: some <code>' '</code>
+characters will be replaced by <code>'\n'</code> characters. The rest of the
+text remains untouched.</p>
+<p>Since we can only replace existing whitespace in the input with
+<code>'\n'</code>, we cannot do hyphenation nor can we split words longer
+than the line width. Indentation is also ruled out. In other
+words, <code>fill_inplace(width)</code> behaves as if you had called <a href="../textwrap/fn.fill.html" title="fill"><code>fill</code></a>
+with these options:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="ident">Options</span> {
+    <span class="ident">width</span>: <span class="ident">width</span>,
+    <span class="ident">initial_indent</span>: <span class="string">&quot;&quot;</span>,
+    <span class="ident">subsequent_indent</span>: <span class="string">&quot;&quot;</span>,
+    <span class="ident">break_words</span>: <span class="bool-val">false</span>,
+    <span class="ident">wrap_algorithm</span>: <span class="ident">textwrap</span>::<span class="ident">core</span>::<span class="ident">WrapAlgorithm</span>::<span class="ident">FirstFit</span>,
+    <span class="ident">splitter</span>: <span class="ident">NoHyphenation</span>,
+};</pre></div>
+<p>The wrap algorithm is <a href="../textwrap/core/enum.WrapAlgorithm.html#variant.FirstFit" title="core::WrapAlgorithm::FirstFit"><code>core::WrapAlgorithm::FirstFit</code></a> since this
+is the fastest algorithm — and the main reason to use
+<code>fill_inplace</code> is to get the string broken into newlines as fast
+as possible.</p>
+<p>A last difference is that (unlike <a href="../textwrap/fn.fill.html" title="fill"><code>fill</code></a>) <code>fill_inplace</code> can
+leave trailing whitespace on lines. This is because we wrap by
+inserting a <code>'\n'</code> at the final whitespace in the input string:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">from</span>(<span class="string">&quot;Hello   World!&quot;</span>);
+<span class="ident">textwrap</span>::<span class="ident">fill_inplace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">text</span>, <span class="number">10</span>);
+<span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">text</span>, <span class="string">&quot;Hello  \nWorld!&quot;</span>);</pre></div>
+<p>If we didn't do this, the word <code>World!</code> would end up being
+indented. You can avoid this if you make sure that your input text
+has no double spaces.</p>
+<h1 id="performance" class="section-header"><a href="#performance">Performance</a></h1>
+<p>In benchmarks, <code>fill_inplace</code> is about twice as fast as <a href="../textwrap/fn.fill.html" title="fill"><code>fill</code></a>.
+Please see the <a href="https://github.com/mgeisler/textwrap/blob/master/benches/linear.rs"><code>linear</code>
+benchmark</a>
+for details.</p>
+</div></section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../";window.currentCrate = "textwrap";</script><script src="../main.js"></script><script defer src="../search-index.js"></script></body></html>

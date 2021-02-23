@@ -1,0 +1,54 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `core` mod in crate `textwrap`."><meta name="keywords" content="rust, rustlang, rust-lang, core"><title>textwrap::core - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../textwrap/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a><p class="location">Module core</p><div class="sidebar-elems"><div class="block items"><ul><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#traits">Traits</a></li><li><a href="#functions">Functions</a></li></ul></div><p class="location"><a href="../index.html">textwrap</a></p><script>window.sidebarCurrent = {name: "core", ty: "mod", relpath: "../"};</script><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../src/textwrap/core.rs.html#1-896" title="goto source code">[src]</a></span><span class="in-band">Module <a href="../index.html">textwrap</a>::<wbr><a class="mod" href="">core</a></span></h1><div class="docblock"><p>Building blocks for advanced wrapping functionality.</p>
+<p>The functions and structs in this module can be used to implement
+advanced wrapping functionality when the <a href="../../textwrap/fn.wrap.html"><code>wrap</code></a> and
+<a href="../../textwrap/fn.fill.html"><code>fill</code></a> function don't do what you want.</p>
+<p>In general, you want to follow these steps when wrapping
+something:</p>
+<ol>
+<li>
+<p>Split your input into <a href="../../textwrap/core/trait.Fragment.html" title="Fragment"><code>Fragment</code></a>s. These are abstract blocks
+of text or content which can be wrapped into lines. You can use
+<a href="../../textwrap/core/fn.find_words.html" title="find_words"><code>find_words</code></a> to do this for text.</p>
+</li>
+<li>
+<p>Potentially split your fragments into smaller pieces. This
+allows you to implement things like hyphenation. If wrapping
+text, <a href="../../textwrap/core/fn.split_words.html" title="split_words"><code>split_words</code></a> can help you do this.</p>
+</li>
+<li>
+<p>Potentially break apart fragments that are still too large to
+fit on a single line. This is implemented in <a href="../../textwrap/core/fn.break_words.html" title="break_words"><code>break_words</code></a>.</p>
+</li>
+<li>
+<p>Finally take your fragments and put them into lines. There are
+two algorithms for this: <a href="../../textwrap/core/fn.wrap_optimal_fit.html" title="wrap_optimal_fit"><code>wrap_optimal_fit</code></a> and
+<a href="../../textwrap/core/fn.wrap_first_fit.html" title="wrap_first_fit"><code>wrap_first_fit</code></a>. The former produces better line breaks, the
+latter is faster.</p>
+</li>
+<li>
+<p>Iterate through the slices returned by the wrapping functions
+and construct your lines of output.</p>
+</li>
+</ol>
+<p>Please <a href="https://github.com/mgeisler/textwrap/">open an issue</a> if
+the functionality here is not sufficient or if you have ideas for
+improving it. We would love to hear from you!</p>
+</div><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
+<table><tr class="module-item"><td><a class="struct" href="struct.Word.html" title="textwrap::core::Word struct">Word</a></td><td class="docblock-short"><p>A piece of wrappable text, including any trailing whitespace.</p>
+</td></tr></table><h2 id="enums" class="section-header"><a href="#enums">Enums</a></h2>
+<table><tr class="module-item"><td><a class="enum" href="enum.WrapAlgorithm.html" title="textwrap::core::WrapAlgorithm enum">WrapAlgorithm</a></td><td class="docblock-short"><p>Wrapping algorithms.</p>
+</td></tr></table><h2 id="traits" class="section-header"><a href="#traits">Traits</a></h2>
+<table><tr class="module-item"><td><a class="trait" href="trait.Fragment.html" title="textwrap::core::Fragment trait">Fragment</a></td><td class="docblock-short"><p>A (text) fragment denotes the unit which we wrap into lines.</p>
+</td></tr></table><h2 id="functions" class="section-header"><a href="#functions">Functions</a></h2>
+<table><tr class="module-item"><td><a class="fn" href="fn.break_words.html" title="textwrap::core::break_words fn">break_words</a></td><td class="docblock-short"><p>Forcibly break words wider than <code>line_width</code> into smaller words.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.display_width.html" title="textwrap::core::display_width fn">display_width</a></td><td class="docblock-short"><p>Compute the display width of <code>text</code> while skipping over ANSI
+escape sequences.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.find_words.html" title="textwrap::core::find_words fn">find_words</a></td><td class="docblock-short"><p>Split line into words separated by regions of <code>' '</code> characters.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.split_words.html" title="textwrap::core::split_words fn">split_words</a></td><td class="docblock-short"><p>Split words into smaller words according to the split points given
+by <code>options</code>.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.wrap_first_fit.html" title="textwrap::core::wrap_first_fit fn">wrap_first_fit</a></td><td class="docblock-short"><p>Wrap abstract fragments into lines with a first-fit algorithm.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.wrap_optimal_fit.html" title="textwrap::core::wrap_optimal_fit fn">wrap_optimal_fit</a></td><td class="docblock-short"><p>Wrap abstract fragments into lines with an optimal-fit algorithm.</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "textwrap";</script><script src="../../main.js"></script><script defer src="../../search-index.js"></script></body></html>
