@@ -15,7 +15,7 @@ The following target languages are currently supported:
 
 * C++ 17
 * Java 8
-* Python 3
+* Python 3 (requires numpy >= 1.20.1)
 * Rust 2018
 * Go >= 1.14
 * C# (NetCoreApp >= 2.1)
