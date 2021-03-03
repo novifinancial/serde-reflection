@@ -1165,7 +1165,7 @@ impl crate::SourceInstaller for Installer {
             r#"
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-       <TargetFramework>netstandard1.6</TargetFramework>
+       <TargetFramework>netstandard2.0</TargetFramework>
        <LangVersion>7.2</LangVersion>
     </PropertyGroup>
     <ItemGroup>
