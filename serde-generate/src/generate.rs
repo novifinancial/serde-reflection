@@ -138,11 +138,15 @@ fn main() {
                     Language::Go => golang::CodeGenerator::new(&config)
                         .output(&mut out, &registry)
                         .unwrap(),
-                    Language::Java => panic!("Code generation in Java requires `--target-source-dir`"),
+                    Language::Java => {
+                        panic!("Code generation in Java requires `--target-source-dir`")
+                    }
                     Language::TypeScript => typescript::CodeGenerator::new(&config)
                         .output(&mut out, &registry)
                         .unwrap(),
-                    Language::CSharp => panic!("Code generation in C# requires `--target-source-dir`"),
+                    Language::CSharp => {
+                        panic!("Code generation in C# requires `--target-source-dir`")
+                    }
                 }
             }
         }
