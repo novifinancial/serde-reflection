@@ -181,6 +181,10 @@
 <span id="178">178</span>
 <span id="179">179</span>
 <span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -322,11 +326,15 @@
                     <span class="ident">Language</span>::<span class="ident">Go</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">golang</span>::<span class="ident">CodeGenerator</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="ident">config</span>)
                         .<span class="ident">output</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">out</span>, <span class="kw-2">&amp;</span><span class="ident">registry</span>)
                         .<span class="ident">unwrap</span>(),
-                    <span class="ident">Language</span>::<span class="ident">Java</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;Code generation in Java requires `--install-dir`&quot;</span>),
+                    <span class="ident">Language</span>::<span class="ident">Java</span> <span class="op">=</span><span class="op">&gt;</span> {
+                        <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;Code generation in Java requires `--target-source-dir`&quot;</span>)
+                    }
                     <span class="ident">Language</span>::<span class="ident">TypeScript</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">typescript</span>::<span class="ident">CodeGenerator</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="ident">config</span>)
                         .<span class="ident">output</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">out</span>, <span class="kw-2">&amp;</span><span class="ident">registry</span>)
                         .<span class="ident">unwrap</span>(),
-                    <span class="ident">Language</span>::<span class="ident">CSharp</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;Code generation in C# requires `--install-dir`&quot;</span>),
+                    <span class="ident">Language</span>::<span class="ident">CSharp</span> <span class="op">=</span><span class="op">&gt;</span> {
+                        <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;Code generation in C# requires `--target-source-dir`&quot;</span>)
+                    }
                 }
             }
         }
