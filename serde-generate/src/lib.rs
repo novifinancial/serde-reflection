@@ -10,12 +10,13 @@
 //!
 //! * C++ 17
 //! * Java 8
-//! * Python 3
+//! * Python 3 (requires numpy >= 1.20.1)
 //! * Rust 2018
-//! * Go >= 1.13
+//! * Go >= 1.14
 //! * C# (NetCoreApp >= 2.1)
 //!
 //! ## Work in progress
+//!
 //! * TypeScript > 3.2 (make sure to enable `esnext.BigInt` and `dom` at tsconfig.json -> lib)
 //!
 //! ## Supported Encodings

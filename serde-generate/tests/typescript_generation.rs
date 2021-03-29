@@ -95,10 +95,7 @@ fn test_that_ts_code_compiles_with_config(
 }
 
 fn make_output_file(dir: &TempDir) {
-    match std::fs::create_dir_all(dir.path().join("testing")) {
-        Ok(_) => {}
-        Err(_) => {}
-    }
+    std::fs::create_dir_all(dir.path().join("testing")).unwrap_or(());
 }
 
 #[test]

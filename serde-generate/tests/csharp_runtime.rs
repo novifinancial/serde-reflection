@@ -68,36 +68,49 @@ fn run_nunit(proj_dir: &Path) {
     assert!(status.success());
 }
 
-fn copy_test_project(root_dir: &Path, copy_runtime_tests: bool) -> PathBuf {
-    let test_dir = root_dir.join("Serde.Tests").to_path_buf();
+fn make_test_project(
+    tmp_dir: &Path,
+    runtime: Runtime,
+    test_name: &str,
+    library_name: &str,
+) -> std::io::Result<PathBuf> {
+    let test_dir = tmp_dir.join(test_name.replace(".", "/"));
+    std::fs::create_dir(&test_dir)?;
+    let mut proj = std::fs::File::create(test_dir.join(format!("{}.csproj", test_name)))?;
+    write!(
+        proj,
+        r#"
+<Project Sdk="Microsoft.NET.Sdk">
 
-    std::fs::create_dir(&test_dir).unwrap();
-    std::fs::copy(
-        "runtime/csharp/Serde.Tests/Serde.Tests.csproj",
-        &test_dir.join("Serde.Tests.csproj"),
-    )
-    .unwrap();
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp2.1;netcoreapp3.1</TargetFrameworks>
+    <IsPackable>false</IsPackable>
+    <LangVersion>7.2</LangVersion>
+  </PropertyGroup>
 
-    if copy_runtime_tests {
-        std::fs::copy(
-            "runtime/csharp/Serde.Tests/TestBcs.cs",
-            &test_dir.join("TestBcs.cs"),
-        )
-        .unwrap();
-    }
+  <ItemGroup>
+    <PackageReference Include="NUnit" Version="3.12.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.0" />
+  </ItemGroup>
 
-    test_dir
+  <ItemGroup>
+    <ProjectReference Include="..\Serde\Serde.csproj" />
+    <ProjectReference Include="..\{0}\{0}.csproj" />
+    <ProjectReference Include="..\{1}\{1}.csproj" />
+  </ItemGroup>
+
+</Project>
+"#,
+        runtime.name().to_camel_case(),
+        library_name
+    )?;
+    Ok(test_dir)
 }
 
 #[test]
 fn test_csharp_bcs_runtime_tests() {
-    let (dir, _tmp) = create_test_dir("test_csharp_bcs_runtime_tests");
-    let test_dir = copy_test_project(&dir, true);
-
-    let installer = csharp::Installer::new(dir);
-    installer.install_serde_runtime().unwrap();
-    installer.install_bcs_runtime().unwrap();
-
+    let test_dir = Path::new("runtime/csharp/Serde.Tests");
     dotnet_build(&test_dir);
     run_nunit(&test_dir);
 }
@@ -115,20 +128,18 @@ fn test_csharp_bincode_runtime_on_simple_data() {
 }
 
 fn test_csharp_runtime_on_simple_data(dir: PathBuf, runtime: Runtime) {
-    let test_dir = copy_test_project(&dir, false);
-
     let registry = test_utils::get_simple_registry().unwrap();
-
-    let installer = csharp::Installer::new(dir.clone());
-    installer.install_serde_runtime().unwrap();
-    installer.install_bincode_runtime().unwrap();
-    installer.install_bcs_runtime().unwrap();
-
-    // Generates code into `Serde/Tests`
+    let test_dir = make_test_project(&dir, runtime, "Testing", "SimpleData").unwrap();
     let config =
-        CodeGeneratorConfig::new("Serde.Tests".to_string()).with_encodings(vec![runtime.into()]);
-    let generator = csharp::CodeGenerator::new(&config);
-    generator.write_source_files(dir, &registry).unwrap();
+        CodeGeneratorConfig::new("SimpleData".to_string()).with_encodings(vec![runtime.into()]);
+
+    let installer = csharp::Installer::new(dir);
+    installer.install_serde_runtime().unwrap();
+    match runtime {
+        Runtime::Bincode => installer.install_bincode_runtime().unwrap(),
+        Runtime::Bcs => installer.install_bcs_runtime().unwrap(),
+    }
+    installer.install_module(&config, &registry).unwrap();
 
     let reference = runtime.serialize(&Test {
         a: vec![4, 6],
@@ -144,8 +155,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
+using {1};
+using Serde;
+using SimpleData;
 
-namespace Serde.Tests {{
+namespace Testing {{
     [TestFixture]
     public class Test{1}Runtime {{
         [Test]
@@ -208,20 +222,17 @@ fn quote_bytes(bytes: &[u8]) -> String {
 }
 
 fn test_csharp_runtime_on_supported_types(dir: PathBuf, runtime: Runtime) {
-    let test_dir = copy_test_project(&dir, false);
-
     let registry = test_utils::get_registry().unwrap();
+    let test_dir = make_test_project(&dir, runtime, "Testing", "Data").unwrap();
+    let config = CodeGeneratorConfig::new("Data".to_string()).with_encodings(vec![runtime.into()]);
 
-    let installer = csharp::Installer::new(dir.clone());
+    let installer = csharp::Installer::new(dir);
     installer.install_serde_runtime().unwrap();
-    installer.install_bincode_runtime().unwrap();
-    installer.install_bcs_runtime().unwrap();
-
-    // Generates code into `Serde/Tests`
-    let config =
-        CodeGeneratorConfig::new("Serde.Tests".to_string()).with_encodings(vec![runtime.into()]);
-    let generator = csharp::CodeGenerator::new(&config);
-    generator.write_source_files(dir, &registry).unwrap();
+    match runtime {
+        Runtime::Bincode => installer.install_bincode_runtime().unwrap(),
+        Runtime::Bcs => installer.install_bcs_runtime().unwrap(),
+    }
+    installer.install_module(&config, &registry).unwrap();
 
     let positive_encodings = runtime
         .get_positive_samples_quick()
@@ -246,8 +257,11 @@ using System.Collections;
 using System.Linq;
 using System.IO;
 using NUnit.Framework;
+using {2};
+using Serde;
+using Data;
 
-namespace Serde.Tests {{
+namespace Testing {{
     [TestFixture]
     public class Test{2}Runtime {{
         public static IEnumerable TestPositiveInputs

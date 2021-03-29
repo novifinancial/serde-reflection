@@ -25,7 +25,7 @@ pub struct CodeGenerator<'a> {
 }
 
 /// Shared state for the code generation of a C# source file.
-struct CsharpEmitter<'a, T> {
+struct CSharpEmitter<'a, T> {
     /// Writer.
     out: IndentedWriter<T>,
     /// Generator.
@@ -60,12 +60,12 @@ impl<'a> CodeGenerator<'a> {
 
     /// Output class definitions for `registry` in separate source files.
     /// Source files will be created in a subdirectory of `install_dir` corresponding to the given
-    /// package name (if any, otherwise `install_dir` it self).
+    /// package name (if any, otherwise `install_dir` itself).
     pub fn write_source_files(
         &self,
         install_dir: std::path::PathBuf,
         registry: &Registry,
-    ) -> Result<()> {
+    ) -> Result<std::path::PathBuf> {
         let current_namespace = self
             .config
             .module_name
@@ -104,7 +104,7 @@ impl<'a> CodeGenerator<'a> {
         if self.config.serialization {
             self.write_helper_class(&dir_path, current_namespace, cstyle_enum_names, registry)?;
         }
-        Ok(())
+        Ok(dir_path)
     }
 
     fn write_container_class(
@@ -116,7 +116,7 @@ impl<'a> CodeGenerator<'a> {
         format: &ContainerFormat,
     ) -> Result<()> {
         let mut file = std::fs::File::create(dir_path.join(name.to_string() + ".cs"))?;
-        let mut emitter = CsharpEmitter {
+        let mut emitter = CSharpEmitter {
             out: IndentedWriter::new(&mut file, IndentConfig::Space(4)),
             generator: self,
             current_namespace,
@@ -140,7 +140,7 @@ impl<'a> CodeGenerator<'a> {
         registry: &Registry,
     ) -> Result<()> {
         let mut file = std::fs::File::create(dir_path.join("TraitHelpers.cs"))?;
-        let mut emitter = CsharpEmitter {
+        let mut emitter = CSharpEmitter {
             out: IndentedWriter::new(&mut file, IndentConfig::Space(4)),
             generator: self,
             current_namespace,
@@ -157,7 +157,7 @@ impl<'a> CodeGenerator<'a> {
     }
 }
 
-impl<'a, T> CsharpEmitter<'a, T>
+impl<'a, T> CSharpEmitter<'a, T>
 where
     T: Write,
 {
@@ -260,7 +260,7 @@ using System.Numerics;"
         use Format::*;
         match format {
             TypeName(x) => self.quote_qualified_name(x),
-            Unit => "Unit".into(),
+            Unit => "Serde.Unit".into(),
             Bool => "bool".into(),
             I8 => "sbyte".into(),
             I16 => "short".into(),
@@ -276,12 +276,12 @@ using System.Numerics;"
             F64 => "double".into(),
             Char => "char".into(),
             Str => "string".into(),
-            Bytes => "ValueArray<byte>".into(),
+            Bytes => "Serde.ValueArray<byte>".into(),
 
-            Option(format) => format!("Option<{}>", self.quote_type(format)),
-            Seq(format) => format!("ValueArray<{}>", self.quote_type(format)),
+            Option(format) => format!("Serde.Option<{}>", self.quote_type(format)),
+            Seq(format) => format!("Serde.ValueArray<{}>", self.quote_type(format)),
             Map { key, value } => format!(
-                "ValueDictionary<{}, {}>",
+                "Serde.ValueDictionary<{}, {}>",
                 self.quote_type(key),
                 self.quote_type(value)
             ),
@@ -289,7 +289,7 @@ using System.Numerics;"
             TupleArray {
                 content,
                 size: _size,
-            } => format!("ValueArray<{}>", self.quote_type(content),),
+            } => format!("Serde.ValueArray<{}>", self.quote_type(content),),
             Variable(_) => panic!("unexpected value"),
         }
     }
@@ -351,7 +351,10 @@ using System.Numerics;"
 
     fn needs_helper(format: &Format) -> bool {
         use Format::*;
-        matches!(format, Option(_) | Seq(_) | Map { .. } | Tuple(_) | TupleArray { .. })
+        matches!(
+            format,
+            Option(_) | Seq(_) | Map { .. } | Tuple(_) | TupleArray { .. }
+        )
     }
 
     fn quote_serialize_value(&self, value: &str, format: &Format) -> String {
@@ -431,7 +434,7 @@ using System.Numerics;"
 
         write!(
             self.out,
-            "public static void serialize_{}({} value, ISerializer serializer) {{",
+            "public static void serialize_{}({} value, Serde.ISerializer serializer) {{",
             name,
             self.quote_type(format0)
         )?;
@@ -499,7 +502,7 @@ serializer.sort_map_entries(offsets);
                     self.out,
                     r#"
 if (value.Count != {0}) {{
-    throw new SerializationException("Invalid length for fixed-size array: " + value.Count + " instead of " + {0});
+    throw new Serde.SerializationException("Invalid length for fixed-size array: " + value.Count + " instead of " + {0});
 }}
 foreach (var item in value) {{
     {1}
@@ -521,7 +524,7 @@ foreach (var item in value) {{
 
         write!(
             self.out,
-            "public static {} deserialize_{}(IDeserializer deserializer) {{",
+            "public static {} deserialize_{}(Serde.IDeserializer deserializer) {{",
             self.quote_type(format0),
             name,
         )?;
@@ -533,9 +536,9 @@ foreach (var item in value) {{
                     r#"
 bool tag = deserializer.deserialize_option_tag();
 if (!tag) {{
-    return Option<{0}>.None;
+    return Serde.Option<{0}>.None;
 }} else {{
-    return Option<{0}>.Some({1});
+    return Serde.Option<{0}>.Some({1});
 }}
 "#,
                     self.quote_type(format),
@@ -552,7 +555,7 @@ long length = deserializer.deserialize_len();
 for (int i = 0; i < length; i++) {{
     obj[i] = {1};
 }}
-return new ValueArray<{0}>(obj);
+return new Serde.ValueArray<{0}>(obj);
 "#,
                     self.quote_type(format),
                     self.quote_deserialize(format)
@@ -573,15 +576,15 @@ for (long i = 0; i < length; i++) {{
     int key_end = deserializer.get_buffer_offset();
     if (i > 0) {{
         deserializer.check_that_key_slices_are_increasing(
-            new Range(previous_key_start, previous_key_end),
-            new Range(key_start, key_end));
+            new Serde.Range(previous_key_start, previous_key_end),
+            new Serde.Range(key_start, key_end));
     }}
     previous_key_start = key_start;
     previous_key_end = key_end;
     var value = {3};
     obj[key] = value;
 }}
-return new ValueDictionary<{0}, {1}>(obj);
+return new Serde.ValueDictionary<{0}, {1}>(obj);
 "#,
                     self.quote_type(key),
                     self.quote_type(value),
@@ -613,7 +616,7 @@ return ({}
 for (int i = 0; i < {1}; i++) {{
     obj[i] = {2};
 }}
-return new ValueArray<{0}>(obj);
+return new Serde.ValueArray<{0}>(obj);
 "#,
                     self.quote_type(content),
                     size,
@@ -638,14 +641,14 @@ return new ValueArray<{0}>(obj);
         let fields = match variant {
             Unit => Vec::new(),
             NewType(format) => vec![Named {
-                name: "Value".to_string(),
+                name: "value".to_string(),
                 value: format.as_ref().clone(),
             }],
             Tuple(formats) => formats
                 .iter()
                 .enumerate()
                 .map(|(i, f)| Named {
-                    name: format!("Field{}", i),
+                    name: format!("field{}", i),
                     value: f.clone(),
                 })
                 .collect(),
@@ -735,7 +738,7 @@ return new ValueArray<{0}>(obj);
         if self.generator.config.serialization {
             writeln!(
                 self.out,
-                "\npublic {}void Serialize(ISerializer serializer) {{",
+                "\npublic {}void Serialize(Serde.ISerializer serializer) {{",
                 fn_mods
             )?;
             self.out.indent();
@@ -765,13 +768,13 @@ return new ValueArray<{0}>(obj);
             if variant_index.is_none() {
                 writeln!(
                     self.out,
-                    "\npublic static {}{} Deserialize(IDeserializer deserializer) {{",
+                    "\npublic static {}{} Deserialize(Serde.IDeserializer deserializer) {{",
                     fn_mods, name,
                 )?;
             } else {
                 writeln!(
                     self.out,
-                    "\ninternal static {} Load(IDeserializer deserializer) {{",
+                    "\ninternal static {} Load(Serde.IDeserializer deserializer) {{",
                     name,
                 )?;
             }
@@ -874,11 +877,11 @@ return new ValueArray<{0}>(obj);
         if self.generator.config.serialization {
             writeln!(
                 self.out,
-                "\npublic abstract void Serialize(ISerializer serializer);"
+                "\npublic abstract void Serialize(Serde.ISerializer serializer);"
             )?;
             write!(
                 self.out,
-                "\npublic static {} Deserialize(IDeserializer deserializer) {{",
+                "\npublic static {} Deserialize(Serde.IDeserializer deserializer) {{",
                 name
             )?;
             self.out.indent();
@@ -898,7 +901,7 @@ switch (index) {{"#,
             }
             writeln!(
                 self.out,
-                r#"default: throw new DeserializationException("Unknown variant index for {}: " + index);"#,
+                r#"default: throw new Serde.DeserializationException("Unknown variant index for {}: " + index);"#,
                 name,
             )?;
             self.out.unindent();
@@ -981,17 +984,17 @@ switch (index) {{"#,
             writeln!(
                 self.out,
                 r#"
-public static void Serialize(this {0} value, ISerializer serializer) {{
+public static void Serialize(this {0} value, Serde.ISerializer serializer) {{
     serializer.increase_container_depth();
     serializer.serialize_variant_index((int)value);
     serializer.decrease_container_depth();
 }}
 
-public static {0} Deserialize(IDeserializer deserializer) {{
+public static {0} Deserialize(Serde.IDeserializer deserializer) {{
     deserializer.increase_container_depth();
     int index = deserializer.deserialize_variant_index();
     if (!Enum.IsDefined(typeof({0}), index))
-        throw new DeserializationException("Unknown variant index for {}: " + index);
+        throw new Serde.DeserializationException("Unknown variant index for {}: " + index);
     {0} value = ({0})index;
     deserializer.decrease_container_depth();
     return value;
@@ -1004,7 +1007,7 @@ public static {0} Deserialize(IDeserializer deserializer) {{
                     self.out,
                     r#"
 public static byte[] {0}Serialize(this {1} value)  {{
-    ISerializer serializer = new {0}.{0}Serializer();
+    Serde.ISerializer serializer = new {0}.{0}Serializer();
     Serialize(value, serializer);
     return serializer.get_bytes();
 }}"#,
@@ -1028,13 +1031,13 @@ public static byte[] {0}Serialize(this {1} value)  {{
 public int {0}Serialize(byte[] outputBuffer) => {0}Serialize(new ArraySegment<byte>(outputBuffer));
 
 public int {0}Serialize(ArraySegment<byte> outputBuffer) {{
-    ISerializer serializer = new {0}.{0}Serializer(outputBuffer);
+    Serde.ISerializer serializer = new {0}.{0}Serializer(outputBuffer);
     Serialize(serializer);
     return serializer.get_buffer_offset();
 }}
 
 public byte[] {0}Serialize()  {{
-    ISerializer serializer = new {0}.{0}Serializer();
+    Serde.ISerializer serializer = new {0}.{0}Serializer();
     Serialize(serializer);
     return serializer.get_bytes();
 }}"#,
@@ -1054,12 +1057,12 @@ public static {0} {1}Deserialize(byte[] input) => {1}Deserialize(new ArraySegmen
 
 public static {0} {1}Deserialize(ArraySegment<byte> input) {{
     if (input == null) {{
-         throw new DeserializationException("Cannot deserialize null array");
+         throw new Serde.DeserializationException("Cannot deserialize null array");
     }}
-    IDeserializer deserializer = new {1}.{1}Deserializer(input);
+    Serde.IDeserializer deserializer = new {1}.{1}Deserializer(input);
     {0} value = Deserialize(deserializer);
     if (deserializer.get_buffer_offset() < input.Count) {{
-         throw new DeserializationException("Some input bytes were not read");
+         throw new Serde.DeserializationException("Some input bytes were not read");
     }}
     return value;
 }}"#,
@@ -1135,8 +1138,47 @@ impl crate::SourceInstaller for Installer {
         config: &CodeGeneratorConfig,
         registry: &Registry,
     ) -> std::result::Result<(), Self::Error> {
+        let name = config.module_name.clone();
         let generator = CodeGenerator::new(config);
-        generator.write_source_files(self.install_dir.clone(), registry)?;
+        let dir_path = generator.write_source_files(self.install_dir.clone(), registry)?;
+
+        let back_path: String = std::iter::repeat("..\\".to_string())
+            .take(dir_path.strip_prefix(&self.install_dir)?.iter().count())
+            .collect();
+        let mut deps = vec!["Serde".to_string()];
+        for encoding in &config.encodings {
+            deps.push(encoding.name().to_camel_case());
+        }
+        let deps: String = deps
+            .iter()
+            .map(|d| {
+                format!(
+                    "      <ProjectReference Include=\"{1}{0}\\{0}.csproj\" />\n",
+                    d, back_path
+                )
+            })
+            .collect();
+
+        let mut proj = std::fs::File::create(dir_path.join(name + ".csproj"))?;
+        write!(
+            proj,
+            r#"
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+       <TargetFramework>netstandard2.0</TargetFramework>
+       <LangVersion>7.2</LangVersion>
+    </PropertyGroup>
+    <ItemGroup>
+      <PackageReference Include="System.Memory" Version="4.5.4" />
+      <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+    </ItemGroup>
+    <ItemGroup>
+{}    </ItemGroup>
+</Project>
+"#,
+            deps
+        )?;
+
         Ok(())
     }
 
@@ -1145,13 +1187,10 @@ impl crate::SourceInstaller for Installer {
     }
 
     fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.install_runtime(
-            include_directory!("runtime/csharp/Serde/Bincode"),
-            "Serde/Bincode",
-        )
+        self.install_runtime(include_directory!("runtime/csharp/Bincode"), "Bincode")
     }
 
     fn install_bcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.install_runtime(include_directory!("runtime/csharp/Serde/Bcs"), "Serde/Bcs")
+        self.install_runtime(include_directory!("runtime/csharp/Bcs"), "Bcs")
     }
 }

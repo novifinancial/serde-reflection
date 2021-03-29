@@ -30,7 +30,7 @@ class BinarySerializer:
 
     def __post_init__(self):
         self.primitive_type_serializer = {
-            st.bool: self.serialize_bool,
+            bool: self.serialize_bool,
             st.uint8: self.serialize_u8,
             st.uint16: self.serialize_u16,
             st.uint32: self.serialize_u32,
@@ -59,7 +59,7 @@ class BinarySerializer:
     def serialize_unit(self, value: st.unit):
         pass
 
-    def serialize_bool(self, value: st.bool):
+    def serialize_bool(self, value: bool):
         self.output.write(int(value).to_bytes(1, "little", signed=False))
 
     def serialize_u8(self, value: st.uint8):
@@ -209,7 +209,7 @@ class BinaryDeserializer:
 
     def __post_init__(self):
         self.primitive_type_deserializer = {
-            st.bool: self.deserialize_bool,
+            bool: self.deserialize_bool,
             st.uint8: self.deserialize_u8,
             st.uint16: self.deserialize_u16,
             st.uint32: self.deserialize_u32,
@@ -248,7 +248,7 @@ class BinaryDeserializer:
     def deserialize_unit(self) -> st.unit:
         pass
 
-    def deserialize_bool(self) -> st.bool:
+    def deserialize_bool(self) -> bool:
         b = int.from_bytes(self.read(1), byteorder="little", signed=False)
         if b == 0:
             return False

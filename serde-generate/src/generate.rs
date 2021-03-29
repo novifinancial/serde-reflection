@@ -144,7 +144,9 @@ fn main() {
                     Language::TypeScript => typescript::CodeGenerator::new(&config)
                         .output(&mut out, &registry)
                         .unwrap(),
-                    Language::CSharp => panic!("Code generation in C# requires `--install-dir`"),
+                    Language::CSharp => {
+                        panic!("Code generation in C# requires `--target-source-dir`")
+                    }
                 }
             }
         }

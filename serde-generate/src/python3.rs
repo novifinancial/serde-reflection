@@ -140,7 +140,7 @@ import typing
         match format {
             TypeName(x) => self.quote_qualified_name(x),
             Unit => "st.unit".into(),
-            Bool => "st.bool".into(),
+            Bool => "bool".into(),
             I8 => "st.int8".into(),
             I16 => "st.int16".into(),
             I32 => "st.int32".into(),

@@ -35,14 +35,14 @@ def decode_length(content: bytes) -> int:
 
 class BcsTestCase(unittest.TestCase):
     def test_bcs_bool(self):
-        self.assertEqual(bcs.serialize(False, st.bool), b"\x00")
-        self.assertEqual(bcs.serialize(True, st.bool), b"\x01")
-        self.assertEqual(bcs.deserialize(b"\x00", st.bool), (False, b""))
-        self.assertEqual(bcs.deserialize(b"\x01", st.bool), (True, b""))
+        self.assertEqual(bcs.serialize(False, bool), b"\x00")
+        self.assertEqual(bcs.serialize(True, bool), b"\x01")
+        self.assertEqual(bcs.deserialize(b"\x00", bool), (False, b""))
+        self.assertEqual(bcs.deserialize(b"\x01", bool), (True, b""))
         with self.assertRaises(st.DeserializationError):
-            bcs.deserialize(b"\x02", st.bool)
+            bcs.deserialize(b"\x02", bool)
         with self.assertRaises(st.DeserializationError):
-            bcs.deserialize(b"", st.bool)
+            bcs.deserialize(b"", bool)
 
     def test_bcs_u8(self):
         self.assertEqual(bcs.serialize(0x1, st.uint8), b"\x01")
