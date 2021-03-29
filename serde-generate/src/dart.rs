@@ -168,15 +168,14 @@ import 'dart:typed_data';
 import 'package:optional/optional.dart';
 import 'package:tuple/tuple.dart';
 import 'package:hex/hex.dart';
-import 'package:{}/serde/serde.dart';"#,
-            self.config.module_name, self.config.module_name,
+import '../serde/serde.dart';"#,
+            self.config.module_name,
         )?;
 
         for encoding in &self.config.encodings {
             writeln!(
                 &mut emitter.out,
-                "import 'package:{0}/{1}/{1}.dart';",
-                self.config.module_name,
+                "import '../{0}/{0}.dart';",
                 encoding.name()
             )?;
         }
