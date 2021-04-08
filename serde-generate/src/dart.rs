@@ -180,6 +180,12 @@ import '../serde/serde.dart';"#,
             )?;
         }
 
+        if let Some(files) = &self.config.external_definitions.get("import") {
+            for file in files {
+                writeln!(&mut emitter.out, "import '{0}';", file)?;
+            }
+        }
+
         writeln!(&mut emitter.out, "\npart 'TraitHelpers.dart';")?;
         for name in registry.keys() {
             writeln!(&mut emitter.out, "part '{}.dart';", name)?;
@@ -435,7 +441,10 @@ where
 
     fn needs_helper(format: &Format) -> bool {
         use Format::*;
-        matches!(format, Option(_) | Seq(_) | Map { .. } | Tuple(_) | TupleArray { .. })
+        matches!(
+            format,
+            Option(_) | Seq(_) | Map { .. } | Tuple(_) | TupleArray { .. }
+        )
     }
 
     fn output_serialization_helper(&mut self, name: &str, format0: &Format) -> Result<()> {
