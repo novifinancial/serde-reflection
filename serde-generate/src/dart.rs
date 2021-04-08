@@ -181,7 +181,7 @@ import '../serde/serde.dart';"#,
         }
 
         if let Some(files) = &self.config.external_definitions.get("import") {
-            for file in files {
+            for file in *files {
                 writeln!(&mut emitter.out, "import '{0}';", file)?;
             }
         }
