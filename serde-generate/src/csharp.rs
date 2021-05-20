@@ -682,7 +682,7 @@ return new Serde.ValueArray<{0}>(obj);
             self.output_comment(name)?;
             writeln!(
                 self.out,
-                "public sealed class {0}: {1}, IEquatable<{0}> {{",
+                "public sealed class {0}: {1}, IEquatable<{0}>, ICloneable {{",
                 name, base
             )?;
             "override "
@@ -690,13 +690,14 @@ return new Serde.ValueArray<{0}>(obj);
             self.output_comment(name)?;
             writeln!(
                 self.out,
-                "public sealed class {0}: IEquatable<{0}> {{",
+                "public sealed class {0}: IEquatable<{0}>, ICloneable {{",
                 name
             )?;
             ""
         };
         let reserved_names = &[];
         self.enter_class(name, reserved_names);
+
         // Fields
         for field in fields {
             self.output_comment(&field.name)?;
@@ -710,6 +711,7 @@ return new Serde.ValueArray<{0}>(obj);
         if !fields.is_empty() {
             writeln!(self.out)?;
         }
+
         // Constructor.
         writeln!(
             self.out,
@@ -734,6 +736,7 @@ return new Serde.ValueArray<{0}>(obj);
         }
         self.out.unindent();
         writeln!(self.out, "}}")?;
+
         // Serialize
         if self.generator.config.serialization {
             writeln!(
@@ -763,6 +766,7 @@ return new Serde.ValueArray<{0}>(obj);
                 }
             }
         }
+
         // Deserialize (struct) or Load (variant)
         if self.generator.config.serialization {
             if variant_index.is_none() {
@@ -832,6 +836,7 @@ return new Serde.ValueArray<{0}>(obj);
         writeln!(self.out, "return true;")?;
         self.out.unindent();
         writeln!(self.out, "}}")?;
+
         // Hashing
         writeln!(self.out, "\npublic override int GetHashCode() {{")?;
         self.out.indent();
@@ -849,9 +854,26 @@ return new Serde.ValueArray<{0}>(obj);
         self.out.unindent();
         writeln!(self.out, "}}")?;
         self.out.unindent();
-        writeln!(self.out, "}}")?;
+        writeln!(self.out, "}}\n")?;
+
+        // Clone
+        if variant_base.is_none() {
+            // Derived classes can use the method inherited from the base class, it works with derived fields.
+            writeln!(
+                self.out,
+                "/// <summary>Creates a shallow clone of the object.</summary>"
+            )?;
+            writeln!(
+                self.out,
+                "public {0} Clone() => ({0})MemberwiseClone();\n",
+                name
+            )?;
+            writeln!(self.out, "object ICloneable.Clone() => Clone();\n")?;
+        }
+
         // Custom code
         self.output_custom_code()?;
+
         // End of class
         self.leave_class(reserved_names);
         writeln!(self.out, "}}")
@@ -866,7 +888,7 @@ return new Serde.ValueArray<{0}>(obj);
         self.output_comment(name)?;
         writeln!(
             self.out,
-            "public abstract class {0}: IEquatable<{0}> {{",
+            "public abstract class {0}: IEquatable<{0}>, ICloneable {{",
             name
         )?;
         let reserved_names = variants
@@ -874,6 +896,8 @@ return new Serde.ValueArray<{0}>(obj);
             .map(|v| v.name.as_str())
             .collect::<Vec<_>>();
         self.enter_class(name, &reserved_names);
+
+        // Serialize/Deserialize
         if self.generator.config.serialization {
             writeln!(
                 self.out,
@@ -915,6 +939,7 @@ switch (index) {{"#,
             }
         }
 
+        // HashCode
         writeln!(self.out, "public override int GetHashCode() {{")?;
         self.out.indent();
         writeln!(self.out, "switch (this) {{")?;
@@ -929,6 +954,7 @@ switch (index) {{"#,
         self.out.unindent();
         writeln!(self.out, "}}")?;
 
+        // Equals
         writeln!(
             self.out,
             "public override bool Equals(object obj) => obj is {} other && Equals(other);\n",
@@ -955,6 +981,18 @@ switch (index) {{"#,
         writeln!(self.out, "}}")?;
         self.out.unindent();
         writeln!(self.out, "}}\n")?;
+
+        // Clone
+        writeln!(
+            self.out,
+            "/// <summary>Creates a shallow clone of the object.</summary>"
+        )?;
+        writeln!(
+            self.out,
+            "public {0} Clone() => ({0})MemberwiseClone();\n",
+            name
+        )?;
+        writeln!(self.out, "object ICloneable.Clone() => Clone();\n")?;
 
         self.output_variants(name, variants)?;
         self.leave_class(&reserved_names);
