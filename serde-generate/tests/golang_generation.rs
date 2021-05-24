@@ -19,12 +19,12 @@ fn get_small_registry() -> Result<Registry> {
     let mut tracer = Tracer::new(TracerConfig::default());
     let samples = Samples::new();
     tracer.trace_type::<Test>(&samples)?;
-    Ok(tracer.registry()?)
+    tracer.registry()
 }
 
 fn get_empty_registry() -> Result<Registry> {
     let tracer = Tracer::new(TracerConfig::default());
-    Ok(tracer.registry()?)
+    tracer.registry()
 }
 
 fn test_that_golang_code_compiles_with_config(

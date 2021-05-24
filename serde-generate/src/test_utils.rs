@@ -28,7 +28,7 @@ pub fn get_simple_registry() -> Result<Registry> {
     let samples = Samples::new();
     tracer.trace_type::<Test>(&samples)?;
     tracer.trace_type::<Choice>(&samples)?;
-    Ok(tracer.registry()?)
+    tracer.registry()
 }
 
 // More complex data format used to test re-serialization and basic fuzzing.
@@ -337,9 +337,9 @@ pub enum Runtime {
     Bincode,
 }
 
-impl std::convert::Into<Encoding> for Runtime {
-    fn into(self) -> Encoding {
-        match self {
+impl std::convert::From<Runtime> for Encoding {
+    fn from(runtime: Runtime) -> Self {
+        match runtime {
             Runtime::Bcs => Encoding::Bcs,
             Runtime::Bincode => Encoding::Bincode,
         }
