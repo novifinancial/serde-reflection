@@ -34,79 +34,79 @@ impl<'a> ser::Serializer for Serializer<'a> {
     type SerializeStruct = StructSerializer<'a>;
     type SerializeStructVariant = StructVariantSerializer<'a>;
 
-    fn serialize_bool(self, v: bool) -> Result<(Format, Value)> {
-        Ok((Format::Bool, Value::Bool(v)))
+    fn serialize_bool(self, content: bool) -> Result<(Format, Value)> {
+        Ok((Format::Bool, Value::Bool(content)))
     }
 
-    fn serialize_i8(self, v: i8) -> Result<(Format, Value)> {
-        Ok((Format::I8, Value::I8(v)))
+    fn serialize_i8(self, content: i8) -> Result<(Format, Value)> {
+        Ok((Format::I8, Value::I8(content)))
     }
 
-    fn serialize_i16(self, v: i16) -> Result<(Format, Value)> {
-        Ok((Format::I16, Value::I16(v)))
+    fn serialize_i16(self, content: i16) -> Result<(Format, Value)> {
+        Ok((Format::I16, Value::I16(content)))
     }
 
-    fn serialize_i32(self, v: i32) -> Result<(Format, Value)> {
-        Ok((Format::I32, Value::I32(v)))
+    fn serialize_i32(self, content: i32) -> Result<(Format, Value)> {
+        Ok((Format::I32, Value::I32(content)))
     }
 
-    fn serialize_i64(self, v: i64) -> Result<(Format, Value)> {
-        Ok((Format::I64, Value::I64(v)))
+    fn serialize_i64(self, content: i64) -> Result<(Format, Value)> {
+        Ok((Format::I64, Value::I64(content)))
     }
 
-    fn serialize_i128(self, v: i128) -> Result<(Format, Value)> {
-        Ok((Format::I128, Value::I128(v)))
+    fn serialize_i128(self, content: i128) -> Result<(Format, Value)> {
+        Ok((Format::I128, Value::I128(content)))
     }
 
-    fn serialize_u8(self, v: u8) -> Result<(Format, Value)> {
-        Ok((Format::U8, Value::U8(v)))
+    fn serialize_u8(self, content: u8) -> Result<(Format, Value)> {
+        Ok((Format::U8, Value::U8(content)))
     }
 
-    fn serialize_u16(self, v: u16) -> Result<(Format, Value)> {
-        Ok((Format::U16, Value::U16(v)))
+    fn serialize_u16(self, content: u16) -> Result<(Format, Value)> {
+        Ok((Format::U16, Value::U16(content)))
     }
 
-    fn serialize_u32(self, v: u32) -> Result<(Format, Value)> {
-        Ok((Format::U32, Value::U32(v)))
+    fn serialize_u32(self, content: u32) -> Result<(Format, Value)> {
+        Ok((Format::U32, Value::U32(content)))
     }
 
-    fn serialize_u64(self, v: u64) -> Result<(Format, Value)> {
-        Ok((Format::U64, Value::U64(v)))
+    fn serialize_u64(self, content: u64) -> Result<(Format, Value)> {
+        Ok((Format::U64, Value::U64(content)))
     }
 
-    fn serialize_u128(self, v: u128) -> Result<(Format, Value)> {
-        Ok((Format::U128, Value::U128(v)))
+    fn serialize_u128(self, content: u128) -> Result<(Format, Value)> {
+        Ok((Format::U128, Value::U128(content)))
     }
 
-    fn serialize_f32(self, v: f32) -> Result<(Format, Value)> {
-        Ok((Format::F32, Value::F32(v)))
+    fn serialize_f32(self, content: f32) -> Result<(Format, Value)> {
+        Ok((Format::F32, Value::F32(content)))
     }
 
-    fn serialize_f64(self, v: f64) -> Result<(Format, Value)> {
-        Ok((Format::F64, Value::F64(v)))
+    fn serialize_f64(self, content: f64) -> Result<(Format, Value)> {
+        Ok((Format::F64, Value::F64(content)))
     }
 
-    fn serialize_char(self, v: char) -> Result<(Format, Value)> {
-        Ok((Format::Char, Value::Char(v)))
+    fn serialize_char(self, content: char) -> Result<(Format, Value)> {
+        Ok((Format::Char, Value::Char(content)))
     }
 
-    fn serialize_str(self, v: &str) -> Result<(Format, Value)> {
-        Ok((Format::Str, Value::Str(v.into())))
+    fn serialize_str(self, content: &str) -> Result<(Format, Value)> {
+        Ok((Format::Str, Value::Str(content.into())))
     }
 
-    fn serialize_bytes(self, v: &[u8]) -> Result<(Format, Value)> {
-        Ok((Format::Bytes, Value::Bytes(v.into())))
+    fn serialize_bytes(self, content: &[u8]) -> Result<(Format, Value)> {
+        Ok((Format::Bytes, Value::Bytes(content.into())))
     }
 
     fn serialize_none(self) -> Result<(Format, Value)> {
         Ok((Format::unknown(), Value::Option(None)))
     }
 
-    fn serialize_some<T>(self, v: &T) -> Result<(Format, Value)>
+    fn serialize_some<T>(self, content: &T) -> Result<(Format, Value)>
     where
         T: ?Sized + Serialize,
     {
-        let (format, value) = v.serialize(self)?;
+        let (format, value) = content.serialize(self)?;
         Ok((
             Format::Option(Box::new(format)),
             Value::Option(Some(Box::new(value))),
@@ -143,11 +143,11 @@ impl<'a> ser::Serializer for Serializer<'a> {
         )
     }
 
-    fn serialize_newtype_struct<T>(self, name: &'static str, value: &T) -> Result<(Format, Value)>
+    fn serialize_newtype_struct<T>(self, name: &'static str, content: &T) -> Result<(Format, Value)>
     where
         T: ?Sized + Serialize,
     {
-        let (format, value) = value.serialize(Serializer::new(self.tracer, self.samples))?;
+        let (format, value) = content.serialize(Serializer::new(self.tracer, self.samples))?;
         self.tracer.record_container(
             self.samples,
             name,
@@ -162,12 +162,12 @@ impl<'a> ser::Serializer for Serializer<'a> {
         name: &'static str,
         variant_index: u32,
         variant_name: &'static str,
-        value: &T,
+        content: &T,
     ) -> Result<(Format, Value)>
     where
         T: ?Sized + Serialize,
     {
-        let (format, value) = value.serialize(Serializer::new(self.tracer, self.samples))?;
+        let (format, value) = content.serialize(Serializer::new(self.tracer, self.samples))?;
         self.tracer.record_variant(
             self.samples,
             name,
@@ -283,11 +283,11 @@ impl<'a> ser::SerializeSeq for SeqSerializer<'a> {
     type Ok = (Format, Value);
     type Error = Error;
 
-    fn serialize_element<T>(&mut self, value: &T) -> Result<()>
+    fn serialize_element<T>(&mut self, content: &T) -> Result<()>
     where
         T: ?Sized + Serialize,
     {
-        let (format, value) = value.serialize(Serializer::new(self.tracer, self.samples))?;
+        let (format, value) = content.serialize(Serializer::new(self.tracer, self.samples))?;
         self.format.unify(format)?;
         self.values.push(value);
         Ok(())
@@ -310,11 +310,11 @@ impl<'a> ser::SerializeTuple for TupleSerializer<'a> {
     type Ok = (Format, Value);
     type Error = Error;
 
-    fn serialize_element<T>(&mut self, value: &T) -> Result<()>
+    fn serialize_element<T>(&mut self, content: &T) -> Result<()>
     where
         T: ?Sized + Serialize,
     {
-        let (format, value) = value.serialize(Serializer::new(self.tracer, self.samples))?;
+        let (format, value) = content.serialize(Serializer::new(self.tracer, self.samples))?;
         self.formats.push(format);
         self.values.push(value);
         Ok(())
@@ -338,11 +338,11 @@ impl<'a> ser::SerializeTupleStruct for TupleStructSerializer<'a> {
     type Ok = (Format, Value);
     type Error = Error;
 
-    fn serialize_field<T>(&mut self, value: &T) -> Result<()>
+    fn serialize_field<T>(&mut self, content: &T) -> Result<()>
     where
         T: ?Sized + Serialize,
     {
-        let (format, value) = value.serialize(Serializer::new(self.tracer, self.samples))?;
+        let (format, value) = content.serialize(Serializer::new(self.tracer, self.samples))?;
         self.formats.push(format);
         self.values.push(value);
         Ok(())
@@ -376,11 +376,11 @@ impl<'a> ser::SerializeTupleVariant for TupleVariantSerializer<'a> {
     type Ok = (Format, Value);
     type Error = Error;
 
-    fn serialize_field<T>(&mut self, v: &T) -> Result<()>
+    fn serialize_field<T>(&mut self, content: &T) -> Result<()>
     where
         T: ?Sized + Serialize,
     {
-        let (format, value) = v.serialize(Serializer::new(self.tracer, self.samples))?;
+        let (format, value) = content.serialize(Serializer::new(self.tracer, self.samples))?;
         self.formats.push(format);
         self.values.push(value);
         Ok(())
@@ -423,11 +423,11 @@ impl<'a> ser::SerializeMap for MapSerializer<'a> {
         Ok(())
     }
 
-    fn serialize_value<T>(&mut self, value: &T) -> Result<()>
+    fn serialize_value<T>(&mut self, content: &T) -> Result<()>
     where
         T: ?Sized + Serialize,
     {
-        let (format, value) = value.serialize(Serializer::new(self.tracer, self.samples))?;
+        let (format, value) = content.serialize(Serializer::new(self.tracer, self.samples))?;
         self.value_format.unify(format)?;
         self.values.push(value);
         Ok(())
@@ -456,11 +456,11 @@ impl<'a> ser::SerializeStruct for StructSerializer<'a> {
     type Ok = (Format, Value);
     type Error = Error;
 
-    fn serialize_field<T>(&mut self, name: &'static str, value: &T) -> Result<()>
+    fn serialize_field<T>(&mut self, name: &'static str, content: &T) -> Result<()>
     where
         T: ?Sized + Serialize,
     {
-        let (format, value) = value.serialize(Serializer::new(self.tracer, self.samples))?;
+        let (format, value) = content.serialize(Serializer::new(self.tracer, self.samples))?;
         self.fields.push(Named {
             name: name.into(),
             value: format,
@@ -496,11 +496,11 @@ impl<'a> ser::SerializeStructVariant for StructVariantSerializer<'a> {
     type Ok = (Format, Value);
     type Error = Error;
 
-    fn serialize_field<T>(&mut self, name: &'static str, value: &T) -> Result<()>
+    fn serialize_field<T>(&mut self, name: &'static str, content: &T) -> Result<()>
     where
         T: ?Sized + Serialize,
     {
-        let (format, value) = value.serialize(Serializer::new(self.tracer, self.samples))?;
+        let (format, value) = content.serialize(Serializer::new(self.tracer, self.samples))?;
         self.fields.push(Named {
             name: name.into(),
             value: format,
