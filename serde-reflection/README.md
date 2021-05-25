@@ -11,10 +11,10 @@ that implement the Serialize and/or Deserialize trait(s) of Serde.
 
 ## Quick Start
 
-Very often, Serde traits are only implemented using Serde derive macros.
-In this case, simply
-* call `trace_type` on the desired top-level definitions, then
-* add a call to `trace_type` for each `enum` type. (This will fix any `MissingVariants` error.)
+Very often, Serde traits are simply implemented using Serde derive macros. In this case,
+you may obtain format descriptions as follows:
+* call `trace_simple_type` on the desired top-level container definition(s), then
+* add a call to `trace_simple_type` for each `enum` type. (This will fix any `MissingVariants` error.)
 
 ```rust
 #[derive(Deserialize)]
@@ -31,13 +31,12 @@ enum Choice { A, B, C }
 
 // Start the tracing session.
 let mut tracer = Tracer::new(TracerConfig::default());
-let samples = Samples::new();
 
 // Trace the desired top-level type(s).
-tracer.trace_type::<Foo>(&samples)?;
+tracer.trace_simple_type::<Foo>()?;
 
 // Also trace each enum type separately to fix any `MissingVariants` error.
-tracer.trace_type::<Choice>(&samples)?;
+tracer.trace_simple_type::<Choice>()?;
 
 // Obtain the registry of Serde formats and serialize it in YAML (for instance).
 let registry = tracer.registry()?;

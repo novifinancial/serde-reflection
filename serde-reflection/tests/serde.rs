@@ -349,9 +349,8 @@ fn test_tracing_deserialization_for_lists() {
         data: u64,
         next: Option<Box<Node>>,
     }
-    let samples = Samples::new();
     let mut tracer = Tracer::new(TracerConfig::default());
-    tracer.trace_type::<Node>(&samples).unwrap();
+    tracer.trace_simple_type::<Node>().unwrap();
     let registry = tracer.registry().unwrap();
     match registry.get("Node").unwrap() {
         ContainerFormat::Struct(fields) => assert_eq!(fields.len(), 2),
@@ -366,9 +365,8 @@ fn test_tracing_deserialization_for_trees() {
         data: u64,
         children: Vec<Node>,
     }
-    let samples = Samples::new();
     let mut tracer = Tracer::new(TracerConfig::default());
-    tracer.trace_type::<Node>(&samples).unwrap();
+    tracer.trace_simple_type::<Node>().unwrap();
     let registry = tracer.registry().unwrap();
     match registry.get("Node").unwrap() {
         ContainerFormat::Struct(fields) => assert_eq!(fields.len(), 2),

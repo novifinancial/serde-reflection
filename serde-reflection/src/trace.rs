@@ -8,6 +8,7 @@ use crate::{
     ser::Serializer,
     value::Value,
 };
+use once_cell::sync::Lazy;
 use serde::{de::DeserializeSeed, Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -177,6 +178,18 @@ impl Tracer {
             }
             return Ok((format, values));
         }
+    }
+
+    /// Trace a type `T` that is simple enough that no samples of values are needed.
+    /// * If `T` is an enum, the tracing iterates until all variants of `T` are covered.
+    /// * Accumulate and return all the sampled values at the end.
+    /// This is merely a shortcut for `self.trace_type` with a fixed empty set of samples.
+    pub fn trace_simple_type<'de, T>(&mut self) -> Result<(Format, Vec<T>)>
+    where
+        T: Deserialize<'de>,
+    {
+        static SAMPLES: Lazy<Samples> = Lazy::new(Samples::new);
+        self.trace_type(&SAMPLES)
     }
 
     /// Same as `trace_type` for seeded deserialization.
