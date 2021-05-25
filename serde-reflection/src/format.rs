@@ -241,7 +241,9 @@ impl FormatHolder for VariantFormat {
     fn unify(&mut self, format: VariantFormat) -> Result<()> {
         match (self, format) {
             (format1, Self::Variable(variable2)) => {
-                assert!(variable2.borrow().is_none());
+                if let Some(format2) = variable2.borrow_mut().deref_mut() {
+                    format1.unify(std::mem::take(format2))?;
+                }
                 *variable2.borrow_mut() = Some(format1.clone());
             }
             (Self::Variable(variable1), format2) => {
@@ -598,7 +600,9 @@ impl FormatHolder for Format {
     fn unify(&mut self, format: Format) -> Result<()> {
         match (self, format) {
             (format1, Self::Variable(variable2)) => {
-                assert!(variable2.borrow().is_none());
+                if let Some(format2) = variable2.borrow_mut().deref_mut() {
+                    format1.unify(std::mem::take(format2))?;
+                }
                 *variable2.borrow_mut() = Some(format1.clone());
             }
             (Self::Variable(variable1), format2) => {
