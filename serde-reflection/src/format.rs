@@ -182,9 +182,10 @@ pub trait FormatHolder {
     fn is_unknown(&self) -> bool;
 }
 
-fn unification_error<T>(v1: T, v2: T) -> Error
+fn unification_error<T1, T2>(v1: T1, v2: T2) -> Error
 where
-    T: std::fmt::Debug,
+    T1: std::fmt::Debug,
+    T2: std::fmt::Debug,
 {
     Error::Incompatible(format!("{:?}", v1), format!("{:?}", v2))
 }
@@ -237,18 +238,13 @@ impl FormatHolder for VariantFormat {
         Ok(())
     }
 
-    fn unify(&mut self, mut format: VariantFormat) -> Result<()> {
-        // Matching `&mut format` instead of `format` because of
-        //   "error[E0009]: cannot bind by-move and by-ref in the same pattern"
-        // See also https://github.com/rust-lang/rust/issues/68354
-        // We make it work using std::mem::take (and the Default trait).
-        match (&mut *self, &mut format) {
-            (_, Self::Variable(variable2)) => {
+    fn unify(&mut self, format: VariantFormat) -> Result<()> {
+        match (self, format) {
+            (format1, Self::Variable(variable2)) => {
                 assert!(variable2.borrow().is_none());
-                *variable2.borrow_mut() = Some(self.clone());
+                *variable2.borrow_mut() = Some(format1.clone());
             }
-            (Self::Variable(variable1), _) => {
-                let format2 = std::mem::take(&mut format);
+            (Self::Variable(variable1), format2) => {
                 let inner_variable = match variable1.borrow_mut().deref_mut() {
                     value1 @ None => {
                         *value1 = Some(format2);
@@ -271,34 +267,26 @@ impl FormatHolder for VariantFormat {
             (Self::Unit, Self::Unit) => (),
 
             (Self::NewType(format1), Self::NewType(format2)) => {
-                let format2 = std::mem::take(format2.as_mut());
-                format1.as_mut().unify(format2)?;
+                format1.as_mut().unify(*format2)?;
             }
 
-            (Self::Tuple(formats1), Self::Tuple(formats2)) => {
-                if formats1.len() != formats2.len() {
-                    return Err(unification_error(formats1, formats2));
-                }
-                let mut formats2 = formats2.iter_mut();
-                for format1 in formats1 {
-                    let format2 = std::mem::take(formats2.next().unwrap());
+            (Self::Tuple(formats1), Self::Tuple(formats2)) if formats1.len() == formats2.len() => {
+                for (format1, format2) in formats1.iter_mut().zip(formats2.into_iter()) {
                     format1.unify(format2)?;
                 }
             }
 
-            (Self::Struct(formats1), Self::Struct(formats2)) => {
-                if formats1.len() != formats2.len() {
-                    return Err(unification_error(formats1, formats2));
-                }
-                let mut formats2 = formats2.iter_mut();
-                for format1 in formats1 {
-                    let format2 = std::mem::take(formats2.next().unwrap());
+            (Self::Struct(named_formats1), Self::Struct(named_formats2))
+                if named_formats1.len() == named_formats2.len() =>
+            {
+                for (format1, format2) in named_formats1.iter_mut().zip(named_formats2.into_iter())
+                {
                     format1.unify(format2)?;
                 }
             }
 
-            _ => {
-                return Err(unification_error(self, &mut format));
+            (format1, format2) => {
+                return Err(unification_error(format1, format2));
             }
         }
         Ok(())
@@ -458,43 +446,34 @@ impl FormatHolder for ContainerFormat {
         Ok(())
     }
 
-    fn unify(&mut self, mut format: ContainerFormat) -> Result<()> {
-        // Matching `&mut format` instead of `format` because of
-        // "error[E0009]: cannot bind by-move and by-ref in the same pattern"
-        match (&mut *self, &mut format) {
+    fn unify(&mut self, format: ContainerFormat) -> Result<()> {
+        match (self, format) {
             (Self::UnitStruct, Self::UnitStruct) => (),
 
             (Self::NewTypeStruct(format1), Self::NewTypeStruct(format2)) => {
-                let format2 = std::mem::take(format2.as_mut());
-                format1.as_mut().unify(format2)?;
+                format1.as_mut().unify(*format2)?;
             }
 
-            (Self::TupleStruct(formats1), Self::TupleStruct(formats2)) => {
-                if formats1.len() != formats2.len() {
-                    return Err(unification_error(self, &mut format));
-                }
-                let mut formats2 = formats2.iter_mut();
-                for format1 in formats1 {
-                    let format2 = std::mem::take(formats2.next().unwrap());
+            (Self::TupleStruct(formats1), Self::TupleStruct(formats2))
+                if formats1.len() == formats2.len() =>
+            {
+                for (format1, format2) in formats1.iter_mut().zip(formats2.into_iter()) {
                     format1.unify(format2)?;
                 }
             }
 
-            (Self::Struct(named_formats1), Self::Struct(named_formats2)) => {
-                if named_formats1.len() != named_formats2.len() {
-                    return Err(unification_error(self, &mut format));
-                }
-                let mut named_formats2 = named_formats2.iter_mut();
-                for format1 in named_formats1 {
-                    let format2 = std::mem::take(named_formats2.next().unwrap());
+            (Self::Struct(named_formats1), Self::Struct(named_formats2))
+                if named_formats1.len() == named_formats2.len() =>
+            {
+                for (format1, format2) in named_formats1.iter_mut().zip(named_formats2.into_iter())
+                {
                     format1.unify(format2)?;
                 }
             }
 
             (Self::Enum(variants1), Self::Enum(variants2)) => {
-                for (index2, variant2) in variants2.iter_mut() {
-                    let variant2 = std::mem::take(variant2);
-                    match variants1.entry(*index2) {
+                for (index2, variant2) in variants2.into_iter() {
+                    match variants1.entry(index2) {
                         Entry::Vacant(e) => {
                             // Note that we do not check for name collisions.
                             e.insert(variant2);
@@ -506,8 +485,8 @@ impl FormatHolder for ContainerFormat {
                 }
             }
 
-            _ => {
-                return Err(unification_error(self, &mut format));
+            (format1, format2) => {
+                return Err(unification_error(format1, format2));
             }
         }
         Ok(())
@@ -616,16 +595,13 @@ impl FormatHolder for Format {
 
     /// Unify the newly "traced" value `format` into the current format.
     /// Note that there should be no `TupleArray`s at this point.
-    fn unify(&mut self, mut format: Format) -> Result<()> {
-        // Matching `&mut format` instead of `format` because of
-        // "error[E0009]: cannot bind by-move and by-ref in the same pattern"
-        match (&mut *self, &mut format) {
-            (_, Self::Variable(variable2)) => {
+    fn unify(&mut self, format: Format) -> Result<()> {
+        match (self, format) {
+            (format1, Self::Variable(variable2)) => {
                 assert!(variable2.borrow().is_none());
-                *variable2.borrow_mut() = Some(self.clone());
+                *variable2.borrow_mut() = Some(format1.clone());
             }
-            (Self::Variable(variable1), _) => {
-                let format2 = std::mem::take(&mut format);
+            (Self::Variable(variable1), format2) => {
                 let inner_variable = match variable1.borrow_mut().deref_mut() {
                     value1 @ None => {
                         *value1 = Some(format2);
@@ -663,25 +639,15 @@ impl FormatHolder for Format {
             | (Self::Str, Self::Str)
             | (Self::Bytes, Self::Bytes) => (),
 
-            (Self::TypeName(name1), Self::TypeName(name2)) => {
-                if name1 != name2 {
-                    return Err(unification_error(self, &mut format));
-                }
-            }
+            (Self::TypeName(name1), Self::TypeName(name2)) if *name1 == name2 => (),
 
             (Self::Option(format1), Self::Option(format2))
             | (Self::Seq(format1), Self::Seq(format2)) => {
-                let format2 = std::mem::take(format2.as_mut());
-                format1.as_mut().unify(format2)?;
+                format1.as_mut().unify(*format2)?;
             }
 
-            (Self::Tuple(formats1), Self::Tuple(formats2)) => {
-                if formats1.len() != formats2.len() {
-                    return Err(unification_error(self, &mut format));
-                }
-                let mut formats2 = formats2.iter_mut();
-                for format1 in formats1 {
-                    let format2 = std::mem::take(formats2.next().unwrap());
+            (Self::Tuple(formats1), Self::Tuple(formats2)) if formats1.len() == formats2.len() => {
+                for (format1, format2) in formats1.iter_mut().zip(formats2.into_iter()) {
                     format1.unify(format2)?;
                 }
             }
@@ -696,14 +662,12 @@ impl FormatHolder for Format {
                     value: value2,
                 },
             ) => {
-                let key2 = std::mem::take(key2.as_mut());
-                let value2 = std::mem::take(value2.as_mut());
-                key1.as_mut().unify(key2)?;
-                value1.as_mut().unify(value2)?;
+                key1.as_mut().unify(*key2)?;
+                value1.as_mut().unify(*value2)?;
             }
 
-            _ => {
-                return Err(unification_error(self, &mut format));
+            (format1, format2) => {
+                return Err(unification_error(format1, format2));
             }
         }
         Ok(())
