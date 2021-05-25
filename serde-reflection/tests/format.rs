@@ -58,7 +58,7 @@ fn assert_variable_contains_value(format: &Format, value: &Format) {
 }
 
 #[test]
-fn test_variable_unification() {
+fn test_pattern_variable_unification() {
     let mut x = Format::unknown();
     let mut y = Format::unknown();
     let mut z = Format::unknown();
@@ -106,6 +106,25 @@ fn test_variable_unification() {
 
     x.reduce();
     assert_eq!(x, Format::U16);
+}
+
+#[test]
+fn test_general_variable_unification() {
+    let mut x = Format::unknown();
+    let mut y = Format::unknown();
+    y.unify(Format::U8).unwrap();
+    x.unify(y.clone()).unwrap();
+    assert!(x.unify(Format::U16).is_err());
+    x.unify(Format::U8).unwrap();
+
+    let mut x = VariantFormat::unknown();
+    let mut y = VariantFormat::unknown();
+    y.unify(VariantFormat::Unit).unwrap();
+    x.unify(y.clone()).unwrap();
+    assert!(x
+        .unify(VariantFormat::NewType(Box::new(Format::U16)))
+        .is_err());
+    x.unify(VariantFormat::Unit).unwrap();
 }
 
 #[test]

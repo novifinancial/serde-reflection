@@ -435,3 +435,25 @@ fn test_value_recording_for_structs() {
     assert_eq!(tracer.trace_type_once::<S>(&samples).unwrap().1, S { a: 2 });
     assert_eq!(tracer.trace_type_once::<T>(&samples).unwrap().1, T(3, 4));
 }
+
+#[test]
+fn test_repeated_tracing() {
+    #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
+    struct Foo(Vec<Option<u64>>);
+
+    let mut samples = Samples::new();
+    let mut tracer = Tracer::new(TracerConfig::default());
+
+    tracer.trace_value(&mut samples, &Foo(Vec::new())).unwrap();
+    tracer
+        .trace_value(&mut samples, &Foo(vec![Some(1u64)]))
+        .unwrap();
+
+    let registry = tracer.registry().unwrap();
+    assert_eq!(
+        *registry.get("Foo").unwrap(),
+        ContainerFormat::NewTypeStruct(Box::new(Format::Seq(Box::new(Format::Option(Box::new(
+            Format::U64
+        ))))))
+    );
+}
