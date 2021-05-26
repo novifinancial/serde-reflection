@@ -314,7 +314,7 @@ dependencies = [
 
 [[package]]
 name = "serde-generate"
-version = "0.19.2"
+version = "0.19.3"
 dependencies = [
  "bcs",
  "bincode",
@@ -335,7 +335,7 @@ dependencies = [
 
 [[package]]
 name = "serde-name"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "serde",
  "serde-reflection",
