@@ -1,7 +1,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-//! This crate aims to compile the data formats extracted from Rust by [`serde_reflection`](https://crates.io/crates/serde_reflection)
+//! This crate aims to compile the data formats extracted from Rust by [`serde-reflection`](https://crates.io/crates/serde-reflection)
 //! into type definitions and (de)serialization methods for other programming languages.
 //!
 //! It can be used as a library or as a command-line tool (see `serdegen` below).
