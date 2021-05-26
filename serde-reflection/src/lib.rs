@@ -40,7 +40,7 @@
 //!
 //! // Obtain the registry of Serde formats and serialize it in YAML (for instance).
 //! let registry = tracer.registry()?;
-//! let data = serde_yaml::to_string(&registry).unwrap() + "\n";
+//! let data = serde_yaml::to_string(&registry).unwrap();
 //! assert_eq!(&data, r#"---
 //! Bar:
 //!   NEWTYPESTRUCT: U64
@@ -149,7 +149,7 @@
 //! };
 //!
 //! // Export the registry in YAML.
-//! let data = serde_yaml::to_string(&registry).unwrap() + "\n";
+//! let data = serde_yaml::to_string(&registry).unwrap();
 //! assert_eq!(&data, r#"---
 //! Name:
 //!   NEWTYPESTRUCT: STR
