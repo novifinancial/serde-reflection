@@ -306,21 +306,34 @@
 <span id="303">303</span>
 <span id="304">304</span>
 <span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
 
 <span class="attribute">#![<span class="ident">forbid</span>(<span class="ident">unsafe_code</span>)]</span>
 
-<span class="doccomment">//! This crate provides a way to extract format descriptions for Rust containers</span>
-<span class="doccomment">//! that implement the Serialize and/or Deserialize trait(s) of Serde.</span>
+<span class="doccomment">//! This crate provides a way to extract format descriptions for Rust containers that</span>
+<span class="doccomment">//! implement the Serialize and/or Deserialize trait(s) of Serde.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Format descriptions are useful in several ways:</span>
+<span class="doccomment">//! * Stored under version control, formats can be tested to prevent unintended modifications</span>
+<span class="doccomment">//! of binary serialization formats (e.g. by changing variant order).</span>
+<span class="doccomment">//! * Formats can be passed to [`serde-generate`](https://docs.rs/serde-generate/0.19.2/serde_generate/)</span>
+<span class="doccomment">//! in order to generate class definitions and provide Serde-compatible binary</span>
+<span class="doccomment">//! serialization in other languages (C++, python, Java, etc).</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # Quick Start</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! Very often, Serde traits are only implemented using Serde derive macros.</span>
-<span class="doccomment">//! In this case, simply</span>
-<span class="doccomment">//! * call `trace_type` on the desired top-level definitions, then</span>
-<span class="doccomment">//! * add a call to `trace_type` for each `enum` type. (This will fix any `MissingVariants` error.)</span>
+<span class="doccomment">//! Very often, Serde traits are simply implemented using Serde derive macros. In this case,</span>
+<span class="doccomment">//! you may obtain format descriptions as follows:</span>
+<span class="doccomment">//! * call `trace_simple_type` on the desired top-level container definition(s), then</span>
+<span class="doccomment">//! * add a call to `trace_simple_type` for each `enum` type. (This will fix any `MissingVariants` error.)</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```rust</span>
 <span class="doccomment">//! # use serde::Deserialize;</span>
@@ -340,17 +353,16 @@
 <span class="doccomment">//! # fn main() -&gt; Result&lt;(), Error&gt; {</span>
 <span class="doccomment">//! // Start the tracing session.</span>
 <span class="doccomment">//! let mut tracer = Tracer::new(TracerConfig::default());</span>
-<span class="doccomment">//! let samples = Samples::new();</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // Trace the desired top-level type(s).</span>
-<span class="doccomment">//! tracer.trace_type::&lt;Foo&gt;(&amp;samples)?;</span>
+<span class="doccomment">//! tracer.trace_simple_type::&lt;Foo&gt;()?;</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // Also trace each enum type separately to fix any `MissingVariants` error.</span>
-<span class="doccomment">//! tracer.trace_type::&lt;Choice&gt;(&amp;samples)?;</span>
+<span class="doccomment">//! tracer.trace_simple_type::&lt;Choice&gt;()?;</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // Obtain the registry of Serde formats and serialize it in YAML (for instance).</span>
 <span class="doccomment">//! let registry = tracer.registry()?;</span>
-<span class="doccomment">//! let data = serde_yaml::to_string(&amp;registry).unwrap() + &quot;\n&quot;;</span>
+<span class="doccomment">//! let data = serde_yaml::to_string(&amp;registry).unwrap();</span>
 <span class="doccomment">//! assert_eq!(&amp;data, r#&quot;---</span>
 <span class="doccomment">//! Bar:</span>
 <span class="doccomment">//!   NEWTYPESTRUCT: U64</span>
@@ -459,7 +471,7 @@
 <span class="doccomment">//! };</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // Export the registry in YAML.</span>
-<span class="doccomment">//! let data = serde_yaml::to_string(&amp;registry).unwrap() + &quot;\n&quot;;</span>
+<span class="doccomment">//! let data = serde_yaml::to_string(&amp;registry).unwrap();</span>
 <span class="doccomment">//! assert_eq!(&amp;data, r#&quot;---</span>
 <span class="doccomment">//! Name:</span>
 <span class="doccomment">//!   NEWTYPESTRUCT: STR</span>

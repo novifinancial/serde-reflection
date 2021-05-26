@@ -1572,7 +1572,7 @@
 <span class="kw">fn</span> <span class="ident">test_get_simple_registry</span>() {
     <span class="kw">let</span> <span class="ident">registry</span> <span class="op">=</span> <span class="ident">get_simple_registry</span>().<span class="ident">unwrap</span>();
     <span class="macro">assert_eq</span><span class="macro">!</span>(
-        <span class="ident">serde_yaml</span>::<span class="ident">to_string</span>(<span class="kw-2">&amp;</span><span class="ident">registry</span>).<span class="ident">unwrap</span>() <span class="op">+</span> <span class="string">&quot;\n&quot;</span>,
+        <span class="ident">serde_yaml</span>::<span class="ident">to_string</span>(<span class="kw-2">&amp;</span><span class="ident">registry</span>).<span class="ident">unwrap</span>(),
         <span class="string">r#&quot;---
 Choice:
   ENUM:

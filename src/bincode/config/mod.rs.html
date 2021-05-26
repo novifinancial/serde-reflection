@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/bincode-1.3.1/src/config/mod.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mod.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings"></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/bincode-1.3.3/src/config/mod.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mod.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings"></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg">
 <link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png">
 <link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../bincode/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
                 <a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
@@ -363,7 +363,82 @@
 <span id="360">360</span>
 <span id="361">361</span>
 <span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
 </pre><div class="example-wrap"><pre class="rust ">
+<span class="doccomment">//! `bincode` uses a Builder-pattern to configure the Serializers and Deserializers in this</span>
+<span class="doccomment">//! crate. This means that if you need to customize the behavior of `bincode`, you should create an</span>
+<span class="doccomment">//! instance of the `DefaultOptions` struct:</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ```rust</span>
+<span class="doccomment">//! use bincode::Options;</span>
+<span class="doccomment">//! let my_options = bincode::DefaultOptions::new();</span>
+<span class="doccomment">//! ```</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! # Options Struct vs bincode functions</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Due to historical reasons, the default options used by the `serialize()` and `deserialize()`</span>
+<span class="doccomment">//! family of functions are different than the default options created by the `DefaultOptions` struct:</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! |          | Byte limit | Endianness | Int Encoding | Trailing Behavior |</span>
+<span class="doccomment">//! |----------|------------|------------|--------------|-------------------|</span>
+<span class="doccomment">//! | struct   | Unlimited  | Little     | Varint       | Reject            |</span>
+<span class="doccomment">//! | function | Unlimited  | Little     | Fixint       | Allow             |</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! This means that if you want to use the `Serialize` / `Deserialize` structs with the same</span>
+<span class="doccomment">//! settings as the functions, you should adjust the `DefaultOptions` struct like so:</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ```rust</span>
+<span class="doccomment">//! use bincode::Options;</span>
+<span class="doccomment">//! let my_options = bincode::DefaultOptions::new()</span>
+<span class="doccomment">//!     .with_fixint_encoding()</span>
+<span class="doccomment">//!     .allow_trailing_bytes();</span>
+<span class="doccomment">//! ```</span>
+
 <span class="kw">use</span> <span class="ident">de</span>::<span class="ident">read</span>::<span class="ident">BincodeRead</span>;
 <span class="kw">use</span> <span class="ident">error</span>::<span class="prelude-ty">Result</span>;
 <span class="kw">use</span> <span class="ident">serde</span>;
@@ -393,6 +468,23 @@
 <span class="doccomment">/// ### Defaults</span>
 <span class="doccomment">/// By default bincode will use little-endian encoding for multi-byte integers, and will not</span>
 <span class="doccomment">/// limit the number of serialized/deserialized bytes.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ### Configuring `DefaultOptions`</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// `DefaultOptions` implements the [Options] trait, which means it exposes functions to change the behavior of bincode.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// For example, if you wanted to limit the bincode deserializer to 1 kilobyte of user input:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```rust</span>
+<span class="doccomment">/// use bincode::Options;</span>
+<span class="doccomment">/// let my_options = bincode::DefaultOptions::new().with_limit(1024);</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ### DefaultOptions struct vs. functions</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// The default configuration used by this struct is not the same as that used by the bincode</span>
+<span class="doccomment">/// helper functions in the root of this crate. See the</span>
+<span class="doccomment">/// [config](index.html#options-struct-vs-bincode-functions) module for more details</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DefaultOptions</span>(<span class="ident">Infinite</span>);
 
@@ -445,8 +537,6 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// When a byte limit is set, bincode will return `Err` on any deserialization that goes over the limit, or any</span>
 <span class="doccomment">/// serialization that goes over the limit.</span>
-<span class="doccomment">/// Sets the byte limit to be unlimited.</span>
-<span class="doccomment">/// This is the default.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Options</span>: <span class="ident">InternalOptions</span> <span class="op">+</span> <span class="ident">Sized</span> {
     <span class="doccomment">/// Sets the byte limit to be unlimited.</span>
     <span class="doccomment">/// This is the default.</span>
@@ -608,12 +698,14 @@
 }
 
 <span class="doccomment">/// A configuration struct with a user-specified length encoding</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">WithOtherIntEncoding</span><span class="op">&lt;</span><span class="ident">O</span>: <span class="ident">Options</span>, <span class="ident">I</span>: <span class="ident">IntEncoding</span><span class="op">&gt;</span> {
     <span class="ident">options</span>: <span class="ident">O</span>,
     <span class="ident">_length</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>,
 }
 
 <span class="doccomment">/// A configuration struct with a user-specified trailing bytes behavior.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">WithOtherTrailing</span><span class="op">&lt;</span><span class="ident">O</span>: <span class="ident">Options</span>, <span class="ident">T</span>: <span class="ident">TrailingBytes</span><span class="op">&gt;</span> {
     <span class="ident">options</span>: <span class="ident">O</span>,
     <span class="ident">_trailing</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,

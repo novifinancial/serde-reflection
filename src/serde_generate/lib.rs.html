@@ -141,16 +141,22 @@
 <span id="138">138</span>
 <span id="139">139</span>
 <span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
 
 <span class="doccomment">//! This crate aims to compile the data formats extracted from Rust by [`serde_reflection`](https://crates.io/crates/serde_reflection)</span>
-<span class="doccomment">//! into type definitions for other programming languages.</span>
+<span class="doccomment">//! into type definitions and (de)serialization methods for other programming languages.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! It can be used as a library or as a command-line tool (see `serdegen` below).</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ## Supported Languages</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! The following target languages are currently supported:</span>
+<span class="doccomment">//! The following programming languages are fully supported as target languages:</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! * C++ 17</span>
 <span class="doccomment">//! * Java 8</span>
@@ -159,7 +165,7 @@
 <span class="doccomment">//! * Go &gt;= 1.14</span>
 <span class="doccomment">//! * C# (NetCoreApp &gt;= 2.1)</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! ## Work in progress</span>
+<span class="doccomment">//! The following languages are partially supported and still considered under development:</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! * TypeScript &gt; 3.2 (make sure to enable `esnext.BigInt` and `dom` at tsconfig.json -&gt; lib)</span>
 <span class="doccomment">//!</span>
@@ -170,15 +176,16 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! This crate provides easy-to-deploy runtime libraries for the following binary formats, in all supported languages:</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! * [Bincode](https://docs.rs/bincode/1.3.1/bincode/),</span>
-<span class="doccomment">//! * [BCS](https://github.com/diem/bcs) (short for &quot;Binary Canonical Serialization&quot; -- formerly known as &quot;LCS&quot; or &quot;Libra Canonical Serialization&quot;).</span>
+<span class="doccomment">//! * [Bincode](https://docs.rs/bincode/1.3.1/bincode/) (default configuration only),</span>
+<span class="doccomment">//! * [BCS](https://github.com/diem/bcs) (short for Binary Canonical Serialization, the main format used</span>
+<span class="doccomment">//!   in the [Diem blockchain](https://github.com/diem/diem)).</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ## Quick Start with Python and Bincode</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! In the following example, we transfer a `Test` value from Rust to Python using [`bincode`](https://docs.rs/bincode/1.3.1/bincode/).</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//! use serde::{Deserialize, Serialize};</span>
-<span class="doccomment">//! use serde_reflection::{Registry, Samples, Tracer, TracerConfig};</span>
+<span class="doccomment">//! use serde_reflection::{Registry, Tracer, TracerConfig};</span>
 <span class="doccomment">//! use std::io::Write;</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! #[derive(Serialize, Deserialize)]</span>
@@ -188,9 +195,9 @@
 <span class="doccomment">//! }</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # fn main() -&gt; Result&lt;(), std::io::Error&gt; {</span>
-<span class="doccomment">//! // Obtain the Serde format of `Test`. (In practice, formats are more often read from a file.)</span>
+<span class="doccomment">//! // Obtain the Serde format of `Test`. (In practice, formats are more likely read from a file.)</span>
 <span class="doccomment">//! let mut tracer = Tracer::new(TracerConfig::default());</span>
-<span class="doccomment">//! tracer.trace_type::&lt;Test&gt;(&amp;Samples::new()).unwrap();</span>
+<span class="doccomment">//! tracer.trace_simple_type::&lt;Test&gt;().unwrap();</span>
 <span class="doccomment">//! let registry = tracer.registry().unwrap();</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // Create Python class definitions.</span>
@@ -255,14 +262,15 @@
 
 <span class="doccomment">/// Dependency analysis and topological sort for Serde formats.</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">analyzer</span>;
+<span class="doccomment">/// Utility function to generate indented text</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">indent</span>;
+
 <span class="doccomment">/// Support for code-generation in C++</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">cpp</span>;
 <span class="doccomment">/// Support for code-generation in C#</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">csharp</span>;
-<span class="doccomment">/// Utility function to generate indented text</span>
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">golang</span>;
 <span class="doccomment">/// Support for code-generation in Go</span>
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">indent</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">golang</span>;
 <span class="doccomment">/// Support for code-generation in Java</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">java</span>;
 <span class="doccomment">/// Support for code-generation in Python 3</span>

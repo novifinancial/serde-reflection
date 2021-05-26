@@ -1,1 +1,1 @@
-initSidebarItems({"derive":[["proc_macro_hack_include_dir",""]]});
+initSidebarItems({"macro":[["proc_macro_hack_include_dir",""]]});

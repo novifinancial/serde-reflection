@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/bcs-0.1.1/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/bcs-0.1.3/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
 <link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
 <link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../bcs/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
                 <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
@@ -309,6 +309,17 @@
 <span id="306">306</span>
 <span id="307">307</span>
 <span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// Copyright (c) The Diem Core Contributors</span>
 <span class="comment">// SPDX-License-Identifier: Apache-2.0</span>
@@ -317,29 +328,48 @@
 
 <span class="doccomment">//! # Binary Canonical Serialization (BCS)</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! BCS defines a deterministic means for translating a message or data structure into bytes</span>
-<span class="doccomment">//! irrespective of platform, architecture, or programming language.</span>
+<span class="doccomment">//! BCS (formerly &quot;Libra Canonical Serialization&quot; or LCS) is a serialization format developed</span>
+<span class="doccomment">//! in the context of the [Diem](https://diem.com) blockchain.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! ## Background</span>
+<span class="doccomment">//! BCS was designed with the following main goals in mind:</span>
+<span class="doccomment">//! * provide good performance and concise (binary) representations;</span>
+<span class="doccomment">//! * support a rich set of data types commonly used in Rust;</span>
+<span class="doccomment">//! * enforce canonical serialization, meaning that every value of a given type should have</span>
+<span class="doccomment">//! a single valid representation.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! In Diem, participants pass around messages or data structures that often times need to be</span>
-<span class="doccomment">//! signed by a prover and verified by one or more verifiers. Serialization in this context refers</span>
-<span class="doccomment">//! to the process of converting a message into a byte array. Many serialization approaches support</span>
-<span class="doccomment">//! loose standards such that two implementations can produce two different byte streams that would</span>
-<span class="doccomment">//! represent the same, identical message. While for many applications, non-deterministic</span>
-<span class="doccomment">//! serialization causes no issues, it does so for applications using serialization for</span>
-<span class="doccomment">//! cryptographic purposes. For example, given a signature and a message, a verifier may not unable</span>
-<span class="doccomment">//! to produce the same serialized byte array constructed by the prover when the prover signed the</span>
-<span class="doccomment">//! message resulting in a non-verifiable message. In other words, to ensure message verifiability</span>
-<span class="doccomment">//! when using non-deterministic serialization, participants must either retain the original</span>
-<span class="doccomment">//! serialized bytes or risk losing the ability to verify messages. This creates a burden requiring</span>
-<span class="doccomment">//! participants to maintain both a copy of the serialized bytes and the deserialized message often</span>
-<span class="doccomment">//! leading to confusion about safety and correctness. While there exist a handful of existing</span>
-<span class="doccomment">//! deterministic serialization formats, there is no obvious choice. To address this, we propose</span>
-<span class="doccomment">//! Diem Canonical Serialization that defines a deterministic means for translating a message into</span>
-<span class="doccomment">//! bytes and back again.</span>
+<span class="doccomment">//! BCS also aims to mitigate the consequence of malicious inputs by enforcing well-defined limits</span>
+<span class="doccomment">//! on large or nested containers during (de)serialization.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! ## Specification</span>
+<span class="doccomment">//! ## Rust Implementation</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! This crate provides a Rust implementation of BCS as an encoding format for the [Serde library](https://serde.rs).</span>
+<span class="doccomment">//! As such, this implementation covers most data types supported by Serde -- including user-defined structs,</span>
+<span class="doccomment">//! tagged variants (Rust enums), tuples, and maps -- excluding floats, single unicode characters (char), and sets.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! BCS is also available in other programming languages, thanks to the separate project [serde-reflection](https://github.com/novifinancial/serde-reflection).</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ## Application to Cryptography</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! The BCS format guarantees canonical serialization, meaning that for any given data type, there</span>
+<span class="doccomment">//! is a one-to-one correspondance between in-memory values and valid byte representations.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! In the context of a cryptographic application, canonical serialization has several benefits:</span>
+<span class="doccomment">//! * It provides a natural and reliable way to associate in-memory values to cryptographic hashes.</span>
+<span class="doccomment">//! * It allows the signature of a message to be defined equivalently as the signature of the serialized bytes or as the signature of the in-memory value.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Note that BCS ensures canonical serialization for each data type separately. The data type of a serialized value</span>
+<span class="doccomment">//! must be enforced by the application itself. This requirement is typically fulfilled</span>
+<span class="doccomment">//! using unique hash seeds for each data type. (See [Diem&#39;s cryptographic library](https://github.com/diem/diem/blob/master/crypto/crypto/src/hash.rs) for an example.)</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ## Backwards Compatibility</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! By design, BCS does not provide implicit versioning or backwards/forwards compatibility, therefore</span>
+<span class="doccomment">//! applications must carefully plan in advance for adhoc extension points:</span>
+<span class="doccomment">//! * Enums may be used for explicit versioning and backward compatibility (e.g. extensible query interfaces).</span>
+<span class="doccomment">//! * In some cases, data fields of type `Vec&lt;u8&gt;` may also be added to allow (future) unknown payloads</span>
+<span class="doccomment">//! in serialized form.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ## Detailed Specifications</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! BCS supports the following data types:</span>
 <span class="doccomment">//!</span>
@@ -355,14 +385,12 @@
 <span class="doccomment">//! * Externally tagged enumerations (aka &quot;enums&quot;)</span>
 <span class="doccomment">//! * Maps</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! ## General structure</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! BCS is not a self-describing format and as such, in order to deserialize a message, one must</span>
+<span class="doccomment">//! BCS is not a self-describing format. As such, in order to deserialize a message, one must</span>
 <span class="doccomment">//! know the message type and layout ahead of time.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Unless specified, all numbers are stored in little endian, two&#39;s complement format.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! ## Recursion and Depth of BCS Data</span>
+<span class="doccomment">//! ### Recursion and Depth of BCS Data</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Recursive data-structures (e.g. trees) are allowed. However, because of the possibility of stack</span>
 <span class="doccomment">//! overflow during (de)serialization, the *container depth* of any valid BCS data cannot exceed the constant</span>
@@ -382,17 +410,17 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ### Booleans and Integers</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! |Type                       |Original data          |Hex representation |Serialized format  |</span>
-<span class="doccomment">//! |---                        |---                    |---                |---                |</span>
-<span class="doccomment">//! |Boolean                    |True / False           |0x01 / 0x00        |[01] / [00]        |</span>
-<span class="doccomment">//! |8-bit signed integer       |-1                     |0xFF               |[FF]               |</span>
-<span class="doccomment">//! |8-bit unsigned integer     |1                      |0x01               |[01]               |</span>
-<span class="doccomment">//! |16-bit signed integer      |-4660                  |0xEDCC             |[CCED]             |</span>
-<span class="doccomment">//! |16-bit unsigned integer    |4660                   |0x1234             |[3412]             |</span>
-<span class="doccomment">//! |32-bit signed integer      |-305419896             |0xEDCBA988         |[88A9CBED]         |</span>
-<span class="doccomment">//! |32-bit unsigned integer    |305419896              |0x12345678         |[78563412]         |</span>
-<span class="doccomment">//! |64-bit signed integer      |-1311768467750121216   |0xEDCBA98754321100 |[0011325487A9CBED] |</span>
-<span class="doccomment">//! |64-bit unsigned integer    |1311768467750121216    |0x12345678ABCDEF00 |[00EFCDAB78563412] |</span>
+<span class="doccomment">//! |Type                       |Original data          |Hex representation |Serialized bytes        |</span>
+<span class="doccomment">//! |---                        |---                    |---                |---                     |</span>
+<span class="doccomment">//! |Boolean                    |True / False           |0x01 / 0x00        |01 / 00                 |</span>
+<span class="doccomment">//! |8-bit signed integer       |-1                     |0xFF               |FF                      |</span>
+<span class="doccomment">//! |8-bit unsigned integer     |1                      |0x01               |01                      |</span>
+<span class="doccomment">//! |16-bit signed integer      |-4660                  |0xEDCC             |CC ED                   |</span>
+<span class="doccomment">//! |16-bit unsigned integer    |4660                   |0x1234             |34 12                   |</span>
+<span class="doccomment">//! |32-bit signed integer      |-305419896             |0xEDCBA988         |88 A9 CB ED             |</span>
+<span class="doccomment">//! |32-bit unsigned integer    |305419896              |0x12345678         |78 56 34 12             |</span>
+<span class="doccomment">//! |64-bit signed integer      |-1311768467750121216   |0xEDCBA98754321100 |00 11 32 54 87 A9 CB ED |</span>
+<span class="doccomment">//! |64-bit unsigned integer    |1311768467750121216    |0x12345678ABCDEF00 |00 EF CD AB 78 56 34 12 |</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ### ULEB128-Encoded Integers</span>
 <span class="doccomment">//!</span>
@@ -401,14 +429,14 @@
 <span class="doccomment">//! (1) lengths of variable-length sequences and (2) tags of enum values (see the corresponding</span>
 <span class="doccomment">//! sections below).</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! |Type                       |Original data          |Hex representation |Serialized format  |</span>
+<span class="doccomment">//! |Type                       |Original data          |Hex representation |Serialized bytes   |</span>
 <span class="doccomment">//! |---                        |---                    |---                |---                |</span>
-<span class="doccomment">//! |ULEB128-encoded u32-integer|2^0 = 1                |0x00000001         |[01]               |</span>
-<span class="doccomment">//! |                           |2^7 = 128              |0x00000080         |[8001]             |</span>
-<span class="doccomment">//! |                           |2^14 = 16384           |0x00004000         |[808001]           |</span>
-<span class="doccomment">//! |                           |2^21 = 2097152         |0x00200000         |[80808001]         |</span>
-<span class="doccomment">//! |                           |2^28 = 268435456       |0x10000000         |[8080808001]       |</span>
-<span class="doccomment">//! |                           |9487                   |0x0000250f         |[8f4a]             |</span>
+<span class="doccomment">//! |ULEB128-encoded u32-integer|2^0 = 1                |0x00000001         |01                 |</span>
+<span class="doccomment">//! |                           |2^7 = 128              |0x00000080         |80 01              |</span>
+<span class="doccomment">//! |                           |2^14 = 16384           |0x00004000         |80 80 01           |</span>
+<span class="doccomment">//! |                           |2^21 = 2097152         |0x00200000         |80 80 80 01        |</span>
+<span class="doccomment">//! |                           |2^28 = 268435456       |0x10000000         |80 80 80 80 01     |</span>
+<span class="doccomment">//! |                           |9487                   |0x0000250f         |8f 4a              |</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! In general, a ULEB128 encoding consists of a little-endian sequence of base-128 (7-bit)</span>
 <span class="doccomment">//! digits. Each digit is completed into a byte by setting the highest bit to 1, except for the</span>
@@ -416,9 +444,9 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! In BCS, the result of decoding ULEB128 bytes is required to fit into a 32-bit unsigned</span>
 <span class="doccomment">//! integer and be in canonical form. For instance, the following values are rejected:</span>
-<span class="doccomment">//! * `[808080808001]` (2^36) is too large.</span>
-<span class="doccomment">//! * `[8080808010]` (2^33) is too large.</span>
-<span class="doccomment">//! * `[8000]` is not a minimal encoding of 0.</span>
+<span class="doccomment">//! * 80 80 80 80 80 01 (2^36) is too large.</span>
+<span class="doccomment">//! * 80 80 80 80 10 (2^33) is too large.</span>
+<span class="doccomment">//! * 80 00 is not a minimal encoding of 0.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ### Optional Data</span>
 <span class="doccomment">//!</span>
@@ -510,14 +538,14 @@
 <span class="doccomment">//! # use bcs::{Result, to_bytes};</span>
 <span class="doccomment">//! # use serde::Serialize;</span>
 <span class="doccomment">//! # fn main() -&gt; Result&lt;()&gt; {</span>
-<span class="doccomment">//! # #[derive(Serialize)]</span>
+<span class="doccomment">//! #[derive(Serialize)]</span>
 <span class="doccomment">//! struct MyStruct {</span>
 <span class="doccomment">//!     boolean: bool,</span>
 <span class="doccomment">//!     bytes: Vec&lt;u8&gt;,</span>
 <span class="doccomment">//!     label: String,</span>
 <span class="doccomment">//! }</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! # #[derive(Serialize)]</span>
+<span class="doccomment">//! #[derive(Serialize)]</span>
 <span class="doccomment">//! struct Wrapper {</span>
 <span class="doccomment">//!     inner: MyStruct,</span>
 <span class="doccomment">//!     name: String,</span>
@@ -557,7 +585,7 @@
 <span class="doccomment">//! # use bcs::{Result, to_bytes};</span>
 <span class="doccomment">//! # use serde::Serialize;</span>
 <span class="doccomment">//! # fn main() -&gt; Result&lt;()&gt; {</span>
-<span class="doccomment">//! # #[derive(Serialize)]</span>
+<span class="doccomment">//! #[derive(Serialize)]</span>
 <span class="doccomment">//! enum E {</span>
 <span class="doccomment">//!     Variant0(u16),</span>
 <span class="doccomment">//!     Variant1(u8),</span>
@@ -597,12 +625,6 @@
 <span class="doccomment">//! assert_eq!(to_bytes(&amp;map)?, to_bytes(&amp;expecting)?);</span>
 <span class="doccomment">//! # Ok(())}</span>
 <span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ## Backwards compatibility</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Complex types dependent upon the specification in which they are used. BCS does not provide</span>
-<span class="doccomment">//! direct provisions for versioning or backwards / forwards compatibility. A change in an objects</span>
-<span class="doccomment">//! structure could prevent historical clients from understanding new clients and vice-versa.</span>
 
 <span class="kw">mod</span> <span class="ident">de</span>;
 <span class="kw">mod</span> <span class="ident">error</span>;
