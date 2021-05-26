@@ -6,8 +6,15 @@
 [![License](https://img.shields.io/badge/license-Apache-green.svg)](../LICENSE-APACHE)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](../LICENSE-MIT)
 
-This crate provides a way to extract format descriptions for Rust containers
-that implement the Serialize and/or Deserialize trait(s) of Serde.
+This crate provides a way to extract format descriptions for Rust containers that
+implement the Serialize and/or Deserialize trait(s) of Serde.
+
+Format descriptions are useful in several ways:
+* Stored under version control, formats can be tested to prevent unintended modifications
+of binary serialization formats (e.g. by changing variant order).
+* Formats can be passed to [`serde-generate`](https://docs.rs/serde-generate/0.19.2/serde_generate/)
+in order to generate class definitions and provide Serde-compatible binary
+serialization in other languages (C++, python, Java, etc).
 
 ## Quick Start
 

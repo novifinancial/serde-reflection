@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 //! This crate aims to compile the data formats extracted from Rust by [`serde_reflection`](https://crates.io/crates/serde_reflection)
-//! into type definitions for other programming languages.
+//! into type definitions and (de)serialization methods for other programming languages.
+//!
+//! It can be used as a library or as a command-line tool (see `serdegen` below).
 //!
 //! ## Supported Languages
 //!
-//! The following target languages are currently supported:
+//! The following programming languages are fully supported as target languages:
 //!
 //! * C++ 17
 //! * Java 8
@@ -15,7 +17,7 @@
 //! * Go >= 1.14
 //! * C# (NetCoreApp >= 2.1)
 //!
-//! ## Work in progress
+//! The following languages are partially supported and still considered under development:
 //!
 //! * TypeScript > 3.2 (make sure to enable `esnext.BigInt` and `dom` at tsconfig.json -> lib)
 //!
@@ -26,15 +28,16 @@
 //!
 //! This crate provides easy-to-deploy runtime libraries for the following binary formats, in all supported languages:
 //!
-//! * [Bincode](https://docs.rs/bincode/1.3.1/bincode/),
-//! * [BCS](https://github.com/diem/bcs) (short for "Binary Canonical Serialization" -- formerly known as "LCS" or "Libra Canonical Serialization").
+//! * [Bincode](https://docs.rs/bincode/1.3.1/bincode/) (default configuration only),
+//! * [BCS](https://github.com/diem/bcs) (short for Binary Canonical Serialization, the main format used
+//!   in the [Diem blockchain](https://github.com/diem/diem)).
 //!
 //! ## Quick Start with Python and Bincode
 //!
 //! In the following example, we transfer a `Test` value from Rust to Python using [`bincode`](https://docs.rs/bincode/1.3.1/bincode/).
 //! ```
 //! use serde::{Deserialize, Serialize};
-//! use serde_reflection::{Registry, Samples, Tracer, TracerConfig};
+//! use serde_reflection::{Registry, Tracer, TracerConfig};
 //! use std::io::Write;
 //!
 //! #[derive(Serialize, Deserialize)]
@@ -44,9 +47,9 @@
 //! }
 //!
 //! # fn main() -> Result<(), std::io::Error> {
-//! // Obtain the Serde format of `Test`. (In practice, formats are more often read from a file.)
+//! // Obtain the Serde format of `Test`. (In practice, formats are more likely read from a file.)
 //! let mut tracer = Tracer::new(TracerConfig::default());
-//! tracer.trace_type::<Test>(&Samples::new()).unwrap();
+//! tracer.trace_simple_type::<Test>().unwrap();
 //! let registry = tracer.registry().unwrap();
 //!
 //! // Create Python class definitions.
@@ -111,14 +114,15 @@
 
 /// Dependency analysis and topological sort for Serde formats.
 pub mod analyzer;
+/// Utility function to generate indented text
+pub mod indent;
+
 /// Support for code-generation in C++
 pub mod cpp;
 /// Support for code-generation in C#
 pub mod csharp;
-/// Utility function to generate indented text
-pub mod golang;
 /// Support for code-generation in Go
-pub mod indent;
+pub mod golang;
 /// Support for code-generation in Java
 pub mod java;
 /// Support for code-generation in Python 3
