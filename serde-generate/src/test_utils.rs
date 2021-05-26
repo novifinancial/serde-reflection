@@ -605,7 +605,7 @@ fn test_get_sample_values() {
 fn test_get_simple_registry() {
     let registry = get_simple_registry().unwrap();
     assert_eq!(
-        serde_yaml::to_string(&registry).unwrap() + "\n",
+        serde_yaml::to_string(&registry).unwrap(),
         r#"---
 Choice:
   ENUM:
