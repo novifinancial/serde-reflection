@@ -113,7 +113,7 @@ import {{ Optional, Seq, Tuple, ListTuple, unit, bool, int8, int16, int32, int64
             .external_qualified_names
             .get(name)
             .cloned()
-            .unwrap_or_else(|| name.to_string())
+            .unwrap_or_else(|| self.quote_var_name(name))
     }
 
     fn output_comment(&mut self, name: &str) -> std::io::Result<()> {
@@ -201,34 +201,41 @@ import {{ Optional, Seq, Tuple, ListTuple, unit, bool, int8, int16, int32, int64
         )
     }
 
+    fn quote_var_name(&self, name: &str) -> String {
+        match name {
+            "function" => "func".to_string(),
+            _ => name.to_string()
+        }
+    }
+
     fn quote_serialize_value(&self, value: &str, format: &Format, use_this: bool) -> String {
         use Format::*;
         let this_str = if use_this { "this." } else { "" };
 
         match format {
-            TypeName(_) => format!("{}{}.serialize(serializer);", this_str, value),
-            Unit => format!("serializer.serializeUnit({}{});", this_str, value),
-            Bool => format!("serializer.serializeBool({}{});", this_str, value),
-            I8 => format!("serializer.serializeI8({}{});", this_str, value),
-            I16 => format!("serializer.serializeI16({}{});", this_str, value),
-            I32 => format!("serializer.serializeI32({}{});", this_str, value),
-            I64 => format!("serializer.serializeI64({}{});", this_str, value),
-            I128 => format!("serializer.serializeI128({}{});", this_str, value),
-            U8 => format!("serializer.serializeU8({}{});", this_str, value),
-            U16 => format!("serializer.serializeU16({}{});", this_str, value),
-            U32 => format!("serializer.serializeU32({}{});", this_str, value),
-            U64 => format!("serializer.serializeU64({}{});", this_str, value),
-            U128 => format!("serializer.serializeU128({}{});", this_str, value),
-            F32 => format!("serializer.serializeF32({}{});", this_str, value),
-            F64 => format!("serializer.serializeF64({}{});", this_str, value),
-            Char => format!("serializer.serializeChar({}{});", this_str, value),
-            Str => format!("serializer.serializeStr({}{});", this_str, value),
-            Bytes => format!("serializer.serializeBytes({}{});", this_str, value),
+            TypeName(_) => format!("{}{}.serialize(serializer);", this_str, self.quote_var_name(value)),
+            Unit => format!("serializer.serializeUnit({}{});", this_str, self.quote_var_name(value)),
+            Bool => format!("serializer.serializeBool({}{});", this_str, self.quote_var_name(value)),
+            I8 => format!("serializer.serializeI8({}{});", this_str, self.quote_var_name(value)),
+            I16 => format!("serializer.serializeI16({}{});", this_str, self.quote_var_name(value)),
+            I32 => format!("serializer.serializeI32({}{});", this_str, self.quote_var_name(value)),
+            I64 => format!("serializer.serializeI64({}{});", this_str, self.quote_var_name(value)),
+            I128 => format!("serializer.serializeI128({}{});", this_str, self.quote_var_name(value)),
+            U8 => format!("serializer.serializeU8({}{});", this_str, self.quote_var_name(value)),
+            U16 => format!("serializer.serializeU16({}{});", this_str, self.quote_var_name(value)),
+            U32 => format!("serializer.serializeU32({}{});", this_str, self.quote_var_name(value)),
+            U64 => format!("serializer.serializeU64({}{});", this_str, self.quote_var_name(value)),
+            U128 => format!("serializer.serializeU128({}{});", this_str, self.quote_var_name(value)),
+            F32 => format!("serializer.serializeF32({}{});", this_str, self.quote_var_name(value)),
+            F64 => format!("serializer.serializeF64({}{});", this_str, self.quote_var_name(value)),
+            Char => format!("serializer.serializeChar({}{});", this_str, self.quote_var_name(value)),
+            Str => format!("serializer.serializeStr({}{});", this_str, self.quote_var_name(value)),
+            Bytes => format!("serializer.serializeBytes({}{});", this_str, self.quote_var_name(value)),
             _ => format!(
                 "Helpers.serialize{}({}{}, serializer);",
                 common::mangle_type(format).to_camel_case(),
                 this_str,
-                value
+                self.quote_var_name(value)
             ),
         }
     }
@@ -536,7 +543,7 @@ return list;
             "constructor ({}) {{",
             fields
                 .iter()
-                .map(|f| { format!("public {}: {}", &f.name, self.quote_type(&f.value)) })
+                .map(|f| { format!("public {}: {}", self.quote_var_name(&f.name), self.quote_type(&f.value)) })
                 .collect::<Vec<_>>()
                 .join(", ")
         )?;
@@ -586,7 +593,7 @@ return list;
                 writeln!(
                     self.out,
                     "const {} = {};",
-                    field.name,
+                    self.quote_var_name(&field.name),
                     self.quote_deserialize(&field.value)
                 )?;
             }
@@ -597,7 +604,7 @@ return list;
                 name,
                 fields
                     .iter()
-                    .map(|f| f.name.to_string())
+                    .map(|f| self.quote_var_name(&f.name))
                     .collect::<Vec<_>>()
                     .join(",")
             )?;
