@@ -66,7 +66,7 @@ export abstract class BinaryDeserializer implements Deserializer {
     return new DataView(this.read(4)).getUint32(0, true);
   }
 
-  public deserializeU64(): BigInt {
+  public deserializeU64(): bigint {
     const low = this.deserializeU32();
     const high = this.deserializeU32();
 
@@ -74,7 +74,7 @@ export abstract class BinaryDeserializer implements Deserializer {
     return (BigInt(high) << BinaryDeserializer.BIG_32) | BigInt(low);
   }
 
-  public deserializeU128(): BigInt {
+  public deserializeU128(): bigint {
     const low = this.deserializeU64();
     const high = this.deserializeU64();
 
@@ -94,7 +94,7 @@ export abstract class BinaryDeserializer implements Deserializer {
     return new DataView(this.read(4)).getInt32(0, true);
   }
 
-  public deserializeI64(): BigInt {
+  public deserializeI64(): bigint {
     const low = this.deserializeI32();
     const high = this.deserializeI32();
 
@@ -102,7 +102,7 @@ export abstract class BinaryDeserializer implements Deserializer {
     return (BigInt(high) << BinaryDeserializer.BIG_32) | BigInt(low);
   }
 
-  public deserializeI128(): BigInt {
+  public deserializeI128(): bigint {
     const low = this.deserializeI64();
     const high = this.deserializeI64();
 

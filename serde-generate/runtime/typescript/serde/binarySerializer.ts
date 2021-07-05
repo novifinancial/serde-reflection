@@ -84,7 +84,7 @@ export abstract class BinarySerializer implements Serializer {
         this.serializeWithFunction(DataView.prototype.setUint32, 4, value);
     }
 
-    public serializeU64(value: BigInt | number): void {
+    public serializeU64(value: bigint | number): void {
         const low = BigInt(value) & BinarySerializer.BIG_32Fs;
         const high = BigInt(value) >> BinarySerializer.BIG_32;
 
@@ -93,7 +93,7 @@ export abstract class BinarySerializer implements Serializer {
         this.serializeU32(Number(high));
     }
 
-    public serializeU128(value: BigInt | number): void {
+    public serializeU128(value: bigint | number): void {
         const low = BigInt(value) & BinarySerializer.BIG_64Fs;
         const high = BigInt(value) >> BinarySerializer.BIG_64;
 
