@@ -3,10 +3,6 @@ import { BinaryDeserializer } from '../serde/binaryDeserializer';
 export class BcsDeserializer extends BinaryDeserializer {
   private static readonly MAX_UINT_32 = 2 ** 32 - 1;
 
-  constructor(data: Uint8Array) {
-    super(data);
-  }
-
   public deserializeUleb128AsU32(): number {
     let value = 0;
     for (let shift = 0; shift < 32; shift += 7) {

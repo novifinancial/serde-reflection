@@ -9,7 +9,7 @@ export abstract class BinaryDeserializer implements Deserializer {
   public buffer: ArrayBuffer;
   public offset: number;
 
-  protected constructor(data: Uint8Array) {
+  constructor(data: Uint8Array) {
     // As we can't be sure about the origin of the data, it's better to copy it to a new buffer
     // e.g. if the data originated by: Buffer.from('16a9', 'hex'), the internal buffer would be much longer and/or different (as Buffer is some sort of a view)
     this.buffer = new ArrayBuffer(data.length);
