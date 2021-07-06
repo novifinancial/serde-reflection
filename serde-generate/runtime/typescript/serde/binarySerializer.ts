@@ -17,7 +17,7 @@ export abstract class BinarySerializer implements Serializer {
     private buffer: ArrayBuffer;
     private offset: number;
 
-    protected constructor() {
+    constructor() {
         this.buffer = new ArrayBuffer(64);
         this.offset = 0;
     }

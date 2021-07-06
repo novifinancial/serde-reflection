@@ -1,9 +1,6 @@
 import { BinarySerializer } from '../serde/binarySerializer';
 
 export class BcsSerializer extends BinarySerializer {
-    constructor() {
-        super();
-    }
     public serializeU32AsUleb128(value: number): void {
         const valueArray = [];
         while (value >>> 7 != 0) {
