@@ -1,8 +1,8 @@
 import {BinaryDeserializer} from "../serde/binaryDeserializer";
 
 export class BincodeDeserializer extends BinaryDeserializer {
-    deserializeLen(): bigint {
-        return this.deserializeU64();
+    deserializeLen(): number {
+        return Number(this.deserializeU64());
     }
 
     public deserializeVariantIndex(): number {

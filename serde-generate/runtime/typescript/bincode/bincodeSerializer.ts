@@ -1,7 +1,7 @@
 import {BinarySerializer} from "../serde/binarySerializer";
 
 export class BincodeSerializer extends BinarySerializer {
-    serializeLen(value: bigint): void {
+    serializeLen(value: number): void {
         this.serializeU64(value);
     }
 
