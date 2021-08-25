@@ -1,7 +1,6 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
-
-import 'dart:typed_data';
+part of serde;
 
 /**
  * Immutable wrapper class around byte[].
@@ -11,10 +10,7 @@ import 'dart:typed_data';
 class Bytes {
   Uint8List content;
 
-  Bytes(Uint8List content) {
-    assert(content != null);
-    this.content = content;
-  }
+  Bytes(Uint8List content) : content = content;
 
   Uint8List getContent() {
     return this.content;
@@ -22,18 +18,13 @@ class Bytes {
 
   @override
   bool operator ==(covariant Bytes other) {
-    if (other == null) return false;
     return isUint8ListsEqual(this.content, other.content);
   }
 
   @override
   int get hashCode => this.content.hashCode;
 
-  Bytes.fromJson(Map<String, dynamic> json)
-      : content = Uint8List.fromList(List<int>.from(json['content']));
+  Bytes.fromJson(String json) : content = Uint8List.fromList(HEX.decode(json));
 
-  Map<String, dynamic> toJson() => {
-    "content": content,
-  };
+  String toJson() => HEX.encode(content);
 }
-

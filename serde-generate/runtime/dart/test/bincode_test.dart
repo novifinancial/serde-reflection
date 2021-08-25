@@ -1,4 +1,4 @@
-part of lcs_test;
+part of bcs_test;
 
 void runBincodeTests() {
   test('serializer u32 work', () {
