@@ -1,7 +1,7 @@
 library serde;
 
 import 'dart:typed_data';
-import 'dart:convert';
+import 'package:hex/hex.dart';
 
 part 'binary_deserializer.dart';
 part 'binary_serializer.dart';
