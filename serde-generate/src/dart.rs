@@ -159,8 +159,9 @@ part 'src/starcoin_test.dart';"#
             r#"library {}_types;
 
 import 'dart:typed_data';
-import 'package:tuple/tuple.dart';
 import 'package:hex/hex.dart';
+import 'package:meta/meta.dart';
+import 'package:tuple/tuple.dart';
 import '../serde/serde.dart';"#,
             self.config.module_name,
         )?;
@@ -678,9 +679,9 @@ return obj;
         // Beginning of class
         writeln!(self.out)?;
         if let Some(base) = variant_base {
-            writeln!(self.out, "class {} extends {} {{", name, base)?;
+            writeln!(self.out, "@immutable\nclass {} extends {} {{", name, base)?;
         } else {
-            writeln!(self.out, "class {} {{", name)?;
+            writeln!(self.out, "@immutable\nclass {} {{", name)?;
         }
         self.enter_class(name);
         // Fields
@@ -688,7 +689,7 @@ return obj;
             //self.output_comment(&field.name)?;
             writeln!(
                 self.out,
-                "{} {};",
+                "final {} {};",
                 self.quote_type(&field.value),
                 field.name.to_mixed_case()
             )?;
@@ -699,7 +700,7 @@ return obj;
         // Constructor.
         writeln!(
             self.out,
-            "{}({}) :",
+            "const {}({}) :",
             name,
             fields
                 .iter()
