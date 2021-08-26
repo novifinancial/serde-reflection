@@ -884,6 +884,35 @@ if (other == null) return false;"#,
             writeln!(self.out, "\ndynamic toJson() => {};", &fields[0].name)?;
         }
 
+        // Generate a toString implementation in each class
+        writeln!(self.out, "\nString toString() {{")?;
+        self.out.indent();
+        write!(
+            self.out,
+            "String fullString = super.toString();
+assert(() {{
+  fullString += ' ' + ["
+        )?;
+
+        self.out.indent();
+        self.out.indent();
+        fields.iter().enumerate().for_each(|(_, f)| {
+            write!(self.out, "\n'{n}: ${n}',", n = f.name.to_mixed_case()).unwrap();
+        });
+
+        self.out.unindent();
+        writeln!(self.out, "\n].join(', ');")?;
+        self.out.unindent();
+        writeln!(
+            self.out,
+            "
+  return true;
+}}());
+return fullString;"
+        )?;
+        self.out.unindent();
+        writeln!(self.out, "}}")?;
+
         self.out.unindent();
         // End of class
         self.leave_class();
