@@ -70,12 +70,42 @@
 //! # }
 //! ```
 //!
+//! # Features and Limitations
+//!
+//! `serde_reflection` is meant to extract formats for Rust containers (i.e. structs and
+//! enums) with "reasonable" implementations of the Serde traits `Serialize` and
+//! `Deserialize`.
+//!
+//! Supported implementations include:
+//!
+//! * Plain derived implementations obtained with `#[derive(Serialize, Deserialize)]` for
+//! Rust containers in the Serde [data model](https://serde.rs/data-model.html)
+//!
+//! * Customized derived implementations using Serde attributes that are compatible with
+//! binary serialization formats, such as `#[serde(rename = "Name")]`.
+//!
+//! * Hand-written implementations of `Deserialize` that are more restrictive than the
+//! derived ones, provided that `trace_value` is used during tracing to provide sample
+//! values for all such constrained types (see the detailed example below).
+//!
+//! Unsupported idioms include:
+//!
+//! * Containers sharing the same base name (e.g. `Foo`) but from different modules. (Work
+//! around: use `#[serde(rename = ..)]`)
+//!
+//! * Generic types instantiated multiple times in the same tracing session. (Work around:
+//! use the crate `serde_name` and its adapters `SerializeNameAdapter` and `DeserializeNameAdapter`.)
+//!
+//! * Attributes that are not compatible with binary formats (e.g. `#[serde(flatten)]`, `#[serde(tag = ..)]`)
+//!
+//! * Tracing type aliases. (E.g. `type Pair = (u32, u64)` will not create an entry "Pair".)
+//!
 //! # Troubleshooting
 //!
 //! The error type used in this crate provides a method `error.explanation()` to help with
 //! troubleshooting during format tracing.
 //!
-//! # Overview
+//! # Detailed Example
 //!
 //! In the following, more complete example, we extract the Serde formats of two containers
 //! `Name` and `Person` and demonstrate how to handle a custom implementation of `serde::Deserialize`
