@@ -97,8 +97,27 @@
 //! In addition to a Rust library, this crate provides a binary tool `serdegen` to process Serde formats
 //! saved on disk.
 //!
-//! Assuming that a `serde_reflection::Registry` object has been serialized in a YAML file `test.yaml`,
-//! the following command will generate Python class definitions and write them into `test.py`:
+//! The tool `serdegen` assumes that a Rust value of type `serde_reflection::Registry` has
+//! been serialized into a YAML file. The recommended way to generate such a value is to
+//! use the library `serde-reflection` to introspect Rust definitions (see also the
+//! example above).
+//!
+//! For a quick test, one may create a test file like this:
+//! ```bash
+//! cat >test.yaml <<EOF
+//! ---
+//! Foo:
+//!   ENUM:
+//!     0:
+//!       A:
+//!         NEWTYPE:
+//!           U64
+//!     1:
+//!       B: UNIT
+//! EOF
+//! ```
+//!
+//! Then, the following command will generate Python class definitions and write them into `test.py`:
 //! ```bash
 //! cargo run -p serde-generate -- --language python3 test.yaml > test.py
 //! ```
