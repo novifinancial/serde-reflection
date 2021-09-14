@@ -2,10 +2,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use serde_generate::{cpp, test_utils, CodeGeneratorConfig, Encoding};
-use std::collections::BTreeMap;
-use std::fs::File;
-use std::io::Write;
-use std::process::Command;
+use std::{collections::BTreeMap, fs::File, io::Write, process::Command};
 use tempfile::{tempdir, TempDir};
 
 fn test_that_cpp_code_compiles_with_config(

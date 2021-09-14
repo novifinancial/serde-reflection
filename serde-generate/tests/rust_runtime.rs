@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use serde_generate::{rust, test_utils, test_utils::Runtime, CodeGeneratorConfig};
-use std::fs::File;
-use std::io::Write;
-use std::process::Command;
+use std::{fs::File, io::Write, process::Command};
 use tempfile::tempdir;
 
 #[test]

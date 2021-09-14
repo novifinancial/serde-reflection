@@ -8,9 +8,11 @@ use crate::{
 };
 use heck::CamelCase;
 use serde_reflection::{ContainerFormat, Format, Named, Registry, VariantFormat};
-use std::collections::{BTreeMap, HashMap, HashSet};
-use std::io::{Result, Write};
-use std::path::PathBuf;
+use std::{
+    collections::{BTreeMap, HashMap, HashSet},
+    io::{Result, Write},
+    path::PathBuf,
+};
 
 /// Main configuration object for code-generation in C++.
 pub struct CodeGenerator<'a> {

@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use serde_generate::{csharp, test_utils, CodeGeneratorConfig, Encoding};
-use std::collections::BTreeMap;
-use std::process::Command;
-use std::sync::Mutex;
+use std::{collections::BTreeMap, process::Command, sync::Mutex};
 use tempfile::{tempdir, TempDir};
 
 lazy_static::lazy_static! {

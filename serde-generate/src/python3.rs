@@ -6,9 +6,11 @@ use crate::{
     CodeGeneratorConfig, Encoding,
 };
 use serde_reflection::{ContainerFormat, Format, Named, Registry, VariantFormat};
-use std::collections::{BTreeMap, HashMap};
-use std::io::{Result, Write};
-use std::path::PathBuf;
+use std::{
+    collections::{BTreeMap, HashMap},
+    io::{Result, Write},
+    path::PathBuf,
+};
 
 /// Main configuration object for code-generation in Python.
 pub struct CodeGenerator<'a> {

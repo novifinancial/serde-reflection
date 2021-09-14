@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use serde_reflection::{ContainerFormat, Error, Format, FormatHolder, Named, VariantFormat};
-use std::collections::HashSet;
-use std::ops::Deref;
+use std::{collections::HashSet, ops::Deref};
 
 #[test]
 fn test_format_visiting() {

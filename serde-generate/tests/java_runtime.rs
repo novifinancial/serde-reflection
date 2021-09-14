@@ -6,9 +6,7 @@ use serde_generate::{
     test_utils::{Choice, Runtime, Test},
     CodeGeneratorConfig,
 };
-use std::fs::File;
-use std::io::Write;
-use std::process::Command;
+use std::{fs::File, io::Write, process::Command};
 use tempfile::tempdir;
 
 #[test]

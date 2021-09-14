@@ -7,11 +7,13 @@ use serde_generate::{
     test_utils::{Choice, Runtime, Test},
     CodeGeneratorConfig, SourceInstaller,
 };
-use std::fs::File;
-use std::io::Write;
-use std::path::{Path, PathBuf};
-use std::process::Command;
-use std::sync::Mutex;
+use std::{
+    fs::File,
+    io::Write,
+    path::{Path, PathBuf},
+    process::Command,
+    sync::Mutex,
+};
 
 lazy_static::lazy_static! {
     // `dotnet build` spuriously fails on linux if run concurrently

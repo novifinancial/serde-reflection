@@ -7,10 +7,12 @@ use crate::{
     CodeGeneratorConfig,
 };
 use serde_reflection::{ContainerFormat, Format, Named, Registry, VariantFormat};
-use std::borrow::Cow;
-use std::collections::{BTreeMap, HashSet};
-use std::io::{Result, Write};
-use std::path::PathBuf;
+use std::{
+    borrow::Cow,
+    collections::{BTreeMap, HashSet},
+    io::{Result, Write},
+    path::PathBuf,
+};
 
 /// Main configuration object for code-generation in Rust.
 pub struct CodeGenerator<'a> {

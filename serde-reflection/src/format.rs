@@ -18,10 +18,12 @@ use serde::{
     ser::{SerializeMap, SerializeStruct},
     Deserialize, Serialize,
 };
-use std::cell::{Ref, RefCell, RefMut};
-use std::collections::{btree_map::Entry, BTreeMap};
-use std::ops::DerefMut;
-use std::rc::Rc;
+use std::{
+    cell::{Ref, RefCell, RefMut},
+    collections::{btree_map::Entry, BTreeMap},
+    ops::DerefMut,
+    rc::Rc,
+};
 
 /// Serde-based serialization format for anonymous "value" types.
 #[derive(Serialize, Deserialize, Debug, Eq, Clone, PartialEq)]

@@ -4,10 +4,7 @@
 use serde::{Deserialize, Serialize};
 use serde_generate::{golang, test_utils, CodeGeneratorConfig, Encoding};
 use serde_reflection::{Registry, Result, Samples, Tracer, TracerConfig};
-use std::collections::BTreeMap;
-use std::fs::File;
-use std::io::Write;
-use std::process::Command;
+use std::{collections::BTreeMap, fs::File, io::Write, process::Command};
 use tempfile::{tempdir, TempDir};
 
 #[derive(Serialize, Deserialize)]
