@@ -3,7 +3,12 @@
 
 #![forbid(unsafe_code)]
 
-//! This crate provides a fast and reliable way to extract the Serde name of a Rust container.
+//! This crate provides fast and reliable ways to extract and to override the Serde name
+//! of a Rust container.
+//!
+//! # Extracting Serde names
+//!
+//! Name extraction relies on the Deserialize trait of Serde:
 //!
 //! ```rust
 //! # use serde::Deserialize;
@@ -21,147 +26,71 @@
 //! assert_eq!(trace_name::<Bar>(), Some("ABC"));
 //! assert_eq!(trace_name::<Option<Bar>>(), None);
 //! ```
+//!
+//! # Overriding Serde names
+//!
+//! `SerializeNameAdapter` and `DeserializeNameAdapter` may be used to override the name
+//! of a container in the cases where `#[serde(rename = "..")]` is not flexible enough.
+//!
+//! ```rust
+//! # use serde_name::{SerializeNameAdapter, DeserializeNameAdapter, trace_name};
+//! # use serde::{Deserialize, Serialize};
+//! struct Foo<T> {
+//!     data: T,
+//! }
+//!
+//! #[derive(Serialize, Deserialize)]
+//! #[serde(remote = "Foo")]
+//! struct FooInternal<S> {
+//!     data: S,
+//! }
+//!
+//! impl<'de, T> Deserialize<'de> for Foo<T>
+//! where
+//!     T: Deserialize<'de>,
+//! {
+//!     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+//!     where
+//!         D: serde::de::Deserializer<'de>,
+//!     {
+//!         FooInternal::deserialize(DeserializeNameAdapter::new(
+//!             deserializer,
+//!             std::any::type_name::<Self>(),
+//!         ))
+//!     }
+//! }
+//!
+//! impl<T> Serialize for Foo<T>
+//! where
+//!     T: Serialize,
+//! {
+//!     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+//!     where
+//!         S: serde::ser::Serializer,
+//!     {
+//!         FooInternal::serialize(
+//!             self,
+//!             SerializeNameAdapter::new(serializer, std::any::type_name::<Self>()),
+//!         )
+//!     }
+//! }
+//!
+//! // Testing the Deserialize implementation
+//! assert!(trace_name::<Foo<u64>>().unwrap().ends_with("Foo<u64>"));
+//!
+//! // Testing the Serialize implementation
+//! use serde_reflection::*;
+//! let mut tracer = Tracer::new(TracerConfig::default());
+//! let mut samples = Samples::new();
+//! let (mut ident, _) = tracer.trace_value(&mut samples, &Foo { data: 1u64 }).unwrap();
+//! ident.normalize().unwrap();
+//! assert!(matches!(ident, Format::TypeName(s) if s.ends_with("Foo<u64>")));
+//! ```
 
-use serde::de::Visitor;
-use thiserror::Error;
+mod de_adapter;
+mod ser_adapter;
+mod trace;
 
-/// Compute the Serde name of a container.
-pub fn trace_name<'de, T>() -> Option<&'static str>
-where
-    T: serde::de::Deserialize<'de>,
-{
-    match T::deserialize(SerdeName) {
-        Err(SerdeNameError(name)) => name,
-        _ => unreachable!(),
-    }
-}
-
-/// Minimal instrumented implementation of `serde::de::Deserializer`
-/// This always returns a `SerdeNameError` as soon as we have learnt the name
-/// of the type (or the absence of name) from Serde.
-struct SerdeName;
-
-/// Custom error value used to report the result of the analysis.
-#[derive(Clone, Debug, Error, PartialEq)]
-#[error("{0:?}")]
-struct SerdeNameError(Option<&'static str>);
-
-impl serde::de::Error for SerdeNameError {
-    fn custom<T: std::fmt::Display>(_msg: T) -> Self {
-        unreachable!();
-    }
-}
-
-macro_rules! declare_deserialize {
-    ($method:ident) => {
-        fn $method<V>(self, _visitor: V) -> std::result::Result<V::Value, SerdeNameError>
-        where
-            V: Visitor<'de>,
-        {
-            Err(SerdeNameError(None))
-        }
-    };
-}
-
-impl<'de> serde::de::Deserializer<'de> for SerdeName {
-    type Error = SerdeNameError;
-
-    declare_deserialize!(deserialize_any);
-    declare_deserialize!(deserialize_identifier);
-    declare_deserialize!(deserialize_ignored_any);
-    declare_deserialize!(deserialize_bool);
-    declare_deserialize!(deserialize_i8);
-    declare_deserialize!(deserialize_i16);
-    declare_deserialize!(deserialize_i32);
-    declare_deserialize!(deserialize_i64);
-    declare_deserialize!(deserialize_i128);
-    declare_deserialize!(deserialize_u8);
-    declare_deserialize!(deserialize_u16);
-    declare_deserialize!(deserialize_u32);
-    declare_deserialize!(deserialize_u64);
-    declare_deserialize!(deserialize_u128);
-    declare_deserialize!(deserialize_f32);
-    declare_deserialize!(deserialize_f64);
-    declare_deserialize!(deserialize_char);
-    declare_deserialize!(deserialize_str);
-    declare_deserialize!(deserialize_string);
-    declare_deserialize!(deserialize_bytes);
-    declare_deserialize!(deserialize_byte_buf);
-    declare_deserialize!(deserialize_option);
-    declare_deserialize!(deserialize_unit);
-    declare_deserialize!(deserialize_seq);
-    declare_deserialize!(deserialize_map);
-
-    fn deserialize_tuple<V>(
-        self,
-        _len: usize,
-        _visitor: V,
-    ) -> std::result::Result<V::Value, SerdeNameError>
-    where
-        V: Visitor<'de>,
-    {
-        Err(SerdeNameError(None))
-    }
-
-    fn deserialize_unit_struct<V>(
-        self,
-        name: &'static str,
-        _visitor: V,
-    ) -> std::result::Result<V::Value, SerdeNameError>
-    where
-        V: Visitor<'de>,
-    {
-        Err(SerdeNameError(Some(name)))
-    }
-
-    fn deserialize_newtype_struct<V>(
-        self,
-        name: &'static str,
-        _visitor: V,
-    ) -> std::result::Result<V::Value, SerdeNameError>
-    where
-        V: Visitor<'de>,
-    {
-        Err(SerdeNameError(Some(name)))
-    }
-
-    fn deserialize_tuple_struct<V>(
-        self,
-        name: &'static str,
-        _len: usize,
-        _visitor: V,
-    ) -> std::result::Result<V::Value, SerdeNameError>
-    where
-        V: Visitor<'de>,
-    {
-        Err(SerdeNameError(Some(name)))
-    }
-
-    fn deserialize_struct<V>(
-        self,
-        name: &'static str,
-        _fields: &'static [&'static str],
-        _visitor: V,
-    ) -> std::result::Result<V::Value, SerdeNameError>
-    where
-        V: Visitor<'de>,
-    {
-        Err(SerdeNameError(Some(name)))
-    }
-
-    fn deserialize_enum<V>(
-        self,
-        name: &'static str,
-        _variants: &'static [&'static str],
-        _visitor: V,
-    ) -> std::result::Result<V::Value, SerdeNameError>
-    where
-        V: Visitor<'de>,
-    {
-        Err(SerdeNameError(Some(name)))
-    }
-
-    fn is_human_readable(&self) -> bool {
-        false
-    }
-}
+pub use de_adapter::DeserializeNameAdapter;
+pub use ser_adapter::SerializeNameAdapter;
+pub use trace::trace_name;
