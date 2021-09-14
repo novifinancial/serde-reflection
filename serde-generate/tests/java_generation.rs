@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use serde_generate::{java, test_utils, CodeGeneratorConfig, Encoding};
-use std::collections::BTreeMap;
-use std::process::Command;
+use std::{collections::BTreeMap, process::Command};
 use tempfile::{tempdir, TempDir};
 
 fn test_that_java_code_compiles_with_config(

@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use serde_generate::{python3, test_utils, CodeGeneratorConfig, Encoding, SourceInstaller};
-use std::collections::BTreeMap;
-use std::fs::File;
-use std::process::Command;
+use std::{collections::BTreeMap, fs::File, process::Command};
 use tempfile::{tempdir, TempDir};
 
 fn test_that_python_code_parses_with_config(

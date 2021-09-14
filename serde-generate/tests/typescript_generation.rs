@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use serde_generate::{test_utils, typescript, CodeGeneratorConfig, Encoding, SourceInstaller};
-use std::fs::File;
-use std::io::{Result, Write};
-use std::process::Command;
+use std::{
+    fs::File,
+    io::{Result, Write},
+    process::Command,
+};
 use tempfile::{tempdir, TempDir};
 
 fn write_package_tsconfig_json_for_test_build(path: std::path::PathBuf) -> Result<()> {
