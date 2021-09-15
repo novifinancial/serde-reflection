@@ -94,7 +94,7 @@
 //! around: use `#[serde(rename = ..)]`)
 //!
 //! * Generic types instantiated multiple times in the same tracing session. (Work around:
-//! use the crate `serde_name` and its adapters `SerializeNameAdapter` and `DeserializeNameAdapter`.)
+//! use the crate [`serde-name`](https://crates.io/crates/serde-name) and its adapters `SerializeNameAdapter` and `DeserializeNameAdapter`.)
 //!
 //! * Attributes that are not compatible with binary formats (e.g. `#[serde(flatten)]`, `#[serde(tag = ..)]`)
 //!
