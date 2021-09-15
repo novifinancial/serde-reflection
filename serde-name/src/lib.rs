@@ -35,14 +35,10 @@
 //! ```rust
 //! # use serde_name::{SerializeNameAdapter, DeserializeNameAdapter, trace_name};
 //! # use serde::{Deserialize, Serialize};
+//! #[derive(Serialize, Deserialize)]
+//! #[serde(remote = "Foo")] // Generates Foo::(de)serialize instead of implementing Serde traits.
 //! struct Foo<T> {
 //!     data: T,
-//! }
-//!
-//! #[derive(Serialize, Deserialize)]
-//! #[serde(remote = "Foo")]
-//! struct FooInternal<S> {
-//!     data: S,
 //! }
 //!
 //! impl<'de, T> Deserialize<'de> for Foo<T>
@@ -53,7 +49,7 @@
 //!     where
 //!         D: serde::de::Deserializer<'de>,
 //!     {
-//!         FooInternal::deserialize(DeserializeNameAdapter::new(
+//!         Foo::deserialize(DeserializeNameAdapter::new(
 //!             deserializer,
 //!             std::any::type_name::<Self>(),
 //!         ))
@@ -68,7 +64,7 @@
 //!     where
 //!         S: serde::ser::Serializer,
 //!     {
-//!         FooInternal::serialize(
+//!         Foo::serialize(
 //!             self,
 //!             SerializeNameAdapter::new(serializer, std::any::type_name::<Self>()),
 //!         )

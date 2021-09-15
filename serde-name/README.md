@@ -34,14 +34,10 @@ assert_eq!(trace_name::<Option<Bar>>(), None);
 of a container in the cases where `#[serde(rename = "..")]` is not flexible enough.
 
 ```rust
+#[derive(Serialize, Deserialize)]
+#[serde(remote = "Foo")] // Generates Foo::(de)serialize instead of implementing Serde traits.
 struct Foo<T> {
     data: T,
-}
-
-#[derive(Serialize, Deserialize)]
-#[serde(remote = "Foo")]
-struct FooInternal<S> {
-    data: S,
 }
 
 impl<'de, T> Deserialize<'de> for Foo<T>
@@ -52,7 +48,7 @@ where
     where
         D: serde::de::Deserializer<'de>,
     {
-        FooInternal::deserialize(DeserializeNameAdapter::new(
+        Foo::deserialize(DeserializeNameAdapter::new(
             deserializer,
             std::any::type_name::<Self>(),
         ))
@@ -67,7 +63,7 @@ where
     where
         S: serde::ser::Serializer,
     {
-        FooInternal::serialize(
+        Foo::serialize(
             self,
             SerializeNameAdapter::new(serializer, std::any::type_name::<Self>()),
         )
