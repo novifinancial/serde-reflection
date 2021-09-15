@@ -1,6 +1,6 @@
 [package]
 name = "serde-generate"
-version = "0.19.3"
+version = "0.19.4"
 description = "Generate (de)serialization code in multiple languages"
 documentation = "https://docs.rs/serde-generate"
 repository = "https://github.com/novifinancial/serde-reflection"
@@ -25,7 +25,7 @@ serde_yaml = "0.8.17"
 structopt = "0.3.21"
 textwrap = "0.13.4"
 
-serde-reflection = { path = "../serde-reflection", version = "0.3.3" }
+serde-reflection = { path = "../serde-reflection", version = "0.3.4" }
 bincode = "1.3.3"
 bcs = "0.1.3"
 
