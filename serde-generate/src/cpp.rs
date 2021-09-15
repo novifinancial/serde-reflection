@@ -97,7 +97,7 @@ impl<'a> CodeGenerator<'a> {
         emitter.output_close_namespace()?;
         writeln!(emitter.out)?;
         for (name, format) in registry {
-            emitter.output_container_traits(&name, format)?;
+            emitter.output_container_traits(name, format)?;
         }
         Ok(())
     }
@@ -508,8 +508,8 @@ template <typename Deserializer>
         self.output_struct_equality_test(name, fields)?;
         if self.generator.config.serialization {
             for encoding in &self.generator.config.encodings {
-                self.output_struct_serialize_for_encoding(&name, *encoding)?;
-                self.output_struct_deserialize_for_encoding(&name, *encoding)?;
+                self.output_struct_serialize_for_encoding(name, *encoding)?;
+                self.output_struct_deserialize_for_encoding(name, *encoding)?;
             }
         }
         self.output_close_namespace()?;
@@ -590,8 +590,8 @@ impl crate::SourceInstaller for Installer {
         registry: &Registry,
     ) -> std::result::Result<(), Self::Error> {
         let mut file = self.create_header_file(&config.module_name)?;
-        let generator = CodeGenerator::new(&config);
-        generator.output(&mut file, &registry)
+        let generator = CodeGenerator::new(config);
+        generator.output(&mut file, registry)
     }
 
     fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {

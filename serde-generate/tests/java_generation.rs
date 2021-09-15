@@ -11,7 +11,7 @@ fn test_that_java_code_compiles_with_config(
     let registry = test_utils::get_registry().unwrap();
     let dir = tempdir().unwrap();
 
-    let generator = java::CodeGenerator::new(&config);
+    let generator = java::CodeGenerator::new(config);
     generator
         .write_source_files(dir.path().to_path_buf(), &registry)
         .unwrap();

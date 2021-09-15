@@ -445,7 +445,7 @@ serde_bytes = "0.11"
         std::fs::create_dir(dir_path.join("src"))?;
         let source_path = dir_path.join("src/lib.rs");
         let mut source = std::fs::File::create(&source_path)?;
-        generator.output(&mut source, &registry)
+        generator.output(&mut source, registry)
     }
 
     fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {

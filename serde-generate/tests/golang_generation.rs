@@ -43,8 +43,8 @@ fn test_that_golang_code_compiles_with_config_and_registry(
     let source_path = dir.path().join("test.go");
     let mut source = File::create(&source_path).unwrap();
 
-    let generator = golang::CodeGenerator::new(&config);
-    generator.output(&mut source, &registry).unwrap();
+    let generator = golang::CodeGenerator::new(config);
+    generator.output(&mut source, registry).unwrap();
 
     writeln!(&mut source, "func main() {{}}").unwrap();
 

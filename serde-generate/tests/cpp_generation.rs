@@ -13,7 +13,7 @@ fn test_that_cpp_code_compiles_with_config(
     let header_path = dir.path().join("test.hpp");
     let mut header = File::create(&header_path).unwrap();
 
-    let generator = cpp::CodeGenerator::new(&config);
+    let generator = cpp::CodeGenerator::new(config);
     generator.output(&mut header, &registry).unwrap();
 
     let source_path = dir.path().join("test.cpp");

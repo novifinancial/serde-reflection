@@ -1180,9 +1180,9 @@ impl crate::SourceInstaller for Installer {
         let generator = CodeGenerator::new(config);
         let dir_path = generator.write_source_files(self.install_dir.clone(), registry)?;
 
-        let back_path: String = std::iter::repeat("..\\".to_string())
-            .take(dir_path.strip_prefix(&self.install_dir)?.iter().count())
-            .collect();
+        let back_path: String = "..\\"
+            .to_string()
+            .repeat(dir_path.strip_prefix(&self.install_dir)?.iter().count());
         let mut deps = vec!["Serde".to_string()];
         for encoding in &config.encodings {
             deps.push(encoding.name().to_camel_case());
