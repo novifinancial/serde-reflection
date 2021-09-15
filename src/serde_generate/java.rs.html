@@ -1,7 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `serde-generate/src/java.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>java.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
-<link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
-<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../serde_generate/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
-                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `serde-generate&#x2F;src&#x2F;java.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>java.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../serde_generate/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input"name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -995,7 +992,7 @@
 <span id="992">992</span>
 <span id="993">993</span>
 <span id="994">994</span>
-</pre><div class="example-wrap"><pre class="rust ">
+</pre><pre class="rust">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
 
@@ -1004,13 +1001,13 @@
     <span class="ident">indent</span>::{<span class="ident">IndentConfig</span>, <span class="ident">IndentedWriter</span>},
     <span class="ident">CodeGeneratorConfig</span>, <span class="ident">Encoding</span>,
 };
-<span class="kw">use</span> <span class="ident">heck</span>::<span class="ident">CamelCase</span>;
-<span class="kw">use</span> <span class="ident">include_dir</span>::<span class="ident">include_dir</span> <span class="kw">as</span> <span class="ident">include_directory</span>;
+<span class="kw">use</span> <span class="ident">heck::CamelCase</span>;
+<span class="kw">use</span> <span class="ident">include_dir::include_dir</span> <span class="kw">as</span> <span class="ident">include_directory</span>;
 <span class="kw">use</span> <span class="ident">serde_reflection</span>::{<span class="ident">ContainerFormat</span>, <span class="ident">Format</span>, <span class="ident">FormatHolder</span>, <span class="ident">Named</span>, <span class="ident">Registry</span>, <span class="ident">VariantFormat</span>};
 <span class="kw">use</span> <span class="ident">std</span>::{
     <span class="ident">collections</span>::{<span class="ident">BTreeMap</span>, <span class="ident">HashMap</span>},
     <span class="ident">io</span>::{<span class="prelude-ty">Result</span>, <span class="ident">Write</span>},
-    <span class="ident">path</span>::<span class="ident">PathBuf</span>,
+    <span class="ident">path::PathBuf</span>,
 };
 
 <span class="doccomment">/// Main configuration object for code-generation in Java.</span>
@@ -1041,13 +1038,13 @@
     <span class="doccomment">/// Create a Java code generator for the given config.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">config</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">CodeGeneratorConfig</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">if</span> <span class="ident">config</span>.<span class="ident">c_style_enums</span> {
-            <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;Java does not support generating c-style enums&quot;</span>);
+            <span class="macro">panic!</span>(<span class="string">&quot;Java does not support generating c-style enums&quot;</span>);
         }
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">external_qualified_names</span> <span class="op">=</span> <span class="ident">HashMap</span>::<span class="ident">new</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">external_qualified_names</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
         <span class="kw">for</span> (<span class="ident">namespace</span>, <span class="ident">names</span>) <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">config</span>.<span class="ident">external_definitions</span> {
             <span class="kw">for</span> <span class="ident">name</span> <span class="kw">in</span> <span class="ident">names</span> {
                 <span class="ident">external_qualified_names</span>
-                    .<span class="ident">insert</span>(<span class="ident">name</span>.<span class="ident">to_string</span>(), <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}.{}&quot;</span>, <span class="ident">namespace</span>, <span class="ident">name</span>));
+                    .<span class="ident">insert</span>(<span class="ident">name</span>.<span class="ident">to_string</span>(), <span class="macro">format!</span>(<span class="string">&quot;{}.{}&quot;</span>, <span class="ident">namespace</span>, <span class="ident">name</span>));
             }
         }
         <span class="self">Self</span> {
@@ -1061,21 +1058,21 @@
     <span class="doccomment">/// package name (if any, otherwise `install_dir` it self).</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_source_files</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">install_dir</span>: <span class="ident">std</span>::<span class="ident">path</span>::<span class="ident">PathBuf</span>,
+        <span class="ident">install_dir</span>: <span class="ident">std::path::PathBuf</span>,
         <span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">Registry</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">current_namespace</span> <span class="op">=</span> <span class="self">self</span>
             .<span class="ident">config</span>
             .<span class="ident">module_name</span>
             .<span class="ident">split</span>(<span class="string">&#39;.&#39;</span>)
-            .<span class="ident">map</span>(<span class="ident">String</span>::<span class="ident">from</span>)
+            .<span class="ident">map</span>(<span class="ident">String::from</span>)
             .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">dir_path</span> <span class="op">=</span> <span class="ident">install_dir</span>;
         <span class="kw">for</span> <span class="ident">part</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">current_namespace</span> {
             <span class="ident">dir_path</span> <span class="op">=</span> <span class="ident">dir_path</span>.<span class="ident">join</span>(<span class="ident">part</span>);
         }
-        <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">create_dir_all</span>(<span class="kw-2">&amp;</span><span class="ident">dir_path</span>)<span class="question-mark">?</span>;
+        <span class="ident">std::fs::create_dir_all</span>(<span class="kw-2">&amp;</span><span class="ident">dir_path</span>)<span class="question-mark">?</span>;
 
         <span class="kw">for</span> (<span class="ident">name</span>, <span class="ident">format</span>) <span class="kw">in</span> <span class="ident">registry</span> {
             <span class="self">self</span>.<span class="ident">write_container_class</span>(<span class="kw-2">&amp;</span><span class="ident">dir_path</span>, <span class="ident">current_namespace</span>.<span class="ident">clone</span>(), <span class="ident">name</span>, <span class="ident">format</span>)<span class="question-mark">?</span>;
@@ -1088,17 +1085,17 @@
 
     <span class="kw">fn</span> <span class="ident">write_container_class</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">dir_path</span>: <span class="kw-2">&amp;</span><span class="ident">std</span>::<span class="ident">path</span>::<span class="ident">Path</span>,
+        <span class="ident">dir_path</span>: <span class="kw-2">&amp;</span><span class="ident">std::path::Path</span>,
         <span class="ident">current_namespace</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
         <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
         <span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">ContainerFormat</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">File</span>::<span class="ident">create</span>(<span class="ident">dir_path</span>.<span class="ident">join</span>(<span class="ident">name</span>.<span class="ident">to_string</span>() <span class="op">+</span> <span class="string">&quot;.java&quot;</span>))<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">std::fs::File::create</span>(<span class="ident">dir_path</span>.<span class="ident">join</span>(<span class="ident">name</span>.<span class="ident">to_string</span>() <span class="op">+</span> <span class="string">&quot;.java&quot;</span>))<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">emitter</span> <span class="op">=</span> <span class="ident">JavaEmitter</span> {
-            <span class="ident">out</span>: <span class="ident">IndentedWriter</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">file</span>, <span class="ident">IndentConfig</span>::<span class="ident">Space</span>(<span class="number">4</span>)),
+            <span class="ident">out</span>: <span class="ident">IndentedWriter::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">file</span>, <span class="ident">IndentConfig::Space</span>(<span class="number">4</span>)),
             <span class="ident">generator</span>: <span class="self">self</span>,
             <span class="ident">current_namespace</span>,
-            <span class="ident">current_reserved_names</span>: <span class="ident">HashMap</span>::<span class="ident">new</span>(),
+            <span class="ident">current_reserved_names</span>: <span class="ident">HashMap::new</span>(),
         };
 
         <span class="ident">emitter</span>.<span class="ident">output_preamble</span>()<span class="question-mark">?</span>;
@@ -1107,16 +1104,16 @@
 
     <span class="kw">fn</span> <span class="ident">write_helper_class</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">dir_path</span>: <span class="kw-2">&amp;</span><span class="ident">std</span>::<span class="ident">path</span>::<span class="ident">Path</span>,
+        <span class="ident">dir_path</span>: <span class="kw-2">&amp;</span><span class="ident">std::path::Path</span>,
         <span class="ident">current_namespace</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
         <span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">Registry</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">File</span>::<span class="ident">create</span>(<span class="ident">dir_path</span>.<span class="ident">join</span>(<span class="string">&quot;TraitHelpers.java&quot;</span>))<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">std::fs::File::create</span>(<span class="ident">dir_path</span>.<span class="ident">join</span>(<span class="string">&quot;TraitHelpers.java&quot;</span>))<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">emitter</span> <span class="op">=</span> <span class="ident">JavaEmitter</span> {
-            <span class="ident">out</span>: <span class="ident">IndentedWriter</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">file</span>, <span class="ident">IndentConfig</span>::<span class="ident">Space</span>(<span class="number">4</span>)),
+            <span class="ident">out</span>: <span class="ident">IndentedWriter::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">file</span>, <span class="ident">IndentConfig::Space</span>(<span class="number">4</span>)),
             <span class="ident">generator</span>: <span class="self">self</span>,
             <span class="ident">current_namespace</span>,
-            <span class="ident">current_reserved_names</span>: <span class="ident">HashMap</span>::<span class="ident">new</span>(),
+            <span class="ident">current_reserved_names</span>: <span class="ident">HashMap::new</span>(),
         };
 
         <span class="ident">emitter</span>.<span class="ident">output_preamble</span>()<span class="question-mark">?</span>;
@@ -1129,7 +1126,7 @@
     <span class="ident">T</span>: <span class="ident">Write</span>,
 {
     <span class="kw">fn</span> <span class="ident">output_preamble</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;package {};\n&quot;</span>, <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">module_name</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;package {};\n&quot;</span>, <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">module_name</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -1143,7 +1140,7 @@
             .<span class="ident">external_qualified_names</span>
             .<span class="ident">get</span>(<span class="ident">name</span>)
             .<span class="ident">cloned</span>()
-            .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}.{}&quot;</span>, <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">module_name</span>, <span class="ident">name</span>));
+            .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;{}.{}&quot;</span>, <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">module_name</span>, <span class="ident">name</span>));
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">qname</span>.<span class="ident">split</span>(<span class="string">&#39;.&#39;</span>).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
         <span class="kw">if</span> <span class="ident">path</span>.<span class="ident">len</span>() <span class="op">&lt;</span><span class="op">=</span> <span class="number">1</span> {
             <span class="kw">return</span> <span class="ident">qname</span>;
@@ -1163,24 +1160,24 @@
         <span class="ident">name</span>.<span class="ident">to_string</span>()
     }
 
-    <span class="kw">fn</span> <span class="ident">output_comment</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">output_comment</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">current_namespace</span>.<span class="ident">clone</span>();
         <span class="ident">path</span>.<span class="ident">push</span>(<span class="ident">name</span>.<span class="ident">to_string</span>());
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">doc</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">comments</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>) {
-            <span class="kw">let</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">textwrap</span>::<span class="ident">indent</span>(<span class="ident">doc</span>, <span class="string">&quot; * &quot;</span>).<span class="ident">replace</span>(<span class="string">&quot;\n\n&quot;</span>, <span class="string">&quot;\n *\n&quot;</span>);
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;/**\n{} */&quot;</span>, <span class="ident">text</span>)<span class="question-mark">?</span>;
+            <span class="kw">let</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">textwrap::indent</span>(<span class="ident">doc</span>, <span class="string">&quot; * &quot;</span>).<span class="ident">replace</span>(<span class="string">&quot;\n\n&quot;</span>, <span class="string">&quot;\n *\n&quot;</span>);
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;/**\n{} */&quot;</span>, <span class="ident">text</span>)<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">output_custom_code</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">output_custom_code</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">code</span>) <span class="op">=</span> <span class="self">self</span>
             .<span class="ident">generator</span>
             .<span class="ident">config</span>
             .<span class="ident">custom_code</span>
             .<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">current_namespace</span>)
         {
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\n{}&quot;</span>, <span class="ident">code</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\n{}&quot;</span>, <span class="ident">code</span>)<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
     }
@@ -1207,24 +1204,24 @@
             <span class="ident">Str</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;String&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">Bytes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;com.novi.serde.Bytes&quot;</span>.<span class="ident">into</span>(),
 
-            <span class="prelude-ty">Option</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;java.util.Optional&lt;{}&gt;&quot;</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format</span>)),
-            <span class="ident">Seq</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;java.util.List&lt;{}&gt;&quot;</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format</span>)),
-            <span class="ident">Map</span> { <span class="ident">key</span>, <span class="ident">value</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
+            <span class="prelude-ty">Option</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;java.util.Optional&lt;{}&gt;&quot;</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format</span>)),
+            <span class="ident">Seq</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;java.util.List&lt;{}&gt;&quot;</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format</span>)),
+            <span class="ident">Map</span> { <span class="ident">key</span>, <span class="ident">value</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(
                 <span class="string">&quot;java.util.Map&lt;{}, {}&gt;&quot;</span>,
                 <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">key</span>),
                 <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">value</span>)
             ),
-            <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
+            <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(
                 <span class="string">&quot;com.novi.serde.Tuple{}&lt;{}&gt;&quot;</span>,
                 <span class="ident">formats</span>.<span class="ident">len</span>(),
                 <span class="self">self</span>.<span class="ident">quote_types</span>(<span class="ident">formats</span>)
             ),
-            <span class="ident">TupleArray</span> { <span class="ident">content</span>, <span class="ident">size</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
+            <span class="ident">TupleArray</span> { <span class="ident">content</span>, <span class="ident">size</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(
                 <span class="string">&quot;java.util.@com.novi.serde.ArrayLen(length={}) List&lt;{}&gt;&quot;</span>,
                 <span class="ident">size</span>,
                 <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">content</span>)
             ),
-            <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;unexpected value&quot;</span>),
+            <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;unexpected value&quot;</span>),
         }
     }
 
@@ -1261,18 +1258,18 @@
     }
 
     <span class="kw">fn</span> <span class="ident">output_trait_helpers</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">Registry</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">subtypes</span> <span class="op">=</span> <span class="ident">BTreeMap</span>::<span class="ident">new</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">subtypes</span> <span class="op">=</span> <span class="ident">BTreeMap::new</span>();
         <span class="kw">for</span> <span class="ident">format</span> <span class="kw">in</span> <span class="ident">registry</span>.<span class="ident">values</span>() {
             <span class="ident">format</span>
                 .<span class="ident">visit</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="op">|</span><span class="ident">f</span><span class="op">|</span> {
-                    <span class="kw">if</span> <span class="self">Self</span>::<span class="ident">needs_helper</span>(<span class="ident">f</span>) {
-                        <span class="ident">subtypes</span>.<span class="ident">insert</span>(<span class="ident">common</span>::<span class="ident">mangle_type</span>(<span class="ident">f</span>), <span class="ident">f</span>.<span class="ident">clone</span>());
+                    <span class="kw">if</span> <span class="self">Self</span><span class="ident">::needs_helper</span>(<span class="ident">f</span>) {
+                        <span class="ident">subtypes</span>.<span class="ident">insert</span>(<span class="ident">common::mangle_type</span>(<span class="ident">f</span>), <span class="ident">f</span>.<span class="ident">clone</span>());
                     }
                     <span class="prelude-val">Ok</span>(())
                 })
                 .<span class="ident">unwrap</span>();
         }
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;final class TraitHelpers {{&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;final class TraitHelpers {{&quot;</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">reserved_names</span> <span class="op">=</span> <span class="kw-2">&amp;</span>[];
         <span class="self">self</span>.<span class="ident">enter_class</span>(<span class="string">&quot;TraitHelpers&quot;</span>, <span class="ident">reserved_names</span>);
         <span class="kw">for</span> (<span class="ident">mangled_name</span>, <span class="ident">subtype</span>) <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">subtypes</span> {
@@ -1280,12 +1277,12 @@
             <span class="self">self</span>.<span class="ident">output_deserialization_helper</span>(<span class="ident">mangled_name</span>, <span class="ident">subtype</span>)<span class="question-mark">?</span>;
         }
         <span class="self">self</span>.<span class="ident">leave_class</span>(<span class="ident">reserved_names</span>);
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">needs_helper</span>(<span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
-        <span class="macro">matches</span><span class="macro">!</span>(
+        <span class="macro">matches!</span>(
             <span class="ident">format</span>,
             <span class="prelude-ty">Option</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">Seq</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">Map</span> { .. } <span class="op">|</span> <span class="ident">Tuple</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">TupleArray</span> { .. }
         )
@@ -1294,28 +1291,28 @@
     <span class="kw">fn</span> <span class="ident">quote_serialize_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
         <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
         <span class="kw">match</span> <span class="ident">format</span> {
-            <span class="ident">TypeName</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}.serialize(serializer);&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_unit({});&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">Bool</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_bool({});&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">I8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_i8({});&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">I16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_i16({});&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">I32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_i32({});&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">I64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_i64({});&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">I128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_i128({});&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">U8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_u8({});&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">U16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_u16({});&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">U32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_u32({});&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">U64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_u64({});&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">U128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_u128({});&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">F32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_f32({});&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">F64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_f64({});&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">Char</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_char({});&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">Str</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_str({});&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">Bytes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.serialize_bytes({});&quot;</span>, <span class="ident">value</span>),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
+            <span class="ident">TypeName</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;{}.serialize(serializer);&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.serialize_unit({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">Bool</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.serialize_bool({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">I8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.serialize_i8({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">I16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.serialize_i16({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">I32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.serialize_i32({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">I64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.serialize_i64({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">I128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.serialize_i128({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">U8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.serialize_u8({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">U16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.serialize_u16({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">U32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.serialize_u32({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">U64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.serialize_u64({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">U128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.serialize_u128({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">F32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.serialize_f32({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">F64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.serialize_f64({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">Char</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.serialize_char({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">Str</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.serialize_str({});&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">Bytes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.serialize_bytes({});&quot;</span>, <span class="ident">value</span>),
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(
                 <span class="string">&quot;{}.serialize_{}({}, serializer);&quot;</span>,
                 <span class="self">self</span>.<span class="ident">quote_qualified_name</span>(<span class="string">&quot;TraitHelpers&quot;</span>),
-                <span class="ident">common</span>::<span class="ident">mangle_type</span>(<span class="ident">format</span>),
+                <span class="ident">common::mangle_type</span>(<span class="ident">format</span>),
                 <span class="ident">value</span>
             ),
         }
@@ -1324,7 +1321,7 @@
     <span class="kw">fn</span> <span class="ident">quote_deserialize</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
         <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
         <span class="kw">match</span> <span class="ident">format</span> {
-            <span class="ident">TypeName</span>(<span class="ident">name</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
+            <span class="ident">TypeName</span>(<span class="ident">name</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(
                 <span class="string">&quot;{}.deserialize(deserializer)&quot;</span>,
                 <span class="self">self</span>.<span class="ident">quote_qualified_name</span>(<span class="ident">name</span>)
             ),
@@ -1345,10 +1342,10 @@
             <span class="ident">Char</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_char()&quot;</span>.<span class="ident">to_string</span>(),
             <span class="ident">Str</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_str()&quot;</span>.<span class="ident">to_string</span>(),
             <span class="ident">Bytes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.deserialize_bytes()&quot;</span>.<span class="ident">to_string</span>(),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(
                 <span class="string">&quot;{}.deserialize_{}(deserializer)&quot;</span>,
                 <span class="self">self</span>.<span class="ident">quote_qualified_name</span>(<span class="string">&quot;TraitHelpers&quot;</span>),
-                <span class="ident">common</span>::<span class="ident">mangle_type</span>(<span class="ident">format</span>),
+                <span class="ident">common::mangle_type</span>(<span class="ident">format</span>),
             ),
         }
     }
@@ -1356,7 +1353,7 @@
     <span class="kw">fn</span> <span class="ident">output_serialization_helper</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">format0</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
 
-        <span class="macro">write</span><span class="macro">!</span>(
+        <span class="macro">write!</span>(
             <span class="self">self</span>.<span class="ident">out</span>,
             <span class="string">&quot;static void serialize_{}({} value, com.novi.serde.Serializer serializer) throws com.novi.serde.SerializationError {{&quot;</span>,
             <span class="ident">name</span>,
@@ -1365,7 +1362,7 @@
         <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
         <span class="kw">match</span> <span class="ident">format0</span> {
             <span class="prelude-ty">Option</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="macro">write</span><span class="macro">!</span>(
+                <span class="macro">write!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">r#&quot;
 if (value.isPresent()) {{
@@ -1380,7 +1377,7 @@ if (value.isPresent()) {{
             }
 
             <span class="ident">Seq</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="macro">write</span><span class="macro">!</span>(
+                <span class="macro">write!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">r#&quot;
 serializer.serialize_len(value.size());
@@ -1394,7 +1391,7 @@ for ({} item : value) {{
             }
 
             <span class="ident">Map</span> { <span class="ident">key</span>, <span class="ident">value</span> } <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="macro">write</span><span class="macro">!</span>(
+                <span class="macro">write!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">r#&quot;
 serializer.serialize_len(value.size());
@@ -1415,15 +1412,15 @@ serializer.sort_map_entries(offsets);
             }
 
             <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
+                <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
                 <span class="kw">for</span> (<span class="ident">index</span>, <span class="ident">format</span>) <span class="kw">in</span> <span class="ident">formats</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
-                    <span class="kw">let</span> <span class="ident">expr</span> <span class="op">=</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;value.field{}&quot;</span>, <span class="ident">index</span>);
-                    <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.<span class="ident">quote_serialize_value</span>(<span class="kw-2">&amp;</span><span class="ident">expr</span>, <span class="ident">format</span>))<span class="question-mark">?</span>;
+                    <span class="kw">let</span> <span class="ident">expr</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;value.field{}&quot;</span>, <span class="ident">index</span>);
+                    <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.<span class="ident">quote_serialize_value</span>(<span class="kw-2">&amp;</span><span class="ident">expr</span>, <span class="ident">format</span>))<span class="question-mark">?</span>;
                 }
             }
 
             <span class="ident">TupleArray</span> { <span class="ident">content</span>, <span class="ident">size</span> } <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="macro">write</span><span class="macro">!</span>(
+                <span class="macro">write!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">r#&quot;
 if (value.size() != {0}) {{
@@ -1439,16 +1436,16 @@ for ({1} item : value) {{
                 )<span class="question-mark">?</span>;
             }
 
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;unexpected case&quot;</span>),
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;unexpected case&quot;</span>),
         }
         <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">output_deserialization_helper</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">format0</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
 
-        <span class="macro">write</span><span class="macro">!</span>(
+        <span class="macro">write!</span>(
         <span class="self">self</span>.<span class="ident">out</span>,
         <span class="string">&quot;static {} deserialize_{}(com.novi.serde.Deserializer deserializer) throws com.novi.serde.DeserializationError {{&quot;</span>,
         <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format0</span>),
@@ -1457,7 +1454,7 @@ for ({1} item : value) {{
         <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
         <span class="kw">match</span> <span class="ident">format0</span> {
             <span class="prelude-ty">Option</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="macro">write</span><span class="macro">!</span>(
+                <span class="macro">write!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">r#&quot;
 boolean tag = deserializer.deserialize_option_tag();
@@ -1472,7 +1469,7 @@ if (!tag) {{
             }
 
             <span class="ident">Seq</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="macro">write</span><span class="macro">!</span>(
+                <span class="macro">write!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">r#&quot;
 long length = deserializer.deserialize_len();
@@ -1488,7 +1485,7 @@ return obj;
             }
 
             <span class="ident">Map</span> { <span class="ident">key</span>, <span class="ident">value</span> } <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="macro">write</span><span class="macro">!</span>(
+                <span class="macro">write!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">r#&quot;
 long length = deserializer.deserialize_len();
@@ -1519,7 +1516,7 @@ return obj;
             }
 
             <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="macro">write</span><span class="macro">!</span>(
+                <span class="macro">write!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">r#&quot;
 return new {}({}
@@ -1528,14 +1525,14 @@ return new {}({}
                     <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format0</span>),
                     <span class="ident">formats</span>
                         .<span class="ident">iter</span>()
-                        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;\n    {}&quot;</span>, <span class="self">self</span>.<span class="ident">quote_deserialize</span>(<span class="ident">f</span>)))
+                        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;\n    {}&quot;</span>, <span class="self">self</span>.<span class="ident">quote_deserialize</span>(<span class="ident">f</span>)))
                         .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
                         .<span class="ident">join</span>(<span class="string">&quot;,&quot;</span>)
                 )<span class="question-mark">?</span>;
             }
 
             <span class="ident">TupleArray</span> { <span class="ident">content</span>, <span class="ident">size</span> } <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="macro">write</span><span class="macro">!</span>(
+                <span class="macro">write!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">r#&quot;
 java.util.List&lt;{0}&gt; obj = new java.util.ArrayList&lt;{0}&gt;({1});
@@ -1550,10 +1547,10 @@ return obj;
                 )<span class="question-mark">?</span>;
             }
 
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;unexpected case&quot;</span>),
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;unexpected case&quot;</span>),
         }
         <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">output_variant</span>(
@@ -1565,8 +1562,8 @@ return obj;
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">VariantFormat</span>::<span class="kw-2">*</span>;
         <span class="kw">let</span> <span class="ident">fields</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">variant</span> {
-            <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Vec</span>::<span class="ident">new</span>(),
-            <span class="ident">NewType</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Named</span> {
+            <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Vec::new</span>(),
+            <span class="ident">NewType</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec!</span>[<span class="ident">Named</span> {
                 <span class="ident">name</span>: <span class="string">&quot;value&quot;</span>.<span class="ident">to_string</span>(),
                 <span class="ident">value</span>: <span class="ident">format</span>.<span class="ident">as_ref</span>().<span class="ident">clone</span>(),
             }],
@@ -1574,12 +1571,12 @@ return obj;
                 .<span class="ident">iter</span>()
                 .<span class="ident">enumerate</span>()
                 .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">f</span>)<span class="op">|</span> <span class="ident">Named</span> {
-                    <span class="ident">name</span>: <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;field{}&quot;</span>, <span class="ident">i</span>),
+                    <span class="ident">name</span>: <span class="macro">format!</span>(<span class="string">&quot;field{}&quot;</span>, <span class="ident">i</span>),
                     <span class="ident">value</span>: <span class="ident">f</span>.<span class="ident">clone</span>(),
                 })
                 .<span class="ident">collect</span>(),
             <span class="ident">Struct</span>(<span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">fields</span>.<span class="ident">clone</span>(),
-            <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;incorrect value&quot;</span>),
+            <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;incorrect value&quot;</span>),
         };
         <span class="self">self</span>.<span class="ident">output_struct_or_variant_container</span>(<span class="prelude-val">Some</span>(<span class="ident">base</span>), <span class="prelude-val">Some</span>(<span class="ident">index</span>), <span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">fields</span>)
     }
@@ -1603,24 +1600,24 @@ return obj;
         <span class="ident">fields</span>: <span class="kw-2">&amp;</span>[<span class="ident">Named</span><span class="op">&lt;</span><span class="ident">Format</span><span class="op">&gt;</span>],
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="comment">// Beginning of class</span>
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">base</span>) <span class="op">=</span> <span class="ident">variant_base</span> {
             <span class="self">self</span>.<span class="ident">output_comment</span>(<span class="ident">name</span>)<span class="question-mark">?</span>;
-            <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="macro">writeln!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">&quot;public static final class {} extends {} {{&quot;</span>,
                 <span class="ident">name</span>, <span class="ident">base</span>
             )<span class="question-mark">?</span>;
         } <span class="kw">else</span> {
             <span class="self">self</span>.<span class="ident">output_comment</span>(<span class="ident">name</span>)<span class="question-mark">?</span>;
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;public final class {} {{&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;public final class {} {{&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
         }
         <span class="kw">let</span> <span class="ident">reserved_names</span> <span class="op">=</span> <span class="kw-2">&amp;</span>[<span class="string">&quot;Builder&quot;</span>];
         <span class="self">self</span>.<span class="ident">enter_class</span>(<span class="ident">name</span>, <span class="ident">reserved_names</span>);
         <span class="comment">// Fields</span>
         <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
             <span class="self">self</span>.<span class="ident">output_comment</span>(<span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>)<span class="question-mark">?</span>;
-            <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="macro">writeln!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">&quot;public final {} {};&quot;</span>,
                 <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>),
@@ -1628,53 +1625,53 @@ return obj;
             )<span class="question-mark">?</span>;
         }
         <span class="kw">if</span> <span class="op">!</span><span class="ident">fields</span>.<span class="ident">is_empty</span>() {
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
         }
         <span class="comment">// Constructor.</span>
-        <span class="macro">writeln</span><span class="macro">!</span>(
+        <span class="macro">writeln!</span>(
             <span class="self">self</span>.<span class="ident">out</span>,
             <span class="string">&quot;public {}({}) {{&quot;</span>,
             <span class="ident">name</span>,
             <span class="ident">fields</span>
                 .<span class="ident">iter</span>()
-                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{} {}&quot;</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">value</span>), <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">name</span>))
+                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;{} {}&quot;</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">value</span>), <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">name</span>))
                 .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
                 .<span class="ident">join</span>(<span class="string">&quot;, &quot;</span>)
         )<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
         <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
-            <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="macro">writeln!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">&quot;java.util.Objects.requireNonNull({0}, \&quot;{0} must not be null\&quot;);&quot;</span>,
                 <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>
             )<span class="question-mark">?</span>;
         }
         <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;this.{} = {};&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;this.{} = {};&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>)<span class="question-mark">?</span>;
         }
         <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
         <span class="comment">// Serialize</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">serialization</span> {
-            <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="macro">writeln!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">&quot;\npublic void serialize(com.novi.serde.Serializer serializer) throws com.novi.serde.SerializationError {{&quot;</span>,
             )<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;serializer.increase_container_depth();&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;serializer.increase_container_depth();&quot;</span>)<span class="question-mark">?</span>;
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">index</span>) <span class="op">=</span> <span class="ident">variant_index</span> {
-                <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;serializer.serialize_variant_index({});&quot;</span>, <span class="ident">index</span>)<span class="question-mark">?</span>;
+                <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;serializer.serialize_variant_index({});&quot;</span>, <span class="ident">index</span>)<span class="question-mark">?</span>;
             }
             <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
-                <span class="macro">writeln</span><span class="macro">!</span>(
+                <span class="macro">writeln!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">&quot;{}&quot;</span>,
                     <span class="self">self</span>.<span class="ident">quote_serialize_value</span>(<span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>)
                 )<span class="question-mark">?</span>;
             }
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;serializer.decrease_container_depth();&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;serializer.decrease_container_depth();&quot;</span>)<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
 
             <span class="kw">if</span> <span class="ident">variant_index</span>.<span class="ident">is_none</span>() {
                 <span class="kw">for</span> <span class="ident">encoding</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">encodings</span> {
@@ -1685,33 +1682,33 @@ return obj;
         <span class="comment">// Deserialize (struct) or Load (variant)</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">serialization</span> {
             <span class="kw">if</span> <span class="ident">variant_index</span>.<span class="ident">is_none</span>() {
-                <span class="macro">writeln</span><span class="macro">!</span>(
+                <span class="macro">writeln!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">&quot;\npublic static {} deserialize(com.novi.serde.Deserializer deserializer) throws com.novi.serde.DeserializationError {{&quot;</span>,
                     <span class="ident">name</span>,
                 )<span class="question-mark">?</span>;
             } <span class="kw">else</span> {
-                <span class="macro">writeln</span><span class="macro">!</span>(
+                <span class="macro">writeln!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">&quot;\nstatic {} load(com.novi.serde.Deserializer deserializer) throws com.novi.serde.DeserializationError {{&quot;</span>,
                     <span class="ident">name</span>,
                 )<span class="question-mark">?</span>;
             }
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;deserializer.increase_container_depth();&quot;</span>)<span class="question-mark">?</span>;
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;Builder builder = new Builder();&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;deserializer.increase_container_depth();&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;Builder builder = new Builder();&quot;</span>)<span class="question-mark">?</span>;
             <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
-                <span class="macro">writeln</span><span class="macro">!</span>(
+                <span class="macro">writeln!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">&quot;builder.{} = {};&quot;</span>,
                     <span class="ident">field</span>.<span class="ident">name</span>,
                     <span class="self">self</span>.<span class="ident">quote_deserialize</span>(<span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>)
                 )<span class="question-mark">?</span>;
             }
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;deserializer.decrease_container_depth();&quot;</span>)<span class="question-mark">?</span>;
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;return builder.build();&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;deserializer.decrease_container_depth();&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;return builder.build();&quot;</span>)<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
 
             <span class="kw">if</span> <span class="ident">variant_index</span>.<span class="ident">is_none</span>() {
                 <span class="kw">for</span> <span class="ident">encoding</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">encodings</span> {
@@ -1720,9 +1717,9 @@ return obj;
             }
         }
         <span class="comment">// Equality</span>
-        <span class="macro">write</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\npublic boolean equals(Object obj) {{&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">write!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\npublic boolean equals(Object obj) {{&quot;</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
-        <span class="macro">writeln</span><span class="macro">!</span>(
+        <span class="macro">writeln!</span>(
             <span class="self">self</span>.<span class="ident">out</span>,
             <span class="string">r#&quot;
 if (this == obj) return true;
@@ -1732,36 +1729,36 @@ if (getClass() != obj.getClass()) return false;
             <span class="ident">name</span>,
         )<span class="question-mark">?</span>;
         <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
-            <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="macro">writeln!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">&quot;if (!java.util.Objects.equals(this.{0}, other.{0})) {{ return false; }}&quot;</span>,
                 <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>,
             )<span class="question-mark">?</span>;
         }
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;return true;&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;return true;&quot;</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
         <span class="comment">// Hashing</span>
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\npublic int hashCode() {{&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\npublic int hashCode() {{&quot;</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;int value = 7;&quot;</span>,)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;int value = 7;&quot;</span>,)<span class="question-mark">?</span>;
         <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
-            <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="macro">writeln!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">&quot;value = 31 * value + (this.{0} != null ? this.{0}.hashCode() : 0);&quot;</span>,
                 <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>
             )<span class="question-mark">?</span>;
         }
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;return value;&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;return value;&quot;</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
         <span class="comment">// Builder</span>
         <span class="self">self</span>.<span class="ident">output_struct_or_variant_container_builder</span>(<span class="ident">name</span>, <span class="ident">fields</span>)<span class="question-mark">?</span>;
         <span class="comment">// Custom code</span>
         <span class="self">self</span>.<span class="ident">output_custom_code</span>()<span class="question-mark">?</span>;
         <span class="comment">// End of class</span>
         <span class="self">self</span>.<span class="ident">leave_class</span>(<span class="ident">reserved_names</span>);
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">output_struct_or_variant_container_builder</span>(
@@ -1770,13 +1767,13 @@ if (getClass() != obj.getClass()) return false;
         <span class="ident">fields</span>: <span class="kw-2">&amp;</span>[<span class="ident">Named</span><span class="op">&lt;</span><span class="ident">Format</span><span class="op">&gt;</span>],
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="comment">// Beginning of builder class</span>
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;public static final class Builder {{&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;public static final class Builder {{&quot;</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">reserved_names</span> <span class="op">=</span> <span class="kw-2">&amp;</span>[];
         <span class="self">self</span>.<span class="ident">enter_class</span>(<span class="string">&quot;Builder&quot;</span>, <span class="ident">reserved_names</span>);
         <span class="comment">// Fields</span>
         <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
-            <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="macro">writeln!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">&quot;public {} {};&quot;</span>,
                 <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>),
@@ -1784,10 +1781,10 @@ if (getClass() != obj.getClass()) return false;
             )<span class="question-mark">?</span>;
         }
         <span class="kw">if</span> <span class="op">!</span><span class="ident">fields</span>.<span class="ident">is_empty</span>() {
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
         }
         <span class="comment">// Finalization</span>
-        <span class="macro">writeln</span><span class="macro">!</span>(
+        <span class="macro">writeln!</span>(
             <span class="self">self</span>.<span class="ident">out</span>,
             <span class="string">r#&quot;public {0} build() {{
     return new {0}({1}
@@ -1796,7 +1793,7 @@ if (getClass() != obj.getClass()) return false;
             <span class="ident">name</span>,
             <span class="ident">fields</span>
                 .<span class="ident">iter</span>()
-                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;\n        {}&quot;</span>, <span class="ident">f</span>.<span class="ident">name</span>))
+                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;\n        {}&quot;</span>, <span class="ident">f</span>.<span class="ident">name</span>))
                 .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
                 .<span class="ident">join</span>(<span class="string">&quot;,&quot;</span>)
         )<span class="question-mark">?</span>;
@@ -1804,7 +1801,7 @@ if (getClass() != obj.getClass()) return false;
         <span class="self">self</span>.<span class="ident">output_custom_code</span>()<span class="question-mark">?</span>;
         <span class="comment">// End of class</span>
         <span class="self">self</span>.<span class="ident">leave_class</span>(<span class="ident">reserved_names</span>);
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">output_enum_container</span>(
@@ -1812,26 +1809,26 @@ if (getClass() != obj.getClass()) return false;
         <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
         <span class="ident">variants</span>: <span class="kw-2">&amp;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Named</span><span class="op">&lt;</span><span class="ident">VariantFormat</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">output_comment</span>(<span class="ident">name</span>)<span class="question-mark">?</span>;
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;public abstract class {} {{&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;public abstract class {} {{&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">reserved_names</span> <span class="op">=</span> <span class="ident">variants</span>
             .<span class="ident">values</span>()
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">v</span>.<span class="ident">name</span>.<span class="ident">as_str</span>())
             .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
         <span class="self">self</span>.<span class="ident">enter_class</span>(<span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">reserved_names</span>);
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">serialization</span> {
-            <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="macro">writeln!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">&quot;\nabstract public void serialize(com.novi.serde.Serializer serializer) throws com.novi.serde.SerializationError;&quot;</span>
             )<span class="question-mark">?</span>;
-            <span class="macro">write</span><span class="macro">!</span>(
+            <span class="macro">write!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">&quot;\npublic static {} deserialize(com.novi.serde.Deserializer deserializer) throws com.novi.serde.DeserializationError {{&quot;</span>,
                 <span class="ident">name</span>
             )<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
-            <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="macro">writeln!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">r#&quot;
 int index = deserializer.deserialize_variant_index();
@@ -1839,21 +1836,21 @@ switch (index) {{&quot;#</span>,
             )<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
             <span class="kw">for</span> (<span class="ident">index</span>, <span class="ident">variant</span>) <span class="kw">in</span> <span class="ident">variants</span> {
-                <span class="macro">writeln</span><span class="macro">!</span>(
+                <span class="macro">writeln!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">&quot;case {}: return {}.load(deserializer);&quot;</span>,
                     <span class="ident">index</span>, <span class="ident">variant</span>.<span class="ident">name</span>,
                 )<span class="question-mark">?</span>;
             }
-            <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="macro">writeln!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">&quot;default: throw new com.novi.serde.DeserializationError(\&quot;Unknown variant index for {}: \&quot; + index);&quot;</span>,
                 <span class="ident">name</span>,
             )<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
 
             <span class="kw">for</span> <span class="ident">encoding</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">encodings</span> {
                 <span class="self">self</span>.<span class="ident">output_class_serialize_for_encoding</span>(<span class="kw-2">*</span><span class="ident">encoding</span>)<span class="question-mark">?</span>;
@@ -1863,11 +1860,11 @@ switch (index) {{&quot;#</span>,
 
         <span class="self">self</span>.<span class="ident">output_variants</span>(<span class="ident">name</span>, <span class="ident">variants</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">leave_class</span>(<span class="kw-2">&amp;</span><span class="ident">reserved_names</span>);
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">output_class_serialize_for_encoding</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">encoding</span>: <span class="ident">Encoding</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="macro">writeln</span><span class="macro">!</span>(
+        <span class="macro">writeln!</span>(
             <span class="self">self</span>.<span class="ident">out</span>,
             <span class="string">r#&quot;
 public byte[] {0}Serialize() throws com.novi.serde.SerializationError {{
@@ -1885,7 +1882,7 @@ public byte[] {0}Serialize() throws com.novi.serde.SerializationError {{
         <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
         <span class="ident">encoding</span>: <span class="ident">Encoding</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="macro">writeln</span><span class="macro">!</span>(
+        <span class="macro">writeln!</span>(
             <span class="self">self</span>.<span class="ident">out</span>,
             <span class="string">r#&quot;
 public static {0} {1}Deserialize(byte[] input) throws com.novi.serde.DeserializationError {{
@@ -1908,8 +1905,8 @@ public static {0} {1}Deserialize(byte[] input) throws com.novi.serde.Deserializa
     <span class="kw">fn</span> <span class="ident">output_container</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">ContainerFormat</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">ContainerFormat</span>::<span class="kw-2">*</span>;
         <span class="kw">let</span> <span class="ident">fields</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">format</span> {
-            <span class="ident">UnitStruct</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Vec</span>::<span class="ident">new</span>(),
-            <span class="ident">NewTypeStruct</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Named</span> {
+            <span class="ident">UnitStruct</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Vec::new</span>(),
+            <span class="ident">NewTypeStruct</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec!</span>[<span class="ident">Named</span> {
                 <span class="ident">name</span>: <span class="string">&quot;value&quot;</span>.<span class="ident">to_string</span>(),
                 <span class="ident">value</span>: <span class="ident">format</span>.<span class="ident">as_ref</span>().<span class="ident">clone</span>(),
             }],
@@ -1917,7 +1914,7 @@ public static {0} {1}Deserialize(byte[] input) throws com.novi.serde.Deserializa
                 .<span class="ident">iter</span>()
                 .<span class="ident">enumerate</span>()
                 .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">f</span>)<span class="op">|</span> <span class="ident">Named</span> {
-                    <span class="ident">name</span>: <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;field{}&quot;</span>, <span class="ident">i</span>),
+                    <span class="ident">name</span>: <span class="macro">format!</span>(<span class="string">&quot;field{}&quot;</span>, <span class="ident">i</span>),
                     <span class="ident">value</span>: <span class="ident">f</span>.<span class="ident">clone</span>(),
                 })
                 .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>(),
@@ -1943,53 +1940,54 @@ public static {0} {1}Deserialize(byte[] input) throws com.novi.serde.Deserializa
 
     <span class="kw">fn</span> <span class="ident">install_runtime</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">source_dir</span>: <span class="ident">include_dir</span>::<span class="ident">Dir</span>,
+        <span class="ident">source_dir</span>: <span class="ident">include_dir::Dir</span>,
         <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std::error::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">dir_path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">install_dir</span>.<span class="ident">join</span>(<span class="ident">path</span>);
-        <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">create_dir_all</span>(<span class="kw-2">&amp;</span><span class="ident">dir_path</span>)<span class="question-mark">?</span>;
+        <span class="ident">std::fs::create_dir_all</span>(<span class="kw-2">&amp;</span><span class="ident">dir_path</span>)<span class="question-mark">?</span>;
         <span class="kw">for</span> <span class="ident">entry</span> <span class="kw">in</span> <span class="ident">source_dir</span>.<span class="ident">files</span>() {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">File</span>::<span class="ident">create</span>(<span class="ident">dir_path</span>.<span class="ident">join</span>(<span class="ident">entry</span>.<span class="ident">path</span>()))<span class="question-mark">?</span>;
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">std::fs::File::create</span>(<span class="ident">dir_path</span>.<span class="ident">join</span>(<span class="ident">entry</span>.<span class="ident">path</span>()))<span class="question-mark">?</span>;
             <span class="ident">file</span>.<span class="ident">write_all</span>(<span class="ident">entry</span>.<span class="ident">contents</span>())<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
     }
 }
 
-<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">SourceInstaller</span> <span class="kw">for</span> <span class="ident">Installer</span> {
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span><span class="op">&gt;</span>;
+<span class="kw">impl</span> <span class="kw">crate</span><span class="ident">::SourceInstaller</span> <span class="kw">for</span> <span class="ident">Installer</span> {
+    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std::error::Error</span><span class="op">&gt;</span>;
 
     <span class="kw">fn</span> <span class="ident">install_module</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">config</span>: <span class="kw-2">&amp;</span><span class="ident">CodeGeneratorConfig</span>,
         <span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">Registry</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">generator</span> <span class="op">=</span> <span class="ident">CodeGenerator</span>::<span class="ident">new</span>(<span class="ident">config</span>);
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="self">Self</span><span class="ident">::Error</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">generator</span> <span class="op">=</span> <span class="ident">CodeGenerator::new</span>(<span class="ident">config</span>);
         <span class="ident">generator</span>.<span class="ident">write_source_files</span>(<span class="self">self</span>.<span class="ident">install_dir</span>.<span class="ident">clone</span>(), <span class="ident">registry</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">install_serde_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">install_serde_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="self">Self</span><span class="ident">::Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">install_runtime</span>(
-            <span class="macro">include_directory</span><span class="macro">!</span>(<span class="string">&quot;runtime/java/com/novi/serde&quot;</span>),
+            <span class="macro">include_directory!</span>(<span class="string">&quot;runtime/java/com/novi/serde&quot;</span>),
             <span class="string">&quot;com/novi/serde&quot;</span>,
         )
     }
 
-    <span class="kw">fn</span> <span class="ident">install_bincode_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">install_bincode_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="self">Self</span><span class="ident">::Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">install_runtime</span>(
-            <span class="macro">include_directory</span><span class="macro">!</span>(<span class="string">&quot;runtime/java/com/novi/bincode&quot;</span>),
+            <span class="macro">include_directory!</span>(<span class="string">&quot;runtime/java/com/novi/bincode&quot;</span>),
             <span class="string">&quot;com/novi/bincode&quot;</span>,
         )
     }
 
-    <span class="kw">fn</span> <span class="ident">install_bcs_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">install_bcs_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="self">Self</span><span class="ident">::Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">install_runtime</span>(
-            <span class="macro">include_directory</span><span class="macro">!</span>(<span class="string">&quot;runtime/java/com/novi/bcs&quot;</span>),
+            <span class="macro">include_directory!</span>(<span class="string">&quot;runtime/java/com/novi/bcs&quot;</span>),
             <span class="string">&quot;com/novi/bcs&quot;</span>,
         )
     }
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="serde_generate" data-search-js="../../search-index.js"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="serde_generate" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
+</body></html>

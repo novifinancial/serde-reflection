@@ -1,7 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `serde-generate/src/golang.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>golang.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
-<link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
-<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../serde_generate/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
-                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">   1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `serde-generate&#x2F;src&#x2F;golang.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>golang.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../serde_generate/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input"name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -1026,7 +1023,7 @@
 <span id="1023">1023</span>
 <span id="1024">1024</span>
 <span id="1025">1025</span>
-</pre><div class="example-wrap"><pre class="rust ">
+</pre><pre class="rust">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
 
@@ -1035,12 +1032,12 @@
     <span class="ident">indent</span>::{<span class="ident">IndentConfig</span>, <span class="ident">IndentedWriter</span>},
     <span class="ident">CodeGeneratorConfig</span>, <span class="ident">Encoding</span>,
 };
-<span class="kw">use</span> <span class="ident">heck</span>::<span class="ident">CamelCase</span>;
+<span class="kw">use</span> <span class="ident">heck::CamelCase</span>;
 <span class="kw">use</span> <span class="ident">serde_reflection</span>::{<span class="ident">ContainerFormat</span>, <span class="ident">Format</span>, <span class="ident">FormatHolder</span>, <span class="ident">Named</span>, <span class="ident">Registry</span>, <span class="ident">VariantFormat</span>};
 <span class="kw">use</span> <span class="ident">std</span>::{
     <span class="ident">collections</span>::{<span class="ident">BTreeMap</span>, <span class="ident">HashMap</span>},
     <span class="ident">io</span>::{<span class="prelude-ty">Result</span>, <span class="ident">Write</span>},
-    <span class="ident">path</span>::<span class="ident">PathBuf</span>,
+    <span class="ident">path::PathBuf</span>,
 };
 
 <span class="doccomment">/// Main configuration object for code-generation in Go.</span>
@@ -1069,9 +1066,9 @@
     <span class="doccomment">/// Create a Go code generator for the given config.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">config</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">CodeGeneratorConfig</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">if</span> <span class="ident">config</span>.<span class="ident">c_style_enums</span> {
-            <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;Go does not support generating c-style enums&quot;</span>);
+            <span class="macro">panic!</span>(<span class="string">&quot;Go does not support generating c-style enums&quot;</span>);
         }
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">external_qualified_names</span> <span class="op">=</span> <span class="ident">HashMap</span>::<span class="ident">new</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">external_qualified_names</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
         <span class="kw">for</span> (<span class="ident">namespace</span>, <span class="ident">names</span>) <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">config</span>.<span class="ident">external_definitions</span> {
             <span class="kw">let</span> <span class="ident">package_name</span> <span class="op">=</span> {
                 <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">namespace</span>.<span class="ident">rsplitn</span>(<span class="number">2</span>, <span class="string">&#39;/&#39;</span>).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
@@ -1083,7 +1080,7 @@
             };
             <span class="kw">for</span> <span class="ident">name</span> <span class="kw">in</span> <span class="ident">names</span> {
                 <span class="ident">external_qualified_names</span>
-                    .<span class="ident">insert</span>(<span class="ident">name</span>.<span class="ident">to_string</span>(), <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}.{}&quot;</span>, <span class="ident">package_name</span>, <span class="ident">name</span>));
+                    .<span class="ident">insert</span>(<span class="ident">name</span>.<span class="ident">to_string</span>(), <span class="macro">format!</span>(<span class="string">&quot;{}.{}&quot;</span>, <span class="ident">package_name</span>, <span class="ident">name</span>));
             }
         }
         <span class="self">Self</span> {
@@ -1107,12 +1104,12 @@
             .<span class="ident">config</span>
             .<span class="ident">module_name</span>
             .<span class="ident">split</span>(<span class="string">&#39;.&#39;</span>)
-            .<span class="ident">map</span>(<span class="ident">String</span>::<span class="ident">from</span>)
+            .<span class="ident">map</span>(<span class="ident">String::from</span>)
             .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">emitter</span> <span class="op">=</span> <span class="ident">GoEmitter</span> {
             <span class="comment">// `go fmt` indents using tabs so let&#39;s do the same.</span>
-            <span class="ident">out</span>: <span class="ident">IndentedWriter</span>::<span class="ident">new</span>(<span class="ident">out</span>, <span class="ident">IndentConfig</span>::<span class="ident">Tab</span>),
+            <span class="ident">out</span>: <span class="ident">IndentedWriter::new</span>(<span class="ident">out</span>, <span class="ident">IndentConfig::Tab</span>),
             <span class="ident">generator</span>: <span class="self">self</span>,
             <span class="ident">current_namespace</span>,
         };
@@ -1136,7 +1133,7 @@
     <span class="ident">T</span>: <span class="ident">Write</span>,
 {
     <span class="kw">fn</span> <span class="ident">output_preamble</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">Registry</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="macro">writeln</span><span class="macro">!</span>(
+        <span class="macro">writeln!</span>(
             <span class="self">self</span>.<span class="ident">out</span>,
             <span class="string">&quot;package {}\n\n&quot;</span>,
             <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">module_name</span>
@@ -1145,19 +1142,19 @@
         <span class="kw">if</span> <span class="ident">registry</span>.<span class="ident">is_empty</span>() {
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
         }
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;import (&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;import (&quot;</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">serialization</span>
-            <span class="op">&amp;&amp;</span> (<span class="self">Self</span>::<span class="ident">has_enum</span>(<span class="ident">registry</span>) <span class="op">|</span><span class="op">|</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">encodings</span>.<span class="ident">is_empty</span>())
+            <span class="op">&amp;&amp;</span> (<span class="self">Self</span><span class="ident">::has_enum</span>(<span class="ident">registry</span>) <span class="op">|</span><span class="op">|</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">encodings</span>.<span class="ident">is_empty</span>())
         {
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\&quot;fmt\&quot;&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\&quot;fmt\&quot;&quot;</span>)<span class="question-mark">?</span>;
         }
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">serialization</span> <span class="op">|</span><span class="op">|</span> <span class="self">Self</span>::<span class="ident">has_int128</span>(<span class="ident">registry</span>) {
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\&quot;{}/serde\&quot;&quot;</span>, <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">serde_module_path</span>)<span class="question-mark">?</span>;
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">serialization</span> <span class="op">|</span><span class="op">|</span> <span class="self">Self</span><span class="ident">::has_int128</span>(<span class="ident">registry</span>) {
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\&quot;{}/serde\&quot;&quot;</span>, <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">serde_module_path</span>)<span class="question-mark">?</span>;
         }
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">serialization</span> {
             <span class="kw">for</span> <span class="ident">encoding</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">encodings</span> {
-                <span class="macro">writeln</span><span class="macro">!</span>(
+                <span class="macro">writeln!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">&quot;\&quot;{}/{}\&quot;&quot;</span>,
                     <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">serde_module_path</span>,
@@ -1166,10 +1163,10 @@
             }
         }
         <span class="kw">for</span> <span class="ident">path</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">external_definitions</span>.<span class="ident">keys</span>() {
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\&quot;{}\&quot;&quot;</span>, <span class="ident">path</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\&quot;{}\&quot;&quot;</span>, <span class="ident">path</span>)<span class="question-mark">?</span>;
         }
         <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;)\n&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;)\n&quot;</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -1177,9 +1174,9 @@
         <span class="kw">for</span> <span class="ident">format</span> <span class="kw">in</span> <span class="ident">registry</span>.<span class="ident">values</span>() {
             <span class="kw">if</span> <span class="ident">format</span>
                 .<span class="ident">visit</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">f</span> {
-                    <span class="ident">Format</span>::<span class="ident">I128</span> <span class="op">|</span> <span class="ident">Format</span>::<span class="ident">U128</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="ident">Format::I128</span> <span class="op">|</span> <span class="ident">Format::U128</span> <span class="op">=</span><span class="op">&gt;</span> {
                         <span class="comment">// Interrupt the visit if we find a (u)int128</span>
-                        <span class="prelude-val">Err</span>(<span class="ident">serde_reflection</span>::<span class="ident">Error</span>::<span class="ident">Custom</span>(<span class="ident">String</span>::<span class="ident">new</span>()))
+                        <span class="prelude-val">Err</span>(<span class="ident">serde_reflection::Error::Custom</span>(<span class="ident">String::new</span>()))
                     }
                     <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(()),
                 })
@@ -1193,7 +1190,7 @@
 
     <span class="kw">fn</span> <span class="ident">has_enum</span>(<span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">Registry</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="kw">for</span> <span class="ident">format</span> <span class="kw">in</span> <span class="ident">registry</span>.<span class="ident">values</span>() {
-            <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ContainerFormat</span>::<span class="ident">Enum</span>(<span class="kw">_</span>) <span class="op">=</span> <span class="ident">format</span> {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ContainerFormat::Enum</span>(<span class="kw">_</span>) <span class="op">=</span> <span class="ident">format</span> {
                 <span class="kw">return</span> <span class="bool-val">true</span>;
             }
         }
@@ -1209,21 +1206,21 @@
             .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">name</span>.<span class="ident">to_string</span>())
     }
 
-    <span class="kw">fn</span> <span class="ident">output_comment</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">output_comment</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">current_namespace</span>.<span class="ident">clone</span>();
         <span class="ident">path</span>.<span class="ident">push</span>(<span class="ident">name</span>.<span class="ident">to_string</span>());
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">doc</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">comments</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>) {
-            <span class="kw">let</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">textwrap</span>::<span class="ident">indent</span>(<span class="ident">doc</span>, <span class="string">&quot;// &quot;</span>).<span class="ident">replace</span>(<span class="string">&quot;\n\n&quot;</span>, <span class="string">&quot;\n//\n&quot;</span>);
-            <span class="macro">write</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">text</span>)<span class="question-mark">?</span>;
+            <span class="kw">let</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">textwrap::indent</span>(<span class="ident">doc</span>, <span class="string">&quot;// &quot;</span>).<span class="ident">replace</span>(<span class="string">&quot;\n\n&quot;</span>, <span class="string">&quot;\n//\n&quot;</span>);
+            <span class="macro">write!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">text</span>)<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">output_custom_code</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">output_custom_code</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">current_namespace</span>.<span class="ident">clone</span>();
         <span class="ident">path</span>.<span class="ident">push</span>(<span class="ident">name</span>.<span class="ident">to_string</span>());
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">code</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">custom_code</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>) {
-            <span class="macro">write</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\n{}&quot;</span>, <span class="ident">code</span>)<span class="question-mark">?</span>;
+            <span class="macro">write!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\n{}&quot;</span>, <span class="ident">code</span>)<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
     }
@@ -1250,23 +1247,23 @@
             <span class="ident">Str</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;string&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">Bytes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;[]byte&quot;</span>.<span class="ident">into</span>(),
 
-            <span class="prelude-ty">Option</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;*{}&quot;</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format</span>)),
-            <span class="ident">Seq</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;[]{}&quot;</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format</span>)),
+            <span class="prelude-ty">Option</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;*{}&quot;</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format</span>)),
+            <span class="ident">Seq</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;[]{}&quot;</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format</span>)),
             <span class="ident">Map</span> { <span class="ident">key</span>, <span class="ident">value</span> } <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;map[{}]{}&quot;</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">key</span>), <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">value</span>))
+                <span class="macro">format!</span>(<span class="string">&quot;map[{}]{}&quot;</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">key</span>), <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">value</span>))
             }
-            <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
+            <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(
                 <span class="string">&quot;struct {{{}}}&quot;</span>,
                 <span class="ident">formats</span>
                     .<span class="ident">iter</span>()
                     .<span class="ident">enumerate</span>()
-                    .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">index</span>, <span class="ident">format</span>)<span class="op">|</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;Field{} {}&quot;</span>, <span class="ident">index</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format</span>)))
+                    .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">index</span>, <span class="ident">format</span>)<span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;Field{} {}&quot;</span>, <span class="ident">index</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format</span>)))
                     .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
                     .<span class="ident">join</span>(<span class="string">&quot;; &quot;</span>)
             ),
-            <span class="ident">TupleArray</span> { <span class="ident">content</span>, <span class="ident">size</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;[{}]{}&quot;</span>, <span class="ident">size</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">content</span>)),
+            <span class="ident">TupleArray</span> { <span class="ident">content</span>, <span class="ident">size</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;[{}]{}&quot;</span>, <span class="ident">size</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">content</span>)),
 
-            <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;unexpected value&quot;</span>),
+            <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;unexpected value&quot;</span>),
         }
     }
 
@@ -1281,12 +1278,12 @@
     }
 
     <span class="kw">fn</span> <span class="ident">output_trait_helpers</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">Registry</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">subtypes</span> <span class="op">=</span> <span class="ident">BTreeMap</span>::<span class="ident">new</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">subtypes</span> <span class="op">=</span> <span class="ident">BTreeMap::new</span>();
         <span class="kw">for</span> <span class="ident">format</span> <span class="kw">in</span> <span class="ident">registry</span>.<span class="ident">values</span>() {
             <span class="ident">format</span>
                 .<span class="ident">visit</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="op">|</span><span class="ident">f</span><span class="op">|</span> {
-                    <span class="kw">if</span> <span class="self">Self</span>::<span class="ident">needs_helper</span>(<span class="ident">f</span>) {
-                        <span class="ident">subtypes</span>.<span class="ident">insert</span>(<span class="ident">common</span>::<span class="ident">mangle_type</span>(<span class="ident">f</span>), <span class="ident">f</span>.<span class="ident">clone</span>());
+                    <span class="kw">if</span> <span class="self">Self</span><span class="ident">::needs_helper</span>(<span class="ident">f</span>) {
+                        <span class="ident">subtypes</span>.<span class="ident">insert</span>(<span class="ident">common::mangle_type</span>(<span class="ident">f</span>), <span class="ident">f</span>.<span class="ident">clone</span>());
                     }
                     <span class="prelude-val">Ok</span>(())
                 })
@@ -1301,7 +1298,7 @@
 
     <span class="kw">fn</span> <span class="ident">needs_helper</span>(<span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
-        <span class="macro">matches</span><span class="macro">!</span>(
+        <span class="macro">matches!</span>(
             <span class="ident">format</span>,
             <span class="prelude-ty">Option</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">Seq</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">Map</span> { .. } <span class="op">|</span> <span class="ident">Tuple</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">TupleArray</span> { .. }
         )
@@ -1310,37 +1307,37 @@
     <span class="kw">fn</span> <span class="ident">quote_serialize_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
         <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
         <span class="kw">let</span> <span class="ident">expr</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">format</span> {
-            <span class="ident">TypeName</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}.Serialize(serializer)&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.SerializeUnit({})&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">Bool</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.SerializeBool({})&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">I8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.SerializeI8({})&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">I16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.SerializeI16({})&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">I32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.SerializeI32({})&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">I64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.SerializeI64({})&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">I128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.SerializeI128({})&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">U8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.SerializeU8({})&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">U16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.SerializeU16({})&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">U32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.SerializeU32({})&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">U64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.SerializeU64({})&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">U128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.SerializeU128({})&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">F32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.SerializeF32({})&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">F64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.SerializeF64({})&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">Char</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.SerializeChar({})&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">Str</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.SerializeStr({})&quot;</span>, <span class="ident">value</span>),
-            <span class="ident">Bytes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;serializer.SerializeBytes({})&quot;</span>, <span class="ident">value</span>),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
+            <span class="ident">TypeName</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;{}.Serialize(serializer)&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.SerializeUnit({})&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">Bool</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.SerializeBool({})&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">I8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.SerializeI8({})&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">I16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.SerializeI16({})&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">I32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.SerializeI32({})&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">I64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.SerializeI64({})&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">I128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.SerializeI128({})&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">U8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.SerializeU8({})&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">U16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.SerializeU16({})&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">U32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.SerializeU32({})&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">U64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.SerializeU64({})&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">U128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.SerializeU128({})&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">F32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.SerializeF32({})&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">F64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.SerializeF64({})&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">Char</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.SerializeChar({})&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">Str</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.SerializeStr({})&quot;</span>, <span class="ident">value</span>),
+            <span class="ident">Bytes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;serializer.SerializeBytes({})&quot;</span>, <span class="ident">value</span>),
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(
                 <span class="string">&quot;serialize_{}({}, serializer)&quot;</span>,
-                <span class="ident">common</span>::<span class="ident">mangle_type</span>(<span class="ident">format</span>),
+                <span class="ident">common::mangle_type</span>(<span class="ident">format</span>),
                 <span class="ident">value</span>
             ),
         };
-        <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;if err := {}; err != nil {{ return err }}&quot;</span>, <span class="ident">expr</span>)
+        <span class="macro">format!</span>(<span class="string">&quot;if err := {}; err != nil {{ return err }}&quot;</span>, <span class="ident">expr</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">quote_deserialize</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>, <span class="ident">dest</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">fail</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
         <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
         <span class="kw">let</span> <span class="ident">expr</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">format</span> {
-            <span class="ident">TypeName</span>(<span class="ident">name</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(
+            <span class="ident">TypeName</span>(<span class="ident">name</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(
                 <span class="string">&quot;Deserialize{}(deserializer)&quot;</span>,
                 <span class="self">self</span>.<span class="ident">quote_qualified_name</span>(<span class="ident">name</span>)
             ),
@@ -1361,9 +1358,9 @@
             <span class="ident">Char</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.DeserializeChar()&quot;</span>.<span class="ident">to_string</span>(),
             <span class="ident">Str</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.DeserializeStr()&quot;</span>.<span class="ident">to_string</span>(),
             <span class="ident">Bytes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;deserializer.DeserializeBytes()&quot;</span>.<span class="ident">to_string</span>(),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;deserialize_{}(deserializer)&quot;</span>, <span class="ident">common</span>::<span class="ident">mangle_type</span>(<span class="ident">format</span>)),
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;deserialize_{}(deserializer)&quot;</span>, <span class="ident">common::mangle_type</span>(<span class="ident">format</span>)),
         };
-        <span class="macro">format</span><span class="macro">!</span>(
+        <span class="macro">format!</span>(
             <span class="string">&quot;if val, err := {}; err == nil {{ {} = val }} else {{ return {}, err }}&quot;</span>,
             <span class="ident">expr</span>, <span class="ident">dest</span>, <span class="ident">fail</span>
         )
@@ -1372,7 +1369,7 @@
     <span class="kw">fn</span> <span class="ident">output_serialization_helper</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">format0</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
 
-        <span class="macro">write</span><span class="macro">!</span>(
+        <span class="macro">write!</span>(
             <span class="self">self</span>.<span class="ident">out</span>,
             <span class="string">&quot;func serialize_{}(value {}, serializer serde.Serializer) error {{&quot;</span>,
             <span class="ident">name</span>,
@@ -1381,7 +1378,7 @@
         <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
         <span class="kw">match</span> <span class="ident">format0</span> {
             <span class="prelude-ty">Option</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="macro">write</span><span class="macro">!</span>(
+                <span class="macro">write!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">r#&quot;
 if value != nil {{
@@ -1396,7 +1393,7 @@ if value != nil {{
             }
 
             <span class="ident">Seq</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="macro">write</span><span class="macro">!</span>(
+                <span class="macro">write!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">r#&quot;
 if err := serializer.SerializeLen(uint64(len(value))); err != nil {{ return err }}
@@ -1409,7 +1406,7 @@ for _, item := range(value) {{
             }
 
             <span class="ident">Map</span> { <span class="ident">key</span>, <span class="ident">value</span> } <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="macro">write</span><span class="macro">!</span>(
+                <span class="macro">write!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">r#&quot;
 if err := serializer.SerializeLen(uint64(len(value))); err != nil {{ return err }}
@@ -1429,15 +1426,15 @@ serializer.SortMapEntries(offsets);
             }
 
             <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
+                <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
                 <span class="kw">for</span> (<span class="ident">index</span>, <span class="ident">format</span>) <span class="kw">in</span> <span class="ident">formats</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
-                    <span class="kw">let</span> <span class="ident">expr</span> <span class="op">=</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;value.Field{}&quot;</span>, <span class="ident">index</span>);
-                    <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.<span class="ident">quote_serialize_value</span>(<span class="kw-2">&amp;</span><span class="ident">expr</span>, <span class="ident">format</span>))<span class="question-mark">?</span>;
+                    <span class="kw">let</span> <span class="ident">expr</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;value.Field{}&quot;</span>, <span class="ident">index</span>);
+                    <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.<span class="ident">quote_serialize_value</span>(<span class="kw-2">&amp;</span><span class="ident">expr</span>, <span class="ident">format</span>))<span class="question-mark">?</span>;
                 }
             }
 
             <span class="ident">TupleArray</span> { <span class="ident">content</span>, <span class="ident">size</span>: <span class="kw">_</span> } <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="macro">write</span><span class="macro">!</span>(
+                <span class="macro">write!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">r#&quot;
 for _, item := range(value) {{
@@ -1448,17 +1445,17 @@ for _, item := range(value) {{
                 )<span class="question-mark">?</span>;
             }
 
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;unexpected case&quot;</span>),
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;unexpected case&quot;</span>),
         }
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;return nil&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;return nil&quot;</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">output_deserialization_helper</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">format0</span>: <span class="kw-2">&amp;</span><span class="ident">Format</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">Format</span>::<span class="kw-2">*</span>;
 
-        <span class="macro">write</span><span class="macro">!</span>(
+        <span class="macro">write!</span>(
             <span class="self">self</span>.<span class="ident">out</span>,
             <span class="string">&quot;func deserialize_{}(deserializer serde.Deserializer) ({}, error) {{&quot;</span>,
             <span class="ident">name</span>,
@@ -1467,7 +1464,7 @@ for _, item := range(value) {{
         <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
         <span class="kw">match</span> <span class="ident">format0</span> {
             <span class="prelude-ty">Option</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="macro">write</span><span class="macro">!</span>(
+                <span class="macro">write!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">r#&quot;
 tag, err := deserializer.DeserializeOptionTag()
@@ -1486,7 +1483,7 @@ if tag {{
             }
 
             <span class="ident">Seq</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="macro">write</span><span class="macro">!</span>(
+                <span class="macro">write!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">r#&quot;
 length, err := deserializer.DeserializeLen()
@@ -1503,7 +1500,7 @@ return obj, nil
             }
 
             <span class="ident">Map</span> { <span class="ident">key</span>, <span class="ident">value</span> } <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="macro">write</span><span class="macro">!</span>(
+                <span class="macro">write!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">r#&quot;
 length, err := deserializer.DeserializeLen()
@@ -1533,7 +1530,7 @@ return obj, nil
             }
 
             <span class="ident">Tuple</span>(<span class="ident">formats</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="macro">write</span><span class="macro">!</span>(
+                <span class="macro">write!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">r#&quot;
 var obj {}
@@ -1544,14 +1541,14 @@ return obj, nil
                     <span class="ident">formats</span>
                         .<span class="ident">iter</span>()
                         .<span class="ident">enumerate</span>()
-                        .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">f</span>)<span class="op">|</span> <span class="self">self</span>.<span class="ident">quote_deserialize</span>(<span class="ident">f</span>, <span class="kw-2">&amp;</span><span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;obj.Field{}&quot;</span>, <span class="ident">i</span>), <span class="string">&quot;obj&quot;</span>))
+                        .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">f</span>)<span class="op">|</span> <span class="self">self</span>.<span class="ident">quote_deserialize</span>(<span class="ident">f</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;obj.Field{}&quot;</span>, <span class="ident">i</span>), <span class="string">&quot;obj&quot;</span>))
                         .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
                         .<span class="ident">join</span>(<span class="string">&quot;\n&quot;</span>)
                 )<span class="question-mark">?</span>;
             }
 
             <span class="ident">TupleArray</span> { <span class="ident">content</span>, <span class="ident">size</span> } <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="macro">write</span><span class="macro">!</span>(
+                <span class="macro">write!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">r#&quot;
 var obj [{1}]{0}
@@ -1566,10 +1563,10 @@ return obj, nil
                 )<span class="question-mark">?</span>;
             }
 
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;unexpected case&quot;</span>),
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;unexpected case&quot;</span>),
         }
         <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}\n&quot;</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">output_variant</span>(
@@ -1581,7 +1578,7 @@ return obj, nil
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">VariantFormat</span>::<span class="kw-2">*</span>;
         <span class="kw">let</span> <span class="ident">fields</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">variant</span> {
-            <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Vec</span>::<span class="ident">new</span>(),
+            <span class="ident">Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Vec::new</span>(),
             <span class="ident">NewType</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">format</span>.<span class="ident">as_ref</span>() {
                 <span class="comment">// We cannot define a &quot;new type&quot; (e.g. `type Foo Bar`) out of a typename `Bar` because `Bar`</span>
                 <span class="comment">// could point to a Go interface. This would make `Foo` an interface as well. Interfaces can&#39;t be used</span>
@@ -1589,7 +1586,7 @@ return obj, nil
                 <span class="comment">//</span>
                 <span class="comment">// Similarly, option types are compiled as pointers but `type Foo *Bar` would prevent `Foo` from being a</span>
                 <span class="comment">// valid pointer receiver.</span>
-                <span class="ident">Format</span>::<span class="ident">TypeName</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">Format</span>::<span class="prelude-ty">Option</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Named</span> {
+                <span class="ident">Format::TypeName</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">Format::Option</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec!</span>[<span class="ident">Named</span> {
                     <span class="ident">name</span>: <span class="string">&quot;Value&quot;</span>.<span class="ident">to_string</span>(),
                     <span class="ident">value</span>: <span class="ident">format</span>.<span class="ident">as_ref</span>().<span class="ident">clone</span>(),
                 }],
@@ -1608,7 +1605,7 @@ return obj, nil
                 .<span class="ident">iter</span>()
                 .<span class="ident">enumerate</span>()
                 .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">f</span>)<span class="op">|</span> <span class="ident">Named</span> {
-                    <span class="ident">name</span>: <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;Field{}&quot;</span>, <span class="ident">i</span>),
+                    <span class="ident">name</span>: <span class="macro">format!</span>(<span class="string">&quot;Field{}&quot;</span>, <span class="ident">i</span>),
                     <span class="ident">value</span>: <span class="ident">f</span>.<span class="ident">clone</span>(),
                 })
                 .<span class="ident">collect</span>(),
@@ -1619,7 +1616,7 @@ return obj, nil
                     <span class="ident">value</span>: <span class="ident">f</span>.<span class="ident">value</span>.<span class="ident">clone</span>(),
                 })
                 .<span class="ident">collect</span>(),
-            <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;incorrect value&quot;</span>),
+            <span class="ident">Variable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;incorrect value&quot;</span>),
         };
         <span class="self">self</span>.<span class="ident">output_struct_or_variant_container</span>(<span class="prelude-val">Some</span>(<span class="ident">base</span>), <span class="prelude-val">Some</span>(<span class="ident">index</span>), <span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">fields</span>)
     }
@@ -1633,51 +1630,51 @@ return obj, nil
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">full_name</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">variant_base</span> {
             <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">name</span>.<span class="ident">to_string</span>(),
-            <span class="prelude-val">Some</span>(<span class="ident">base</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}__{}&quot;</span>, <span class="ident">base</span>, <span class="ident">name</span>),
+            <span class="prelude-val">Some</span>(<span class="ident">base</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;{}__{}&quot;</span>, <span class="ident">base</span>, <span class="ident">name</span>),
         };
         <span class="comment">// Struct</span>
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">output_comment</span>(<span class="ident">name</span>)<span class="question-mark">?</span>;
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;type {} struct {{&quot;</span>, <span class="ident">full_name</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;type {} struct {{&quot;</span>, <span class="ident">full_name</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">enter_class</span>(<span class="ident">name</span>);
         <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
             <span class="self">self</span>.<span class="ident">output_comment</span>(<span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>)<span class="question-mark">?</span>;
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;{} {}&quot;</span>, <span class="ident">field</span>.<span class="ident">name</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>))<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;{} {}&quot;</span>, <span class="ident">field</span>.<span class="ident">name</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>))<span class="question-mark">?</span>;
         }
         <span class="self">self</span>.<span class="ident">leave_class</span>();
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
 
         <span class="comment">// Link to base interface.</span>
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">base</span>) <span class="op">=</span> <span class="ident">variant_base</span> {
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\nfunc (*{}) is{}() {{}}&quot;</span>, <span class="ident">full_name</span>, <span class="ident">base</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\nfunc (*{}) is{}() {{}}&quot;</span>, <span class="ident">full_name</span>, <span class="ident">base</span>)<span class="question-mark">?</span>;
         }
 
         <span class="comment">// Serialize</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">serialization</span> {
-            <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="macro">writeln!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">&quot;\nfunc (obj *{}) Serialize(serializer serde.Serializer) error {{&quot;</span>,
                 <span class="ident">full_name</span>
             )<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
-            <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="macro">writeln!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">&quot;if err := serializer.IncreaseContainerDepth(); err != nil {{ return err }}&quot;</span>
             )<span class="question-mark">?</span>;
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">index</span>) <span class="op">=</span> <span class="ident">variant_index</span> {
-                <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;serializer.SerializeVariantIndex({})&quot;</span>, <span class="ident">index</span>)<span class="question-mark">?</span>;
+                <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;serializer.SerializeVariantIndex({})&quot;</span>, <span class="ident">index</span>)<span class="question-mark">?</span>;
             }
             <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
-                <span class="macro">writeln</span><span class="macro">!</span>(
+                <span class="macro">writeln!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">&quot;{}&quot;</span>,
-                    <span class="self">self</span>.<span class="ident">quote_serialize_value</span>(<span class="kw-2">&amp;</span><span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;obj.{}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>), <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>)
+                    <span class="self">self</span>.<span class="ident">quote_serialize_value</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;obj.{}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">name</span>), <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>)
                 )<span class="question-mark">?</span>;
             }
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;serializer.DecreaseContainerDepth()&quot;</span>)<span class="question-mark">?</span>;
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;return nil&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;serializer.DecreaseContainerDepth()&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;return nil&quot;</span>)<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
 
             <span class="kw">for</span> <span class="ident">encoding</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">encodings</span> {
                 <span class="self">self</span>.<span class="ident">output_struct_serialize_for_encoding</span>(<span class="kw-2">&amp;</span><span class="ident">full_name</span>, <span class="kw-2">*</span><span class="ident">encoding</span>)<span class="question-mark">?</span>;
@@ -1685,7 +1682,7 @@ return obj, nil
         }
         <span class="comment">// Deserialize (struct) or Load (variant)</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">serialization</span> {
-            <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="macro">writeln!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">&quot;\nfunc {0}{1}(deserializer serde.Deserializer) ({1}, error) {{&quot;</span>,
                 <span class="kw">if</span> <span class="ident">variant_base</span>.<span class="ident">is_none</span>() {
@@ -1696,22 +1693,22 @@ return obj, nil
                 <span class="ident">full_name</span>,
             )<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;var obj {}&quot;</span>, <span class="ident">full_name</span>)<span class="question-mark">?</span>;
-            <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;var obj {}&quot;</span>, <span class="ident">full_name</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">&quot;if err := deserializer.IncreaseContainerDepth(); err != nil {{ return obj, err }}&quot;</span>
             )<span class="question-mark">?</span>;
             <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
-                <span class="macro">writeln</span><span class="macro">!</span>(
+                <span class="macro">writeln!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">&quot;{}&quot;</span>,
-                    <span class="self">self</span>.<span class="ident">quote_deserialize</span>(<span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>, <span class="kw-2">&amp;</span><span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;obj.{}&quot;</span>, <span class="ident">field</span>.<span class="ident">name</span>), <span class="string">&quot;obj&quot;</span>)
+                    <span class="self">self</span>.<span class="ident">quote_deserialize</span>(<span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">value</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;obj.{}&quot;</span>, <span class="ident">field</span>.<span class="ident">name</span>), <span class="string">&quot;obj&quot;</span>)
                 )<span class="question-mark">?</span>;
             }
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;deserializer.DecreaseContainerDepth()&quot;</span>)<span class="question-mark">?</span>;
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;return obj, nil&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;deserializer.DecreaseContainerDepth()&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;return obj, nil&quot;</span>)<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
 
             <span class="kw">if</span> <span class="ident">variant_base</span>.<span class="ident">is_none</span>() {
                 <span class="kw">for</span> <span class="ident">encoding</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">encodings</span> {
@@ -1735,45 +1732,45 @@ return obj, nil
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">full_name</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">variant_base</span> {
             <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">name</span>.<span class="ident">to_string</span>(),
-            <span class="prelude-val">Some</span>(<span class="ident">base</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}__{}&quot;</span>, <span class="ident">base</span>, <span class="ident">name</span>),
+            <span class="prelude-val">Some</span>(<span class="ident">base</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;{}__{}&quot;</span>, <span class="ident">base</span>, <span class="ident">name</span>),
         };
         <span class="comment">// Struct</span>
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">output_comment</span>(<span class="ident">name</span>)<span class="question-mark">?</span>;
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;type {} {}&quot;</span>, <span class="ident">full_name</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format</span>))<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;type {} {}&quot;</span>, <span class="ident">full_name</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format</span>))<span class="question-mark">?</span>;
 
         <span class="comment">// Link to base interface.</span>
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">base</span>) <span class="op">=</span> <span class="ident">variant_base</span> {
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\nfunc (*{}) is{}() {{}}&quot;</span>, <span class="ident">full_name</span>, <span class="ident">base</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;\nfunc (*{}) is{}() {{}}&quot;</span>, <span class="ident">full_name</span>, <span class="ident">base</span>)<span class="question-mark">?</span>;
         }
 
         <span class="comment">// Serialize</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">serialization</span> {
-            <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="macro">writeln!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">&quot;\nfunc (obj *{}) Serialize(serializer serde.Serializer) error {{&quot;</span>,
                 <span class="ident">full_name</span>
             )<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
-            <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="macro">writeln!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">&quot;if err := serializer.IncreaseContainerDepth(); err != nil {{ return err }}&quot;</span>
             )<span class="question-mark">?</span>;
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">index</span>) <span class="op">=</span> <span class="ident">variant_index</span> {
-                <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;serializer.SerializeVariantIndex({})&quot;</span>, <span class="ident">index</span>)<span class="question-mark">?</span>;
+                <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;serializer.SerializeVariantIndex({})&quot;</span>, <span class="ident">index</span>)<span class="question-mark">?</span>;
             }
-            <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="macro">writeln!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">&quot;{}&quot;</span>,
                 <span class="self">self</span>.<span class="ident">quote_serialize_value</span>(
-                    <span class="kw-2">&amp;</span><span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;(({})(*obj))&quot;</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format</span>)),
+                    <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;(({})(*obj))&quot;</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format</span>)),
                     <span class="ident">format</span>
                 )
             )<span class="question-mark">?</span>;
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;serializer.DecreaseContainerDepth()&quot;</span>)<span class="question-mark">?</span>;
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;return nil&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;serializer.DecreaseContainerDepth()&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;return nil&quot;</span>)<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
 
             <span class="kw">for</span> <span class="ident">encoding</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">encodings</span> {
                 <span class="self">self</span>.<span class="ident">output_struct_serialize_for_encoding</span>(<span class="kw-2">&amp;</span><span class="ident">full_name</span>, <span class="kw-2">*</span><span class="ident">encoding</span>)<span class="question-mark">?</span>;
@@ -1781,7 +1778,7 @@ return obj, nil
         }
         <span class="comment">// Deserialize (struct) or Load (variant)</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">serialization</span> {
-            <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="macro">writeln!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">&quot;\nfunc {0}{1}(deserializer serde.Deserializer) ({1}, error) {{&quot;</span>,
                 <span class="kw">if</span> <span class="ident">variant_base</span>.<span class="ident">is_none</span>() {
@@ -1792,17 +1789,17 @@ return obj, nil
                 <span class="ident">full_name</span>,
             )<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;var obj {}&quot;</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format</span>))<span class="question-mark">?</span>;
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;if err := deserializer.IncreaseContainerDepth(); err != nil {{ return ({})(obj), err }}&quot;</span>, <span class="ident">full_name</span>)<span class="question-mark">?</span>;
-            <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;var obj {}&quot;</span>, <span class="self">self</span>.<span class="ident">quote_type</span>(<span class="ident">format</span>))<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;if err := deserializer.IncreaseContainerDepth(); err != nil {{ return ({})(obj), err }}&quot;</span>, <span class="ident">full_name</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">&quot;{}&quot;</span>,
-                <span class="self">self</span>.<span class="ident">quote_deserialize</span>(<span class="ident">format</span>, <span class="string">&quot;obj&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;(({})(obj))&quot;</span>, <span class="ident">full_name</span>))
+                <span class="self">self</span>.<span class="ident">quote_deserialize</span>(<span class="ident">format</span>, <span class="string">&quot;obj&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;(({})(obj))&quot;</span>, <span class="ident">full_name</span>))
             )<span class="question-mark">?</span>;
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;deserializer.DecreaseContainerDepth()&quot;</span>)<span class="question-mark">?</span>;
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;return ({})(obj), nil&quot;</span>, <span class="ident">full_name</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;deserializer.DecreaseContainerDepth()&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;return ({})(obj), nil&quot;</span>, <span class="ident">full_name</span>)<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
 
             <span class="kw">if</span> <span class="ident">variant_base</span>.<span class="ident">is_none</span>() {
                 <span class="kw">for</span> <span class="ident">encoding</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">encodings</span> {
@@ -1820,7 +1817,7 @@ return obj, nil
         <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
         <span class="ident">encoding</span>: <span class="ident">Encoding</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="macro">writeln</span><span class="macro">!</span>(
+        <span class="macro">writeln!</span>(
             <span class="self">self</span>.<span class="ident">out</span>,
             <span class="string">r#&quot;
 func (obj *{0}) {2}Serialize() ([]byte, error) {{
@@ -1842,7 +1839,7 @@ func (obj *{0}) {2}Serialize() ([]byte, error) {{
         <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
         <span class="ident">encoding</span>: <span class="ident">Encoding</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="macro">writeln</span><span class="macro">!</span>(
+        <span class="macro">writeln!</span>(
             <span class="self">self</span>.<span class="ident">out</span>,
             <span class="string">r#&quot;
 func {2}Deserialize{0}(input []byte) ({0}, error) {{
@@ -1868,16 +1865,16 @@ func {2}Deserialize{0}(input []byte) ({0}, error) {{
         <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
         <span class="ident">variants</span>: <span class="kw-2">&amp;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Named</span><span class="op">&lt;</span><span class="ident">VariantFormat</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">output_comment</span>(<span class="ident">name</span>)<span class="question-mark">?</span>;
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;type {} interface {{&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;type {} interface {{&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">current_namespace</span>.<span class="ident">push</span>(<span class="ident">name</span>.<span class="ident">to_string</span>());
         <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;is{}()&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;is{}()&quot;</span>, <span class="ident">name</span>)<span class="question-mark">?</span>;
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">serialization</span> {
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;Serialize(serializer serde.Serializer) error&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;Serialize(serializer serde.Serializer) error&quot;</span>)<span class="question-mark">?</span>;
             <span class="kw">for</span> <span class="ident">encoding</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">encodings</span> {
-                <span class="macro">writeln</span><span class="macro">!</span>(
+                <span class="macro">writeln!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">&quot;{}Serialize() ([]byte, error)&quot;</span>,
                     <span class="ident">encoding</span>.<span class="ident">name</span>().<span class="ident">to_camel_case</span>()
@@ -1885,16 +1882,16 @@ func {2}Deserialize{0}(input []byte) ({0}, error) {{
             }
         }
         <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
 
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">serialization</span> {
-            <span class="macro">write</span><span class="macro">!</span>(
+            <span class="macro">write!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">&quot;\nfunc Deserialize{0}(deserializer serde.Deserializer) ({0}, error) {{&quot;</span>,
                 <span class="ident">name</span>
             )<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">indent</span>();
-            <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="macro">writeln!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">r#&quot;
 index, err := deserializer.DeserializeVariantIndex()
@@ -1903,7 +1900,7 @@ if err != nil {{ return nil, err }}
 switch index {{&quot;#</span>,
             )<span class="question-mark">?</span>;
             <span class="kw">for</span> (<span class="ident">index</span>, <span class="ident">variant</span>) <span class="kw">in</span> <span class="ident">variants</span> {
-                <span class="macro">writeln</span><span class="macro">!</span>(
+                <span class="macro">writeln!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">r#&quot;case {}:
 	if val, err := load_{}__{}(deserializer); err == nil {{
@@ -1915,15 +1912,15 @@ switch index {{&quot;#</span>,
                     <span class="ident">index</span>, <span class="ident">name</span>, <span class="ident">variant</span>.<span class="ident">name</span>
                 )<span class="question-mark">?</span>;
             }
-            <span class="macro">writeln</span><span class="macro">!</span>(
+            <span class="macro">writeln!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
                 <span class="string">&quot;default:
 	return nil, fmt.Errorf(\&quot;Unknown variant index for {}: %d\&quot;, index)&quot;</span>,
                 <span class="ident">name</span>,
             )<span class="question-mark">?</span>;
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">out</span>.<span class="ident">unindent</span>();
-            <span class="macro">writeln</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
 
             <span class="kw">for</span> <span class="ident">encoding</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">config</span>.<span class="ident">encodings</span> {
                 <span class="self">self</span>.<span class="ident">output_struct_deserialize_for_encoding</span>(<span class="ident">name</span>, <span class="kw-2">*</span><span class="ident">encoding</span>)<span class="question-mark">?</span>;
@@ -1942,10 +1939,10 @@ switch index {{&quot;#</span>,
     <span class="kw">fn</span> <span class="ident">output_container</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">format</span>: <span class="kw-2">&amp;</span><span class="ident">ContainerFormat</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">ContainerFormat</span>::<span class="kw-2">*</span>;
         <span class="kw">let</span> <span class="ident">fields</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">format</span> {
-            <span class="ident">UnitStruct</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Vec</span>::<span class="ident">new</span>(),
+            <span class="ident">UnitStruct</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Vec::new</span>(),
             <span class="ident">NewTypeStruct</span>(<span class="ident">format</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">format</span>.<span class="ident">as_ref</span>() {
                 <span class="comment">// See comment in `output_variant`.</span>
-                <span class="ident">Format</span>::<span class="ident">TypeName</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">Format</span>::<span class="prelude-ty">Option</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Named</span> {
+                <span class="ident">Format::TypeName</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">Format::Option</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">vec!</span>[<span class="ident">Named</span> {
                     <span class="ident">name</span>: <span class="string">&quot;Value&quot;</span>.<span class="ident">to_string</span>(),
                     <span class="ident">value</span>: <span class="ident">format</span>.<span class="ident">as_ref</span>().<span class="ident">clone</span>(),
                 }],
@@ -1958,7 +1955,7 @@ switch index {{&quot;#</span>,
                 .<span class="ident">iter</span>()
                 .<span class="ident">enumerate</span>()
                 .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">f</span>)<span class="op">|</span> <span class="ident">Named</span> {
-                    <span class="ident">name</span>: <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;Field{}&quot;</span>, <span class="ident">i</span>),
+                    <span class="ident">name</span>: <span class="macro">format!</span>(<span class="string">&quot;Field{}&quot;</span>, <span class="ident">i</span>),
                     <span class="ident">value</span>: <span class="ident">f</span>.<span class="ident">clone</span>(),
                 })
                 .<span class="ident">collect</span>(),
@@ -2005,31 +2002,31 @@ switch index {{&quot;#</span>,
     }
 
     <span class="kw">fn</span> <span class="ident">runtime_installation_message</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) {
-        <span class="macro">eprintln</span><span class="macro">!</span>(
+        <span class="macro">eprintln!</span>(
             <span class="string">&quot;Not installing sources for published package {}{}&quot;</span>,
             <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">serde_module_path</span> {
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">String</span>::<span class="ident">new</span>(),
-                <span class="prelude-val">Some</span>(<span class="ident">path</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}/&quot;</span>, <span class="ident">path</span>),
+                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">String::new</span>(),
+                <span class="prelude-val">Some</span>(<span class="ident">path</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;{}/&quot;</span>, <span class="ident">path</span>),
             },
             <span class="ident">name</span>
         );
     }
 }
 
-<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">SourceInstaller</span> <span class="kw">for</span> <span class="ident">Installer</span> {
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span><span class="op">&gt;</span>;
+<span class="kw">impl</span> <span class="kw">crate</span><span class="ident">::SourceInstaller</span> <span class="kw">for</span> <span class="ident">Installer</span> {
+    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std::error::Error</span><span class="op">&gt;</span>;
 
     <span class="kw">fn</span> <span class="ident">install_module</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">config</span>: <span class="kw-2">&amp;</span><span class="ident">CodeGeneratorConfig</span>,
         <span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">Registry</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="self">Self</span><span class="ident">::Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">dir_path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">install_dir</span>.<span class="ident">join</span>(<span class="kw-2">&amp;</span><span class="ident">config</span>.<span class="ident">module_name</span>);
-        <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">create_dir_all</span>(<span class="kw-2">&amp;</span><span class="ident">dir_path</span>)<span class="question-mark">?</span>;
+        <span class="ident">std::fs::create_dir_all</span>(<span class="kw-2">&amp;</span><span class="ident">dir_path</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">source_path</span> <span class="op">=</span> <span class="ident">dir_path</span>.<span class="ident">join</span>(<span class="string">&quot;lib.go&quot;</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">File</span>::<span class="ident">create</span>(<span class="ident">source_path</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">std::fs::File::create</span>(<span class="ident">source_path</span>)<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">generator</span> <span class="op">=</span> <span class="ident">CodeGenerator</span>::<span class="ident">new</span>(<span class="ident">config</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">generator</span> <span class="op">=</span> <span class="ident">CodeGenerator::new</span>(<span class="ident">config</span>);
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">path</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">serde_module_path</span> {
             <span class="ident">generator</span> <span class="op">=</span> <span class="ident">generator</span>.<span class="ident">with_serde_module_path</span>(<span class="ident">path</span>.<span class="ident">clone</span>());
         }
@@ -2037,21 +2034,22 @@ switch index {{&quot;#</span>,
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">install_serde_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">install_serde_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="self">Self</span><span class="ident">::Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">runtime_installation_message</span>(<span class="string">&quot;serde&quot;</span>);
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">install_bincode_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">install_bincode_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="self">Self</span><span class="ident">::Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">runtime_installation_message</span>(<span class="string">&quot;bincode&quot;</span>);
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">install_bcs_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">install_bcs_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="self">Self</span><span class="ident">::Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">runtime_installation_message</span>(<span class="string">&quot;bcs&quot;</span>);
         <span class="prelude-val">Ok</span>(())
     }
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="serde_generate" data-search-js="../../search-index.js"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="serde_generate" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
+</body></html>

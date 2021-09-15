@@ -1,7 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/textwrap-0.13.4/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
-<link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
-<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../textwrap/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
-                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">   1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;usr&#x2F;local&#x2F;cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;textwrap-0.13.4&#x2F;src&#x2F;lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../textwrap/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input"name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -1895,7 +1892,7 @@
 <span id="1892">1892</span>
 <span id="1893">1893</span>
 <span id="1894">1894</span>
-</pre><div class="example-wrap"><pre class="rust ">
+</pre><pre class="rust">
 <span class="doccomment">//! The textwrap library provides functions for word wrapping and</span>
 <span class="doccomment">//! indenting text.</span>
 <span class="doccomment">//!</span>
@@ -2067,16 +2064,16 @@
 <span class="attribute">#![<span class="ident">forbid</span>(<span class="ident">unsafe_code</span>)]</span> <span class="comment">// See https://github.com/mgeisler/textwrap/issues/210</span>
 <span class="attribute">#![<span class="ident">deny</span>(<span class="ident">missing_docs</span>)]</span>
 <span class="attribute">#![<span class="ident">deny</span>(<span class="ident">missing_debug_implementations</span>)]</span>
-<span class="attribute">#![<span class="ident">allow</span>(<span class="ident">clippy</span>::<span class="ident">redundant_field_names</span>)]</span>
+<span class="attribute">#![<span class="ident">allow</span>(<span class="ident">clippy::redundant_field_names</span>)]</span>
 
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">borrow</span>::<span class="ident">Cow</span>;
+<span class="kw">use</span> <span class="ident">std::borrow::Cow</span>;
 
 <span class="kw">mod</span> <span class="ident">indentation</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">indentation</span>::<span class="ident">dedent</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">indentation</span>::<span class="ident">indent</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::indentation::dedent</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::indentation::indent</span>;
 
 <span class="kw">mod</span> <span class="ident">splitting</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">splitting</span>::{<span class="ident">HyphenSplitter</span>, <span class="ident">NoHyphenation</span>, <span class="ident">WordSplitter</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::splitting</span>::{<span class="ident">HyphenSplitter</span>, <span class="ident">NoHyphenation</span>, <span class="ident">WordSplitter</span>};
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">core</span>;
 
@@ -2097,7 +2094,7 @@
     <span class="kw">pub</span> <span class="ident">break_words</span>: <span class="ident">bool</span>,
     <span class="doccomment">/// Wraping algorithm to use, see [`core::WrapAlgorithm`] for</span>
     <span class="doccomment">/// details.</span>
-    <span class="kw">pub</span> <span class="ident">wrap_algorithm</span>: <span class="ident">core</span>::<span class="ident">WrapAlgorithm</span>,
+    <span class="kw">pub</span> <span class="ident">wrap_algorithm</span>: <span class="ident">core::WrapAlgorithm</span>,
     <span class="doccomment">/// The method for splitting words. This can be used to prohibit</span>
     <span class="doccomment">/// splitting words on hyphens, or it can be used to implement</span>
     <span class="doccomment">/// language-aware machine hyphenation. Please see the</span>
@@ -2120,7 +2117,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Options</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">HyphenSplitter</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">width</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">Options</span>::<span class="ident">new</span>(<span class="ident">width</span>)
+        <span class="ident">Options::new</span>(<span class="ident">width</span>)
     }
 }
 
@@ -2207,7 +2204,7 @@
     <span class="doccomment">/// allows to change the splitter at run-time without changing the</span>
     <span class="doccomment">/// variables type.</span>
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">width</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">Options</span>::<span class="ident">with_splitter</span>(<span class="ident">width</span>, <span class="ident">HyphenSplitter</span>)
+        <span class="ident">Options::with_splitter</span>(<span class="ident">width</span>, <span class="ident">HyphenSplitter</span>)
     }
 
     <span class="doccomment">/// Creates a new [`Options`] with `width` set to the current</span>
@@ -2229,7 +2226,7 @@
     <span class="doccomment">/// enabled.</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;terminal_size&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_termwidth</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span>::<span class="ident">new</span>(<span class="ident">termwidth</span>())
+        <span class="self">Self</span><span class="ident">::new</span>(<span class="ident">termwidth</span>())
     }
 }
 
@@ -2308,9 +2305,9 @@
             <span class="ident">subsequent_indent</span>: <span class="string">&quot;&quot;</span>,
             <span class="ident">break_words</span>: <span class="bool-val">true</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;smawk&quot;</span>)]</span>
-            <span class="ident">wrap_algorithm</span>: <span class="ident">core</span>::<span class="ident">WrapAlgorithm</span>::<span class="ident">OptimalFit</span>,
+            <span class="ident">wrap_algorithm</span>: <span class="ident">core::WrapAlgorithm::OptimalFit</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;smawk&quot;</span>))]</span>
-            <span class="ident">wrap_algorithm</span>: <span class="ident">core</span>::<span class="ident">WrapAlgorithm</span>::<span class="ident">FirstFit</span>,
+            <span class="ident">wrap_algorithm</span>: <span class="ident">core::WrapAlgorithm::FirstFit</span>,
             <span class="ident">splitter</span>: <span class="ident">splitter</span>,
         }
     }
@@ -2410,7 +2407,7 @@
     <span class="doccomment">/// See [`core::WrapAlgorithm`] for details on the choices.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// [`self.wrap_algorithm`]: #structfield.wrap_algorithm</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">wrap_algorithm</span>(<span class="self">self</span>, <span class="ident">wrap_algorithm</span>: <span class="ident">core</span>::<span class="ident">WrapAlgorithm</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">wrap_algorithm</span>(<span class="self">self</span>, <span class="ident">wrap_algorithm</span>: <span class="ident">core::WrapAlgorithm</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">Options</span> {
             <span class="ident">wrap_algorithm</span>,
             ..<span class="self">self</span>
@@ -2469,7 +2466,7 @@
 <span class="doccomment">/// enabled.</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;terminal_size&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">termwidth</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
-    <span class="ident">terminal_size</span>::<span class="ident">terminal_size</span>().<span class="ident">map_or</span>(<span class="number">80</span>, <span class="op">|</span>(<span class="ident">terminal_size</span>::<span class="ident">Width</span>(<span class="ident">w</span>), <span class="kw">_</span>)<span class="op">|</span> <span class="ident">w</span>.<span class="ident">into</span>())
+    <span class="ident">terminal_size::terminal_size</span>().<span class="ident">map_or</span>(<span class="number">80</span>, <span class="op">|</span>(<span class="ident">terminal_size::Width</span>(<span class="ident">w</span>), <span class="kw">_</span>)<span class="op">|</span> <span class="ident">w</span>.<span class="ident">into</span>())
 }
 
 <span class="doccomment">/// Fill a line of text at a given width.</span>
@@ -2511,7 +2508,7 @@
 {
     <span class="comment">// This will avoid reallocation in simple cases (no</span>
     <span class="comment">// indentation, no hyphenation).</span>
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">with_capacity</span>(<span class="ident">text</span>.<span class="ident">len</span>());
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">String::with_capacity</span>(<span class="ident">text</span>.<span class="ident">len</span>());
 
     <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">line</span>) <span class="kw">in</span> <span class="ident">wrap</span>(<span class="ident">text</span>, <span class="ident">width_or_options</span>).<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
         <span class="kw">if</span> <span class="ident">i</span> <span class="op">&gt;</span> <span class="number">0</span> {
@@ -2573,9 +2570,9 @@
     <span class="kw">let</span> <span class="ident">trimmed</span> <span class="op">=</span> <span class="ident">text</span>.<span class="ident">trim_end_matches</span>(<span class="string">&#39;\n&#39;</span>);
     <span class="kw">let</span> <span class="ident">prefix_chars</span>: <span class="kw-2">&amp;</span>[<span class="kw">_</span>] <span class="op">=</span> <span class="kw-2">&amp;</span>[<span class="string">&#39; &#39;</span>, <span class="string">&#39;-&#39;</span>, <span class="string">&#39;+&#39;</span>, <span class="string">&#39;*&#39;</span>, <span class="string">&#39;&gt;&#39;</span>, <span class="string">&#39;#&#39;</span>, <span class="string">&#39;/&#39;</span>];
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">0</span>);
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">0</span>);
     <span class="kw">for</span> (<span class="ident">idx</span>, <span class="ident">line</span>) <span class="kw">in</span> <span class="ident">trimmed</span>.<span class="ident">split</span>(<span class="string">&#39;\n&#39;</span>).<span class="ident">enumerate</span>() {
-        <span class="ident">options</span>.<span class="ident">width</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">cmp</span>::<span class="ident">max</span>(<span class="ident">options</span>.<span class="ident">width</span>, <span class="ident">core</span>::<span class="ident">display_width</span>(<span class="ident">line</span>));
+        <span class="ident">options</span>.<span class="ident">width</span> <span class="op">=</span> <span class="ident">std::cmp::max</span>(<span class="ident">options</span>.<span class="ident">width</span>, <span class="ident">core::display_width</span>(<span class="ident">line</span>));
         <span class="kw">let</span> <span class="ident">without_prefix</span> <span class="op">=</span> <span class="ident">line</span>.<span class="ident">trim_start_matches</span>(<span class="ident">prefix_chars</span>);
         <span class="kw">let</span> <span class="ident">prefix</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">line</span>[..<span class="ident">line</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="ident">without_prefix</span>.<span class="ident">len</span>()];
 
@@ -2596,7 +2593,7 @@
         }
     }
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">unfilled</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">with_capacity</span>(<span class="ident">text</span>.<span class="ident">len</span>());
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">unfilled</span> <span class="op">=</span> <span class="ident">String::with_capacity</span>(<span class="ident">text</span>.<span class="ident">len</span>());
     <span class="kw">for</span> (<span class="ident">idx</span>, <span class="ident">line</span>) <span class="kw">in</span> <span class="ident">trimmed</span>.<span class="ident">split</span>(<span class="string">&#39;\n&#39;</span>).<span class="ident">enumerate</span>() {
         <span class="kw">if</span> <span class="ident">idx</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
             <span class="ident">unfilled</span>.<span class="ident">push_str</span>(<span class="kw-2">&amp;</span><span class="ident">line</span>[<span class="ident">options</span>.<span class="ident">initial_indent</span>.<span class="ident">len</span>()..]);
@@ -2783,43 +2780,43 @@
 
     <span class="kw">let</span> <span class="ident">initial_width</span> <span class="op">=</span> <span class="ident">options</span>
         .<span class="ident">width</span>
-        .<span class="ident">saturating_sub</span>(<span class="ident">core</span>::<span class="ident">display_width</span>(<span class="ident">options</span>.<span class="ident">initial_indent</span>));
+        .<span class="ident">saturating_sub</span>(<span class="ident">core::display_width</span>(<span class="ident">options</span>.<span class="ident">initial_indent</span>));
     <span class="kw">let</span> <span class="ident">subsequent_width</span> <span class="op">=</span> <span class="ident">options</span>
         .<span class="ident">width</span>
-        .<span class="ident">saturating_sub</span>(<span class="ident">core</span>::<span class="ident">display_width</span>(<span class="ident">options</span>.<span class="ident">subsequent_indent</span>));
+        .<span class="ident">saturating_sub</span>(<span class="ident">core::display_width</span>(<span class="ident">options</span>.<span class="ident">subsequent_indent</span>));
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">lines</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">new</span>();
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">lines</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
     <span class="kw">for</span> <span class="ident">line</span> <span class="kw">in</span> <span class="ident">text</span>.<span class="ident">split</span>(<span class="string">&#39;\n&#39;</span>) {
-        <span class="kw">let</span> <span class="ident">words</span> <span class="op">=</span> <span class="ident">core</span>::<span class="ident">find_words</span>(<span class="ident">line</span>);
-        <span class="kw">let</span> <span class="ident">split_words</span> <span class="op">=</span> <span class="ident">core</span>::<span class="ident">split_words</span>(<span class="ident">words</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>);
+        <span class="kw">let</span> <span class="ident">words</span> <span class="op">=</span> <span class="ident">core::find_words</span>(<span class="ident">line</span>);
+        <span class="kw">let</span> <span class="ident">split_words</span> <span class="op">=</span> <span class="ident">core::split_words</span>(<span class="ident">words</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>);
         <span class="kw">let</span> <span class="ident">broken_words</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">options</span>.<span class="ident">break_words</span> {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">broken_words</span> <span class="op">=</span> <span class="ident">core</span>::<span class="ident">break_words</span>(<span class="ident">split_words</span>, <span class="ident">subsequent_width</span>);
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">broken_words</span> <span class="op">=</span> <span class="ident">core::break_words</span>(<span class="ident">split_words</span>, <span class="ident">subsequent_width</span>);
             <span class="kw">if</span> <span class="op">!</span><span class="ident">options</span>.<span class="ident">initial_indent</span>.<span class="ident">is_empty</span>() {
                 <span class="comment">// Without this, the first word will always go into</span>
                 <span class="comment">// the first line. However, since we break words based</span>
                 <span class="comment">// on the _second_ line width, it can be wrong to</span>
                 <span class="comment">// unconditionally put the first word onto the first</span>
                 <span class="comment">// line. An empty zero-width word fixed this.</span>
-                <span class="ident">broken_words</span>.<span class="ident">insert</span>(<span class="number">0</span>, <span class="ident">core</span>::<span class="ident">Word</span>::<span class="ident">from</span>(<span class="string">&quot;&quot;</span>));
+                <span class="ident">broken_words</span>.<span class="ident">insert</span>(<span class="number">0</span>, <span class="ident">core::Word::from</span>(<span class="string">&quot;&quot;</span>));
             }
             <span class="ident">broken_words</span>
         } <span class="kw">else</span> {
             <span class="ident">split_words</span>.<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
         };
 
-        <span class="attribute">#[<span class="ident">rustfmt</span>::<span class="ident">skip</span>]</span>
+        <span class="attribute">#[<span class="ident">rustfmt::skip</span>]</span>
         <span class="kw">let</span> <span class="ident">line_lengths</span> <span class="op">=</span> <span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="kw">if</span> <span class="ident">i</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> { <span class="ident">initial_width</span> } <span class="kw">else</span> { <span class="ident">subsequent_width</span> };
         <span class="kw">let</span> <span class="ident">wrapped_words</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">options</span>.<span class="ident">wrap_algorithm</span> {
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;smawk&quot;</span>)]</span>
-            <span class="ident">core</span>::<span class="ident">WrapAlgorithm</span>::<span class="ident">OptimalFit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">core</span>::<span class="ident">wrap_optimal_fit</span>(<span class="kw-2">&amp;</span><span class="ident">broken_words</span>, <span class="ident">line_lengths</span>),
-            <span class="ident">core</span>::<span class="ident">WrapAlgorithm</span>::<span class="ident">FirstFit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">core</span>::<span class="ident">wrap_first_fit</span>(<span class="kw-2">&amp;</span><span class="ident">broken_words</span>, <span class="ident">line_lengths</span>),
+            <span class="ident">core::WrapAlgorithm::OptimalFit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">core::wrap_optimal_fit</span>(<span class="kw-2">&amp;</span><span class="ident">broken_words</span>, <span class="ident">line_lengths</span>),
+            <span class="ident">core::WrapAlgorithm::FirstFit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">core::wrap_first_fit</span>(<span class="kw-2">&amp;</span><span class="ident">broken_words</span>, <span class="ident">line_lengths</span>),
         };
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">idx</span> <span class="op">=</span> <span class="number">0</span>;
         <span class="kw">for</span> <span class="ident">words</span> <span class="kw">in</span> <span class="ident">wrapped_words</span> {
             <span class="kw">let</span> <span class="ident">last_word</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">words</span>.<span class="ident">last</span>() {
                 <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
-                    <span class="ident">lines</span>.<span class="ident">push</span>(<span class="ident">Cow</span>::<span class="ident">from</span>(<span class="string">&quot;&quot;</span>));
+                    <span class="ident">lines</span>.<span class="ident">push</span>(<span class="ident">Cow::from</span>(<span class="string">&quot;&quot;</span>));
                     <span class="kw">continue</span>;
                 }
                 <span class="prelude-val">Some</span>(<span class="ident">word</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">word</span>,
@@ -2837,14 +2834,14 @@
             <span class="comment">// The result is owned if we have indentation, otherwise</span>
             <span class="comment">// we can simply borrow an empty string.</span>
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">lines</span>.<span class="ident">is_empty</span>() <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">options</span>.<span class="ident">initial_indent</span>.<span class="ident">is_empty</span>() {
-                <span class="ident">Cow</span>::<span class="ident">Owned</span>(<span class="ident">options</span>.<span class="ident">initial_indent</span>.<span class="ident">to_owned</span>())
+                <span class="ident">Cow::Owned</span>(<span class="ident">options</span>.<span class="ident">initial_indent</span>.<span class="ident">to_owned</span>())
             } <span class="kw">else</span> <span class="kw">if</span> <span class="op">!</span><span class="ident">lines</span>.<span class="ident">is_empty</span>() <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">options</span>.<span class="ident">subsequent_indent</span>.<span class="ident">is_empty</span>() {
-                <span class="ident">Cow</span>::<span class="ident">Owned</span>(<span class="ident">options</span>.<span class="ident">subsequent_indent</span>.<span class="ident">to_owned</span>())
+                <span class="ident">Cow::Owned</span>(<span class="ident">options</span>.<span class="ident">subsequent_indent</span>.<span class="ident">to_owned</span>())
             } <span class="kw">else</span> {
                 <span class="comment">// We can use an empty string here since string</span>
                 <span class="comment">// concatenation for `Cow` preserves a borrowed value</span>
                 <span class="comment">// when either side is empty.</span>
-                <span class="ident">Cow</span>::<span class="ident">from</span>(<span class="string">&quot;&quot;</span>)
+                <span class="ident">Cow::from</span>(<span class="string">&quot;&quot;</span>)
             };
 
             <span class="ident">result</span> <span class="op">+</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">line</span>[<span class="ident">idx</span>..<span class="ident">idx</span> <span class="op">+</span> <span class="ident">len</span>];
@@ -2934,30 +2931,30 @@
     <span class="ident">S</span>: <span class="ident">WordSplitter</span>,
     <span class="ident">Opt</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Options</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">S</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 {
-    <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">columns</span> <span class="op">&gt;</span> <span class="number">0</span>);
+    <span class="macro">assert!</span>(<span class="ident">columns</span> <span class="op">&gt;</span> <span class="number">0</span>);
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">total_width_or_options</span>.<span class="ident">into</span>();
 
     <span class="kw">let</span> <span class="ident">inner_width</span> <span class="op">=</span> <span class="ident">options</span>
         .<span class="ident">width</span>
-        .<span class="ident">saturating_sub</span>(<span class="ident">core</span>::<span class="ident">display_width</span>(<span class="ident">left_gap</span>))
-        .<span class="ident">saturating_sub</span>(<span class="ident">core</span>::<span class="ident">display_width</span>(<span class="ident">right_gap</span>))
-        .<span class="ident">saturating_sub</span>(<span class="ident">core</span>::<span class="ident">display_width</span>(<span class="ident">mid_gap</span>) <span class="op">*</span> (<span class="ident">columns</span> <span class="op">-</span> <span class="number">1</span>));
+        .<span class="ident">saturating_sub</span>(<span class="ident">core::display_width</span>(<span class="ident">left_gap</span>))
+        .<span class="ident">saturating_sub</span>(<span class="ident">core::display_width</span>(<span class="ident">right_gap</span>))
+        .<span class="ident">saturating_sub</span>(<span class="ident">core::display_width</span>(<span class="ident">mid_gap</span>) <span class="op">*</span> (<span class="ident">columns</span> <span class="op">-</span> <span class="number">1</span>));
 
-    <span class="kw">let</span> <span class="ident">column_width</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">cmp</span>::<span class="ident">max</span>(<span class="ident">inner_width</span> <span class="op">/</span> <span class="ident">columns</span>, <span class="number">1</span>);
+    <span class="kw">let</span> <span class="ident">column_width</span> <span class="op">=</span> <span class="ident">std::cmp::max</span>(<span class="ident">inner_width</span> <span class="op">/</span> <span class="ident">columns</span>, <span class="number">1</span>);
     <span class="ident">options</span>.<span class="ident">width</span> <span class="op">=</span> <span class="ident">column_width</span>;
     <span class="kw">let</span> <span class="ident">last_column_padding</span> <span class="op">=</span> <span class="string">&quot; &quot;</span>.<span class="ident">repeat</span>(<span class="ident">inner_width</span> <span class="op">%</span> <span class="ident">column_width</span>);
     <span class="kw">let</span> <span class="ident">wrapped_lines</span> <span class="op">=</span> <span class="ident">wrap</span>(<span class="ident">text</span>, <span class="ident">options</span>);
     <span class="kw">let</span> <span class="ident">lines_per_column</span> <span class="op">=</span>
-        <span class="ident">wrapped_lines</span>.<span class="ident">len</span>() <span class="op">/</span> <span class="ident">columns</span> <span class="op">+</span> <span class="ident">usize</span>::<span class="ident">from</span>(<span class="ident">wrapped_lines</span>.<span class="ident">len</span>() <span class="op">%</span> <span class="ident">columns</span> <span class="op">&gt;</span> <span class="number">0</span>);
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">lines</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">new</span>();
+        <span class="ident">wrapped_lines</span>.<span class="ident">len</span>() <span class="op">/</span> <span class="ident">columns</span> <span class="op">+</span> <span class="ident">usize::from</span>(<span class="ident">wrapped_lines</span>.<span class="ident">len</span>() <span class="op">%</span> <span class="ident">columns</span> <span class="op">&gt;</span> <span class="number">0</span>);
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">lines</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
     <span class="kw">for</span> <span class="ident">line_no</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">lines_per_column</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">line</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">from</span>(<span class="ident">left_gap</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">line</span> <span class="op">=</span> <span class="ident">String::from</span>(<span class="ident">left_gap</span>);
         <span class="kw">for</span> <span class="ident">column_no</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">columns</span> {
             <span class="kw">match</span> <span class="ident">wrapped_lines</span>.<span class="ident">get</span>(<span class="ident">line_no</span> <span class="op">+</span> <span class="ident">column_no</span> <span class="op">*</span> <span class="ident">lines_per_column</span>) {
                 <span class="prelude-val">Some</span>(<span class="ident">column_line</span>) <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="ident">line</span>.<span class="ident">push_str</span>(<span class="kw-2">&amp;</span><span class="ident">column_line</span>);
-                    <span class="ident">line</span>.<span class="ident">push_str</span>(<span class="kw-2">&amp;</span><span class="string">&quot; &quot;</span>.<span class="ident">repeat</span>(<span class="ident">column_width</span> <span class="op">-</span> <span class="ident">core</span>::<span class="ident">display_width</span>(<span class="kw-2">&amp;</span><span class="ident">column_line</span>)));
+                    <span class="ident">line</span>.<span class="ident">push_str</span>(<span class="kw-2">&amp;</span><span class="string">&quot; &quot;</span>.<span class="ident">repeat</span>(<span class="ident">column_width</span> <span class="op">-</span> <span class="ident">core::display_width</span>(<span class="kw-2">&amp;</span><span class="ident">column_line</span>)));
                 }
                 <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="ident">line</span>.<span class="ident">push_str</span>(<span class="kw-2">&amp;</span><span class="string">&quot; &quot;</span>.<span class="ident">repeat</span>(<span class="ident">column_width</span>));
@@ -3027,12 +3024,12 @@
 <span class="doccomment">/// benchmark](https://github.com/mgeisler/textwrap/blob/master/benches/linear.rs)</span>
 <span class="doccomment">/// for details.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">fill_inplace</span>(<span class="ident">text</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">String</span>, <span class="ident">width</span>: <span class="ident">usize</span>) {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">indices</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">new</span>();
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">indices</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">offset</span> <span class="op">=</span> <span class="number">0</span>;
     <span class="kw">for</span> <span class="ident">line</span> <span class="kw">in</span> <span class="ident">text</span>.<span class="ident">split</span>(<span class="string">&#39;\n&#39;</span>) {
-        <span class="kw">let</span> <span class="ident">words</span> <span class="op">=</span> <span class="ident">core</span>::<span class="ident">find_words</span>(<span class="ident">line</span>).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
-        <span class="kw">let</span> <span class="ident">wrapped_words</span> <span class="op">=</span> <span class="ident">core</span>::<span class="ident">wrap_first_fit</span>(<span class="kw-2">&amp;</span><span class="ident">words</span>, <span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">width</span>);
+        <span class="kw">let</span> <span class="ident">words</span> <span class="op">=</span> <span class="ident">core::find_words</span>(<span class="ident">line</span>).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
+        <span class="kw">let</span> <span class="ident">wrapped_words</span> <span class="op">=</span> <span class="ident">core::wrap_first_fit</span>(<span class="kw-2">&amp;</span><span class="ident">words</span>, <span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">width</span>);
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">line_offset</span> <span class="op">=</span> <span class="ident">offset</span>;
         <span class="kw">for</span> <span class="ident">words</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">wrapped_words</span>[..<span class="ident">wrapped_words</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>] {
@@ -3052,11 +3049,11 @@
         <span class="ident">offset</span> <span class="op">+</span><span class="op">=</span> <span class="ident">line</span>.<span class="ident">len</span>() <span class="op">+</span> <span class="number">1</span>;
     }
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bytes</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">mem</span>::<span class="ident">take</span>(<span class="ident">text</span>).<span class="ident">into_bytes</span>();
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bytes</span> <span class="op">=</span> <span class="ident">std::mem::take</span>(<span class="ident">text</span>).<span class="ident">into_bytes</span>();
     <span class="kw">for</span> <span class="ident">idx</span> <span class="kw">in</span> <span class="ident">indices</span> {
         <span class="ident">bytes</span>[<span class="ident">idx</span>] <span class="op">=</span> <span class="string">b&#39;\n&#39;</span>;
     }
-    <span class="kw-2">*</span><span class="ident">text</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">from_utf8</span>(<span class="ident">bytes</span>).<span class="ident">unwrap</span>();
+    <span class="kw-2">*</span><span class="ident">text</span> <span class="op">=</span> <span class="ident">String::from_utf8</span>(<span class="ident">bytes</span>).<span class="ident">unwrap</span>();
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
@@ -3067,14 +3064,14 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">options_agree_with_usize</span>() {
-        <span class="kw">let</span> <span class="ident">opt_usize</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">from</span>(<span class="number">42_usize</span>);
-        <span class="kw">let</span> <span class="ident">opt_options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">42</span>);
+        <span class="kw">let</span> <span class="ident">opt_usize</span> <span class="op">=</span> <span class="ident">Options::from</span>(<span class="number">42_usize</span>);
+        <span class="kw">let</span> <span class="ident">opt_options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">42</span>);
 
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">opt_usize</span>.<span class="ident">width</span>, <span class="ident">opt_options</span>.<span class="ident">width</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">opt_usize</span>.<span class="ident">initial_indent</span>, <span class="ident">opt_options</span>.<span class="ident">initial_indent</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">opt_usize</span>.<span class="ident">subsequent_indent</span>, <span class="ident">opt_options</span>.<span class="ident">subsequent_indent</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">opt_usize</span>.<span class="ident">break_words</span>, <span class="ident">opt_options</span>.<span class="ident">break_words</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="macro">assert_eq!</span>(<span class="ident">opt_usize</span>.<span class="ident">width</span>, <span class="ident">opt_options</span>.<span class="ident">width</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">opt_usize</span>.<span class="ident">initial_indent</span>, <span class="ident">opt_options</span>.<span class="ident">initial_indent</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">opt_usize</span>.<span class="ident">subsequent_indent</span>, <span class="ident">opt_options</span>.<span class="ident">subsequent_indent</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">opt_usize</span>.<span class="ident">break_words</span>, <span class="ident">opt_options</span>.<span class="ident">break_words</span>);
+        <span class="macro">assert_eq!</span>(
             <span class="ident">opt_usize</span>.<span class="ident">splitter</span>.<span class="ident">split_points</span>(<span class="string">&quot;hello-world&quot;</span>),
             <span class="ident">opt_options</span>.<span class="ident">splitter</span>.<span class="ident">split_points</span>(<span class="string">&quot;hello-world&quot;</span>)
         );
@@ -3082,48 +3079,48 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">no_wrap</span>() {
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo&quot;</span>, <span class="number">10</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;foo&quot;</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo&quot;</span>, <span class="number">10</span>), <span class="macro">vec!</span>[<span class="string">&quot;foo&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">wrap_simple</span>() {
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo bar baz&quot;</span>, <span class="number">5</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;foo&quot;</span>, <span class="string">&quot;bar&quot;</span>, <span class="string">&quot;baz&quot;</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo bar baz&quot;</span>, <span class="number">5</span>), <span class="macro">vec!</span>[<span class="string">&quot;foo&quot;</span>, <span class="string">&quot;bar&quot;</span>, <span class="string">&quot;baz&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">to_be_or_not</span>() {
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="macro">assert_eq!</span>(
             <span class="ident">wrap</span>(
                 <span class="string">&quot;To be, or not to be, that is the question.&quot;</span>,
-                <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">10</span>).<span class="ident">wrap_algorithm</span>(<span class="ident">core</span>::<span class="ident">WrapAlgorithm</span>::<span class="ident">FirstFit</span>)
+                <span class="ident">Options::new</span>(<span class="number">10</span>).<span class="ident">wrap_algorithm</span>(<span class="ident">core::WrapAlgorithm::FirstFit</span>)
             ),
-            <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;To be, or&quot;</span>, <span class="string">&quot;not to be,&quot;</span>, <span class="string">&quot;that is&quot;</span>, <span class="string">&quot;the&quot;</span>, <span class="string">&quot;question.&quot;</span>]
+            <span class="macro">vec!</span>[<span class="string">&quot;To be, or&quot;</span>, <span class="string">&quot;not to be,&quot;</span>, <span class="string">&quot;that is&quot;</span>, <span class="string">&quot;the&quot;</span>, <span class="string">&quot;question.&quot;</span>]
         );
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">multiple_words_on_first_line</span>() {
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo bar baz&quot;</span>, <span class="number">10</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;foo bar&quot;</span>, <span class="string">&quot;baz&quot;</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo bar baz&quot;</span>, <span class="number">10</span>), <span class="macro">vec!</span>[<span class="string">&quot;foo bar&quot;</span>, <span class="string">&quot;baz&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">long_word</span>() {
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo&quot;</span>, <span class="number">0</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;f&quot;</span>, <span class="string">&quot;o&quot;</span>, <span class="string">&quot;o&quot;</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo&quot;</span>, <span class="number">0</span>), <span class="macro">vec!</span>[<span class="string">&quot;f&quot;</span>, <span class="string">&quot;o&quot;</span>, <span class="string">&quot;o&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">long_words</span>() {
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo bar&quot;</span>, <span class="number">0</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;f&quot;</span>, <span class="string">&quot;o&quot;</span>, <span class="string">&quot;o&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;a&quot;</span>, <span class="string">&quot;r&quot;</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo bar&quot;</span>, <span class="number">0</span>), <span class="macro">vec!</span>[<span class="string">&quot;f&quot;</span>, <span class="string">&quot;o&quot;</span>, <span class="string">&quot;o&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;a&quot;</span>, <span class="string">&quot;r&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">max_width</span>() {
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo bar&quot;</span>, <span class="ident">usize</span>::<span class="ident">max_value</span>()), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;foo bar&quot;</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo bar&quot;</span>, <span class="ident">usize::max_value</span>()), <span class="macro">vec!</span>[<span class="string">&quot;foo bar&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">leading_whitespace</span>() {
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;  foo bar&quot;</span>, <span class="number">6</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;  foo&quot;</span>, <span class="string">&quot;bar&quot;</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;  foo bar&quot;</span>, <span class="number">6</span>), <span class="macro">vec!</span>[<span class="string">&quot;  foo&quot;</span>, <span class="string">&quot;bar&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -3131,16 +3128,16 @@
         <span class="comment">// Whitespace is only significant inside a line. After a line</span>
         <span class="comment">// gets too long and is broken, the first word starts in</span>
         <span class="comment">// column zero and is not indented.</span>
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo     bar     baz  &quot;</span>, <span class="number">5</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;foo&quot;</span>, <span class="string">&quot;bar&quot;</span>, <span class="string">&quot;baz&quot;</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo     bar     baz  &quot;</span>, <span class="number">5</span>), <span class="macro">vec!</span>[<span class="string">&quot;foo&quot;</span>, <span class="string">&quot;bar&quot;</span>, <span class="string">&quot;baz&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">issue_99</span>() {
         <span class="comment">// We did not reset the in_whitespace flag correctly and did</span>
         <span class="comment">// not handle single-character words after a line break.</span>
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="macro">assert_eq!</span>(
             <span class="ident">wrap</span>(<span class="string">&quot;aaabbbccc x yyyzzzwww&quot;</span>, <span class="number">9</span>),
-            <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;aaabbbccc&quot;</span>, <span class="string">&quot;x&quot;</span>, <span class="string">&quot;yyyzzzwww&quot;</span>]
+            <span class="macro">vec!</span>[<span class="string">&quot;aaabbbccc&quot;</span>, <span class="string">&quot;x&quot;</span>, <span class="string">&quot;yyyzzzwww&quot;</span>]
         );
     }
 
@@ -3148,16 +3145,16 @@
     <span class="kw">fn</span> <span class="ident">issue_129</span>() {
         <span class="comment">// The dash is an em-dash which takes up four bytes. We used</span>
         <span class="comment">// to panic since we tried to index into the character.</span>
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;x – x&quot;</span>, <span class="number">1</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;x&quot;</span>, <span class="string">&quot;–&quot;</span>, <span class="string">&quot;x&quot;</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;x – x&quot;</span>, <span class="number">1</span>), <span class="macro">vec!</span>[<span class="string">&quot;x&quot;</span>, <span class="string">&quot;–&quot;</span>, <span class="string">&quot;x&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unicode-width&quot;</span>)]</span>
     <span class="kw">fn</span> <span class="ident">wide_character_handling</span>() {
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;Hello, World!&quot;</span>, <span class="number">15</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;Hello, World!&quot;</span>]);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;Hello, World!&quot;</span>, <span class="number">15</span>), <span class="macro">vec!</span>[<span class="string">&quot;Hello, World!&quot;</span>]);
+        <span class="macro">assert_eq!</span>(
             <span class="ident">wrap</span>(<span class="string">&quot;Ｈｅｌｌｏ, Ｗｏｒｌｄ!&quot;</span>, <span class="number">15</span>),
-            <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;Ｈｅｌｌｏ,&quot;</span>, <span class="string">&quot;Ｗｏｒｌｄ!&quot;</span>]
+            <span class="macro">vec!</span>[<span class="string">&quot;Ｈｅｌｌｏ,&quot;</span>, <span class="string">&quot;Ｗｏｒｌｄ!&quot;</span>]
         );
     }
 
@@ -3167,39 +3164,39 @@
         <span class="comment">// However, this is somewhat inconsistent and undesirable if</span>
         <span class="comment">// the indentation is something like a border (&quot;| &quot;) which you</span>
         <span class="comment">// want to apply to all lines, empty or not.</span>
-        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">10</span>).<span class="ident">initial_indent</span>(<span class="string">&quot;!!!&quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">fill</span>(<span class="string">&quot;&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="string">&quot;!!!&quot;</span>);
+        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">10</span>).<span class="ident">initial_indent</span>(<span class="string">&quot;!!!&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">fill</span>(<span class="string">&quot;&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="string">&quot;!!!&quot;</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">indent_single_line</span>() {
-        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">10</span>).<span class="ident">initial_indent</span>(<span class="string">&quot;&gt;&gt;&gt;&quot;</span>); <span class="comment">// No trailing space</span>
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">fill</span>(<span class="string">&quot;foo&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="string">&quot;&gt;&gt;&gt;foo&quot;</span>);
+        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">10</span>).<span class="ident">initial_indent</span>(<span class="string">&quot;&gt;&gt;&gt;&quot;</span>); <span class="comment">// No trailing space</span>
+        <span class="macro">assert_eq!</span>(<span class="ident">fill</span>(<span class="string">&quot;foo&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="string">&quot;&gt;&gt;&gt;foo&quot;</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unicode-width&quot;</span>)]</span>
     <span class="kw">fn</span> <span class="ident">indent_first_emoji</span>() {
-        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">10</span>).<span class="ident">initial_indent</span>(<span class="string">&quot;👉👉&quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">10</span>).<span class="ident">initial_indent</span>(<span class="string">&quot;👉👉&quot;</span>);
+        <span class="macro">assert_eq!</span>(
             <span class="ident">wrap</span>(<span class="string">&quot;x x x x x x x x x x x x x&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>),
-            <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;👉👉x x x&quot;</span>, <span class="string">&quot;x x x x x&quot;</span>, <span class="string">&quot;x x x x x&quot;</span>]
+            <span class="macro">vec!</span>[<span class="string">&quot;👉👉x x x&quot;</span>, <span class="string">&quot;x x x x x&quot;</span>, <span class="string">&quot;x x x x x&quot;</span>]
         );
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">indent_multiple_lines</span>() {
-        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">6</span>).<span class="ident">initial_indent</span>(<span class="string">&quot;* &quot;</span>).<span class="ident">subsequent_indent</span>(<span class="string">&quot;  &quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">6</span>).<span class="ident">initial_indent</span>(<span class="string">&quot;* &quot;</span>).<span class="ident">subsequent_indent</span>(<span class="string">&quot;  &quot;</span>);
+        <span class="macro">assert_eq!</span>(
             <span class="ident">wrap</span>(<span class="string">&quot;foo bar baz&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>),
-            <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;* foo&quot;</span>, <span class="string">&quot;  bar&quot;</span>, <span class="string">&quot;  baz&quot;</span>]
+            <span class="macro">vec!</span>[<span class="string">&quot;* foo&quot;</span>, <span class="string">&quot;  bar&quot;</span>, <span class="string">&quot;  baz&quot;</span>]
         );
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">indent_break_words</span>() {
-        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">5</span>).<span class="ident">initial_indent</span>(<span class="string">&quot;* &quot;</span>).<span class="ident">subsequent_indent</span>(<span class="string">&quot;  &quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foobarbaz&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;* foo&quot;</span>, <span class="string">&quot;  bar&quot;</span>, <span class="string">&quot;  baz&quot;</span>]);
+        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">5</span>).<span class="ident">initial_indent</span>(<span class="string">&quot;* &quot;</span>).<span class="ident">subsequent_indent</span>(<span class="string">&quot;  &quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foobarbaz&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="macro">vec!</span>[<span class="string">&quot;* foo&quot;</span>, <span class="string">&quot;  bar&quot;</span>, <span class="string">&quot;  baz&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -3208,155 +3205,155 @@
         <span class="comment">// according to the width of the subsequent lines. The first</span>
         <span class="comment">// fragment of the word no longer fits on the first line,</span>
         <span class="comment">// which ends up being pure indentation.</span>
-        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">5</span>).<span class="ident">initial_indent</span>(<span class="string">&quot;--&gt;&quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foobarbaz&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;--&gt;&quot;</span>, <span class="string">&quot;fooba&quot;</span>, <span class="string">&quot;rbaz&quot;</span>]);
+        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">5</span>).<span class="ident">initial_indent</span>(<span class="string">&quot;--&gt;&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foobarbaz&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="macro">vec!</span>[<span class="string">&quot;--&gt;&quot;</span>, <span class="string">&quot;fooba&quot;</span>, <span class="string">&quot;rbaz&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">hyphens</span>() {
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo-bar&quot;</span>, <span class="number">5</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;foo-&quot;</span>, <span class="string">&quot;bar&quot;</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo-bar&quot;</span>, <span class="number">5</span>), <span class="macro">vec!</span>[<span class="string">&quot;foo-&quot;</span>, <span class="string">&quot;bar&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">trailing_hyphen</span>() {
-        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">5</span>).<span class="ident">break_words</span>(<span class="bool-val">false</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foobar-&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;foobar-&quot;</span>]);
+        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">5</span>).<span class="ident">break_words</span>(<span class="bool-val">false</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foobar-&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="macro">vec!</span>[<span class="string">&quot;foobar-&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">multiple_hyphens</span>() {
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo-bar-baz&quot;</span>, <span class="number">5</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;foo-&quot;</span>, <span class="string">&quot;bar-&quot;</span>, <span class="string">&quot;baz&quot;</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo-bar-baz&quot;</span>, <span class="number">5</span>), <span class="macro">vec!</span>[<span class="string">&quot;foo-&quot;</span>, <span class="string">&quot;bar-&quot;</span>, <span class="string">&quot;baz&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">hyphens_flag</span>() {
-        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">5</span>).<span class="ident">break_words</span>(<span class="bool-val">false</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">5</span>).<span class="ident">break_words</span>(<span class="bool-val">false</span>);
+        <span class="macro">assert_eq!</span>(
             <span class="ident">wrap</span>(<span class="string">&quot;The --foo-bar flag.&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>),
-            <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;The&quot;</span>, <span class="string">&quot;--foo-&quot;</span>, <span class="string">&quot;bar&quot;</span>, <span class="string">&quot;flag.&quot;</span>]
+            <span class="macro">vec!</span>[<span class="string">&quot;The&quot;</span>, <span class="string">&quot;--foo-&quot;</span>, <span class="string">&quot;bar&quot;</span>, <span class="string">&quot;flag.&quot;</span>]
         );
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">repeated_hyphens</span>() {
-        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">4</span>).<span class="ident">break_words</span>(<span class="bool-val">false</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo--bar&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;foo--bar&quot;</span>]);
+        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">4</span>).<span class="ident">break_words</span>(<span class="bool-val">false</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo--bar&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="macro">vec!</span>[<span class="string">&quot;foo--bar&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">hyphens_alphanumeric</span>() {
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;Na2-CH4&quot;</span>, <span class="number">5</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;Na2-&quot;</span>, <span class="string">&quot;CH4&quot;</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;Na2-CH4&quot;</span>, <span class="number">5</span>), <span class="macro">vec!</span>[<span class="string">&quot;Na2-&quot;</span>, <span class="string">&quot;CH4&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">hyphens_non_alphanumeric</span>() {
-        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">5</span>).<span class="ident">break_words</span>(<span class="bool-val">false</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo(-)bar&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;foo(-)bar&quot;</span>]);
+        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">5</span>).<span class="ident">break_words</span>(<span class="bool-val">false</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo(-)bar&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="macro">vec!</span>[<span class="string">&quot;foo(-)bar&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">multiple_splits</span>() {
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo-bar-baz&quot;</span>, <span class="number">9</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;foo-bar-&quot;</span>, <span class="string">&quot;baz&quot;</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo-bar-baz&quot;</span>, <span class="number">9</span>), <span class="macro">vec!</span>[<span class="string">&quot;foo-bar-&quot;</span>, <span class="string">&quot;baz&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">forced_split</span>() {
-        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">5</span>).<span class="ident">break_words</span>(<span class="bool-val">false</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foobar-baz&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;foobar-&quot;</span>, <span class="string">&quot;baz&quot;</span>]);
+        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">5</span>).<span class="ident">break_words</span>(<span class="bool-val">false</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foobar-baz&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="macro">vec!</span>[<span class="string">&quot;foobar-&quot;</span>, <span class="string">&quot;baz&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">multiple_unbroken_words_issue_193</span>() {
-        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">3</span>).<span class="ident">break_words</span>(<span class="bool-val">false</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">3</span>).<span class="ident">break_words</span>(<span class="bool-val">false</span>);
+        <span class="macro">assert_eq!</span>(
             <span class="ident">wrap</span>(<span class="string">&quot;small large tiny&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>),
-            <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;small&quot;</span>, <span class="string">&quot;large&quot;</span>, <span class="string">&quot;tiny&quot;</span>]
+            <span class="macro">vec!</span>[<span class="string">&quot;small&quot;</span>, <span class="string">&quot;large&quot;</span>, <span class="string">&quot;tiny&quot;</span>]
         );
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="macro">assert_eq!</span>(
             <span class="ident">wrap</span>(<span class="string">&quot;small  large   tiny&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>),
-            <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;small&quot;</span>, <span class="string">&quot;large&quot;</span>, <span class="string">&quot;tiny&quot;</span>]
+            <span class="macro">vec!</span>[<span class="string">&quot;small&quot;</span>, <span class="string">&quot;large&quot;</span>, <span class="string">&quot;tiny&quot;</span>]
         );
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">very_narrow_lines_issue_193</span>() {
-        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">1</span>).<span class="ident">break_words</span>(<span class="bool-val">false</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;fooo x y&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;fooo&quot;</span>, <span class="string">&quot;x&quot;</span>, <span class="string">&quot;y&quot;</span>]);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;fooo   x     y&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;fooo&quot;</span>, <span class="string">&quot;x&quot;</span>, <span class="string">&quot;y&quot;</span>]);
+        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">1</span>).<span class="ident">break_words</span>(<span class="bool-val">false</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;fooo x y&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="macro">vec!</span>[<span class="string">&quot;fooo&quot;</span>, <span class="string">&quot;x&quot;</span>, <span class="string">&quot;y&quot;</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;fooo   x     y&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="macro">vec!</span>[<span class="string">&quot;fooo&quot;</span>, <span class="string">&quot;x&quot;</span>, <span class="string">&quot;y&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">simple_hyphens_static</span>() {
-        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">8</span>).<span class="ident">splitter</span>(<span class="ident">HyphenSplitter</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo bar-baz&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;foo bar-&quot;</span>, <span class="string">&quot;baz&quot;</span>]);
+        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">8</span>).<span class="ident">splitter</span>(<span class="ident">HyphenSplitter</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo bar-baz&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="macro">vec!</span>[<span class="string">&quot;foo bar-&quot;</span>, <span class="string">&quot;baz&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">simple_hyphens_dynamic</span>() {
-        <span class="kw">let</span> <span class="ident">options</span>: <span class="ident">Options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">8</span>).<span class="ident">splitter</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">HyphenSplitter</span>));
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo bar-baz&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;foo bar-&quot;</span>, <span class="string">&quot;baz&quot;</span>]);
+        <span class="kw">let</span> <span class="ident">options</span>: <span class="ident">Options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">8</span>).<span class="ident">splitter</span>(<span class="ident">Box::new</span>(<span class="ident">HyphenSplitter</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo bar-baz&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="macro">vec!</span>[<span class="string">&quot;foo bar-&quot;</span>, <span class="string">&quot;baz&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">no_hyphenation_static</span>() {
-        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">8</span>).<span class="ident">splitter</span>(<span class="ident">NoHyphenation</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo bar-baz&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;foo&quot;</span>, <span class="string">&quot;bar-baz&quot;</span>]);
+        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">8</span>).<span class="ident">splitter</span>(<span class="ident">NoHyphenation</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo bar-baz&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="macro">vec!</span>[<span class="string">&quot;foo&quot;</span>, <span class="string">&quot;bar-baz&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">no_hyphenation_dynamic</span>() {
-        <span class="kw">let</span> <span class="ident">options</span>: <span class="ident">Options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">8</span>).<span class="ident">splitter</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">NoHyphenation</span>));
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo bar-baz&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;foo&quot;</span>, <span class="string">&quot;bar-baz&quot;</span>]);
+        <span class="kw">let</span> <span class="ident">options</span>: <span class="ident">Options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">8</span>).<span class="ident">splitter</span>(<span class="ident">Box::new</span>(<span class="ident">NoHyphenation</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo bar-baz&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="macro">vec!</span>[<span class="string">&quot;foo&quot;</span>, <span class="string">&quot;bar-baz&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;hyphenation&quot;</span>)]</span>
     <span class="kw">fn</span> <span class="ident">auto_hyphenation_double_hyphenation_static</span>() {
-        <span class="kw">let</span> <span class="ident">dictionary</span> <span class="op">=</span> <span class="ident">Standard</span>::<span class="ident">from_embedded</span>(<span class="ident">Language</span>::<span class="ident">EnglishUS</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">10</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="kw">let</span> <span class="ident">dictionary</span> <span class="op">=</span> <span class="ident">Standard::from_embedded</span>(<span class="ident">Language::EnglishUS</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">10</span>);
+        <span class="macro">assert_eq!</span>(
             <span class="ident">wrap</span>(<span class="string">&quot;Internationalization&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>),
-            <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;Internatio&quot;</span>, <span class="string">&quot;nalization&quot;</span>]
+            <span class="macro">vec!</span>[<span class="string">&quot;Internatio&quot;</span>, <span class="string">&quot;nalization&quot;</span>]
         );
 
-        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">10</span>).<span class="ident">splitter</span>(<span class="ident">dictionary</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">10</span>).<span class="ident">splitter</span>(<span class="ident">dictionary</span>);
+        <span class="macro">assert_eq!</span>(
             <span class="ident">wrap</span>(<span class="string">&quot;Internationalization&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>),
-            <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;Interna-&quot;</span>, <span class="string">&quot;tionaliza-&quot;</span>, <span class="string">&quot;tion&quot;</span>]
+            <span class="macro">vec!</span>[<span class="string">&quot;Interna-&quot;</span>, <span class="string">&quot;tionaliza-&quot;</span>, <span class="string">&quot;tion&quot;</span>]
         );
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;hyphenation&quot;</span>)]</span>
     <span class="kw">fn</span> <span class="ident">auto_hyphenation_double_hyphenation_dynamic</span>() {
-        <span class="kw">let</span> <span class="ident">dictionary</span> <span class="op">=</span> <span class="ident">Standard</span>::<span class="ident">from_embedded</span>(<span class="ident">Language</span>::<span class="ident">EnglishUS</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">options</span>: <span class="ident">Options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">10</span>).<span class="ident">splitter</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">HyphenSplitter</span>));
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="kw">let</span> <span class="ident">dictionary</span> <span class="op">=</span> <span class="ident">Standard::from_embedded</span>(<span class="ident">Language::EnglishUS</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">options</span>: <span class="ident">Options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">10</span>).<span class="ident">splitter</span>(<span class="ident">Box::new</span>(<span class="ident">HyphenSplitter</span>));
+        <span class="macro">assert_eq!</span>(
             <span class="ident">wrap</span>(<span class="string">&quot;Internationalization&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>),
-            <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;Internatio&quot;</span>, <span class="string">&quot;nalization&quot;</span>]
+            <span class="macro">vec!</span>[<span class="string">&quot;Internatio&quot;</span>, <span class="string">&quot;nalization&quot;</span>]
         );
 
-        <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">10</span>).<span class="ident">splitter</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">dictionary</span>));
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">10</span>).<span class="ident">splitter</span>(<span class="ident">Box::new</span>(<span class="ident">dictionary</span>));
+        <span class="macro">assert_eq!</span>(
             <span class="ident">wrap</span>(<span class="string">&quot;Internationalization&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>),
-            <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;Interna-&quot;</span>, <span class="string">&quot;tionaliza-&quot;</span>, <span class="string">&quot;tion&quot;</span>]
+            <span class="macro">vec!</span>[<span class="string">&quot;Interna-&quot;</span>, <span class="string">&quot;tionaliza-&quot;</span>, <span class="string">&quot;tion&quot;</span>]
         );
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;hyphenation&quot;</span>)]</span>
     <span class="kw">fn</span> <span class="ident">auto_hyphenation_issue_158</span>() {
-        <span class="kw">let</span> <span class="ident">dictionary</span> <span class="op">=</span> <span class="ident">Standard</span>::<span class="ident">from_embedded</span>(<span class="ident">Language</span>::<span class="ident">EnglishUS</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">10</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="kw">let</span> <span class="ident">dictionary</span> <span class="op">=</span> <span class="ident">Standard::from_embedded</span>(<span class="ident">Language::EnglishUS</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">10</span>);
+        <span class="macro">assert_eq!</span>(
             <span class="ident">wrap</span>(<span class="string">&quot;participation is the key to success&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>),
-            <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;participat&quot;</span>, <span class="string">&quot;ion is&quot;</span>, <span class="string">&quot;the key to&quot;</span>, <span class="string">&quot;success&quot;</span>]
+            <span class="macro">vec!</span>[<span class="string">&quot;participat&quot;</span>, <span class="string">&quot;ion is&quot;</span>, <span class="string">&quot;the key to&quot;</span>, <span class="string">&quot;success&quot;</span>]
         );
 
-        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">10</span>).<span class="ident">splitter</span>(<span class="ident">dictionary</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">10</span>).<span class="ident">splitter</span>(<span class="ident">dictionary</span>);
+        <span class="macro">assert_eq!</span>(
             <span class="ident">wrap</span>(<span class="string">&quot;participation is the key to success&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>),
-            <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;partici-&quot;</span>, <span class="string">&quot;pation is&quot;</span>, <span class="string">&quot;the key to&quot;</span>, <span class="string">&quot;success&quot;</span>]
+            <span class="macro">vec!</span>[<span class="string">&quot;partici-&quot;</span>, <span class="string">&quot;pation is&quot;</span>, <span class="string">&quot;the key to&quot;</span>, <span class="string">&quot;success&quot;</span>]
         );
     }
 
@@ -3365,11 +3362,11 @@
     <span class="kw">fn</span> <span class="ident">split_len_hyphenation</span>() {
         <span class="comment">// Test that hyphenation takes the width of the wihtespace</span>
         <span class="comment">// into account.</span>
-        <span class="kw">let</span> <span class="ident">dictionary</span> <span class="op">=</span> <span class="ident">Standard</span>::<span class="ident">from_embedded</span>(<span class="ident">Language</span>::<span class="ident">EnglishUS</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">15</span>).<span class="ident">splitter</span>(<span class="ident">dictionary</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="kw">let</span> <span class="ident">dictionary</span> <span class="op">=</span> <span class="ident">Standard::from_embedded</span>(<span class="ident">Language::EnglishUS</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">15</span>).<span class="ident">splitter</span>(<span class="ident">dictionary</span>);
+        <span class="macro">assert_eq!</span>(
             <span class="ident">wrap</span>(<span class="string">&quot;garbage   collection&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>),
-            <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;garbage   col-&quot;</span>, <span class="string">&quot;lection&quot;</span>]
+            <span class="macro">vec!</span>[<span class="string">&quot;garbage   col-&quot;</span>, <span class="string">&quot;lection&quot;</span>]
         );
     }
 
@@ -3378,92 +3375,92 @@
     <span class="kw">fn</span> <span class="ident">borrowed_lines</span>() {
         <span class="comment">// Lines that end with an extra hyphen are owned, the final</span>
         <span class="comment">// line is borrowed.</span>
-        <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">borrow</span>::<span class="ident">Cow</span>::{<span class="ident">Borrowed</span>, <span class="ident">Owned</span>};
-        <span class="kw">let</span> <span class="ident">dictionary</span> <span class="op">=</span> <span class="ident">Standard</span>::<span class="ident">from_embedded</span>(<span class="ident">Language</span>::<span class="ident">EnglishUS</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">10</span>).<span class="ident">splitter</span>(<span class="ident">dictionary</span>);
+        <span class="kw">use</span> <span class="ident">std::borrow::Cow</span>::{<span class="ident">Borrowed</span>, <span class="ident">Owned</span>};
+        <span class="kw">let</span> <span class="ident">dictionary</span> <span class="op">=</span> <span class="ident">Standard::from_embedded</span>(<span class="ident">Language::EnglishUS</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">10</span>).<span class="ident">splitter</span>(<span class="ident">dictionary</span>);
         <span class="kw">let</span> <span class="ident">lines</span> <span class="op">=</span> <span class="ident">wrap</span>(<span class="string">&quot;Internationalization&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>);
         <span class="kw">if</span> <span class="kw">let</span> <span class="ident">Borrowed</span>(<span class="ident">s</span>) <span class="op">=</span> <span class="ident">lines</span>[<span class="number">0</span>] {
-            <span class="macro">assert</span><span class="macro">!</span>(<span class="bool-val">false</span>, <span class="string">&quot;should not have been borrowed: {:?}&quot;</span>, <span class="ident">s</span>);
+            <span class="macro">assert!</span>(<span class="bool-val">false</span>, <span class="string">&quot;should not have been borrowed: {:?}&quot;</span>, <span class="ident">s</span>);
         }
         <span class="kw">if</span> <span class="kw">let</span> <span class="ident">Borrowed</span>(<span class="ident">s</span>) <span class="op">=</span> <span class="ident">lines</span>[<span class="number">1</span>] {
-            <span class="macro">assert</span><span class="macro">!</span>(<span class="bool-val">false</span>, <span class="string">&quot;should not have been borrowed: {:?}&quot;</span>, <span class="ident">s</span>);
+            <span class="macro">assert!</span>(<span class="bool-val">false</span>, <span class="string">&quot;should not have been borrowed: {:?}&quot;</span>, <span class="ident">s</span>);
         }
         <span class="kw">if</span> <span class="kw">let</span> <span class="ident">Owned</span>(<span class="kw-2">ref</span> <span class="ident">s</span>) <span class="op">=</span> <span class="ident">lines</span>[<span class="number">2</span>] {
-            <span class="macro">assert</span><span class="macro">!</span>(<span class="bool-val">false</span>, <span class="string">&quot;should not have been owned: {:?}&quot;</span>, <span class="ident">s</span>);
+            <span class="macro">assert!</span>(<span class="bool-val">false</span>, <span class="string">&quot;should not have been owned: {:?}&quot;</span>, <span class="ident">s</span>);
         }
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;hyphenation&quot;</span>)]</span>
     <span class="kw">fn</span> <span class="ident">auto_hyphenation_with_hyphen</span>() {
-        <span class="kw">let</span> <span class="ident">dictionary</span> <span class="op">=</span> <span class="ident">Standard</span>::<span class="ident">from_embedded</span>(<span class="ident">Language</span>::<span class="ident">EnglishUS</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">8</span>).<span class="ident">break_words</span>(<span class="bool-val">false</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="kw">let</span> <span class="ident">dictionary</span> <span class="op">=</span> <span class="ident">Standard::from_embedded</span>(<span class="ident">Language::EnglishUS</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">8</span>).<span class="ident">break_words</span>(<span class="bool-val">false</span>);
+        <span class="macro">assert_eq!</span>(
             <span class="ident">wrap</span>(<span class="string">&quot;over-caffinated&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>),
-            <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;over-&quot;</span>, <span class="string">&quot;caffinated&quot;</span>]
+            <span class="macro">vec!</span>[<span class="string">&quot;over-&quot;</span>, <span class="string">&quot;caffinated&quot;</span>]
         );
 
         <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">options</span>.<span class="ident">splitter</span>(<span class="ident">dictionary</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="macro">assert_eq!</span>(
             <span class="ident">wrap</span>(<span class="string">&quot;over-caffinated&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>),
-            <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;over-&quot;</span>, <span class="string">&quot;caffi-&quot;</span>, <span class="string">&quot;nated&quot;</span>]
+            <span class="macro">vec!</span>[<span class="string">&quot;over-&quot;</span>, <span class="string">&quot;caffi-&quot;</span>, <span class="string">&quot;nated&quot;</span>]
         );
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">break_words</span>() {
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foobarbaz&quot;</span>, <span class="number">3</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;foo&quot;</span>, <span class="string">&quot;bar&quot;</span>, <span class="string">&quot;baz&quot;</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foobarbaz&quot;</span>, <span class="number">3</span>), <span class="macro">vec!</span>[<span class="string">&quot;foo&quot;</span>, <span class="string">&quot;bar&quot;</span>, <span class="string">&quot;baz&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">break_words_wide_characters</span>() {
         <span class="comment">// Even the poor man&#39;s version of `ch_width` counts these</span>
         <span class="comment">// characters as wide.</span>
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;Ｈｅｌｌｏ&quot;</span>, <span class="number">5</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;Ｈｅ&quot;</span>, <span class="string">&quot;ｌｌ&quot;</span>, <span class="string">&quot;ｏ&quot;</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;Ｈｅｌｌｏ&quot;</span>, <span class="number">5</span>), <span class="macro">vec!</span>[<span class="string">&quot;Ｈｅ&quot;</span>, <span class="string">&quot;ｌｌ&quot;</span>, <span class="string">&quot;ｏ&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">break_words_zero_width</span>() {
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foobar&quot;</span>, <span class="number">0</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;f&quot;</span>, <span class="string">&quot;o&quot;</span>, <span class="string">&quot;o&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;a&quot;</span>, <span class="string">&quot;r&quot;</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foobar&quot;</span>, <span class="number">0</span>), <span class="macro">vec!</span>[<span class="string">&quot;f&quot;</span>, <span class="string">&quot;o&quot;</span>, <span class="string">&quot;o&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;a&quot;</span>, <span class="string">&quot;r&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">break_long_first_word</span>() {
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;testx y&quot;</span>, <span class="number">4</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;test&quot;</span>, <span class="string">&quot;x y&quot;</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;testx y&quot;</span>, <span class="number">4</span>), <span class="macro">vec!</span>[<span class="string">&quot;test&quot;</span>, <span class="string">&quot;x y&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">break_words_line_breaks</span>() {
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">fill</span>(<span class="string">&quot;ab\ncdefghijkl&quot;</span>, <span class="number">5</span>), <span class="string">&quot;ab\ncdefg\nhijkl&quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">fill</span>(<span class="string">&quot;abcdefgh\nijkl&quot;</span>, <span class="number">5</span>), <span class="string">&quot;abcde\nfgh\nijkl&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">fill</span>(<span class="string">&quot;ab\ncdefghijkl&quot;</span>, <span class="number">5</span>), <span class="string">&quot;ab\ncdefg\nhijkl&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">fill</span>(<span class="string">&quot;abcdefgh\nijkl&quot;</span>, <span class="number">5</span>), <span class="string">&quot;abcde\nfgh\nijkl&quot;</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">break_words_empty_lines</span>() {
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
-            <span class="ident">fill</span>(<span class="string">&quot;foo\nbar&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">2</span>).<span class="ident">break_words</span>(<span class="bool-val">false</span>)),
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">fill</span>(<span class="string">&quot;foo\nbar&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">Options::new</span>(<span class="number">2</span>).<span class="ident">break_words</span>(<span class="bool-val">false</span>)),
             <span class="string">&quot;foo\nbar&quot;</span>
         );
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">preserve_line_breaks</span>() {
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">fill</span>(<span class="string">&quot;&quot;</span>, <span class="number">80</span>), <span class="string">&quot;&quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">fill</span>(<span class="string">&quot;\n&quot;</span>, <span class="number">80</span>), <span class="string">&quot;\n&quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">fill</span>(<span class="string">&quot;\n\n\n&quot;</span>, <span class="number">80</span>), <span class="string">&quot;\n\n\n&quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">fill</span>(<span class="string">&quot;test\n&quot;</span>, <span class="number">80</span>), <span class="string">&quot;test\n&quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">fill</span>(<span class="string">&quot;test\n\na\n\n&quot;</span>, <span class="number">80</span>), <span class="string">&quot;test\n\na\n\n&quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="macro">assert_eq!</span>(<span class="ident">fill</span>(<span class="string">&quot;&quot;</span>, <span class="number">80</span>), <span class="string">&quot;&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">fill</span>(<span class="string">&quot;\n&quot;</span>, <span class="number">80</span>), <span class="string">&quot;\n&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">fill</span>(<span class="string">&quot;\n\n\n&quot;</span>, <span class="number">80</span>), <span class="string">&quot;\n\n\n&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">fill</span>(<span class="string">&quot;test\n&quot;</span>, <span class="number">80</span>), <span class="string">&quot;test\n&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">fill</span>(<span class="string">&quot;test\n\na\n\n&quot;</span>, <span class="number">80</span>), <span class="string">&quot;test\n\na\n\n&quot;</span>);
+        <span class="macro">assert_eq!</span>(
             <span class="ident">fill</span>(
                 <span class="string">&quot;1 3 5 7\n1 3 5 7&quot;</span>,
-                <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">7</span>).<span class="ident">wrap_algorithm</span>(<span class="ident">core</span>::<span class="ident">WrapAlgorithm</span>::<span class="ident">FirstFit</span>)
+                <span class="ident">Options::new</span>(<span class="number">7</span>).<span class="ident">wrap_algorithm</span>(<span class="ident">core::WrapAlgorithm::FirstFit</span>)
             ),
             <span class="string">&quot;1 3 5 7\n1 3 5 7&quot;</span>
         );
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="macro">assert_eq!</span>(
             <span class="ident">fill</span>(
                 <span class="string">&quot;1 3 5 7\n1 3 5 7&quot;</span>,
-                <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">5</span>).<span class="ident">wrap_algorithm</span>(<span class="ident">core</span>::<span class="ident">WrapAlgorithm</span>::<span class="ident">FirstFit</span>)
+                <span class="ident">Options::new</span>(<span class="number">5</span>).<span class="ident">wrap_algorithm</span>(<span class="ident">core::WrapAlgorithm::FirstFit</span>)
             ),
             <span class="string">&quot;1 3 5\n7\n1 3 5\n7&quot;</span>
         );
@@ -3471,26 +3468,26 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">preserve_line_breaks_with_whitespace</span>() {
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">fill</span>(<span class="string">&quot;  &quot;</span>, <span class="number">80</span>), <span class="string">&quot;&quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">fill</span>(<span class="string">&quot;  \n  &quot;</span>, <span class="number">80</span>), <span class="string">&quot;\n&quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">fill</span>(<span class="string">&quot;  \n \n  \n &quot;</span>, <span class="number">80</span>), <span class="string">&quot;\n\n\n&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">fill</span>(<span class="string">&quot;  &quot;</span>, <span class="number">80</span>), <span class="string">&quot;&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">fill</span>(<span class="string">&quot;  \n  &quot;</span>, <span class="number">80</span>), <span class="string">&quot;\n&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">fill</span>(<span class="string">&quot;  \n \n  \n &quot;</span>, <span class="number">80</span>), <span class="string">&quot;\n\n\n&quot;</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">non_breaking_space</span>() {
-        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">5</span>).<span class="ident">break_words</span>(<span class="bool-val">false</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">fill</span>(<span class="string">&quot;foo bar baz&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="string">&quot;foo bar baz&quot;</span>);
+        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">5</span>).<span class="ident">break_words</span>(<span class="bool-val">false</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">fill</span>(<span class="string">&quot;foo bar baz&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="string">&quot;foo bar baz&quot;</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">non_breaking_hyphen</span>() {
-        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">5</span>).<span class="ident">break_words</span>(<span class="bool-val">false</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">fill</span>(<span class="string">&quot;foo‑bar‑baz&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="string">&quot;foo‑bar‑baz&quot;</span>);
+        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">5</span>).<span class="ident">break_words</span>(<span class="bool-val">false</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">fill</span>(<span class="string">&quot;foo‑bar‑baz&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">options</span>), <span class="string">&quot;foo‑bar‑baz&quot;</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">fill_simple</span>() {
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">fill</span>(<span class="string">&quot;foo bar baz&quot;</span>, <span class="number">10</span>), <span class="string">&quot;foo bar\nbaz&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">fill</span>(<span class="string">&quot;foo bar baz&quot;</span>, <span class="number">10</span>), <span class="string">&quot;foo bar\nbaz&quot;</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -3499,198 +3496,198 @@
         <span class="comment">// intact after filling the text.</span>
         <span class="kw">let</span> <span class="ident">green_hello</span> <span class="op">=</span> <span class="string">&quot;\u{1b}[0m\u{1b}[32mHello\u{1b}[0m&quot;</span>;
         <span class="kw">let</span> <span class="ident">blue_world</span> <span class="op">=</span> <span class="string">&quot;\u{1b}[0m\u{1b}[34mWorld!\u{1b}[0m&quot;</span>;
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
-            <span class="ident">fill</span>(<span class="kw-2">&amp;</span>(<span class="ident">String</span>::<span class="ident">from</span>(<span class="ident">green_hello</span>) <span class="op">+</span> <span class="string">&quot; &quot;</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">blue_world</span>), <span class="number">6</span>),
-            <span class="ident">String</span>::<span class="ident">from</span>(<span class="ident">green_hello</span>) <span class="op">+</span> <span class="string">&quot;\n&quot;</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">blue_world</span>
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">fill</span>(<span class="kw-2">&amp;</span>(<span class="ident">String::from</span>(<span class="ident">green_hello</span>) <span class="op">+</span> <span class="string">&quot; &quot;</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">blue_world</span>), <span class="number">6</span>),
+            <span class="ident">String::from</span>(<span class="ident">green_hello</span>) <span class="op">+</span> <span class="string">&quot;\n&quot;</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">blue_world</span>
         );
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">cloning_works</span>() {
-        <span class="kw">static</span> <span class="ident">OPT</span>: <span class="ident">Options</span><span class="op">&lt;</span><span class="ident">HyphenSplitter</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">with_splitter</span>(<span class="number">80</span>, <span class="ident">HyphenSplitter</span>);
-        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy</span>::<span class="ident">clone_on_copy</span>)]</span>
+        <span class="kw">static</span> <span class="ident">OPT</span>: <span class="ident">Options</span><span class="op">&lt;</span><span class="ident">HyphenSplitter</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Options::with_splitter</span>(<span class="number">80</span>, <span class="ident">HyphenSplitter</span>);
+        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::clone_on_copy</span>)]</span>
         <span class="kw">let</span> <span class="ident">opt</span> <span class="op">=</span> <span class="ident">OPT</span>.<span class="ident">clone</span>();
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">opt</span>.<span class="ident">width</span>, <span class="number">80</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">opt</span>.<span class="ident">width</span>, <span class="number">80</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">fill_inplace_empty</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">from</span>(<span class="string">&quot;&quot;</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">String::from</span>(<span class="string">&quot;&quot;</span>);
         <span class="ident">fill_inplace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">text</span>, <span class="number">80</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">text</span>, <span class="string">&quot;&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">text</span>, <span class="string">&quot;&quot;</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">fill_inplace_simple</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">from</span>(<span class="string">&quot;foo bar baz&quot;</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">String::from</span>(<span class="string">&quot;foo bar baz&quot;</span>);
         <span class="ident">fill_inplace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">text</span>, <span class="number">10</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">text</span>, <span class="string">&quot;foo bar\nbaz&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">text</span>, <span class="string">&quot;foo bar\nbaz&quot;</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">fill_inplace_multiple_lines</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">from</span>(<span class="string">&quot;Some text to wrap over multiple lines&quot;</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">String::from</span>(<span class="string">&quot;Some text to wrap over multiple lines&quot;</span>);
         <span class="ident">fill_inplace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">text</span>, <span class="number">12</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">text</span>, <span class="string">&quot;Some text to\nwrap over\nmultiple\nlines&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">text</span>, <span class="string">&quot;Some text to\nwrap over\nmultiple\nlines&quot;</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">fill_inplace_long_word</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">from</span>(<span class="string">&quot;Internationalization is hard&quot;</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">String::from</span>(<span class="string">&quot;Internationalization is hard&quot;</span>);
         <span class="ident">fill_inplace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">text</span>, <span class="number">10</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">text</span>, <span class="string">&quot;Internationalization\nis hard&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">text</span>, <span class="string">&quot;Internationalization\nis hard&quot;</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">fill_inplace_no_hyphen_splitting</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">from</span>(<span class="string">&quot;A well-chosen example&quot;</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">String::from</span>(<span class="string">&quot;A well-chosen example&quot;</span>);
         <span class="ident">fill_inplace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">text</span>, <span class="number">10</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">text</span>, <span class="string">&quot;A\nwell-chosen\nexample&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">text</span>, <span class="string">&quot;A\nwell-chosen\nexample&quot;</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">fill_inplace_newlines</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">from</span>(<span class="string">&quot;foo bar\n\nbaz\n\n\n&quot;</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">String::from</span>(<span class="string">&quot;foo bar\n\nbaz\n\n\n&quot;</span>);
         <span class="ident">fill_inplace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">text</span>, <span class="number">10</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">text</span>, <span class="string">&quot;foo bar\n\nbaz\n\n\n&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">text</span>, <span class="string">&quot;foo bar\n\nbaz\n\n\n&quot;</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">fill_inplace_newlines_reset_line_width</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">from</span>(<span class="string">&quot;1 3 5\n1 3 5 7 9\n1 3 5 7 9 1 3&quot;</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">String::from</span>(<span class="string">&quot;1 3 5\n1 3 5 7 9\n1 3 5 7 9 1 3&quot;</span>);
         <span class="ident">fill_inplace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">text</span>, <span class="number">10</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">text</span>, <span class="string">&quot;1 3 5\n1 3 5 7 9\n1 3 5 7 9\n1 3&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">text</span>, <span class="string">&quot;1 3 5\n1 3 5 7 9\n1 3 5 7 9\n1 3&quot;</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">fill_inplace_leading_whitespace</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">from</span>(<span class="string">&quot;  foo bar baz&quot;</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">String::from</span>(<span class="string">&quot;  foo bar baz&quot;</span>);
         <span class="ident">fill_inplace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">text</span>, <span class="number">10</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">text</span>, <span class="string">&quot;  foo bar\nbaz&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">text</span>, <span class="string">&quot;  foo bar\nbaz&quot;</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">fill_inplace_trailing_whitespace</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">from</span>(<span class="string">&quot;foo bar baz  &quot;</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">String::from</span>(<span class="string">&quot;foo bar baz  &quot;</span>);
         <span class="ident">fill_inplace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">text</span>, <span class="number">10</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">text</span>, <span class="string">&quot;foo bar\nbaz  &quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">text</span>, <span class="string">&quot;foo bar\nbaz  &quot;</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">fill_inplace_interior_whitespace</span>() {
         <span class="comment">// To avoid an unwanted indentation of &quot;baz&quot;, it is important</span>
         <span class="comment">// to replace the final &#39; &#39; with &#39;\n&#39;.</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">from</span>(<span class="string">&quot;foo  bar    baz&quot;</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">String::from</span>(<span class="string">&quot;foo  bar    baz&quot;</span>);
         <span class="ident">fill_inplace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">text</span>, <span class="number">10</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">text</span>, <span class="string">&quot;foo  bar   \nbaz&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">text</span>, <span class="string">&quot;foo  bar   \nbaz&quot;</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">unfill_simple</span>() {
         <span class="kw">let</span> (<span class="ident">text</span>, <span class="ident">options</span>) <span class="op">=</span> <span class="ident">unfill</span>(<span class="string">&quot;foo\nbar&quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">text</span>, <span class="string">&quot;foo bar&quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">options</span>.<span class="ident">width</span>, <span class="number">3</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">text</span>, <span class="string">&quot;foo bar&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">options</span>.<span class="ident">width</span>, <span class="number">3</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">unfill_trailing_newlines</span>() {
         <span class="kw">let</span> (<span class="ident">text</span>, <span class="ident">options</span>) <span class="op">=</span> <span class="ident">unfill</span>(<span class="string">&quot;foo\nbar\n\n\n&quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">text</span>, <span class="string">&quot;foo bar\n\n\n&quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">options</span>.<span class="ident">width</span>, <span class="number">3</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">text</span>, <span class="string">&quot;foo bar\n\n\n&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">options</span>.<span class="ident">width</span>, <span class="number">3</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">unfill_initial_indent</span>() {
         <span class="kw">let</span> (<span class="ident">text</span>, <span class="ident">options</span>) <span class="op">=</span> <span class="ident">unfill</span>(<span class="string">&quot;  foo\nbar\nbaz&quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">text</span>, <span class="string">&quot;foo bar baz&quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">options</span>.<span class="ident">width</span>, <span class="number">5</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">options</span>.<span class="ident">initial_indent</span>, <span class="string">&quot;  &quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">text</span>, <span class="string">&quot;foo bar baz&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">options</span>.<span class="ident">width</span>, <span class="number">5</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">options</span>.<span class="ident">initial_indent</span>, <span class="string">&quot;  &quot;</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">unfill_differing_indents</span>() {
         <span class="kw">let</span> (<span class="ident">text</span>, <span class="ident">options</span>) <span class="op">=</span> <span class="ident">unfill</span>(<span class="string">&quot;  foo\n    bar\n  baz&quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">text</span>, <span class="string">&quot;foo   bar baz&quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">options</span>.<span class="ident">width</span>, <span class="number">7</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">options</span>.<span class="ident">initial_indent</span>, <span class="string">&quot;  &quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">options</span>.<span class="ident">subsequent_indent</span>, <span class="string">&quot;  &quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">text</span>, <span class="string">&quot;foo   bar baz&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">options</span>.<span class="ident">width</span>, <span class="number">7</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">options</span>.<span class="ident">initial_indent</span>, <span class="string">&quot;  &quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">options</span>.<span class="ident">subsequent_indent</span>, <span class="string">&quot;  &quot;</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">unfill_list_item</span>() {
         <span class="kw">let</span> (<span class="ident">text</span>, <span class="ident">options</span>) <span class="op">=</span> <span class="ident">unfill</span>(<span class="string">&quot;* foo\n  bar\n  baz&quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">text</span>, <span class="string">&quot;foo bar baz&quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">options</span>.<span class="ident">width</span>, <span class="number">5</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">options</span>.<span class="ident">initial_indent</span>, <span class="string">&quot;* &quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">options</span>.<span class="ident">subsequent_indent</span>, <span class="string">&quot;  &quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">text</span>, <span class="string">&quot;foo bar baz&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">options</span>.<span class="ident">width</span>, <span class="number">5</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">options</span>.<span class="ident">initial_indent</span>, <span class="string">&quot;* &quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">options</span>.<span class="ident">subsequent_indent</span>, <span class="string">&quot;  &quot;</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">unfill_multiple_char_prefix</span>() {
         <span class="kw">let</span> (<span class="ident">text</span>, <span class="ident">options</span>) <span class="op">=</span> <span class="ident">unfill</span>(<span class="string">&quot;    // foo bar\n    // baz\n    // quux&quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">text</span>, <span class="string">&quot;foo bar baz quux&quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">options</span>.<span class="ident">width</span>, <span class="number">14</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">options</span>.<span class="ident">initial_indent</span>, <span class="string">&quot;    // &quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">options</span>.<span class="ident">subsequent_indent</span>, <span class="string">&quot;    // &quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">text</span>, <span class="string">&quot;foo bar baz quux&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">options</span>.<span class="ident">width</span>, <span class="number">14</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">options</span>.<span class="ident">initial_indent</span>, <span class="string">&quot;    // &quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">options</span>.<span class="ident">subsequent_indent</span>, <span class="string">&quot;    // &quot;</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">unfill_block_quote</span>() {
         <span class="kw">let</span> (<span class="ident">text</span>, <span class="ident">options</span>) <span class="op">=</span> <span class="ident">unfill</span>(<span class="string">&quot;&gt; foo\n&gt; bar\n&gt; baz&quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">text</span>, <span class="string">&quot;foo bar baz&quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">options</span>.<span class="ident">width</span>, <span class="number">5</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">options</span>.<span class="ident">initial_indent</span>, <span class="string">&quot;&gt; &quot;</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">options</span>.<span class="ident">subsequent_indent</span>, <span class="string">&quot;&gt; &quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">text</span>, <span class="string">&quot;foo bar baz&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">options</span>.<span class="ident">width</span>, <span class="number">5</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">options</span>.<span class="ident">initial_indent</span>, <span class="string">&quot;&gt; &quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">options</span>.<span class="ident">subsequent_indent</span>, <span class="string">&quot;&gt; &quot;</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">unfill_whitespace</span>() {
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">unfill</span>(<span class="string">&quot;foo   bar&quot;</span>).<span class="number">0</span>, <span class="string">&quot;foo   bar&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">unfill</span>(<span class="string">&quot;foo   bar&quot;</span>).<span class="number">0</span>, <span class="string">&quot;foo   bar&quot;</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">trait_object</span>() {
-        <span class="kw">let</span> <span class="ident">opt_a</span>: <span class="ident">Options</span><span class="op">&lt;</span><span class="ident">NoHyphenation</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">with_splitter</span>(<span class="number">20</span>, <span class="ident">NoHyphenation</span>);
+        <span class="kw">let</span> <span class="ident">opt_a</span>: <span class="ident">Options</span><span class="op">&lt;</span><span class="ident">NoHyphenation</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Options::with_splitter</span>(<span class="number">20</span>, <span class="ident">NoHyphenation</span>);
         <span class="kw">let</span> <span class="ident">opt_b</span>: <span class="ident">Options</span><span class="op">&lt;</span><span class="ident">HyphenSplitter</span><span class="op">&gt;</span> <span class="op">=</span> <span class="number">10</span>.<span class="ident">into</span>();
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">dyn_opt</span>: <span class="kw-2">&amp;</span><span class="ident">Options</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">WordSplitter</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">opt_a</span>;
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo bar-baz&quot;</span>, <span class="ident">dyn_opt</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;foo bar-baz&quot;</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo bar-baz&quot;</span>, <span class="ident">dyn_opt</span>), <span class="macro">vec!</span>[<span class="string">&quot;foo bar-baz&quot;</span>]);
 
         <span class="comment">// Just assign a totally different option</span>
         <span class="ident">dyn_opt</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">opt_b</span>;
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo bar-baz&quot;</span>, <span class="ident">dyn_opt</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;foo bar-&quot;</span>, <span class="string">&quot;baz&quot;</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo bar-baz&quot;</span>, <span class="ident">dyn_opt</span>), <span class="macro">vec!</span>[<span class="string">&quot;foo bar-&quot;</span>, <span class="string">&quot;baz&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">trait_object_vec</span>() {
         <span class="comment">// Create a vector of referenced trait-objects</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">vector</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Options</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">WordSplitter</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">new</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">vector</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Options</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">WordSplitter</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
         <span class="comment">// Expected result from each options</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">results</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">new</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">results</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 
         <span class="kw">let</span> <span class="ident">opt_usize</span>: <span class="ident">Options</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="number">10</span>.<span class="ident">into</span>();
         <span class="ident">vector</span>.<span class="ident">push</span>(<span class="kw-2">&amp;</span><span class="ident">opt_usize</span>);
-        <span class="ident">results</span>.<span class="ident">push</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;over-&quot;</span>, <span class="string">&quot;caffinated&quot;</span>]);
+        <span class="ident">results</span>.<span class="ident">push</span>(<span class="macro">vec!</span>[<span class="string">&quot;over-&quot;</span>, <span class="string">&quot;caffinated&quot;</span>]);
 
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;hyphenation&quot;</span>)]</span>
-        <span class="kw">let</span> <span class="ident">dictionary</span> <span class="op">=</span> <span class="ident">Standard</span>::<span class="ident">from_embedded</span>(<span class="ident">Language</span>::<span class="ident">EnglishUS</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">dictionary</span> <span class="op">=</span> <span class="ident">Standard::from_embedded</span>(<span class="ident">Language::EnglishUS</span>).<span class="ident">unwrap</span>();
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;hyphenation&quot;</span>)]</span>
-        <span class="kw">let</span> <span class="ident">opt_hyp</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">8</span>).<span class="ident">splitter</span>(<span class="ident">dictionary</span>);
+        <span class="kw">let</span> <span class="ident">opt_hyp</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">8</span>).<span class="ident">splitter</span>(<span class="ident">dictionary</span>);
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;hyphenation&quot;</span>)]</span>
         <span class="ident">vector</span>.<span class="ident">push</span>(<span class="kw-2">&amp;</span><span class="ident">opt_hyp</span>);
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;hyphenation&quot;</span>)]</span>
-        <span class="ident">results</span>.<span class="ident">push</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;over-&quot;</span>, <span class="string">&quot;caffi-&quot;</span>, <span class="string">&quot;nated&quot;</span>]);
+        <span class="ident">results</span>.<span class="ident">push</span>(<span class="macro">vec!</span>[<span class="string">&quot;over-&quot;</span>, <span class="string">&quot;caffi-&quot;</span>, <span class="string">&quot;nated&quot;</span>]);
 
         <span class="comment">// Actually: Options&lt;Box&lt;dyn WordSplitter&gt;&gt;</span>
-        <span class="kw">let</span> <span class="ident">opt_box</span>: <span class="ident">Options</span> <span class="op">=</span> <span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">10</span>)
+        <span class="kw">let</span> <span class="ident">opt_box</span>: <span class="ident">Options</span> <span class="op">=</span> <span class="ident">Options::new</span>(<span class="number">10</span>)
             .<span class="ident">break_words</span>(<span class="bool-val">false</span>)
-            .<span class="ident">splitter</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">NoHyphenation</span>));
+            .<span class="ident">splitter</span>(<span class="ident">Box::new</span>(<span class="ident">NoHyphenation</span>));
         <span class="ident">vector</span>.<span class="ident">push</span>(<span class="kw-2">&amp;</span><span class="ident">opt_box</span>);
-        <span class="ident">results</span>.<span class="ident">push</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;over-caffinated&quot;</span>]);
+        <span class="ident">results</span>.<span class="ident">push</span>(<span class="macro">vec!</span>[<span class="string">&quot;over-caffinated&quot;</span>]);
 
         <span class="comment">// Test each entry</span>
         <span class="kw">for</span> (<span class="ident">opt</span>, <span class="ident">expected</span>) <span class="kw">in</span> <span class="ident">vector</span>.<span class="ident">into_iter</span>().<span class="ident">zip</span>(<span class="ident">results</span>) {
-            <span class="macro">assert_eq</span><span class="macro">!</span>(
+            <span class="macro">assert_eq!</span>(
                 <span class="comment">// Just all the totally different options</span>
                 <span class="ident">wrap</span>(<span class="string">&quot;over-caffinated&quot;</span>, <span class="ident">opt</span>),
                 <span class="ident">expected</span>
@@ -3700,32 +3697,32 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">outer_boxing</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">wrapper</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Options</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">WordSplitter</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">Options</span>::<span class="ident">new</span>(<span class="number">80</span>));
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">wrapper</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Options</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">WordSplitter</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Box::new</span>(<span class="ident">Options::new</span>(<span class="number">80</span>));
 
         <span class="comment">// We must first deref the Box into a trait object and pass it by-reference</span>
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo bar baz&quot;</span>, <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">wrapper</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;foo bar baz&quot;</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap</span>(<span class="string">&quot;foo bar baz&quot;</span>, <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">wrapper</span>), <span class="macro">vec!</span>[<span class="string">&quot;foo bar baz&quot;</span>]);
 
         <span class="comment">// Replace the `Options` with a `usize`</span>
-        <span class="ident">wrapper</span> <span class="op">=</span> <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">Options</span>::<span class="ident">from</span>(<span class="number">5</span>));
+        <span class="ident">wrapper</span> <span class="op">=</span> <span class="ident">Box::new</span>(<span class="ident">Options::from</span>(<span class="number">5</span>));
 
         <span class="comment">// Deref per-se works as well, it already returns a reference</span>
-        <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ops</span>::<span class="ident">Deref</span>;
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="kw">use</span> <span class="ident">std::ops::Deref</span>;
+        <span class="macro">assert_eq!</span>(
             <span class="ident">wrap</span>(<span class="string">&quot;foo bar baz&quot;</span>, <span class="ident">wrapper</span>.<span class="ident">deref</span>()),
-            <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;foo&quot;</span>, <span class="string">&quot;bar&quot;</span>, <span class="string">&quot;baz&quot;</span>]
+            <span class="macro">vec!</span>[<span class="string">&quot;foo&quot;</span>, <span class="string">&quot;bar&quot;</span>, <span class="string">&quot;baz&quot;</span>]
         );
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">wrap_columns_empty_text</span>() {
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">wrap_columns</span>(<span class="string">&quot;&quot;</span>, <span class="number">1</span>, <span class="number">10</span>, <span class="string">&quot;| &quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot; |&quot;</span>), <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;|        |&quot;</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">wrap_columns</span>(<span class="string">&quot;&quot;</span>, <span class="number">1</span>, <span class="number">10</span>, <span class="string">&quot;| &quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot; |&quot;</span>), <span class="macro">vec!</span>[<span class="string">&quot;|        |&quot;</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">wrap_columns_single_column</span>() {
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="macro">assert_eq!</span>(
             <span class="ident">wrap_columns</span>(<span class="string">&quot;Foo&quot;</span>, <span class="number">3</span>, <span class="number">30</span>, <span class="string">&quot;| &quot;</span>, <span class="string">&quot; | &quot;</span>, <span class="string">&quot; |&quot;</span>),
-            <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;| Foo    |        |          |&quot;</span>]
+            <span class="macro">vec!</span>[<span class="string">&quot;| Foo    |        |          |&quot;</span>]
         );
     }
 
@@ -3733,28 +3730,28 @@
     <span class="kw">fn</span> <span class="ident">wrap_columns_uneven_columns</span>() {
         <span class="comment">// The gaps take up a total of 5 columns, so the columns are</span>
         <span class="comment">// (21 - 5)/4 = 4 columns wide:</span>
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="macro">assert_eq!</span>(
             <span class="ident">wrap_columns</span>(<span class="string">&quot;Foo Bar Baz Quux&quot;</span>, <span class="number">4</span>, <span class="number">21</span>, <span class="string">&quot;|&quot;</span>, <span class="string">&quot;|&quot;</span>, <span class="string">&quot;|&quot;</span>),
-            <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;|Foo |Bar |Baz |Quux|&quot;</span>]
+            <span class="macro">vec!</span>[<span class="string">&quot;|Foo |Bar |Baz |Quux|&quot;</span>]
         );
         <span class="comment">// As the total width increases, the last column absorbs the</span>
         <span class="comment">// excess width:</span>
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="macro">assert_eq!</span>(
             <span class="ident">wrap_columns</span>(<span class="string">&quot;Foo Bar Baz Quux&quot;</span>, <span class="number">4</span>, <span class="number">24</span>, <span class="string">&quot;|&quot;</span>, <span class="string">&quot;|&quot;</span>, <span class="string">&quot;|&quot;</span>),
-            <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;|Foo |Bar |Baz |Quux   |&quot;</span>]
+            <span class="macro">vec!</span>[<span class="string">&quot;|Foo |Bar |Baz |Quux   |&quot;</span>]
         );
         <span class="comment">// Finally, when the width is 25, the columns can be resized</span>
         <span class="comment">// to a width of (25 - 5)/4 = 5 columns:</span>
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="macro">assert_eq!</span>(
             <span class="ident">wrap_columns</span>(<span class="string">&quot;Foo Bar Baz Quux&quot;</span>, <span class="number">4</span>, <span class="number">25</span>, <span class="string">&quot;|&quot;</span>, <span class="string">&quot;|&quot;</span>, <span class="string">&quot;|&quot;</span>),
-            <span class="macro">vec</span><span class="macro">!</span>[<span class="string">&quot;|Foo  |Bar  |Baz  |Quux |&quot;</span>]
+            <span class="macro">vec!</span>[<span class="string">&quot;|Foo  |Bar  |Baz  |Quux |&quot;</span>]
         );
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unicode-width&quot;</span>)]</span>
     <span class="kw">fn</span> <span class="ident">wrap_columns_with_emojis</span>() {
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="macro">assert_eq!</span>(
             <span class="ident">wrap_columns</span>(
                 <span class="string">&quot;Words and a few emojis 😍 wrapped in ⓶ columns&quot;</span>,
                 <span class="number">2</span>,
@@ -3763,7 +3760,7 @@
                 <span class="string">&quot; ⚽ &quot;</span>,
                 <span class="string">&quot; 👀&quot;</span>
             ),
-            <span class="macro">vec</span><span class="macro">!</span>[
+            <span class="macro">vec!</span>[
                 <span class="string">&quot;✨ Words      ⚽ wrapped in 👀&quot;</span>,
                 <span class="string">&quot;✨ and a few  ⚽ ⓶ columns  👀&quot;</span>,
                 <span class="string">&quot;✨ emojis 😍  ⚽            👀&quot;</span>
@@ -3775,9 +3772,9 @@
     <span class="kw">fn</span> <span class="ident">wrap_columns_big_gaps</span>() {
         <span class="comment">// The column width shrinks to 1 because the gaps take up all</span>
         <span class="comment">// the space.</span>
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="macro">assert_eq!</span>(
             <span class="ident">wrap_columns</span>(<span class="string">&quot;xyz&quot;</span>, <span class="number">2</span>, <span class="number">10</span>, <span class="string">&quot;----&gt; &quot;</span>, <span class="string">&quot; !!! &quot;</span>, <span class="string">&quot; &lt;----&quot;</span>),
-            <span class="macro">vec</span><span class="macro">!</span>[
+            <span class="macro">vec!</span>[
                 <span class="string">&quot;----&gt; x !!! z &lt;----&quot;</span>, <span class="comment">//</span>
                 <span class="string">&quot;----&gt; y !!!   &lt;----&quot;</span>
             ]
@@ -3791,5 +3788,6 @@
     }
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="textwrap" data-search-js="../../search-index.js"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="textwrap" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
+</body></html>
