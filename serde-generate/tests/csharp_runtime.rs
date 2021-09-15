@@ -113,8 +113,8 @@ fn make_test_project(
 #[test]
 fn test_csharp_bcs_runtime_tests() {
     let test_dir = Path::new("runtime/csharp/Serde.Tests");
-    dotnet_build(&test_dir);
-    run_nunit(&test_dir);
+    dotnet_build(test_dir);
+    run_nunit(test_dir);
 }
 
 #[test]

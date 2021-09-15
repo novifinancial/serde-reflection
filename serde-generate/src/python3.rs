@@ -253,7 +253,7 @@ import typing
             base, name
         )?;
         self.out.indent();
-        self.output_comment(&name)?;
+        self.output_comment(name)?;
         if self.generator.config.serialization {
             writeln!(self.out, "INDEX = {}  # type: int", index)?;
         }
@@ -272,7 +272,7 @@ import typing
     ) -> Result<()> {
         writeln!(self.out, "\nclass {}:", name)?;
         self.out.indent();
-        self.output_comment(&name)?;
+        self.output_comment(name)?;
         self.current_namespace.push(name.to_string());
         if self.generator.config.serialization {
             writeln!(

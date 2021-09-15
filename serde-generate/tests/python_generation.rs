@@ -14,7 +14,7 @@ fn test_that_python_code_parses_with_config(
     let source_path = dir.path().join("test.py");
     let mut source = File::create(&source_path).unwrap();
 
-    let generator = python3::CodeGenerator::new(&config);
+    let generator = python3::CodeGenerator::new(config);
     generator.output(&mut source, &registry).unwrap();
 
     let python_path = format!(

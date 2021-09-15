@@ -68,7 +68,7 @@ fn test_that_ts_code_compiles_with_config(
     let source_path = dir.path().join("testing").join("test.ts");
     let mut source = File::create(&source_path).unwrap();
 
-    let generator = typescript::CodeGenerator::new(&config);
+    let generator = typescript::CodeGenerator::new(config);
     generator.output(&mut source, &registry).unwrap();
     let _result = write_package_tsconfig_json_for_test_build(dir.path().to_path_buf());
 
