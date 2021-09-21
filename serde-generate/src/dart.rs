@@ -78,7 +78,7 @@ environment:
 
 dependencies:
   tuple: '2.0.0'
-  json_serializable: '5.0.0'
+  json_serializable: '5.0.2'
   hex: ^0.2.0
             "#,
             self.config.module_name
