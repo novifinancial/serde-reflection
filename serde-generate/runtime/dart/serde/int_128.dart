@@ -1,48 +1,45 @@
 part of serde;
 
+@immutable
 class Int128 {
-  late int high;
-  late int low;
+  const Int128(this.high, this.low);
 
-  Int128(int high, int low)
-      : this.high = high,
-        this.low = low;
-
-  Int128 fromBigInt(BigInt num) {
-    high = (num >> 64).toInt();
-    low = (num & BigInt.from(0xFFFFFFFFFFFFFFFF)).toInt();
+  factory Int128.fromBigInt(BigInt num) {
+    final high = (num >> 64).toInt();
+    final low = (num & BigInt.from(0xFFFFFFFFFFFFFFFF)).toInt();
     return Int128(high, low);
   }
 
-  BigInt toBigInt() {
-    var result = BigInt.from(high);
-    result << 64;
-    result = result + BigInt.from(low);
-    return result;
+  factory Int128.fromJson(String json) {
+    final num = BigInt.parse(json);
+    final high = (num >> 64).toInt();
+    final low = (num & BigInt.from(0xFFFFFFFFFFFFFFFF)).toInt();
+    return Int128(high, low);
+  }
+
+  final int high;
+  final int low;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
+
+    return other is Int128 && high == other.high && low == other.low;
   }
 
   @override
-  bool operator ==(covariant Int128 other) {
-    if (this.high == other.high && this.low == other.low) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  @override
-  int get hashCode => $jf($jc(this.high.hashCode, this.low));
+  int get hashCode => Object.hash(
+        high,
+        low,
+      );
 
   @override
   String toString() {
     return "$high$low";
   }
 
-  Int128.fromJson(String json) {
-    final num = BigInt.parse(json);
-    this.high = (num >> 64).toInt();
-    this.low = (num & BigInt.from(0xFFFFFFFFFFFFFFFF)).toInt();
-  }
+  BigInt toBigInt() => (BigInt.from(high) << 64) + BigInt.from(low);
 
-  String toJson() => this.toBigInt().toString();
+  String toJson() => toBigInt().toString();
 }
