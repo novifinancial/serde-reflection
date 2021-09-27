@@ -794,31 +794,26 @@ return obj;
         }
 
         // Generate a toString implementation in each class
-        writeln!(self.out, "\nString toString() {{")?;
+        writeln!(self.out, "\n@override\nString toString() {{")?;
         self.out.indent();
-        write!(
-            self.out,
-            "String fullString = super.toString();
-assert(() {{
-  fullString += ' ' + ["
-        )?;
-
+        writeln!(self.out, "String? fullString;")?;
+        writeln!(self.out, "\nassert(() {{")?;
         self.out.indent();
+        writeln!(self.out, "fullString = '$runtimeType('")?;
         self.out.indent();
-        fields.iter().enumerate().for_each(|(_, f)| {
-            write!(self.out, "\n'{n}: ${n}',", n = f.name.to_mixed_case()).unwrap();
-        });
-
+        for (index, field) in fields.iter().enumerate() {
+            if index == field_count - 1 {
+                writeln!(self.out, "'{0}: ${0}'", field.name.to_mixed_case())?;
+            } else {
+                writeln!(self.out, "'{0}: ${0}, '", field.name.to_mixed_case())?;
+            }
+        }
+        writeln!(self.out, "')';")?;
         self.out.unindent();
-        writeln!(self.out, "\n].join(', ');")?;
+        writeln!(self.out, "return true;")?;
         self.out.unindent();
-        writeln!(
-            self.out,
-            "
-  return true;
-}}());
-return fullString;"
-        )?;
+        writeln!(self.out, "}}());")?;
+        writeln!(self.out, "\nreturn fullString ?? '{}';", name)?;
         self.out.unindent();
         writeln!(self.out, "}}")?;
 
