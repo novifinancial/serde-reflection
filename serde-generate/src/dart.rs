@@ -712,6 +712,8 @@ return obj;
         redefine: bool,
         actual_name: &str,
     ) -> Result<()> {
+        let field_count = fields.len();
+
         // Beginning of class
         writeln!(self.out)?;
         if let Some(base) = variant_base {
@@ -734,30 +736,16 @@ return obj;
             writeln!(self.out)?;
         }
         // Constructor.
-        writeln!(
-            self.out,
-            "const {}({}) :",
-            name,
-            fields
-                .iter()
-                .map(|f| format!("{} {}", self.quote_type(&f.value), &f.name.to_mixed_case()))
-                .collect::<Vec<_>>()
-                .join(", ")
-        )?;
+        writeln!(self.out, "const {}({{", name)?;
         self.out.indent();
-        let field_count = fields.len();
-        for (i, field) in fields.iter().enumerate() {
-            write!(
-                self.out,
-                "this.{} = {}",
-                &field.name.to_mixed_case(),
-                &field.name.to_mixed_case()
-            )?;
-            if i + 1 < field_count {
-                writeln!(self.out, ",")?;
-            } else {
-                writeln!(self.out, ";")?;
-            }
+        for field in fields.iter() {
+            writeln!(self.out, "required this.{},", &field.name.to_mixed_case())?;
+        }
+        self.out.unindent();
+        if variant_base.is_some() {
+            writeln!(self.out, "}}) : super();")?;
+        } else {
+            writeln!(self.out, "}});")?;
         }
 
         // Serialize
@@ -788,39 +776,36 @@ return obj;
             if variant_index.is_none() {
                 writeln!(
                     self.out,
-                    "\nstatic {} deserialize(BinaryDeserializer deserializer){{",
-                    name,
+                    "\n{}.deserialize(BinaryDeserializer deserializer) :",
+                    name
                 )?;
             } else {
                 writeln!(
                     self.out,
-                    "\nstatic {} load(BinaryDeserializer deserializer){{",
-                    name,
+                    "\n{}.load(BinaryDeserializer deserializer) :",
+                    name
                 )?;
             }
+
             self.out.indent();
-
-            for field in fields {
-                writeln!(
-                    self.out,
-                    "var {} = {};",
-                    field.name,
-                    self.quote_deserialize(&field.value)
-                )?;
+            for (index, field) in fields.iter().enumerate() {
+                if index == field_count - 1 {
+                    writeln!(
+                        self.out,
+                        "{} = {};",
+                        field.name,
+                        self.quote_deserialize(&field.value)
+                    )?;
+                } else {
+                    writeln!(
+                        self.out,
+                        "{} = {},",
+                        field.name,
+                        self.quote_deserialize(&field.value)
+                    )?;
+                }
             }
-            writeln!(
-                self.out,
-                "return new {}({});",
-                name,
-                fields
-                    .iter()
-                    .map(|f| f.name.to_string())
-                    .collect::<Vec<_>>()
-                    .join(",")
-            )?;
-
             self.out.unindent();
-            writeln!(self.out, "}}")?;
 
             if variant_index.is_none() {
                 for encoding in &self.generator.config.encodings {
@@ -903,28 +888,28 @@ return obj;
 
         if field_count > 0 {
             if variant_index.is_none() {
-                writeln!(self.out, "\n{0}.fromJson(dynamic json) :", name)?;
+                writeln!(self.out, "\n{}.fromJson(dynamic json) :", name)?;
             } else {
                 //enum
-                writeln!(self.out, "\n{}.loadJson(dynamic json) :", name,)?;
+                writeln!(self.out, "\n{}.loadJson(dynamic json) :", name)?;
             }
             self.out.indent();
             if redefine {
-                writeln!(self.out, "{} = json ;", &fields[0].name,)?;
+                writeln!(self.out, "{} = json;", &fields[0].name)?;
             } else {
                 for (index, field) in fields.iter().enumerate() {
                     if index == field_count - 1 {
-                        writeln!(self.out, "{} ;", self.from_json(field))?;
+                        writeln!(self.out, "{};", self.from_json(field))?;
                     } else {
-                        writeln!(self.out, "{} ,", self.from_json(field))?;
+                        writeln!(self.out, "{},", self.from_json(field))?;
                     }
                 }
             }
             self.out.unindent();
         } else if variant_index.is_none() {
-            writeln!(self.out, "\n{0}.fromJson(dynamic json);", name)?;
+            writeln!(self.out, "\n{}.fromJson(dynamic json);", name)?;
         } else {
-            writeln!(self.out, "\n{0}.loadJson(dynamic json);", name)?; //enum
+            writeln!(self.out, "\n{}.loadJson(dynamic json);", name)?; //enum
         }
 
         if !redefine {
@@ -1002,13 +987,13 @@ Uint8List {0}Serialize() {{
         writeln!(
             self.out,
             r#"
-static {0} {1}Deserialize(Uint8List input)  {{
-   var deserializer = new {2}Deserializer(input);
-    {0} value = deserialize(deserializer);
-    if (deserializer.get_buffer_offset() < input.length) {{
-         throw new Exception("Some input bytes were not read");
-    }}
-    return value;
+factory {0}.{1}Deserialize(Uint8List input) {{
+  final deserializer = {2}Deserializer(input);
+  final value = {0}.deserialize(deserializer);
+  if (deserializer.get_buffer_offset() < input.length) {{
+    throw Exception('Some input bytes were not read');
+  }}
+  return value;
 }}"#,
             name,
             encoding.name(),
