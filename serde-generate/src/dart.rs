@@ -74,7 +74,7 @@ impl<'a> CodeGenerator<'a> {
             r#"name: {}
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: '>=2.14.0 <3.0.0'
 
 dependencies:
   tuple: '2.0.0'
@@ -831,60 +831,77 @@ return obj;
 
         // Equality
         write!(self.out, "\n@override")?;
-        write!(self.out, "\nbool operator ==(covariant {0} other) {{", name)?;
+        write!(self.out, "\nbool operator ==(Object other) {{")?;
         self.out.indent();
-        let fields_num = fields.len();
 
-        if fields_num > 0 {
-            writeln!(self.out, "\nreturn (other is {}) &&", name)?;
-
-            for (index, field) in fields.iter().enumerate() {
-                let stmt = match &field.value {
-                    Format::Seq(_) => format!(
-                        " isListsEqual(this.{0}, other.{0})",
-                        &field.name.to_mixed_case()
-                    ),
-                    Format::TupleArray {
-                        content: _,
-                        size: _,
-                    } => format!(
-                        " isListsEqual(this.{0}, other.{0})",
-                        &field.name.to_mixed_case()
-                    ),
-                    _ => format!(" this.{0} == other.{0}", &field.name.to_mixed_case()),
-                };
-
-                if index < fields_num - 1 {
-                    writeln!(self.out, " {} &&", stmt)?;
-                } else {
-                    writeln!(self.out, " {};", stmt)?;
-                }
-            }
-        } else {
-            writeln!(self.out, "return true;")?;
-        }
-
-        self.out.unindent();
-        writeln!(self.out, "}}")?;
-        // Hashing
-        write!(self.out, "\n@override")?;
-        writeln!(self.out, "\nint get hashCode {{")?;
-        self.out.indent();
-        writeln!(self.out, "final props = [")?;
-        self.out.indent();
-        for field in fields {
-            writeln!(self.out, "{},", &field.name.to_mixed_case())?;
-        }
-        self.out.unindent();
-        writeln!(self.out, "];")?;
+        writeln!(self.out, "\nif (identical(this, other)) return true;")?;
         writeln!(
             self.out,
-            "return $jf(props.fold(0, (h, i) => $jc(h, i.hashCode)));"
+            "if (other.runtimeType != runtimeType) return false;"
         )?;
+        writeln!(self.out, "\nreturn other is {}", name)?;
+
+        for field in fields.iter() {
+            let stmt = match &field.value {
+                Format::Seq(_) => {
+                    format!(" listEquals({0}, other.{0})", &field.name.to_mixed_case())
+                }
+                Format::TupleArray {
+                    content: _,
+                    size: _,
+                } => format!(" listEquals({0}, other.{0})", &field.name.to_mixed_case()),
+                _ => format!(" {0} == other.{0}", &field.name.to_mixed_case()),
+            };
+
+            writeln!(self.out, "&& {}", stmt)?;
+        }
+
+        write!(self.out, ";")?;
+
         self.out.unindent();
         writeln!(self.out, "}}")?;
 
-        if fields_num > 0 {
+        if field_count > 0 {
+            // Hashing
+            write!(self.out, "\n@override")?;
+
+            if field_count == 1 {
+                writeln!(
+                    self.out,
+                    "\nint get hashCode => {}.hashCode;",
+                    fields.first().unwrap().name
+                )?;
+            } else {
+                let use_hash_all = field_count > 20;
+
+                if use_hash_all {
+                    writeln!(self.out, "\nint get hashCode => Object.hashAll([")?;
+                } else {
+                    writeln!(self.out, "\nint get hashCode => Object.hash(")?;
+                }
+
+                self.out.indent();
+                self.out.indent();
+                self.out.indent();
+
+                for field in fields {
+                    writeln!(self.out, "{},", &field.name.to_mixed_case())?;
+                }
+
+                self.out.unindent();
+
+                if use_hash_all {
+                    writeln!(self.out, "]);")?;
+                } else {
+                    writeln!(self.out, ");")?;
+                }
+
+                self.out.unindent();
+                self.out.unindent();
+            }
+        }
+
+        if field_count > 0 {
             if variant_index.is_none() {
                 writeln!(self.out, "\n{0}.fromJson(dynamic json) :", name)?;
             } else {
@@ -896,7 +913,7 @@ return obj;
                 writeln!(self.out, "{} = json ;", &fields[0].name,)?;
             } else {
                 for (index, field) in fields.iter().enumerate() {
-                    if index == fields_num - 1 {
+                    if index == field_count - 1 {
                         writeln!(self.out, "{} ;", self.from_json(field))?;
                     } else {
                         writeln!(self.out, "{} ,", self.from_json(field))?;
@@ -924,7 +941,7 @@ return obj;
             }
             self.out.unindent();
             writeln!(self.out, "}};")?;
-        } else if fields_num > 0 {
+        } else if field_count > 0 {
             writeln!(self.out, "\ndynamic toJson() => {};", &fields[0].name)?;
         }
 
