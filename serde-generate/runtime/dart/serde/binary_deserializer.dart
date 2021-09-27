@@ -1,7 +1,7 @@
 part of serde;
 
 abstract class BinaryDeserializer {
-  BinaryDeserializer(Uint8List input): input = ByteData.view(input.buffer);
+  BinaryDeserializer(Uint8List input) : input = ByteData.view(input.buffer);
 
   final ByteData input;
   int offset = 0;

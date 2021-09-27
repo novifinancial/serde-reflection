@@ -30,11 +30,10 @@ void runStarcoinTests() {
         accountAddress);
   });
 
-
   test('AccessPath', () {
     AccountAddress accountAddress = new AccountAddress(List<int>.filled(16, 1));
     AccessPath accessPath1 =
-    new AccessPath(accountAddress, DataPathCodeItem(Identifier("123")));
+        new AccessPath(accountAddress, DataPathCodeItem(Identifier("123")));
     var result = accessPath1.bcsSerialize();
 
     print(result);
@@ -61,8 +60,8 @@ void runStarcoinTests() {
 
     print(jsonEncode(u8args_de));
 
-    expect(
-        TransactionArgument.fromJson(jsonDecode(jsonEncode(u8args_de))), u8args_de);
+    expect(TransactionArgument.fromJson(jsonDecode(jsonEncode(u8args_de))),
+        u8args_de);
   });
 
   test('TransactionPayload', () {
@@ -85,6 +84,5 @@ void runStarcoinTests() {
 
     expect(
         TransactionPayload.fromJson(jsonDecode(jsonEncode(payload))), payload);
-
   });
 }
