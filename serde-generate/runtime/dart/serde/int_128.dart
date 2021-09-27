@@ -10,13 +10,6 @@ class Int128 {
     return Int128(high, low);
   }
 
-  factory Int128.fromJson(String json) {
-    final num = BigInt.parse(json);
-    final high = (num >> 64).toInt();
-    final low = (num & BigInt.from(0xFFFFFFFFFFFFFFFF)).toInt();
-    return Int128(high, low);
-  }
-
   final int high;
   final int low;
 
@@ -40,6 +33,4 @@ class Int128 {
   }
 
   BigInt toBigInt() => (BigInt.from(high) << 64) + BigInt.from(low);
-
-  String toJson() => toBigInt().toString();
 }
