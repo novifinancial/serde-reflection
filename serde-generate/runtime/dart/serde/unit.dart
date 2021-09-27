@@ -2,13 +2,16 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 part of serde;
 
+@immutable
 class Unit {
-  Unit() {}
+  const Unit();
 
   @override
-  bool operator ==(covariant Unit other) {
-    if (other == null) return false;
-    return true;
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
+
+    return other is Unit;
   }
 
   @override

@@ -7,24 +7,26 @@ part of serde;
  *
  * Enforces value-semantice for `equals` and `hashCode`.
  */
+@immutable
 class Bytes {
-  Uint8List content;
+  const Bytes(this.content);
 
-  Bytes(Uint8List content) : content = content;
+  factory Bytes.fromJson(String json) {
+    return Bytes(Uint8List.fromList(HEX.decode(json)));
+  }
 
-  Uint8List getContent() {
-    return this.content;
+  final Uint8List content;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
+
+    return other is Bytes && listEquals(content, other.content);
   }
 
   @override
-  bool operator ==(covariant Bytes other) {
-    return isUint8ListsEqual(this.content, other.content);
-  }
-
-  @override
-  int get hashCode => this.content.hashCode;
-
-  Bytes.fromJson(String json) : content = Uint8List.fromList(HEX.decode(json));
+  int get hashCode => content.hashCode;
 
   String toJson() => HEX.encode(content);
 }
