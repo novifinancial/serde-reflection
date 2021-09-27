@@ -3,106 +3,103 @@ part of serde;
 abstract class BinaryDeserializer {
   BinaryDeserializer(Uint8List input) : input = ByteData.view(input.buffer);
 
+  @protected
   final ByteData input;
-  int offset = 0;
+  int _offset = 0;
 
-  bool deserialize_bool() {
-    final result = input.getUint8(offset) != 0;
-    offset += 1;
+  int get offset {
+    return _offset;
+  }
+
+  bool deserializeBool() {
+    final result = input.getUint8(_offset) != 0;
+    _offset += 1;
     return result;
   }
 
-  Unit deserialize_unit() {
-    return new Unit();
+  Unit deserializeUnit() {
+    return const Unit();
   }
 
-  int deserialize_u8() {
-    final result = input.getUint8(offset);
-    offset += 1;
+  int deserializeUint8() {
+    final result = input.getUint8(_offset);
+    _offset += 1;
     return result;
   }
 
-  int deserialize_u16() {
-    final result = input.getUint16(offset, Endian.little);
-    offset += 2;
+  int deserializeUint16() {
+    final result = input.getUint16(_offset, Endian.little);
+    _offset += 2;
     return result;
   }
 
-  int deserialize_u32() {
-    final result = input.getUint32(offset, Endian.little);
-    offset += 4;
+  int deserializeUint32() {
+    final result = input.getUint32(_offset, Endian.little);
+    _offset += 4;
     return result;
   }
 
-  int deserialize_u64() {
-    final result = input.getUint64(offset, Endian.little);
-    offset += 8;
+  int deserializeUint64() {
+    final result = input.getUint64(_offset, Endian.little);
+    _offset += 8;
     return result;
   }
 
-  int deserialize_i8() {
-    final result = input.getInt8(offset);
-    offset += 1;
+  int deserializeInt8() {
+    final result = input.getInt8(_offset);
+    _offset += 1;
     return result;
   }
 
-  int deserialize_i16() {
-    final result = input.getInt16(offset, Endian.little);
-    offset += 2;
+  int deserializeInt16() {
+    final result = input.getInt16(_offset, Endian.little);
+    _offset += 2;
     return result;
   }
 
-  int deserialize_i32() {
-    final result = input.getInt32(offset, Endian.little);
-    offset += 4;
+  int deserializeInt32() {
+    final result = input.getInt32(_offset, Endian.little);
+    _offset += 4;
     return result;
   }
 
-  int deserialize_i64() {
-    final result = input.getInt64(offset, Endian.little);
-    offset += 8;
+  int deserializeInt64() {
+    final result = input.getInt64(_offset, Endian.little);
+    _offset += 8;
     return result;
   }
 
-  Bytes deserialize_bytes() {
-    return Bytes(deserialize_uint8list());
+  Bytes deserializeBytes() {
+    return Bytes(deserializeUint8List());
   }
 
-  Uint8List deserialize_uint8list() {
-    final len = deserialize_len();
+  Uint8List deserializeUint8List() {
+    final len = deserializeLength();
     if (len < 0 || len > maxInt) {
       throw Exception('The length of an array cannot exceed MAXINT');
     }
     final content = Uint8List(len);
     for (var i = 0; i < len; i++) {
-      content[i] = deserialize_u8();
+      content[i] = deserializeUint8();
     }
     return content;
   }
 
-  bool deserialize_option_tag() {
-    return deserialize_bool();
+  bool deserializeOptionTag() {
+    return deserializeBool();
   }
 
-  int deserialize_variant_index();
+  int deserializeVariantIndex();
 
-  String deserialize_str() {
-    return String.fromCharCodes(deserialize_uint8list());
+  String deserializeString() {
+    return String.fromCharCodes(deserializeUint8List());
   }
 
-  int get_buffer_offset() {
-    return offset;
-  }
+  int deserializeLength();
 
-  int deserialize_len();
-
-  Int128 deserialize_u128() {
-    final low = this.deserialize_u64();
-    final high = this.deserialize_u64();
+  Int128 deserializeUint128() {
+    final low = deserializeUint64();
+    final high = deserializeUint64();
     return Int128(high, low);
-  }
-
-  int getUint8() {
-    return deserialize_u8();
   }
 }

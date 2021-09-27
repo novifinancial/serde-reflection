@@ -285,27 +285,27 @@ where
         use Format::*;
         match format {
             TypeName(_) => format!("{}.serialize(serializer);", value),
-            Unit => format!("serializer.serialize_unit({});", value),
-            Bool => format!("serializer.serialize_bool({});", value),
-            I8 => format!("serializer.serialize_i8({});", value),
-            I16 => format!("serializer.serialize_i16({});", value),
-            I32 => format!("serializer.serialize_i32({});", value),
-            I64 => format!("serializer.serialize_i64({});", value),
-            I128 => format!("serializer.serialize_i128({});", value),
-            U8 => format!("serializer.serialize_u8({});", value),
-            U16 => format!("serializer.serialize_u16({});", value),
-            U32 => format!("serializer.serialize_u32({});", value),
-            U64 => format!("serializer.serialize_u64({});", value),
-            U128 => format!("serializer.serialize_u128({});", value),
-            F32 => format!("serializer.serialize_f32({});", value),
-            F64 => format!("serializer.serialize_f64({});", value),
-            Char => format!("serializer.serialize_char({});", value),
-            Str => format!("serializer.serialize_str({});", value),
-            Bytes => format!("serializer.serialize_bytes({});", value),
+            Unit => format!("serializer.serializeUnit({});", value),
+            Bool => format!("serializer.serializeBool({});", value),
+            I8 => format!("serializer.serializeInt8({});", value),
+            I16 => format!("serializer.serializeInt16({});", value),
+            I32 => format!("serializer.serializeInt32({});", value),
+            I64 => format!("serializer.serializeInt64({});", value),
+            I128 => format!("serializer.serializeInt128({});", value),
+            U8 => format!("serializer.serializeUint8({});", value),
+            U16 => format!("serializer.serializeUint16({});", value),
+            U32 => format!("serializer.serializeUint32({});", value),
+            U64 => format!("serializer.serializeUint64({});", value),
+            U128 => format!("serializer.serializeUint128({});", value),
+            F32 => format!("serializer.serializeFloat32({});", value),
+            F64 => format!("serializer.serializeFloat64({});", value),
+            Char => format!("serializer.serializeChar({});", value),
+            Str => format!("serializer.serializeString({});", value),
+            Bytes => format!("serializer.serializeBytes({});", value),
             _ => format!(
-                "{}.serialize_{}({}, serializer);",
+                "{}.serialize{}({}, serializer);",
                 self.quote_qualified_name("TraitHelpers"),
-                common::mangle_type(format),
+                common::mangle_type(format).to_camel_case(),
                 value
             ),
         }
@@ -318,27 +318,27 @@ where
                 "{}.deserialize(deserializer)",
                 self.quote_qualified_name(name)
             ),
-            Unit => "deserializer.deserialize_unit()".to_string(),
-            Bool => "deserializer.deserialize_bool()".to_string(),
-            I8 => "deserializer.deserialize_i8()".to_string(),
-            I16 => "deserializer.deserialize_i16()".to_string(),
-            I32 => "deserializer.deserialize_i32()".to_string(),
-            I64 => "deserializer.deserialize_i64()".to_string(),
-            I128 => "deserializer.deserialize_i128()".to_string(),
-            U8 => "deserializer.deserialize_u8()".to_string(),
-            U16 => "deserializer.deserialize_u16()".to_string(),
-            U32 => "deserializer.deserialize_u32()".to_string(),
-            U64 => "deserializer.deserialize_u64()".to_string(),
-            U128 => "deserializer.deserialize_u128()".to_string(),
-            F32 => "deserializer.deserialize_f32()".to_string(),
-            F64 => "deserializer.deserialize_f64()".to_string(),
-            Char => "deserializer.deserialize_char()".to_string(),
-            Str => "deserializer.deserialize_str()".to_string(),
-            Bytes => "deserializer.deserialize_bytes()".to_string(),
+            Unit => "deserializer.deserializeUnit()".to_string(),
+            Bool => "deserializer.deserializeBool()".to_string(),
+            I8 => "deserializer.deserializeInt8()".to_string(),
+            I16 => "deserializer.deserializeInt16()".to_string(),
+            I32 => "deserializer.deserializeInt32()".to_string(),
+            I64 => "deserializer.deserializeInt64()".to_string(),
+            I128 => "deserializer.deserializeInt128()".to_string(),
+            U8 => "deserializer.deserializeUint8()".to_string(),
+            U16 => "deserializer.deserializeUint16()".to_string(),
+            U32 => "deserializer.deserializeUint32()".to_string(),
+            U64 => "deserializer.deserializeUint64()".to_string(),
+            U128 => "deserializer.deserializeUint128()".to_string(),
+            F32 => "deserializer.deserializeFloat32()".to_string(),
+            F64 => "deserializer.deserializeFloat64()".to_string(),
+            Char => "deserializer.deserializeChar()".to_string(),
+            Str => "deserializer.deserializeString()".to_string(),
+            Bytes => "deserializer.deserializeBytes()".to_string(),
             _ => format!(
-                "{}.deserialize_{}(deserializer)",
+                "{}.deserialize{}(deserializer)",
                 self.quote_qualified_name("TraitHelpers"),
-                common::mangle_type(format),
+                common::mangle_type(format).to_camel_case(),
             ),
         }
     }
@@ -388,8 +388,8 @@ where
 
         write!(
             self.out,
-            "static void serialize_{}({} value, BinarySerializer serializer) {{",
-            name,
+            "static void serialize{}({} value, BinarySerializer serializer) {{",
+            name.to_camel_case(),
             self.quote_type(format0)
         )?;
         self.out.indent();
@@ -398,11 +398,11 @@ where
                 write!(
                     self.out,
                     r#"
-if (value != null) {{
-    serializer.serialize_option_tag(true);
-    {}
+if (value == null) {{
+    serializer.serializeOptionTag(false);
 }} else {{
-    serializer.serialize_option_tag(false);
+    serializer.serializeOptionTag(true);
+    {}
 }}
 "#,
                     self.quote_serialize_value("value", format)
@@ -413,12 +413,11 @@ if (value != null) {{
                 write!(
                     self.out,
                     r#"
-serializer.serialize_len(value.length);
-for ({} item in value) {{
+serializer.serializeLength(value.length);
+for (final item in value) {{
     {}
 }}
 "#,
-                    self.quote_type(format),
                     self.quote_serialize_value("item", format)
                 )?;
             }
@@ -427,18 +426,16 @@ for ({} item in value) {{
                 write!(
                     self.out,
                     r#"
-serializer.serialize_len(value.length);
-List<int> offsets = new List<int>();
-int count = 0;
-for (Map.Entry<{}, {}> entry : value.entrySet()) {{
-    offsets[count++] = serializer.get_buffer_offset();
+serializer.serializeLength(value.length);
+final offsets = List<int>.filled(value.length, 0);
+var count = 0;
+for (final entry : value.entrySet()) {{
+    offsets[count++] = serializer.offset;
     {}
     {}
 }}
-serializer.sort_map_entries(offsets);
+serializer.sortMapEntries(offsets);
 "#,
-                    self.quote_type(key),
-                    self.quote_type(value),
                     self.quote_serialize_value("entry.getKey()", key),
                     self.quote_serialize_value("entry.getValue()", value)
                 )?;
@@ -457,12 +454,11 @@ serializer.sort_map_entries(offsets);
                     self.out,
                     r#"
 assert (value.length == {});
-for ({} item in value) {{
+for (final item in value) {{
     {}
 }}
 "#,
                     size,
-                    self.quote_type(content),
                     self.quote_serialize_value("item", content),
                 )?;
             }
@@ -478,9 +474,9 @@ for ({} item in value) {{
 
         write!(
             self.out,
-            "static {} deserialize_{}(BinaryDeserializer deserializer) {{",
+            "static {} deserialize{}(BinaryDeserializer deserializer) {{",
             self.quote_type(format0),
-            name,
+            name.to_camel_case(),
         )?;
         self.out.indent();
         match format0 {
@@ -488,11 +484,11 @@ for ({} item in value) {{
                 write!(
                     self.out,
                     r#"
-bool tag = deserializer.deserialize_option_tag();
-if (!tag) {{
-    return null;
-}} else {{
+final tag = deserializer.deserializeOptionTag();
+if (tag) {{
     return {};
+}} else {{
+    return null;
 }}
 "#,
                     self.quote_deserialize(format),
@@ -503,7 +499,7 @@ if (!tag) {{
                 write!(
                     self.out,
                     r#"
-int length = deserializer.deserialize_len();
+final length = deserializer.deserializeLength();
 return List.generate(length, (_i) => {0});
 "#,
                     self.quote_deserialize(format)
@@ -514,21 +510,22 @@ return List.generate(length, (_i) => {0});
                 write!(
                     self.out,
                     r#"
-int length = deserializer.deserialize_len();
-Map<{0}, {1}> obj = new HashMap<{0}, {1}>();
-int previous_key_start = 0;
-int previous_key_end = 0;
-for (int i = 0; i < length; i++) {{
-    int key_start = deserializer.get_buffer_offset();
+final length = deserializer.deserializeLength();
+final obj = <{0}, {1}>{{}};
+var previousKeyStart = 0;
+var previousKeyEnd = 0;
+for (var i = 0; i < length; i++) {{
+    final keyStart = deserializer.offset;
     {0} key = {2};
-    int key_end = deserializer.get_buffer_offset();
+    final keyEnd = deserializer.offset;
     if (i > 0) {{
-        deserializer.check_that_key_slices_are_increasing(
-            new Slice(previous_key_start, previous_key_end),
-            new Slice(key_start, key_end));
+        deserializer.checkThatKeySlicesAreIncreasing(
+            Slice(previousKeyStart, previousKeyEnd),
+            Slice(keyStart, keyEnd),
+        );
     }}
-    previous_key_start = key_start;
-    previous_key_end = key_end;
+    previousKeyStart = keyStart;
+    previousKeyEnd = keyEnd;
     {1} value = {3};
     obj.put(key, value);
 }}
@@ -545,7 +542,7 @@ return obj;
                 write!(
                     self.out,
                     r#"
-return new {}({}
+return {}({}
 );
 "#,
                     self.quote_type(format0),
@@ -561,8 +558,8 @@ return new {}({}
                 write!(
                     self.out,
                     r#"
-List<{0}> obj = new List<{0}>.filled({1}, 0);
-for (int i = 0; i < {1}; i++) {{
+final obj = List<{0}>.filled({1}, 0);
+for (var i = 0; i < {1}; i++) {{
     obj[i] = {2};
 }}
 return obj;
@@ -702,7 +699,7 @@ return obj;
             writeln!(self.out, "\nvoid serialize(BinarySerializer serializer){{",)?;
             self.out.indent();
             if let Some(index) = variant_index {
-                writeln!(self.out, "serializer.serialize_variant_index({});", index)?;
+                writeln!(self.out, "serializer.serializeVariantIndex({});", index)?;
             }
             for field in fields {
                 writeln!(
@@ -830,7 +827,7 @@ return obj;
 Uint8List {0}Serialize() {{
     final serializer = {1}Serializer();
     serialize(serializer);
-    return serializer.get_bytes();
+    return serializer.bytes;
 }}"#,
             encoding.name(),
             encoding.name().to_camel_case(),
@@ -848,7 +845,7 @@ Uint8List {0}Serialize() {{
 factory {0}.{1}Deserialize(Uint8List input) {{
   final deserializer = {2}Deserializer(input);
   final value = {0}.deserialize(deserializer);
-  if (deserializer.get_buffer_offset() < input.length) {{
+  if (deserializer.offset < input.length) {{
     throw Exception('Some input bytes were not read');
   }}
   return value;
@@ -881,7 +878,7 @@ factory {0}.{1}Deserialize(Uint8List input) {{
             writeln!(
                 self.out,
                 r#"
-int index = deserializer.deserialize_variant_index();
+int index = deserializer.deserializeVariantIndex();
 switch (index) {{"#,
             )?;
             self.out.indent();
