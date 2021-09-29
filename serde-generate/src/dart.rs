@@ -622,16 +622,25 @@ return obj;
         self.enter_class(name);
 
         // Constructor.
-        writeln!(self.out, "const {}({{", name)?;
+        writeln!(
+            self.out,
+            "const {}({}",
+            name,
+            if fields.len() > 0 { "{" } else { "" }
+        )?;
         self.out.indent();
         for field in fields.iter() {
             writeln!(self.out, "required this.{},", &field.name.to_mixed_case())?;
         }
         self.out.unindent();
         if variant_base.is_some() {
-            writeln!(self.out, "}}) : super();")?;
+            writeln!(
+                self.out,
+                "{}) : super();",
+                if fields.len() > 0 { "}" } else { "" }
+            )?;
         } else {
-            writeln!(self.out, "}});")?;
+            writeln!(self.out, "{});", if fields.len() > 0 { "}" } else { "" })?;
         }
 
         // Deserialize (struct) or Load (variant)
@@ -645,7 +654,7 @@ return obj;
             } else {
                 writeln!(
                     self.out,
-                    "\n{}.load(BinaryDeserializer deserializer) :",
+                    "\n{}.load(BinaryDeserializer deserializer);",
                     name
                 )?;
             }
@@ -865,7 +874,7 @@ factory {0}.{1}Deserialize(Uint8List input) {{
         //self.output_comment(name)?;
         writeln!(self.out, "abstract class {} {{", name)?;
         self.enter_class(name);
-        writeln!(self.out, "{}();", name)?;
+        writeln!(self.out, "const {}();", name)?;
 
         if self.generator.config.serialization {
             writeln!(self.out, "\nvoid serialize(BinarySerializer serializer);")?;
