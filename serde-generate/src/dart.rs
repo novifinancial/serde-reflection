@@ -24,6 +24,8 @@ struct DartEmitter<'a, T> {
     generator: &'a CodeGenerator<'a>,
     /// Current namespace (e.g. vec!["my_package", "my_module", "MyClass"])
     current_namespace: Vec<String>,
+    // A reference to the registry so we can look up information for special cases
+    registry: &'a Registry,
 }
 
 impl<'a> CodeGenerator<'a> {
@@ -58,7 +60,13 @@ impl<'a> CodeGenerator<'a> {
         std::fs::create_dir_all(&dir_path)?;
 
         for (name, format) in registry {
-            self.write_container_class(&dir_path, current_namespace.clone(), name, format)?;
+            self.write_container_class(
+                &dir_path,
+                current_namespace.clone(),
+                name,
+                format,
+                registry,
+            )?;
         }
         self.write_helper_class(&dir_path, current_namespace.clone(), registry)?;
         self.write_library(&dir_path, current_namespace, registry)?;
@@ -150,6 +158,7 @@ part 'src/starcoin_test.dart';"#
             out: IndentedWriter::new(&mut file, IndentConfig::Space(2)),
             generator: self,
             current_namespace,
+            registry,
         };
 
         writeln!(
@@ -191,6 +200,7 @@ import '../serde/serde.dart';"#,
         current_namespace: Vec<String>,
         name: &str,
         format: &ContainerFormat,
+        registry: &Registry,
     ) -> Result<()> {
         let mut file =
             std::fs::File::create(dir_path.join(name.to_string().to_snake_case() + ".dart"))?;
@@ -198,6 +208,7 @@ import '../serde/serde.dart';"#,
             out: IndentedWriter::new(&mut file, IndentConfig::Space(2)),
             generator: self,
             current_namespace,
+            registry,
         };
 
         emitter.output_preamble()?;
@@ -215,6 +226,7 @@ import '../serde/serde.dart';"#,
             out: IndentedWriter::new(&mut file, IndentConfig::Space(2)),
             generator: self,
             current_namespace,
+            registry,
         };
 
         emitter.output_preamble()?;
@@ -234,6 +246,27 @@ where
         )?;
 
         Ok(())
+    }
+
+    fn get_field_container_type(&self, name: &str) -> Option<&ContainerFormat> {
+        match self.registry.get(name) {
+            Some(container) => Some(container),
+            None => None,
+        }
+    }
+
+    // in Dart enums cannot have a static method added to them
+    // yet so we must call the extension class instead
+    fn get_class(&self, name: &str) -> String {
+        if self.generator.config.c_style_enums {
+            use ContainerFormat::Enum;
+            match self.get_field_container_type(name) {
+                Some(Enum(_)) => format!("{}Extension", self.quote_qualified_name(name)),
+                _ => self.quote_qualified_name(name),
+            }
+        } else {
+            self.quote_qualified_name(name)
+        }
     }
 
     fn quote_qualified_name(&self, name: &str) -> String {
@@ -314,10 +347,9 @@ where
     fn quote_deserialize(&self, format: &Format) -> String {
         use Format::*;
         match format {
-            TypeName(name) => format!(
-                "{}.deserialize(deserializer)",
-                self.quote_qualified_name(name)
-            ),
+            TypeName(name) => {
+                format!("{}.deserialize(deserializer)", self.get_class(name))
+            }
             Unit => "deserializer.deserializeUnit()".to_string(),
             Bool => "deserializer.deserializeBool()".to_string(),
             I8 => "deserializer.deserializeInt8()".to_string(),
@@ -596,7 +628,11 @@ return obj;
                 .collect::<Vec<_>>(),
             Struct(fields) => fields.clone(),
             Enum(variants) => {
-                self.output_enum_container(name, variants)?;
+                if self.generator.config.c_style_enums {
+                    self.output_enum_container(name, variants)?;
+                } else {
+                    self.output_enum_class_container(name, variants)?;
+                }
                 return Ok(());
             }
         };
@@ -851,21 +887,110 @@ Uint8List {0}Serialize() {{
         writeln!(
             self.out,
             r#"
-factory {0}.{1}Deserialize(Uint8List input) {{
-  final deserializer = {2}Deserializer(input);
-  final value = {0}.deserialize(deserializer);
+static {klass} {encoding}Deserialize(Uint8List input) {{
+  final deserializer = {encoding_class}Deserializer(input);
+  final value = {static_class}.deserialize(deserializer);
   if (deserializer.offset < input.length) {{
     throw Exception('Some input bytes were not read');
   }}
   return value;
 }}"#,
-            name,
-            encoding.name(),
-            encoding.name().to_camel_case()
+            klass = name,
+            static_class = self.get_class(name),
+            encoding = encoding.name(),
+            encoding_class = encoding.name().to_camel_case()
         )
     }
 
     fn output_enum_container(
+        &mut self,
+        name: &str,
+        variants: &BTreeMap<u32, Named<VariantFormat>>,
+    ) -> Result<()> {
+        writeln!(self.out)?;
+        writeln!(self.out, "enum {} {{", name)?;
+        self.enter_class(name);
+
+        for (_index, variant) in variants {
+            write!(self.out, "{},\n", &variant.name.to_mixed_case())?;
+        }
+
+        self.out.unindent();
+        writeln!(self.out, "}}\n")?;
+
+        if self.generator.config.serialization {
+            writeln!(self.out, "extension {n}Extension on {n} {{", n = &name)?;
+            self.out.indent();
+            write!(
+                self.out,
+                "static {} deserialize(BinaryDeserializer deserializer) {{",
+                &name
+            )?;
+            self.out.indent();
+            writeln!(
+                self.out,
+                r#"
+final index = deserializer.deserializeVariantIndex();
+switch (index) {{"#,
+            )?;
+            self.out.indent();
+            for (index, variant) in variants {
+                writeln!(
+                    self.out,
+                    "case {}: return {}.{};",
+                    index,
+                    name,
+                    variant.name.to_mixed_case(),
+                )?;
+            }
+            writeln!(
+                self.out,
+                "default: throw new Exception(\"Unknown variant index for {}: \" + index.toString());",
+                name,
+            )?;
+            self.out.unindent();
+            writeln!(self.out, "}}")?;
+            self.out.unindent();
+            writeln!(self.out, "}}\n")?;
+
+            write!(self.out, "void serialize(BinarySerializer serializer) {{")?;
+
+            self.out.indent();
+            writeln!(
+                self.out,
+                r#"
+switch (this) {{"#,
+            )?;
+            self.out.indent();
+            for (index, variant) in variants {
+                writeln!(
+                    self.out,
+                    "case {}.{}: return serializer.serializeVariantIndex({});",
+                    name,
+                    variant.name.to_mixed_case(),
+                    index,
+                )?;
+            }
+            self.out.unindent();
+            writeln!(self.out, "}}")?;
+            self.out.unindent();
+            writeln!(self.out, "}}")?;
+
+            for encoding in &self.generator.config.encodings {
+                self.output_class_serialize_for_encoding(*encoding)?;
+                self.output_class_deserialize_for_encoding(&format!("{}", name), *encoding)?;
+            }
+        }
+        self.out.unindent();
+        self.out.unindent();
+
+        writeln!(self.out, "}}\n")?;
+
+        self.leave_class();
+        Ok(())
+    }
+
+    fn output_enum_class_container(
         &mut self,
         name: &str,
         variants: &BTreeMap<u32, Named<VariantFormat>>,
