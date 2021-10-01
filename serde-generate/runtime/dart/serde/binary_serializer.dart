@@ -60,6 +60,11 @@ abstract class BinarySerializer {
     serializeUint64(value);
   }
 
+  void serializeFloat64(double value) {
+    final bdata = ByteData(8)..setFloat64(0, value, Endian.little);
+    output.addAll(bdata.buffer.asUint8List());
+  }
+
   void serializeOptionTag(bool value) {
     output.addAll(Uint8List.fromList([value ? 1 : 0]));
   }
