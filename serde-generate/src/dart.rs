@@ -666,7 +666,10 @@ return obj;
         )?;
         self.out.indent();
         for field in fields.iter() {
-            writeln!(self.out, "required this.{},", &field.name.to_mixed_case())?;
+            match &field.value {
+                Format::Option(_) => writeln!(self.out, "this.{},", &field.name.to_mixed_case())?,
+                _ => writeln!(self.out, "required this.{},", &field.name.to_mixed_case())?,
+            }
         }
         self.out.unindent();
         if variant_base.is_some() {
