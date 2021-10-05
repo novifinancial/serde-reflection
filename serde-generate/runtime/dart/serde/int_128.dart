@@ -1,7 +1,5 @@
 part of serde;
 
-typedef Uint128 = Int128;
-
 @immutable
 class Int128 {
   Int128(this.high, this.low);
@@ -36,7 +34,7 @@ class Int128 {
 
   @override
   String toString() {
-    return '$high$low';
+    return toBigInt().toString();
   }
 
   BigInt toBigInt() =>
