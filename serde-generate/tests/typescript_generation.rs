@@ -47,8 +47,7 @@ fn write_package_tsconfig_json_for_test_build(path: std::path::PathBuf) -> Resul
     "forceConsistentCasingInFileNames": true,
     "lib": [
       "es6",
-      "esnext.BigInt",
-      "dom"
+      "dom",
     ]
 
   }},
@@ -70,7 +69,7 @@ fn test_that_ts_code_compiles_with_config(
 
     let generator = typescript::CodeGenerator::new(config);
     generator.output(&mut source, &registry).unwrap();
-    let _result = write_package_tsconfig_json_for_test_build(dir.path().to_path_buf());
+    write_package_tsconfig_json_for_test_build(dir.path().to_path_buf()).unwrap();
 
     let installer = typescript::Installer::new(dir.path().to_path_buf());
     installer.install_serde_runtime().unwrap();

@@ -24,7 +24,7 @@ The following programming languages are fully supported as target languages:
 
 The following languages are partially supported and still considered under development:
 
-* TypeScript > 3.2 (make sure to enable `esnext.BigInt` and `dom` at tsconfig.json -> lib)
+* TypeScript > 3.2 (make sure to enable `es6` and `dom` at tsconfig.json -> lib)
 
 ### Supported Encodings
 
