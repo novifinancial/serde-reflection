@@ -46,8 +46,8 @@ fn write_package_tsconfig_json_for_test_build(path: std::path::PathBuf) -> Resul
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "lib": [
-      "es6",
-      "dom",
+//      "es6",
+//      "dom",
     ]
 
   }},
