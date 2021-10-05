@@ -45,19 +45,28 @@ abstract class BinarySerializer {
   }
 
   void serializeInt8(int value) {
-    serializeUint8(value);
+    final bdata = ByteData(1)..setInt8(0, value);
+    output.addAll(bdata.buffer.asUint8List());
   }
 
   void serializeInt16(int value) {
-    serializeUint16(value);
+    final bdata = ByteData(2)..setInt16(0, value, Endian.little);
+    output.addAll(bdata.buffer.asUint8List());
   }
 
   void serializeInt32(int value) {
-    serializeUint32(value);
+    final bdata = ByteData(4)..setInt32(0, value, Endian.little);
+    output.addAll(bdata.buffer.asUint8List());
   }
 
   void serializeInt64(int value) {
-    serializeUint64(value);
+    final bdata = ByteData(8)..setInt64(0, value, Endian.little);
+    output.addAll(bdata.buffer.asUint8List());
+  }
+
+  void serializeFloat32(double value) {
+    final bdata = ByteData(4)..setFloat32(0, value, Endian.little);
+    output.addAll(bdata.buffer.asUint8List());
   }
 
   void serializeFloat64(double value) {
