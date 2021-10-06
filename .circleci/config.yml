@@ -45,6 +45,9 @@ jobs:
             sudo dpkg -i packages-microsoft-prod.deb
             sudo apt-get update
             sudo apt-get install -y dotnet-sdk-2.1 dotnet-sdk-3.1
+            curl -fsSL https://deno.land/x/install/install.sh | sh
+            echo 'export DENO_INSTALL="/home/circleci/.deno"' >> $BASH_ENV
+            echo 'export PATH="$DENO_INSTALL/bin:$PATH"' >> $BASH_ENV
       - run:
           name: Version Information
           command: |
