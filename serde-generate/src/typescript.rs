@@ -1,21 +1,19 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use include_dir::include_dir as include_directory;
-use std::{
-    collections::{BTreeMap, HashMap},
-    io::{Result, Write},
-    path::PathBuf,
-};
-
-use serde_reflection::{ContainerFormat, Format, FormatHolder, Named, Registry, VariantFormat};
-
 use crate::{
     common,
     indent::{IndentConfig, IndentedWriter},
     CodeGeneratorConfig,
 };
 use heck::CamelCase;
+use include_dir::include_dir as include_directory;
+use serde_reflection::{ContainerFormat, Format, FormatHolder, Named, Registry, VariantFormat};
+use std::{
+    collections::{BTreeMap, HashMap},
+    io::{Result, Write},
+    path::PathBuf,
+};
 
 /// Main configuration object for code-generation in TypeScript.
 pub struct CodeGenerator<'a> {
@@ -26,6 +24,8 @@ pub struct CodeGenerator<'a> {
     external_qualified_names: HashMap<String, String>,
     /// vector of namespaces to import
     namespaces_to_import: Vec<String>,
+    /// Flavor of typescript that dictates nuances like imports and preambles.
+    runtime: TypeScriptRuntime,
 }
 
 /// Shared state for the code generation of a TypeScript source file.
@@ -36,9 +36,20 @@ struct TypeScriptEmitter<'a, T> {
     generator: &'a CodeGenerator<'a>,
 }
 
+#[derive(Debug)]
+pub enum TypeScriptRuntime {
+    Node,
+    Deno,
+}
+
 impl<'a> CodeGenerator<'a> {
     /// Create a TypeScript code generator for the given config.
     pub fn new(config: &'a CodeGeneratorConfig) -> Self {
+        Self::new_with_runtime(config, TypeScriptRuntime::Node)
+    }
+
+    /// Create a TypeScript code generator for the given config.
+    pub fn new_with_runtime(config: &'a CodeGeneratorConfig, runtime: TypeScriptRuntime) -> Self {
         if config.c_style_enums {
             panic!("TypeScript does not support generating c-style enums");
         }
@@ -59,6 +70,7 @@ impl<'a> CodeGenerator<'a> {
                 .keys()
                 .map(|k| k.to_string())
                 .collect::<Vec<_>>(),
+            runtime,
         }
     }
 
@@ -69,7 +81,12 @@ impl<'a> CodeGenerator<'a> {
             generator: self,
         };
 
-        emitter.output_preamble()?;
+        writeln!(
+            emitter.out,
+            "{}",
+            self.runtime
+                .preamble(&emitter.generator.namespaces_to_import)
+        )?;
 
         for (name, format) in registry {
             emitter.output_container(name, format)?;
@@ -83,31 +100,58 @@ impl<'a> CodeGenerator<'a> {
     }
 }
 
+impl TypeScriptRuntime {
+    pub fn preamble(&self, namespaces_to_import: &[String]) -> String {
+        use TypeScriptRuntime::*;
+        match self {
+            Node => {
+                let mut rval = String::from(
+                    r#"
+import { Serializer } from '../serde/serializer';
+import { Deserializer } from '../serde/deserializer';
+import { Optional, Seq, Tuple, ListTuple, unit, bool, int8, int16, int32, int64, int128, uint8, uint16, uint32, uint64, uint128, float32, float64, char, str, bytes } from '../serde/types';
+"#,
+                );
+                for namespace in namespaces_to_import.iter() {
+                    rval.push_str(
+                        format!(
+                            "import * as {} from '../{}';\n",
+                            namespace.to_camel_case(),
+                            namespace
+                        )
+                        .as_str(),
+                    );
+                }
+                rval
+            }
+            Deno => {
+                let mut rval = String::from(
+                    r#"
+import { Serializer, Deserializer } from '../serde/mod.ts';
+import { BcsSerializer, BcsDeserializer } from '../bcs/mod.ts';
+import { Optional, Seq, Tuple, ListTuple, unit, bool, int8, int16, int32, int64, int128, uint8, uint16, uint32, uint64, uint128, float32, float64, char, str, bytes } from '../serde/mod.ts';
+"#,
+                );
+                for namespace in namespaces_to_import.iter() {
+                    rval.push_str(
+                        format!(
+                            "import * as {} from '../{}.ts';\n",
+                            namespace.to_camel_case(),
+                            namespace,
+                        )
+                        .as_str(),
+                    );
+                }
+                rval
+            }
+        }
+    }
+}
+
 impl<'a, T> TypeScriptEmitter<'a, T>
 where
     T: Write,
 {
-    fn output_preamble(&mut self) -> Result<()> {
-        writeln!(
-            self.out,
-            r#"
-import {{ Serializer }} from '../serde/serializer';
-import {{ Deserializer }} from '../serde/deserializer';
-import {{ Optional, Seq, Tuple, ListTuple, unit, bool, int8, int16, int32, int64, int128, uint8, uint16, uint32, uint64, uint128, float32, float64, char, str, bytes}} from '../serde/types';
-"#
-        )?;
-        for namespace in self.generator.namespaces_to_import.iter() {
-            writeln!(
-                self.out,
-                "import * as {} from '../{}';\n",
-                namespace.to_camel_case(),
-                namespace
-            )?;
-        }
-
-        Ok(())
-    }
-
     fn quote_qualified_name(&self, name: &str) -> String {
         self.generator
             .external_qualified_names
