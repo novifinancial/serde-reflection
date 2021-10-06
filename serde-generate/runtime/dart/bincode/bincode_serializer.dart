@@ -5,7 +5,9 @@ part of bincode;
 class BincodeSerializer extends BinarySerializer {
   @override
   void serializeLength(int value) {
-    serializeUint64(value);
+    // bincode expects a u64 but since the capacity of a Dart int is less than that
+    // we can safely serialize as int to simplify over constructing Uint8 bytes
+    return serializeInt64(value);
   }
 
   @override

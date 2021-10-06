@@ -7,7 +7,9 @@ class BincodeDeserializer extends BinaryDeserializer {
 
   @override
   int deserializeLength() {
-    return deserializeUint64();
+    // bincode sends this as a u64 but since transferred data length should never exceed the upper
+    // bounds of an i64 (9223372036854775807 bytes is 9k petabytes) still deserialize to a Dart int
+    return deserializeInt64();
   }
 
   @override
