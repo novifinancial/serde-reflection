@@ -39,10 +39,10 @@ abstract class BinaryDeserializer {
     return result;
   }
 
-  int deserializeUint64() {
-    final result = input.getUint64(_offset, Endian.little);
+  Uint64 deserializeUint64() {
+    final number = _bytesToBigInt(8, signed: false);
     _offset += 8;
-    return result;
+    return Uint64(number);
   }
 
   int deserializeInt8() {
@@ -112,12 +112,29 @@ abstract class BinaryDeserializer {
   Int128 deserializeInt128() {
     final low = deserializeUint64();
     final high = deserializeUint64();
-    return Int128(high, low);
+    return Int128(high.toBigInt(), low.toBigInt());
   }
 
   Uint128 deserializeUint128() {
     final low = deserializeUint64();
     final high = deserializeUint64();
-    return Uint128(high, low);
+    return Uint128(high.toBigInt(), low.toBigInt());
+  }
+
+  BigInt _bytesToBigInt(int byteLength, {required bool signed}) {
+    BigInt number = BigInt.from(0);
+    for (int i = 0; (i < byteLength); i++) {
+      // big endian
+      // number += BigInt.from(bytes[byteLength - i - 1]) << (8 * i);
+
+      // little endian
+      number += BigInt.from(input.getUint8(_offset + i)) << (8 * i);
+    }
+
+    if (signed) {
+      return number.toSigned(byteLength * 8);
+    } else {
+      return number.toUnsigned(byteLength * 8);
+    }
   }
 }
