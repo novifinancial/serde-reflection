@@ -3,25 +3,25 @@
 
 use heck::CamelCase;
 use serde_generate::{
-    deno, test_utils,
+    test_utils,
     test_utils::{Choice, Runtime, Test},
-    CodeGeneratorConfig, SourceInstaller,
+    typescript, CodeGeneratorConfig, SourceInstaller,
 };
 use std::{fs::File, io::Write, process::Command};
 use tempfile::tempdir;
 
 #[test]
-fn test_deno_bcs_runtime_on_simple_data() {
-    test_deno_runtime_on_simple_data(Runtime::Bcs);
+fn test_typescript_bcs_runtime_on_simple_data() {
+    test_typescript_runtime_on_simple_data(Runtime::Bcs);
 }
 
-fn test_deno_runtime_on_simple_data(runtime: Runtime) {
+fn test_typescript_runtime_on_simple_data(runtime: Runtime) {
     let registry = test_utils::get_simple_registry().unwrap();
     let dir = tempdir().unwrap();
     let dir_path = dir.path();
     std::fs::create_dir_all(dir_path.join("tests")).unwrap();
 
-    let installer = deno::Installer::new(dir_path.to_path_buf());
+    let installer = typescript::Installer::new(dir_path.to_path_buf());
     installer.install_serde_runtime().unwrap();
     installer.install_bcs_runtime().unwrap();
 
@@ -29,7 +29,7 @@ fn test_deno_runtime_on_simple_data(runtime: Runtime) {
     let mut source = File::create(&source_path).unwrap();
 
     let config = CodeGeneratorConfig::new("main".to_string()).with_encodings(vec![runtime.into()]);
-    let generator = deno::CodeGenerator::new(&config);
+    let generator = typescript::CodeGenerator::new(&config);
     generator.output(&mut source, &registry).unwrap();
 
     let reference = runtime.serialize(&Test {
@@ -42,7 +42,7 @@ fn test_deno_runtime_on_simple_data(runtime: Runtime) {
         source,
         r#"
 import {{ assertEquals }} from "https://deno.land/std@0.110.0/testing/asserts.ts";
-Deno.test("{1} serialization matches deserialization in deno", () => {{
+Deno.test("{1} serialization matches deserialization", () => {{
 	const expectedBytes = new Uint8Array([{0}]);
   const {1}Deserializer: {2}Deserializer = new {2}Deserializer(expectedBytes);
   const deserializedInstance: Test = Test.deserialize({1}Deserializer);
