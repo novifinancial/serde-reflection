@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["CodeGenerator","Main configuration object for code-generation in TypeScript."],["Installer","Installer for generated source files in TypeScript."]]});
+initSidebarItems({"struct":[["CodeGenerator","Main configuration object for code-generation in TypeScript, powered by the Deno runtime."],["Installer","Installer for generated source files in TypeScript."]]});

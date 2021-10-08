@@ -734,23 +734,9 @@
 <span id="734">734</span>
 <span id="735">735</span>
 <span id="736">736</span>
-<span id="737">737</span>
-<span id="738">738</span>
-<span id="739">739</span>
-<span id="740">740</span>
-<span id="741">741</span>
 </pre><pre class="rust">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
-
-<span class="kw">use</span> <span class="ident">include_dir::include_dir</span> <span class="kw">as</span> <span class="ident">include_directory</span>;
-<span class="kw">use</span> <span class="ident">std</span>::{
-    <span class="ident">collections</span>::{<span class="ident">BTreeMap</span>, <span class="ident">HashMap</span>},
-    <span class="ident">io</span>::{<span class="prelude-ty">Result</span>, <span class="ident">Write</span>},
-    <span class="ident">path::PathBuf</span>,
-};
-
-<span class="kw">use</span> <span class="ident">serde_reflection</span>::{<span class="ident">ContainerFormat</span>, <span class="ident">Format</span>, <span class="ident">FormatHolder</span>, <span class="ident">Named</span>, <span class="ident">Registry</span>, <span class="ident">VariantFormat</span>};
 
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">common</span>,
@@ -758,8 +744,16 @@
     <span class="ident">CodeGeneratorConfig</span>,
 };
 <span class="kw">use</span> <span class="ident">heck::CamelCase</span>;
+<span class="kw">use</span> <span class="ident">include_dir::include_dir</span> <span class="kw">as</span> <span class="ident">include_directory</span>;
+<span class="kw">use</span> <span class="ident">serde_reflection</span>::{<span class="ident">ContainerFormat</span>, <span class="ident">Format</span>, <span class="ident">FormatHolder</span>, <span class="ident">Named</span>, <span class="ident">Registry</span>, <span class="ident">VariantFormat</span>};
+<span class="kw">use</span> <span class="ident">std</span>::{
+    <span class="ident">collections</span>::{<span class="ident">BTreeMap</span>, <span class="ident">HashMap</span>},
+    <span class="ident">io</span>::{<span class="prelude-ty">Result</span>, <span class="ident">Write</span>},
+    <span class="ident">path::PathBuf</span>,
+};
 
-<span class="doccomment">/// Main configuration object for code-generation in TypeScript.</span>
+<span class="doccomment">/// Main configuration object for code-generation in TypeScript, powered by</span>
+<span class="doccomment">/// the Deno runtime.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CodeGenerator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Language-independent configuration.</span>
     <span class="ident">config</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">CodeGeneratorConfig</span>,
@@ -833,15 +827,15 @@
         <span class="macro">writeln!</span>(
             <span class="self">self</span>.<span class="ident">out</span>,
             <span class="string">r#&quot;
-import {{ Serializer }} from &#39;../serde/serializer&#39;;
-import {{ Deserializer }} from &#39;../serde/deserializer&#39;;
-import {{ Optional, Seq, Tuple, ListTuple, unit, bool, int8, int16, int32, int64, int128, uint8, uint16, uint32, uint64, uint128, float32, float64, char, str, bytes}} from &#39;../serde/types&#39;;
-&quot;#</span>
+import {{ Serializer, Deserializer }} from &#39;../serde/mod.ts&#39;;
+import {{ BcsSerializer, BcsDeserializer }} from &#39;../bcs/mod.ts&#39;;
+import {{ Optional, Seq, Tuple, ListTuple, unit, bool, int8, int16, int32, int64, int128, uint8, uint16, uint32, uint64, uint128, float32, float64, char, str, bytes }} from &#39;../serde/mod.ts&#39;;
+&quot;#</span>,
         )<span class="question-mark">?</span>;
         <span class="kw">for</span> <span class="ident">namespace</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">namespaces_to_import</span>.<span class="ident">iter</span>() {
             <span class="macro">writeln!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
-                <span class="string">&quot;import * as {} from &#39;../{}&#39;;\n&quot;</span>,
+                <span class="string">&quot;import * as {} from &#39;../{}.ts&#39;;\n&quot;</span>,
                 <span class="ident">namespace</span>.<span class="ident">to_camel_case</span>(),
                 <span class="ident">namespace</span>
             )<span class="question-mark">?</span>;
@@ -1463,10 +1457,6 @@ switch (index) {{&quot;#</span>,
         <span class="kw">let</span> <span class="ident">generator</span> <span class="op">=</span> <span class="ident">CodeGenerator::new</span>(<span class="ident">config</span>);
         <span class="ident">generator</span>.<span class="ident">output</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">file</span>, <span class="ident">registry</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
-
-        <span class="comment">// let generator = CodeGenerator::new(config, true);</span>
-        <span class="comment">// generator.write_source_files(self.install_dir.clone(), registry)?;</span>
-        <span class="comment">// Ok(())</span>
     }
 
     <span class="kw">fn</span> <span class="ident">install_serde_runtime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="self">Self</span><span class="ident">::Error</span><span class="op">&gt;</span> {
