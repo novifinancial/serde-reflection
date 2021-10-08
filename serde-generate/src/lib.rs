@@ -19,7 +19,7 @@
 //!
 //! The following languages are partially supported and still considered under development:
 //!
-//! * TypeScript > 3.2 (make sure to enable `esnext.BigInt` and `dom` at tsconfig.json -> lib)
+//! * TypeScript 4 (packaged and tested with Deno)
 //!
 //! ## Supported Encodings
 //!

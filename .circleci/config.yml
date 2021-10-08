@@ -37,7 +37,7 @@ jobs:
             echo "deb http://http.us.debian.org/debian/ buster-backports main" | sudo tee -a /etc/apt/sources.list
             echo "deb-src http://http.us.debian.org/debian/ buster-backports main" | sudo tee -a /etc/apt/sources.list
             sudo apt-get update
-            sudo apt-get install -y apt-transport-https python3-all-dev python3-pip clang llvm default-jdk nodejs npm golang-1.14-go/buster-backports
+            sudo apt-get install -y apt-transport-https python3-all-dev python3-pip clang llvm default-jdk golang-1.14-go/buster-backports
             echo 'export PATH=$PATH:/usr/lib/go-1.14/bin' >> $BASH_ENV
             python3 -m pip install pyre-check==0.0.59
             python3 -m pip install numpy==1.20.1
@@ -58,9 +58,8 @@ jobs:
             clang++ --version
             javac -version
             go version
-            echo "node $(node -v)"
-            echo "npm $(npm -v)"
             dotnet --list-sdks
+            deno --version
       - run:
           name: Setup Env
           command: |
