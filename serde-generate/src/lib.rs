@@ -140,8 +140,6 @@ pub mod indent;
 pub mod cpp;
 /// Support for code-generation in C#
 pub mod csharp;
-/// Support for code-generation in Deno
-pub mod deno;
 /// Support for code-generation in Go
 pub mod golang;
 /// Support for code-generation in Java

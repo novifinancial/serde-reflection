@@ -42,7 +42,7 @@ export interface Deserializer {
   getBufferOffset(): number;
 
   checkThatKeySlicesAreIncreasing(
-      key1: [number, number],
-      key2: [number, number]
+    key1: [number, number],
+    key2: [number, number],
   ): void;
 }
