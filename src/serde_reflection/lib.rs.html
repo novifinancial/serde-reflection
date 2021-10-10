@@ -339,6 +339,14 @@
 <span id="339">339</span>
 <span id="340">340</span>
 <span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
 </pre><pre class="rust">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -430,6 +438,10 @@
 <span class="doccomment">//! derived ones, provided that `trace_value` is used during tracing to provide sample</span>
 <span class="doccomment">//! values for all such constrained types (see the detailed example below).</span>
 <span class="doccomment">//!</span>
+<span class="doccomment">//! * Mutually recursive types provided that the first variant of each enum is</span>
+<span class="doccomment">//! recursion-free. (For instance, `enum List { None, Some(Box&lt;List&gt;)}`.) Note that each</span>
+<span class="doccomment">//! enum must be traced separately with `trace_type` to discover all the variants.</span>
+<span class="doccomment">//!</span>
 <span class="doccomment">//! Unsupported idioms include:</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! * Containers sharing the same base name (e.g. `Foo`) but from different modules. (Work</span>
@@ -441,6 +453,10 @@
 <span class="doccomment">//! * Attributes that are not compatible with binary formats (e.g. `#[serde(flatten)]`, `#[serde(tag = ..)]`)</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! * Tracing type aliases. (E.g. `type Pair = (u32, u64)` will not create an entry &quot;Pair&quot;.)</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! * Mutually recursive types for which picking the first variant of each enum does not</span>
+<span class="doccomment">//! terminate. (Work around: re-order the variants. For instance `enum List {</span>
+<span class="doccomment">//! Some(Box&lt;List&gt;), None}` must be rewritten `enum List { None, Some(Box&lt;List&gt;)}`.)</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # Troubleshooting</span>
 <span class="doccomment">//!</span>
