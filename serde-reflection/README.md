@@ -86,6 +86,10 @@ binary serialization formats, such as `#[serde(rename = "Name")]`.
 derived ones, provided that `trace_value` is used during tracing to provide sample
 values for all such constrained types (see the detailed example below).
 
+* Mutually recursive types provided that the first variant of each enum is
+recursion-free. (For instance, `enum List { None, Some(Box<List>)}`.) Note that each
+enum must be traced separately with `trace_type` to discover all the variants.
+
 Unsupported idioms include:
 
 * Containers sharing the same base name (e.g. `Foo`) but from different modules. (Work
@@ -97,6 +101,10 @@ use the crate [`serde-name`](https://crates.io/crates/serde-name) and its adapte
 * Attributes that are not compatible with binary formats (e.g. `#[serde(flatten)]`, `#[serde(tag = ..)]`)
 
 * Tracing type aliases. (E.g. `type Pair = (u32, u64)` will not create an entry "Pair".)
+
+* Mutually recursive types for which picking the first variant of each enum does not
+terminate. (Work around: re-order the variants. For instance `enum List {
+Some(Box<List>), None}` must be rewritten `enum List { None, Some(Box<List>)}`.)
 
 ## Troubleshooting
 
