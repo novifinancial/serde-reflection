@@ -3,7 +3,7 @@
 
 use regex::Regex;
 use serde_generate::{test_utils, typescript, CodeGeneratorConfig, Encoding, SourceInstaller};
-use std::{fs::File, path::Path, process::Command};
+use std::{collections::BTreeMap, fs::File, path::Path, process::Command};
 use tempfile::tempdir;
 
 fn test_typescript_code_compiles_with_config(
@@ -96,4 +96,24 @@ fn test_typescript_code_compiles_with_comments() {
  */
 "#
     ));
+}
+
+#[test]
+fn test_typescript_code_compiles_with_external_definitions() {
+    let dir = tempdir().unwrap();
+
+    // create external definition
+    std::fs::create_dir_all(dir.path().join("external")).unwrap_or(());
+    std::fs::write(
+        dir.path().join("external/mod.ts"),
+        "export const CustomType = 5;",
+    )
+    .unwrap();
+
+    let mut external_definitions = BTreeMap::new();
+    external_definitions.insert(String::from("external"), vec![String::from("CustomType")]);
+    let config = CodeGeneratorConfig::new("testing".to_string())
+        .with_external_definitions(external_definitions);
+
+    test_typescript_code_compiles_with_config(&dir.path(), &config);
 }
