@@ -835,7 +835,7 @@ import {{ Optional, Seq, Tuple, ListTuple, unit, bool, int8, int16, int32, int64
         <span class="kw">for</span> <span class="ident">namespace</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">generator</span>.<span class="ident">namespaces_to_import</span>.<span class="ident">iter</span>() {
             <span class="macro">writeln!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
-                <span class="string">&quot;import * as {} from &#39;../{}.ts&#39;;\n&quot;</span>,
+                <span class="string">&quot;import * as {} from &#39;../{}/mod.ts&#39;;\n&quot;</span>,
                 <span class="ident">namespace</span>.<span class="ident">to_camel_case</span>(),
                 <span class="ident">namespace</span>
             )<span class="question-mark">?</span>;
