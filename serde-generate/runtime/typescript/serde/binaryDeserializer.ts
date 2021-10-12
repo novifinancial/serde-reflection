@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) Facebook, Inc. and its affiliates
+ * SPDX-License-Identifier: MIT OR Apache-2.0
+ */
+
 import { Deserializer } from "./deserializer.ts";
 import * as util from "https://deno.land/std@0.85.0/node/util.ts";
 
