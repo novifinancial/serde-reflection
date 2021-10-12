@@ -1,3 +1,6 @@
+# Copyright (c) Facebook, Inc. and its affiliates
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
 from collections import OrderedDict
 from dataclasses import dataclass
 import unittest
