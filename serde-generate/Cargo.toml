@@ -25,7 +25,7 @@ serde_yaml = "0.8.17"
 structopt = "0.3.21"
 textwrap = "0.13.4"
 
-serde-reflection = { path = "../serde-reflection", version = "0.3.4" }
+serde-reflection = { path = "../serde-reflection", version = "0.3.5" }
 bincode = "1.3.3"
 bcs = "0.1.3"
 
