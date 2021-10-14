@@ -90,7 +90,11 @@ abstract class BinarySerializer {
     output.addAll(Uint8List.fromList([value ? 1 : 0]));
   }
 
-  void serializeUintnit(Unit value) {}
+  void serializeUnit(Unit value) {}
+
+  void serializeChar(int value) {
+    serializeInt64(value);
+  }
 
   void serializeVariantIndex(int index);
 
