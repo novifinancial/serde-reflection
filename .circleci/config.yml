@@ -48,6 +48,11 @@ jobs:
             curl -fsSL https://deno.land/x/install/install.sh | sh
             echo 'export DENO_INSTALL="/home/circleci/.deno"' >> $BASH_ENV
             echo 'export PATH="$DENO_INSTALL/bin:$PATH"' >> $BASH_ENV
+            sudo apt-get install apt-transport-https
+            sudo sh -c 'wget -qO- https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -'
+            sudo sh -c 'wget -qO- https://storage.googleapis.com/download.dartlang.org/linux/debian/dart_stable.list > /etc/apt/sources.list.d/dart_stable.list'
+            sudo apt-get update
+            sudo apt-get install dart
       - run:
           name: Version Information
           command: |
@@ -60,6 +65,7 @@ jobs:
             go version
             dotnet --list-sdks
             deno --version
+            dart --version
       - run:
           name: Setup Env
           command: |

@@ -92,47 +92,30 @@ dependencies:
         Ok(())
     }
 
-    fn output_test(&self, install_dir: &std::path::PathBuf) -> Result<()> {
+    pub fn output_test(&self, install_dir: &std::path::PathBuf) -> Result<()> {
         let test_dir_path = install_dir.join("test");
         std::fs::create_dir_all(&test_dir_path)?;
 
-        let mut file = std::fs::File::create(test_dir_path.join("all_test.dart"))?;
+        let mut file = std::fs::File::create(test_dir_path.join(format!("all_test.dart")))?;
         let mut out = IndentedWriter::new(&mut file, IndentConfig::Space(2));
+        writeln!(&mut out, r#"import 'package:test/test.dart';"#,)?;
+
         writeln!(
             &mut out,
-            r#"library bcs_test;
-
-import 'package:test/test.dart';
-import 'dart:typed_data';
-import 'dart:convert';
-import 'package:{0}/{0}/{0}.dart';
-import 'package:{0}/serde/serde.dart';"#,
-            self.config.module_name
+            r#"
+import 'src/serde.dart';
+import 'src/serde_generate.dart';"#
         )?;
-
         for encoding in &self.config.encodings {
-            writeln!(
-                &mut out,
-                "import 'package:{0}/{1}/{1}.dart';",
-                self.config.module_name,
-                encoding.name()
-            )?;
+            writeln!(&mut out, "import 'src/{}.dart';", encoding.name())?;
         }
 
         writeln!(
             &mut out,
-            r#"part 'src/serde_test.dart';
-part 'src/starcoin_test.dart';"#
-        )?;
-        for encoding in &self.config.encodings {
-            writeln!(&mut out, "part 'src/{}_test.dart';", encoding.name())?;
-        }
-
-        writeln!(
-            &mut out,
-            r#"void main() {{
+            r#"
+void main() {{
   group('Serde', runSerdeTests);
-  group('starcoin', runStarcoinTests);"#,
+  group('Serde Generate', runSerdeGenerateTests);"#,
         )?;
         for encoding in &self.config.encodings {
             writeln!(
@@ -263,16 +246,28 @@ where
         if self.generator.config.c_style_enums {
             use ContainerFormat::Enum;
             match self.get_field_container_type(name) {
-                Some(Enum(_)) => format!("{}Extension", self.quote_qualified_name(name)),
-                _ => self.quote_qualified_name(name),
+                Some(Enum(_)) => format!("{}Extension", name),
+                _ => name.to_string(),
             }
         } else {
-            self.quote_qualified_name(name)
+            name.to_string()
         }
     }
 
     fn quote_qualified_name(&self, name: &str) -> String {
-        name.to_string()
+        match name {
+            "List" => "List_".to_string(),
+            "Map" => "Map_".to_string(),
+            name => name.to_string(),
+        }
+    }
+
+    fn quote_field(&self, name: &str) -> String {
+        match name {
+            "hashCode" => "hashCode_".to_string(),
+            "runtimeType" => "runtimeType_".to_string(),
+            name => name.to_string(),
+        }
     }
 
     fn quote_type(&self, format: &Format) -> String {
@@ -463,15 +458,14 @@ for (final item in value) {{
 serializer.serializeLength(value.length);
 final offsets = List<int>.filled(value.length, 0);
 var count = 0;
-for (final entry : value.entrySet()) {{
-    offsets[count++] = serializer.offset;
-    {}
-    {}
-}}
-serializer.sortMapEntries(offsets);
+value.entries.forEach((entry) {{
+  offsets[count++] = serializer.offset;
+  {}
+  {}
+}});
 "#,
-                    self.quote_serialize_value("entry.getKey()", key),
-                    self.quote_serialize_value("entry.getValue()", value)
+                    self.quote_serialize_value("entry.key", key),
+                    self.quote_serialize_value("entry.value", value)
                 )?;
             }
 
@@ -561,7 +555,7 @@ for (var i = 0; i < length; i++) {{
     previousKeyStart = keyStart;
     previousKeyEnd = keyEnd;
     {1} value = {3};
-    obj.put(key, value);
+    obj.putIfAbsent(key, () => value);
 }}
 return obj;
 "#,
@@ -652,10 +646,20 @@ return obj;
 
         // Beginning of class
         writeln!(self.out)?;
+        self.output_comment(name)?;
         if let Some(base) = variant_base {
-            writeln!(self.out, "@immutable\nclass {} extends {} {{", name, base)?;
+            writeln!(
+                self.out,
+                "@immutable\nclass {} extends {} {{",
+                self.quote_qualified_name(name),
+                base
+            )?;
         } else {
-            writeln!(self.out, "@immutable\nclass {} {{", name)?;
+            writeln!(
+                self.out,
+                "@immutable\nclass {} {{",
+                self.quote_qualified_name(name)
+            )?;
         }
         self.enter_class(name);
 
@@ -663,14 +667,15 @@ return obj;
         writeln!(
             self.out,
             "const {}({}",
-            name,
+            self.quote_qualified_name(name),
             if fields.len() > 0 { "{" } else { "" }
         )?;
         self.out.indent();
         for field in fields.iter() {
+            let field_name = self.quote_field(&field.name.to_mixed_case());
             match &field.value {
-                Format::Option(_) => writeln!(self.out, "this.{},", &field.name.to_mixed_case())?,
-                _ => writeln!(self.out, "required this.{},", &field.name.to_mixed_case())?,
+                Format::Option(_) => writeln!(self.out, "this.{},", field_name)?,
+                _ => writeln!(self.out, "required this.{},", field_name)?,
             }
         }
         self.out.unindent();
@@ -684,19 +689,26 @@ return obj;
             writeln!(self.out, "{});", if fields.len() > 0 { "}" } else { "" })?;
         }
 
-        // Deserialize (struct) or Load (variant)
         if self.generator.config.serialization {
-            if variant_index.is_none() {
+            // a struct (UnitStruct) with zero fields
+            if variant_index.is_none() && fields.len() == 0 {
+                writeln!(
+                    self.out,
+                    "\n{}.deserialize(BinaryDeserializer deserializer);",
+                    self.quote_qualified_name(name)
+                )?;
+            // Deserialize (struct) or Load (variant)
+            } else if variant_index.is_none() {
                 writeln!(
                     self.out,
                     "\n{}.deserialize(BinaryDeserializer deserializer) :",
-                    name
+                    self.quote_qualified_name(name)
                 )?;
             } else {
                 writeln!(
                     self.out,
                     "\n{}.load(BinaryDeserializer deserializer);",
-                    name
+                    self.quote_qualified_name(name)
                 )?;
             }
 
@@ -706,14 +718,14 @@ return obj;
                     writeln!(
                         self.out,
                         "{} = {};",
-                        field.name.to_mixed_case(),
+                        self.quote_field(&field.name.to_mixed_case()),
                         self.quote_deserialize(&field.value)
                     )?;
                 } else {
                     writeln!(
                         self.out,
                         "{} = {},",
-                        field.name.to_mixed_case(),
+                        self.quote_field(&field.name.to_mixed_case()),
                         self.quote_deserialize(&field.value)
                     )?;
                 }
@@ -737,7 +749,7 @@ return obj;
                 self.out,
                 "final {} {};",
                 self.quote_type(&field.value),
-                field.name.to_mixed_case()
+                self.quote_field(&field.name.to_mixed_case())
             )?;
         }
         if !fields.is_empty() {
@@ -755,7 +767,10 @@ return obj;
                 writeln!(
                     self.out,
                     "{}",
-                    self.quote_serialize_value(&field.name.to_mixed_case(), &field.value)
+                    self.quote_serialize_value(
+                        &self.quote_field(&field.name.to_mixed_case()),
+                        &field.value
+                    )
                 )?;
             }
             self.out.unindent();
@@ -783,13 +798,22 @@ return obj;
         for field in fields.iter() {
             let stmt = match &field.value {
                 Format::Seq(_) => {
-                    format!(" listEquals({0}, other.{0})", &field.name.to_mixed_case())
+                    format!(
+                        " listEquals({0}, other.{0})",
+                        self.quote_field(&field.name.to_mixed_case())
+                    )
                 }
                 Format::TupleArray {
                     content: _,
                     size: _,
-                } => format!(" listEquals({0}, other.{0})", &field.name.to_mixed_case()),
-                _ => format!(" {0} == other.{0}", &field.name.to_mixed_case()),
+                } => format!(
+                    " listEquals({0}, other.{0})",
+                    self.quote_field(&field.name.to_mixed_case())
+                ),
+                _ => format!(
+                    " {0} == other.{0}",
+                    self.quote_field(&field.name.to_mixed_case())
+                ),
             };
 
             writeln!(self.out, "&& {}", stmt)?;
@@ -824,7 +848,11 @@ return obj;
                 self.out.indent();
 
                 for field in fields {
-                    writeln!(self.out, "{},", &field.name.to_mixed_case())?;
+                    writeln!(
+                        self.out,
+                        "{},",
+                        self.quote_field(&field.name.to_mixed_case())
+                    )?;
                 }
 
                 self.out.unindent();
@@ -850,9 +878,17 @@ return obj;
         self.out.indent();
         for (index, field) in fields.iter().enumerate() {
             if index == field_count - 1 {
-                writeln!(self.out, "'{0}: ${0}'", field.name.to_mixed_case())?;
+                writeln!(
+                    self.out,
+                    "'{0}: ${0}'",
+                    self.quote_field(&field.name.to_mixed_case())
+                )?;
             } else {
-                writeln!(self.out, "'{0}: ${0}, '", field.name.to_mixed_case())?;
+                writeln!(
+                    self.out,
+                    "'{0}: ${0}, '",
+                    self.quote_field(&field.name.to_mixed_case())
+                )?;
             }
         }
         writeln!(self.out, "')';")?;
@@ -900,7 +936,7 @@ static {klass} {encoding}Deserialize(Uint8List input) {{
   }}
   return value;
 }}"#,
-            klass = name,
+            klass = self.quote_qualified_name(name),
             static_class = self.get_class(name),
             encoding = encoding.name(),
             encoding_class = encoding.name().to_camel_case()
@@ -913,23 +949,33 @@ static {klass} {encoding}Deserialize(Uint8List input) {{
         variants: &BTreeMap<u32, Named<VariantFormat>>,
     ) -> Result<()> {
         writeln!(self.out)?;
-        writeln!(self.out, "enum {} {{", name)?;
+        self.output_comment(name)?;
+        writeln!(self.out, "enum {} {{", self.quote_qualified_name(name))?;
         self.enter_class(name);
 
         for (_index, variant) in variants {
-            write!(self.out, "{},\n", &variant.name.to_mixed_case())?;
+            write!(
+                self.out,
+                "{},\n",
+                self.quote_field(&variant.name.to_mixed_case())
+            )?;
         }
 
         self.out.unindent();
         writeln!(self.out, "}}\n")?;
 
         if self.generator.config.serialization {
-            writeln!(self.out, "extension {n}Extension on {n} {{", n = &name)?;
+            writeln!(
+                self.out,
+                "extension {name}Extension on {n} {{",
+                name = name,
+                n = self.quote_qualified_name(name)
+            )?;
             self.out.indent();
             write!(
                 self.out,
                 "static {} deserialize(BinaryDeserializer deserializer) {{",
-                &name
+                self.quote_qualified_name(name)
             )?;
             self.out.indent();
             writeln!(
@@ -944,14 +990,14 @@ switch (index) {{"#,
                     self.out,
                     "case {}: return {}.{};",
                     index,
-                    name,
-                    variant.name.to_mixed_case(),
+                    self.quote_qualified_name(name),
+                    self.quote_field(&variant.name.to_mixed_case()),
                 )?;
             }
             writeln!(
                 self.out,
                 "default: throw new Exception(\"Unknown variant index for {}: \" + index.toString());",
-                name,
+                self.quote_qualified_name(name),
             )?;
             self.out.unindent();
             writeln!(self.out, "}}")?;
@@ -971,8 +1017,8 @@ switch (this) {{"#,
                 writeln!(
                     self.out,
                     "case {}.{}: return serializer.serializeVariantIndex({});",
-                    name,
-                    variant.name.to_mixed_case(),
+                    self.quote_qualified_name(name),
+                    self.quote_field(&variant.name.to_mixed_case()),
                     index,
                 )?;
             }
@@ -983,7 +1029,7 @@ switch (this) {{"#,
 
             for encoding in &self.generator.config.encodings {
                 self.output_class_serialize_for_encoding(*encoding)?;
-                self.output_class_deserialize_for_encoding(&format!("{}", name), *encoding)?;
+                self.output_class_deserialize_for_encoding(&name, *encoding)?;
             }
         }
         self.out.unindent();
@@ -1001,17 +1047,21 @@ switch (this) {{"#,
         variants: &BTreeMap<u32, Named<VariantFormat>>,
     ) -> Result<()> {
         writeln!(self.out)?;
-        //self.output_comment(name)?;
-        writeln!(self.out, "abstract class {} {{", name)?;
+        self.output_comment(name)?;
+        writeln!(
+            self.out,
+            "abstract class {} {{",
+            self.quote_qualified_name(name)
+        )?;
         self.enter_class(name);
-        writeln!(self.out, "const {}();", name)?;
+        writeln!(self.out, "const {}();", self.quote_qualified_name(name))?;
 
         if self.generator.config.serialization {
             writeln!(self.out, "\nvoid serialize(BinarySerializer serializer);")?;
             write!(
                 self.out,
                 "\nstatic {} deserialize(BinaryDeserializer deserializer) {{",
-                name
+                self.quote_qualified_name(name)
             )?;
             self.out.indent();
             writeln!(
@@ -1025,13 +1075,15 @@ switch (index) {{"#,
                 writeln!(
                     self.out,
                     "case {}: return {}{}Item.load(deserializer);",
-                    index, name, variant.name,
+                    index,
+                    self.quote_qualified_name(name),
+                    self.quote_field(&variant.name),
                 )?;
             }
             writeln!(
                 self.out,
                 "default: throw new Exception(\"Unknown variant index for {}: \" + index.toString());",
-                name,
+                self.quote_qualified_name(name),
             )?;
             self.out.unindent();
             writeln!(self.out, "}}")?;
@@ -1040,7 +1092,7 @@ switch (index) {{"#,
 
             for encoding in &self.generator.config.encodings {
                 self.output_class_serialize_for_encoding(*encoding)?;
-                self.output_class_deserialize_for_encoding(name, *encoding)?;
+                self.output_class_deserialize_for_encoding(&name, *encoding)?;
             }
         }
         self.out.unindent();
@@ -1094,7 +1146,22 @@ switch (index) {{"#,
             Struct(fields) => fields.clone(),
             Variable(_) => panic!("incorrect value"),
         };
-        self.output_struct_or_variant_container(Some(base), Some(index), name, &fields)
+        self.output_struct_or_variant_container(
+            Some(&self.quote_qualified_name(base)),
+            Some(index),
+            name,
+            &fields,
+        )
+    }
+
+    fn output_comment(&mut self, name: &str) -> std::io::Result<()> {
+        let mut path = self.current_namespace.clone();
+        path.push(name.to_string());
+        if let Some(doc) = self.generator.config.comments.get(&path) {
+            let text = textwrap::indent(doc, "/// ").replace("\n\n", "\n///\n");
+            write!(self.out, "{}", text)?;
+        }
+        Ok(())
     }
 }
 
@@ -1135,6 +1202,18 @@ impl crate::SourceInstaller for Installer {
         generator.output(self.install_dir.clone(), registry)?;
         generator.output_test(&self.install_dir)?;
         self.install_runtime(include_directory!("runtime/dart/test"), "test/src")?;
+
+        // write the main module file to export the public api
+        std::fs::write(
+            self.install_dir
+                .join("lib")
+                .join(format!("{}.dart", &config.module_name)),
+            format!(
+                "export 'src/{name}/{name}.dart';",
+                name = &config.module_name
+            ),
+        )?;
+
         Ok(())
     }
 
