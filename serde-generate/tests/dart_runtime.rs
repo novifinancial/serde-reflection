@@ -28,11 +28,11 @@ fn test_dart_runtime() {
 
     let _result = install_test_dependency(source_path.to_path_buf());
 
-    let status = Command::new("dart")
+    let dart_test = Command::new("dart")
         .current_dir(source_path.to_path_buf())
         .args(["test"])
         .status()
         .unwrap();
 
-    assert!(status.success());
+    assert!(dart_test.success());
 }
