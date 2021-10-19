@@ -23,7 +23,9 @@ class Int128 {
     if (identical(this, other)) return true;
     if (other.runtimeType != runtimeType) return false;
 
-    return other is Int128 && high == other.high && low == other.low;
+    return other is Int128 &&
+        high.toSigned(64) == other.high.toSigned(64) &&
+        low.toUnsigned(64) == other.low.toUnsigned(64);
   }
 
   @override
