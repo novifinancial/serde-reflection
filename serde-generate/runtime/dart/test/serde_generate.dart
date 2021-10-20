@@ -1,5 +1,5 @@
 import 'dart:typed_data';
-import 'package:example/example.dart';
+<package_path>
 import 'package:test/test.dart';
 import 'package:tuple/tuple.dart';
 
@@ -10,13 +10,7 @@ void runSerdeGenerateTests() {
         Struct.bincodeDeserialize(struct.bincodeSerialize()), equals(struct));
   });
 
-  test('C Enum', () {
-    final val = CStyleEnum.a;
-
-    expect(
-        CStyleEnumExtension.bincodeDeserialize(CStyleEnum.a.bincodeSerialize()),
-        equals(val));
-  });
+  <enum_test>
 
   test('UnitStruct', () {
     final val = UnitStruct();

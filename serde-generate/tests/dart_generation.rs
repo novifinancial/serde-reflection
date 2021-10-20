@@ -84,3 +84,14 @@ fn test_dart_code_compiles_with_comments() {
 "#
     ));
 }
+
+#[test]
+fn test_dart_code_compiles_with_class_enums() {
+    let source_path = tempdir().unwrap().path().join("dart_project");
+
+    let config = CodeGeneratorConfig::new("example".to_string())
+        .with_encodings(vec![Encoding::Bcs, Encoding::Bincode])
+        .with_c_style_enums(false);
+
+    test_dart_code_compiles_with_config(source_path, &config);
+}
