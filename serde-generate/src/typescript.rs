@@ -714,7 +714,7 @@ impl crate::SourceInstaller for Installer {
     ) -> std::result::Result<(), Self::Error> {
         let dir_path = self.install_dir.join(&config.module_name);
         std::fs::create_dir_all(&dir_path)?;
-        let source_path = dir_path.join("index.ts");
+        let source_path = dir_path.join("mod.ts");
         let mut file = std::fs::File::create(source_path)?;
 
         let generator = CodeGenerator::new(config);

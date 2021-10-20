@@ -11,11 +11,7 @@ use std::{fs::File, io::Write, process::Command};
 use tempfile::tempdir;
 
 #[test]
-fn test_typescript_bcs_runtime_on_simple_data() {
-    test_typescript_runtime_on_simple_data(Runtime::Bcs);
-}
-
-fn test_typescript_runtime_on_simple_data(runtime: Runtime) {
+fn test_typescript_runtime_bcs_serialization() {
     let registry = test_utils::get_simple_registry().unwrap();
     let dir = tempdir().unwrap();
     let dir_path = dir.path();
@@ -28,6 +24,7 @@ fn test_typescript_runtime_on_simple_data(runtime: Runtime) {
     let source_path = dir_path.join("tests/test.ts");
     let mut source = File::create(&source_path).unwrap();
 
+    let runtime = Runtime::Bcs;
     let config = CodeGeneratorConfig::new("main".to_string()).with_encodings(vec![runtime.into()]);
     let generator = typescript::CodeGenerator::new(&config);
     generator.output(&mut source, &registry).unwrap();

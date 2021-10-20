@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) Facebook, Inc. and its affiliates
+ * SPDX-License-Identifier: MIT OR Apache-2.0
+ */
+
 export type Optional<T> = T | null;
 export type Seq<T> = T[];
 export type Tuple<T extends any[]> = T;
