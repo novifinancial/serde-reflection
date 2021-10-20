@@ -92,7 +92,7 @@ dependencies:
         Ok(())
     }
 
-    pub fn output_test(&self, install_dir: &std::path::PathBuf) -> Result<()> {
+    fn output_test(&self, install_dir: &std::path::PathBuf) -> Result<()> {
         let test_dir_path = install_dir.join("test");
         std::fs::create_dir_all(&test_dir_path)?;
 
@@ -1228,6 +1228,40 @@ impl crate::SourceInstaller for Installer {
                 name = &config.module_name
             ),
         )?;
+
+        // update integration test runtime based on current config
+        let test_dir = self.install_dir.join("test").join("src");
+        let mut tmpl = std::fs::read_to_string(test_dir.join("serde_generate.dart"))?;
+        tmpl = tmpl.replace(
+            "<package_path>",
+            &format!(
+                "import 'package:{name}/{name}.dart';",
+                name = &config.module_name
+            ),
+        );
+        tmpl = if config.c_style_enums {
+            tmpl.replace(
+                "<enum_test>",
+                r#"test('C Enum', () {
+    final val = CStyleEnum.a;
+
+    expect(
+        CStyleEnumExtension.bincodeDeserialize(val.bincodeSerialize()),
+        equals(val));
+  });"#,
+            )
+        } else {
+            tmpl.replace(
+                "<enum_test>",
+                r#"test('Enum', () {
+    final val = CStyleEnumAItem();
+
+    expect(CStyleEnum.bincodeDeserialize(val.bincodeSerialize()), equals(val));
+  });"#,
+            )
+        };
+
+        std::fs::write(test_dir.join("serde_generate.dart"), tmpl)?;
 
         Ok(())
     }
