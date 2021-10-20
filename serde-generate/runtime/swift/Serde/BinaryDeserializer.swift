@@ -101,12 +101,12 @@ public class BinaryDeserializer : Deserializer {
     return reader.readUInt64()
   }
   
-  func deserialize_u128() throws -> BigInt {
-    let signed: BigInt =  try deserialize_i128()
+  func deserialize_u128() throws -> BigInt8 {
+    let signed: BigInt8 =  try deserialize_i128()
     if signed >= 0 {
       return signed
     } else {
-      return signed + (BigInt(1) << 128)
+      return signed + (BigInt8(1) << 128)
     }
   }
   
@@ -126,12 +126,12 @@ public class BinaryDeserializer : Deserializer {
     return reader.readInt64()
   }
   
-  func deserialize_i128() throws -> BigInt {
+  func deserialize_i128() throws -> BigInt8 {
     let content: [UInt8]  = reader.readBytes(count: 16)
     if content.count < 16 {
       throw BinaryDeserializerError.deserializationException(issue: "Need more bytes to deserialize 128-bit integer")
     }
-    return BigInt(content.map{UInt($0)})
+    return BigInt8(content.map{UInt8($0)})
   }
   
   func deserialize_option_tag() throws -> Bool {

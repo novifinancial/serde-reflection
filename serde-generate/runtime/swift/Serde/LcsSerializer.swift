@@ -20,7 +20,7 @@ public class LcsSerializer : BinarySerializer {
       output.write(data: Data(fromArray:[(UInt8)((value & 0x7f) | 0x80)]))
       input >>= 7
     }
-    output.write(data: Data(fromArray:[(UInt8)(value)]))
+    output.write(data: Data(fromArray:[(UInt8)(input)]))
   }
   
   override func serialize_len(value len: Int64) {
