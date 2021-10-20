@@ -14,12 +14,12 @@ protocol Serializer {
   func serialize_u16(value: UInt16)
   func serialize_u32(value: UInt32)
   func serialize_u64(value: UInt64)
-  func serialize_u128(value: BigInt) throws
+  func serialize_u128(value: BigInt8) throws
   func serialize_i8(value: Int8)
   func serialize_i16(value: Int16)
   func serialize_i32(value: Int32)
   func serialize_i64(value: Int64)
-  func serialize_i128(value: BigInt) throws
+  func serialize_i128(value: BigInt8) throws
   func serialize_len(value: Int64)
   func serialize_variant_index(value: Int)
   func serialize_option_tag(value: Bool)

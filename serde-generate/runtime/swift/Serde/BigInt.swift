@@ -1452,3 +1452,16 @@ struct Bit : FixedWidthInteger, UnsignedInteger {
     }
   }
 }
+
+typealias BigInt = _BigInt<UInt>
+typealias BigInt8 = _BigInt<UInt8>
+
+typealias BigIntBit = _BigInt<Bit>
+
+func testBinaryInit<T: BinaryInteger>(_ x: T) -> BigInt {
+  return BigInt(x)
+}
+
+func randomBitLength() -> Int {
+  return Int.random(in: 2...1000)
+}

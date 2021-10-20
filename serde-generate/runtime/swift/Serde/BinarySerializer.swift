@@ -72,6 +72,16 @@ public class BinarySerializer : Serializer {
   
   func serialize_u8(value: UInt8) {
     output.write(data: Data(fromArray:[value]))
+    //custom_write(value: value.littleEndian)
+  }
+  
+  private func custom_write<T>(value: T) -> Void {
+    var value = value
+    let size = MemoryLayout.size(ofValue: value)
+    withUnsafeBytes(of: &value) {
+      ptr in
+      output.write(ptr.baseAddress!.assumingMemoryBound(to: UInt8.self), maxLength: size)
+    }
   }
   
   func serialize_u16(value: UInt16) {
@@ -81,7 +91,7 @@ public class BinarySerializer : Serializer {
   
   func serialize_u32(value: UInt32) {
     output.write(data: Data(fromArray: [value]))
-    print(value)
+    //custom_write(value: value.littleEndian)
   }
   
   func serialize_u64(value: UInt64) {
@@ -89,20 +99,16 @@ public class BinarySerializer : Serializer {
     print(value)
   }
   
-  func serialize_u128(value: BigInt) throws {
+  func serialize_u128(value: BigInt8) throws {
     if value >> 128 != 0 {
       throw BinarySerializerError.serializationException(issue: "Invalid value for an unsigned int128")
     }
     
-    let content: [UInt8] = withUnsafeBytes(of: value._data) {
-      Array($0)
-    }
-    
-    assert(content.count <= 16 || content[16] == 0)
+    assert(value._data.count <= 16 || value._data[16] == 0)
     
     for i in 0..<16 {
-      if i < content.count {
-        output.write(data: Data(fromArray: [content[i]]))
+      if i < value._data.count {
+        output.write(data: Data(fromArray: [value._data[i]]))
       } else {
         output.write(data: Data(fromArray: [UInt8(0)]))
       }
@@ -129,7 +135,7 @@ public class BinarySerializer : Serializer {
     return print(value)
   }
   
-  func serialize_i128(value: BigInt) throws {
+  func serialize_i128(value: BigInt8) throws {
     if value >= 0 {
       if value >> 127 != 0 {
         throw BinarySerializerError.serializationException(issue: "Invalid value for a signed int128")
@@ -140,7 +146,7 @@ public class BinarySerializer : Serializer {
       if -(value + 1) >> 127 != 0 {
         throw BinarySerializerError.serializationException(issue: "Invalid value for a signed int128")
       }
-      try serialize_u128(value: value + (BigInt(1) << 128))
+      try serialize_u128(value: value + (BigInt8(1) << 128))
     }
   }
   
