@@ -10,7 +10,7 @@ use std::collections::BTreeMap;
 use std::{
     collections::HashMap,
     io::{Result, Write},
-    path::PathBuf,
+    path::{Path, PathBuf},
 };
 
 /// Main configuration object for code-generation in Dart.
@@ -76,7 +76,7 @@ impl<'a> CodeGenerator<'a> {
         Ok(())
     }
 
-    fn write_package(&self, install_dir: &std::path::PathBuf) -> Result<()> {
+    fn write_package(&self, install_dir: &Path) -> Result<()> {
         let mut file = std::fs::File::create(install_dir.join("pubspec.yaml"))?;
         let mut out = IndentedWriter::new(&mut file, IndentConfig::Space(2));
         writeln!(
@@ -95,11 +95,11 @@ dependencies:
         Ok(())
     }
 
-    fn output_test(&self, install_dir: &std::path::PathBuf) -> Result<()> {
+    fn output_test(&self, install_dir: &Path) -> Result<()> {
         let test_dir_path = install_dir.join("test");
         std::fs::create_dir_all(&test_dir_path)?;
 
-        let mut file = std::fs::File::create(test_dir_path.join(format!("all_test.dart")))?;
+        let mut file = std::fs::File::create(test_dir_path.join("all_test.dart".to_string()))?;
         let mut out = IndentedWriter::new(&mut file, IndentConfig::Space(2));
         writeln!(&mut out, r#"import 'package:test/test.dart';"#,)?;
 
@@ -134,7 +134,7 @@ void main() {{
 
     fn write_library(
         &self,
-        install_dir: &std::path::PathBuf,
+        install_dir: &Path,
         current_namespace: Vec<String>,
         registry: &Registry,
     ) -> Result<()> {
@@ -674,7 +674,7 @@ return obj;
             self.out,
             "const {}({}",
             self.quote_qualified_name(name),
-            if fields.len() > 0 { "{" } else { "" }
+            if !fields.is_empty() { "{" } else { "" }
         )?;
         self.out.indent();
         for field in fields.iter() {
@@ -689,15 +689,15 @@ return obj;
             writeln!(
                 self.out,
                 "{}) : super();",
-                if fields.len() > 0 { "}" } else { "" }
+                if !fields.is_empty() { "}" } else { "" }
             )?;
         } else {
-            writeln!(self.out, "{});", if fields.len() > 0 { "}" } else { "" })?;
+            writeln!(self.out, "{});", if !fields.is_empty() { "}" } else { "" })?;
         }
 
         if self.generator.config.serialization {
             // a struct (UnitStruct) with zero fields
-            if variant_index.is_none() && fields.len() == 0 {
+            if variant_index.is_none() && fields.is_empty() {
                 writeln!(
                     self.out,
                     "\n{}.deserialize(BinaryDeserializer deserializer);",
@@ -710,7 +710,7 @@ return obj;
                     "\n{}.deserialize(BinaryDeserializer deserializer) :",
                     self.quote_qualified_name(name)
                 )?;
-            } else if fields.len() > 0 {
+            } else if !fields.is_empty() {
                 writeln!(
                     self.out,
                     "\n{}.load(BinaryDeserializer deserializer) :",
@@ -970,10 +970,10 @@ static {klass} {encoding}Deserialize(Uint8List input) {{
         writeln!(self.out, "enum {} {{", self.quote_qualified_name(name))?;
         self.enter_class(name);
 
-        for (_index, variant) in variants {
-            write!(
+        for variant in variants.values() {
+            writeln!(
                 self.out,
-                "{},\n",
+                "{},",
                 self.quote_field(&variant.name.to_mixed_case())
             )?;
         }
@@ -1046,7 +1046,7 @@ switch (this) {{"#,
 
             for encoding in &self.generator.config.encodings {
                 self.output_class_serialize_for_encoding(*encoding)?;
-                self.output_class_deserialize_for_encoding(&name, *encoding)?;
+                self.output_class_deserialize_for_encoding(name, *encoding)?;
             }
         }
         self.out.unindent();
@@ -1109,7 +1109,7 @@ switch (index) {{"#,
 
             for encoding in &self.generator.config.encodings {
                 self.output_class_serialize_for_encoding(*encoding)?;
-                self.output_class_deserialize_for_encoding(&name, *encoding)?;
+                self.output_class_deserialize_for_encoding(name, *encoding)?;
             }
         }
         self.out.unindent();
