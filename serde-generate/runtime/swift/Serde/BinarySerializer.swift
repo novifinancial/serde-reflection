@@ -45,7 +45,8 @@ public class BinarySerializer : Serializer {
   }
   
   func get_bytes() -> [UInt8] {
-    return [UInt8](Data(reading: buffer))
+    return output.getBuffer()
+    //return [UInt8](Data(reading: buffer))
   }
   
   func serialize_str(value: String) throws {
@@ -72,7 +73,6 @@ public class BinarySerializer : Serializer {
   
   func serialize_u8(value: UInt8) {
     output.write(data: Data(fromArray:[value]))
-    //custom_write(value: value.littleEndian)
   }
   
   private func custom_write<T>(value: T) -> Void {
@@ -86,17 +86,14 @@ public class BinarySerializer : Serializer {
   
   func serialize_u16(value: UInt16) {
     output.write(data: Data(fromArray: [value]))
-    print(value)
   }
   
   func serialize_u32(value: UInt32) {
     output.write(data: Data(fromArray: [value]))
-    //custom_write(value: value.littleEndian)
   }
   
   func serialize_u64(value: UInt64) {
     output.write(data: Data(fromArray: [value]))
-    print(value)
   }
   
   func serialize_u128(value: BigInt8) throws {

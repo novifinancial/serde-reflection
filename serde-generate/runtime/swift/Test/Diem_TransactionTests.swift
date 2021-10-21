@@ -35,6 +35,68 @@ class Diem_TransactionTests: XCTestCase {
     XCTAssertEqual(serializer.output.getBuffer(), [255, 1, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0], "the array should be same")
   }
   
+  func testDeserializer() {
+    let deserializer = BincodeDeserializer(input: [1,0,0,0])
+    let result = deserializer.deserialize_u32()
+    XCTAssertEqual(result, 1, "should match")
+  }
+  
+  func testSerializeUint8() {
+    let serializer = BincodeSerializer()
+    serializer.serialize_u8(value: 255)
+    let deserializer = BincodeDeserializer(input: serializer.get_bytes())
+    let result = deserializer.deserialize_u8()
+    XCTAssertEqual(result, 255, "should be same")
+  }
+  
+  func testSerializeUint16() {
+    let serializer = BincodeSerializer()
+    serializer.serialize_u16(value: 65535)
+    let deserializer = BincodeDeserializer(input: serializer.get_bytes())
+    let result = deserializer.deserialize_u16()
+    XCTAssertEqual(result, 65535, "should be same")
+  }
+  
+  func testSerializeUint32() {
+    let serializer = BincodeSerializer()
+    serializer.serialize_u32(value: 4294967295)
+    let deserializer = BincodeDeserializer(input: serializer.get_bytes())
+    let result = deserializer.deserialize_u32()
+    XCTAssertEqual(result, 4294967295, "should be same")
+  }
+  
+  func testSerializeInt8() {
+    let serializer = BincodeSerializer()
+    serializer.serialize_u8(value: 127)
+    let deserializer = BincodeDeserializer(input: serializer.get_bytes())
+    let result = deserializer.deserialize_u8()
+    XCTAssertEqual(result, 127, "should be same")
+  }
+  
+  func testSerializeInt16() {
+    let serializer = BincodeSerializer()
+    serializer.serialize_i16(value: 32767)
+    let deserializer = BincodeDeserializer(input: serializer.get_bytes())
+    let result = deserializer.deserialize_i16()
+    XCTAssertEqual(result, 32767, "should be same")
+  }
+  
+  func testSerializeInt32() {
+    let serializer = BincodeSerializer()
+    serializer.serialize_i32(value: 2147483647)
+    let deserializer = BincodeDeserializer(input: serializer.get_bytes())
+    let result = deserializer.deserialize_i32()
+    XCTAssertEqual(result, 2147483647, "should be same")
+  }
+  
+  func testSerializeInt64() {
+    let serializer = BincodeSerializer()
+    serializer.serialize_i64(value: 9223372036854775807)
+    let deserializer = BincodeDeserializer(input: serializer.get_bytes())
+    let result = deserializer.deserialize_i64()
+    XCTAssertEqual(result, 9223372036854775807, "should be same")
+  }
+  
   func testSerializeU128() {
     let serializer = LcsSerializer()
     XCTAssertNoThrow (try serializer.serialize_u128(value: (BigInt8(1) << 128) - 1))
