@@ -14,7 +14,7 @@ public class BinaryDeserializer : Deserializer {
   
   init(input: [UInt8], maxContainerDepth: Int64) {
     self.input = input
-    self.reader = BinaryReader(data: Data(input) as! Readable)
+    self.reader = BinaryReader(data: UPData(withData: Data(input)) as Readable)
     containerDepthBudget = maxContainerDepth;
   }
   
