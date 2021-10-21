@@ -143,7 +143,7 @@ fn main() {
                         panic!("Code generation in Java requires `--target-source-dir`")
                     }
                     Language::Dart => {
-                        panic!("Code generation in Dart requires `--install-dir`")
+                        panic!("Code generation in Dart requires `--target-source-dir`")
                     }
                     Language::TypeScript => typescript::CodeGenerator::new(&config)
                         .output(&mut out, &registry)

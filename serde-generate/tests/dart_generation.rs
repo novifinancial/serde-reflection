@@ -1,3 +1,6 @@
+// Copyright (c) Facebook, Inc. and its affiliates
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 use serde_generate::{dart, test_utils, CodeGeneratorConfig, Encoding, SourceInstaller};
 use std::{io::Result, path::PathBuf, process::Command};
 use tempfile::tempdir;

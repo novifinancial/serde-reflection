@@ -1,3 +1,6 @@
+// Copyright (c) Facebook, Inc. and its affiliates
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 use crate::indent::{IndentConfig, IndentedWriter};
 use crate::{common, CodeGeneratorConfig, Encoding};
 use heck::{CamelCase, MixedCase, SnakeCase};
@@ -29,7 +32,7 @@ struct DartEmitter<'a, T> {
 }
 
 impl<'a> CodeGenerator<'a> {
-    /// Create a Java code generator for the given config.
+    /// Create a Dart code generator for the given config.
     pub fn new(config: &'a CodeGeneratorConfig) -> Self {
         let mut external_qualified_names = HashMap::new();
         for (namespace, names) in &config.external_definitions {
@@ -753,7 +756,6 @@ return obj;
             writeln!(self.out)?;
         }
         for field in fields {
-            //self.output_comment(&field.name)?;
             writeln!(
                 self.out,
                 "final {} {};",
