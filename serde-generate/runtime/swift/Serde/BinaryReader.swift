@@ -92,7 +92,7 @@ public class BinaryReader: Readable {
   }
   
   var buffer: Readable
-  var endianness: ByteOrder = ByteOrder.bigEndian
+  var endianness: ByteOrder = ByteOrder.littleEndian
   
   init(data: Readable) {
     self.buffer = data
