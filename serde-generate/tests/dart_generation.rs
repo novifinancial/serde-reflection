@@ -5,19 +5,16 @@ use serde_generate::{dart, test_utils, CodeGeneratorConfig, Encoding, SourceInst
 use std::{io::Result, path::PathBuf, process::Command};
 use tempfile::tempdir;
 
-fn install_test_dependency(path: PathBuf) -> Result<()> {
+fn install_test_dependencies(path: PathBuf) -> Result<()> {
     Command::new("dart")
-        .current_dir(path)
+        .current_dir(path.to_path_buf())
         .args(["pub", "add", "-d", "test"])
         .status()?;
 
     Ok(())
 }
 
-fn test_dart_code_compiles_with_config(
-    source_path: PathBuf,
-    config: &CodeGeneratorConfig,
-) -> PathBuf {
+fn generate_with_config(source_path: PathBuf, config: &CodeGeneratorConfig) -> PathBuf {
     let registry = test_utils::get_registry().unwrap();
 
     let installer = dart::Installer::new(source_path.to_path_buf());
@@ -26,7 +23,7 @@ fn test_dart_code_compiles_with_config(
     installer.install_bincode_runtime().unwrap();
     installer.install_bcs_runtime().unwrap();
 
-    install_test_dependency(source_path.to_path_buf()).unwrap();
+    install_test_dependencies(source_path.to_path_buf()).unwrap();
 
     let dart_analyze = Command::new("dart")
         .current_dir(source_path.to_path_buf())
@@ -44,21 +41,18 @@ fn test_dart_code_compiles_with_config(
 
 #[test]
 fn test_dart_code_compiles() {
-    let tempdir = tempdir().unwrap();
-    let source_path = tempdir.path().join("dart_project");
+    let source_path = tempdir().unwrap().path().join("dart_basic_project");
 
     let config = CodeGeneratorConfig::new("example".to_string())
         .with_encodings(vec![Encoding::Bcs, Encoding::Bincode])
         .with_c_style_enums(true);
 
-    test_dart_code_compiles_with_config(source_path, &config);
-    tempdir.close().unwrap();
+    generate_with_config(source_path, &config);
 }
 
 #[test]
 fn test_dart_code_compiles_with_comments() {
-    let tempdir = tempdir().unwrap();
-    let source_path = tempdir.path().join("dart_project");
+    let source_path = tempdir().unwrap().path().join("dart_comment_project");
 
     let comments = vec![(
         vec!["example".to_string(), "SerdeData".to_string()],
@@ -72,7 +66,7 @@ fn test_dart_code_compiles_with_comments() {
         .with_c_style_enums(true)
         .with_comments(comments);
 
-    let path = test_dart_code_compiles_with_config(source_path, &config);
+    let path = generate_with_config(source_path, &config);
 
     // Comment was correctly generated.
     let content = std::fs::read_to_string(
@@ -89,20 +83,15 @@ fn test_dart_code_compiles_with_comments() {
 /// comments
 "#
     ));
-
-    tempdir.close().unwrap();
 }
 
 #[test]
 fn test_dart_code_compiles_with_class_enums() {
-    let tempdir = tempdir().unwrap();
-    let source_path = tempdir.path().join("dart_project");
+    let source_path = tempdir().unwrap().path().join("dart_enum_project");
 
     let config = CodeGeneratorConfig::new("example".to_string())
         .with_encodings(vec![Encoding::Bcs, Encoding::Bincode])
         .with_c_style_enums(false);
 
-    test_dart_code_compiles_with_config(source_path, &config);
-
-    tempdir.close().unwrap();
+    generate_with_config(source_path, &config);
 }
