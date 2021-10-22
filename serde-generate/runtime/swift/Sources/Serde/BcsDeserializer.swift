@@ -4,11 +4,11 @@ import Foundation
 
 import Foundation
 
-enum LcsDeserializerError: Error {
-    case lcsException(issue: String)
+enum BcsDeserializerError: Error {
+    case bcsException(issue: String)
 }
 
-public class LcsDeserializer: BinaryDeserializer {
+public class BcsDeserializer: BinaryDeserializer {
     public init(input: [UInt8]) {
         super.init(input: input, maxContainerDepth: Int64.max)
     }
@@ -20,11 +20,11 @@ public class LcsDeserializer: BinaryDeserializer {
             let digit: UInt8 = (UInt8)(x & 0x7F)
             value |= ((Int64)(digit) << shift)
             if value < 0 || value > Int.max {
-                throw LcsDeserializerError.lcsException(issue: "Overflow while parsing uleb128-encoded uint32 value")
+                throw BcsDeserializerError.bcsException(issue: "Overflow while parsing uleb128-encoded uint32 value")
             }
             if digit == x {
                 if shift > 0, digit == 0 {
-                    throw LcsDeserializerError.lcsException(issue: "Invalid uleb128 number (unexpected zero digit)")
+                    throw BcsDeserializerError.bcsException(issue: "Invalid uleb128 number (unexpected zero digit)")
                 }
                 return (Int)(value)
             }
