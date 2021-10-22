@@ -2,7 +2,7 @@
 
 import Foundation
 
-enum BincodeDeserializerError: Error {
+public enum BincodeDeserializerError: Error {
     case bincodeDeserializerException(issue: String)
 }
 
@@ -39,6 +39,6 @@ public class BincodeDeserializer: BinaryDeserializer {
     }
 
     override public func deserialize_variant_index() -> Int {
-        return Int(reader.readInt())
+        return Int(reader.readInt32())
     }
 }

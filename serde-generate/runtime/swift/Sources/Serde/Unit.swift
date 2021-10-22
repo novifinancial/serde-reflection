@@ -2,6 +2,8 @@
 
 import Foundation
 
+// Defining Unit as () creates all sorts of warnings in the generated code.
+
 public struct Unit: Equatable {
     public func Equals(obj: Any) -> Bool {
         return (obj as? Unit) != nil

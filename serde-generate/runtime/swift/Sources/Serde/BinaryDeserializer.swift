@@ -2,7 +2,7 @@
 
 import Foundation
 
-enum BinaryDeserializerError: Error {
+public enum BinaryDeserializerError: Error {
     case deserializationException(issue: String)
 }
 
@@ -26,7 +26,7 @@ public class BinaryDeserializer: Deserializer {
     }
 
     public func deserialize_variant_index() -> Int {
-        return Int(reader.readInt())
+        return Int(reader.readInt32())
     }
 
     public func deserialize_char() throws -> Character {
@@ -41,14 +41,14 @@ public class BinaryDeserializer: Deserializer {
         return reader.readDouble()
     }
 
-    func increase_container_depth() throws {
+    public func increase_container_depth() throws {
         if containerDepthBudget == 0 {
             throw BinaryDeserializerError.deserializationException(issue: "Exceeded maximum container depth")
         }
         containerDepthBudget -= 1
     }
 
-    func decrease_container_depth() {
+    public func decrease_container_depth() {
         containerDepthBudget += 1
     }
 
@@ -93,7 +93,7 @@ public class BinaryDeserializer: Deserializer {
     }
 
     public func deserialize_u32() -> UInt32 {
-        return reader.readUInt()
+        return reader.readUInt32()
     }
 
     public func deserialize_u64() -> UInt64 {
@@ -117,8 +117,8 @@ public class BinaryDeserializer: Deserializer {
         return reader.readInt16()
     }
 
-    public func deserialize_i32() -> Int {
-        return Int(reader.readInt())
+    public func deserialize_i32() -> Int32 {
+        return reader.readInt32()
     }
 
     public func deserialize_i64() -> Int64 {
@@ -140,5 +140,14 @@ public class BinaryDeserializer: Deserializer {
         case 1: return true
         default: throw BinaryDeserializerError.deserializationException(issue: "Incorrect value for Option tag: \(value)")
         }
+    }
+
+    public func get_buffer_offset() -> Int {
+        // TODO
+        return 0
+    }
+
+    public func check_that_key_slices_are_increasing(key1: Slice, key2: Slice) throws {
+        // TODO
     }
 }

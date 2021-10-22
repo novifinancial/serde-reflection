@@ -79,11 +79,11 @@ public enum ByteOrder {
     case littleEndian
 
     /// Machine specific byte order
-#if os(Linux)
-    static let nativeByteOrder: ByteOrder = (__BYTE_ORDER == __LITTLE_ENDIAN) ? .littleEndian : .bigEndian;
-#else
-    static let nativeByteOrder: ByteOrder = (Int(CFByteOrderGetCurrent()) == Int(CFByteOrderLittleEndian.rawValue)) ? .littleEndian : .bigEndian;
-#endif
+    #if os(Linux)
+        static let nativeByteOrder: ByteOrder = (__BYTE_ORDER == __LITTLE_ENDIAN) ? .littleEndian : .bigEndian
+    #else
+        static let nativeByteOrder: ByteOrder = (Int(CFByteOrderGetCurrent()) == Int(CFByteOrderLittleEndian.rawValue)) ? .littleEndian : .bigEndian
+    #endif
 }
 
 public class BinaryReader: Readable {
@@ -131,11 +131,11 @@ public class BinaryReader: Readable {
         return byte != 0
     }
 
-    func readInt() -> Int32 {
-        return readInt(byteOrder: endianness)
+    func readInt32() -> Int32 {
+        return readInt32(byteOrder: endianness)
     }
 
-    func readInt(byteOrder: ByteOrder) -> Int32 {
+    func readInt32(byteOrder: ByteOrder) -> Int32 {
         let b = buffer.readBytes(count: 4)
         let int: Int32 = BinaryReader.fromByteArray(b, Int32.self, byteOrder: byteOrder)
         return int
@@ -161,11 +161,11 @@ public class BinaryReader: Readable {
         return int
     }
 
-    func readUInt() -> UInt32 {
-        return readUInt(byteOrder: endianness)
+    func readUInt32() -> UInt32 {
+        return readUInt32(byteOrder: endianness)
     }
 
-    func readUInt(byteOrder: ByteOrder) -> UInt32 {
+    func readUInt32(byteOrder: ByteOrder) -> UInt32 {
         let b = buffer.readBytes(count: 4)
         let int: UInt32 = BinaryReader.fromByteArray(b, UInt32.self, byteOrder: byteOrder)
         return int
