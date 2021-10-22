@@ -79,7 +79,11 @@ public enum ByteOrder {
     case littleEndian
 
     /// Machine specific byte order
-    static let nativeByteOrder: ByteOrder = (Int(CFByteOrderGetCurrent()) == Int(CFByteOrderLittleEndian.rawValue)) ? .littleEndian : .bigEndian
+#if os(Linux)
+    static let nativeByteOrder: ByteOrder = (__BYTE_ORDER == __LITTLE_ENDIAN) ? .littleEndian : .bigEndian;
+#else
+    static let nativeByteOrder: ByteOrder = (Int(CFByteOrderGetCurrent()) == Int(CFByteOrderLittleEndian.rawValue)) ? .littleEndian : .bigEndian;
+#endif
 }
 
 public class BinaryReader: Readable {
