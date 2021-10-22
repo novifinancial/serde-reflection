@@ -74,6 +74,7 @@ jobs:
           name: Build and Test
           # Build all targets to ensure examples are built as well.
           command: |
+            cargo test -p serde-generate -- swift
             cargo build --all-targets
             cargo test
             cargo build --release --all-targets --all-features
