@@ -1,4 +1,4 @@
-//  Copyright © Diem Association. All rights reserved.
+//  Copyright (c) Facebook, Inc. and its affiliates.
 
 import Serde
 import XCTest
