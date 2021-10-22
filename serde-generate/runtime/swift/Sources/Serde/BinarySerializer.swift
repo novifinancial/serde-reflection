@@ -7,12 +7,10 @@ enum BinarySerializerError: Error {
 import Foundation
 
 public class BinarySerializer: Serializer {
-    let buffer: InputStream
     public var output = OutputStream.toMemory()
     private var containerDepthBudget: Int64
 
     public init(maxContainerDepth: Int64) {
-        buffer = InputStream()
         output.open()
         containerDepthBudget = maxContainerDepth
     }
@@ -46,7 +44,6 @@ public class BinarySerializer: Serializer {
 
     public func get_bytes() -> [UInt8] {
         return output.getBuffer()
-        // return [UInt8](Data(reading: buffer))
     }
 
     public func serialize_str(value: String) throws {
