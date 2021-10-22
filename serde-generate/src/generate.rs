@@ -8,7 +8,7 @@
 //! '''
 
 use serde_generate::{
-    cpp, csharp, dart, golang, java, python3, rust, typescript, CodeGeneratorConfig, Encoding,
+    cpp, csharp, dart, golang, java, python3, rust, swift, typescript, CodeGeneratorConfig, Encoding,
     SourceInstaller,
 };
 use serde_reflection::Registry;
@@ -26,6 +26,7 @@ enum Language {
     Dart,
     TypeScript,
     CSharp,
+    Swift,
 }
 }
 
@@ -90,7 +91,7 @@ where
             Runtime::Bcs => {
                 encodings.push(Encoding::Bcs);
             }
-            _ => (),
+            Runtime::Serde => (),
         }
     }
     CodeGeneratorConfig::new(name)
@@ -151,6 +152,9 @@ fn main() {
                     Language::CSharp => {
                         panic!("Code generation in C# requires `--target-source-dir`")
                     }
+                    Language::Swift => swift::CodeGenerator::new(&config)
+                        .output(&mut out, &registry)
+                        .unwrap(),
                 }
             }
         }
@@ -170,6 +174,9 @@ fn main() {
                     Language::Dart => Box::new(dart::Installer::new(install_dir)),
                     Language::TypeScript => Box::new(typescript::Installer::new(install_dir)),
                     Language::CSharp => Box::new(csharp::Installer::new(install_dir)),
+                    Language::Swift => {
+                        Box::new(swift::Installer::new(install_dir, serde_package_name_opt))
+                    }
                 };
 
             if let Some((registry, name)) = named_registry_opt {

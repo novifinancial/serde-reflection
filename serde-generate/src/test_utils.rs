@@ -50,8 +50,8 @@ pub enum SerdeData {
     TupleArray([u32; 3]),
     UnitVector(Vec<()>),
     SimpleList(SimpleList),
-    ComplexMap(BTreeMap<([u32; 2], [u8; 4]), ()>),
     CStyleEnum(CStyleEnum),
+    ComplexMap(BTreeMap<([u32; 2], [u8; 4]), ()>),
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -126,7 +126,7 @@ pub enum CStyleEnum {
     E = 10,
 }
 
-/// The registry corresponding to the test data structures above .
+/// The registry corresponding to the test data structures above.
 pub fn get_registry() -> Result<Registry> {
     let mut tracer = Tracer::new(TracerConfig::default());
     let samples = Samples::new();
@@ -134,6 +134,22 @@ pub fn get_registry() -> Result<Registry> {
     tracer.trace_type::<List<SerdeData>>(&samples)?;
     tracer.trace_type::<CStyleEnum>(&samples)?;
     tracer.registry()
+}
+
+/// The registry corresponding to the test data structures above.
+pub fn get_registry_without_complex_map() -> Result<Registry> {
+    let mut tracer = Tracer::new(TracerConfig::default());
+    let samples = Samples::new();
+    tracer.trace_type::<SerdeData>(&samples)?;
+    tracer.trace_type::<List<SerdeData>>(&samples)?;
+    tracer.trace_type::<CStyleEnum>(&samples)?;
+    let mut registry = tracer.registry()?;
+    let cmap = registry.get_mut("SerdeData").unwrap();
+    if let serde_reflection::ContainerFormat::Enum(variants) = cmap {
+        variants.remove(&(variants.len() as u32 - 1));
+        variants.remove(&(variants.len() as u32 - 1));
+    }
+    Ok(registry)
 }
 
 /// Manually generate sample values.
@@ -289,9 +305,9 @@ pub fn get_sample_values(has_canonical_maps: bool, has_floats: bool) -> Vec<Serd
 
     let v11 = SerdeData::SimpleList(SimpleList(Some(Box::new(SimpleList(None)))));
 
-    let v12 = SerdeData::ComplexMap(btreemap! { ([1,2], [3,4,5,6]) => ()});
+    let v12 = SerdeData::CStyleEnum(CStyleEnum::C);
 
-    let v13 = SerdeData::CStyleEnum(CStyleEnum::C);
+    let v13 = SerdeData::ComplexMap(btreemap! { ([1,2], [3,4,5,6]) => ()});
 
     vec![
         v0, v1, v2, v2bis, v2ter, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13,
@@ -759,6 +775,10 @@ SerdeData:
         NEWTYPE:
           TYPENAME: SimpleList
     11:
+      CStyleEnum:
+        NEWTYPE:
+          TYPENAME: CStyleEnum
+    12:
       ComplexMap:
         NEWTYPE:
           MAP:
@@ -771,10 +791,6 @@ SerdeData:
                     CONTENT: U8
                     SIZE: 4
             VALUE: UNIT
-    12:
-      CStyleEnum:
-        NEWTYPE:
-          TYPENAME: CStyleEnum
 SimpleList:
   NEWTYPESTRUCT:
     OPTION:

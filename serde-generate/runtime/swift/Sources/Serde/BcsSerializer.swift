@@ -2,7 +2,7 @@
 
 import Foundation
 
-enum BcsSerializerError: Error {
+public enum BcsSerializerError: Error {
     case bcsException(issue: String)
 }
 

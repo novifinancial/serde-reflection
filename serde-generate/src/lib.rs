@@ -20,6 +20,7 @@
 //! The following languages are partially supported and still considered under development:
 //!
 //! * TypeScript 4 (packaged and tested with Deno)
+//! * Swift 5.3
 //!
 //! ## Supported Encodings
 //!
@@ -150,6 +151,8 @@ pub mod java;
 pub mod python3;
 /// Support for code-generation in Rust
 pub mod rust;
+/// Support for code-generation in Swift
+pub mod swift;
 /// Support for code-generation in TypeScript/JavaScript
 pub mod typescript;
 

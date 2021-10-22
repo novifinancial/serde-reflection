@@ -2,11 +2,11 @@
 
 import Foundation
 
-class Slice {
-    var start: Int
-    var end: Int
+public struct Slice {
+    public var start: Int
+    public var end: Int
 
-    init(start: Int, end: Int) {
+    public init(start: Int, end: Int) {
         self.start = start
         self.end = end
     }
@@ -41,13 +41,13 @@ class Slice {
 }
 
 extension Slice: Equatable {
-    static func == (lhs: Slice, rhs: Slice) -> Bool {
+    public static func == (lhs: Slice, rhs: Slice) -> Bool {
         return lhs.start == rhs.start
     }
 }
 
 extension Slice: Comparable {
-    static func < (lhs: Slice, rhs: Slice) -> Bool {
+    public static func < (lhs: Slice, rhs: Slice) -> Bool {
         return lhs.start < rhs.start
     }
 }

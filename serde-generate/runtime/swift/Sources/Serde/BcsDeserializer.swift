@@ -4,7 +4,7 @@ import Foundation
 
 import Foundation
 
-enum BcsDeserializerError: Error {
+public enum BcsDeserializerError: Error {
     case bcsException(issue: String)
 }
 
@@ -41,10 +41,10 @@ public class BcsDeserializer: BinaryDeserializer {
     }
 
     override public func deserialize_variant_index() -> Int {
-        return Int(reader.readInt())
+        return Int(reader.readInt32())
     }
 
     public func check_that_key_slices_are_increasing(key1 _: Range<Int>, key2 _: Range<Int>) {
-        // Not required by the format.
+        // TODO
     }
 }

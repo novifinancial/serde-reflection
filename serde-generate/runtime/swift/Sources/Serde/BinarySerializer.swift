@@ -1,6 +1,6 @@
 //  Copyright (c) Facebook, Inc. and its affiliates.
 
-enum BinarySerializerError: Error {
+public enum BinarySerializerError: Error {
     case serializationException(issue: String)
 }
 
@@ -19,14 +19,14 @@ public class BinarySerializer: Serializer {
         output.close()
     }
 
-    func increase_container_depth() throws {
+    public func increase_container_depth() throws {
         if containerDepthBudget == 0 {
             throw BinarySerializerError.serializationException(issue: "Exceeded maximum container depth")
         }
         containerDepthBudget -= 1
     }
 
-    func decrease_container_depth() {
+    public func decrease_container_depth() {
         containerDepthBudget += 1
     }
 
@@ -160,7 +160,7 @@ public class BinarySerializer: Serializer {
         print(value)
     }
 
-    func sort_map_entries(offsets _: [Int]) {
+    public func sort_map_entries(offsets _: [Int]) {
         // Not required by the format.
     }
 
