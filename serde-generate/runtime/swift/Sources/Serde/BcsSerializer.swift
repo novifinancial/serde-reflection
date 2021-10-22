@@ -2,11 +2,11 @@
 
 import Foundation
 
-enum LcsSerializerError: Error {
-    case lcsException(issue: String)
+enum BcsSerializerError: Error {
+    case bcsException(issue: String)
 }
 
-public class LcsSerializer: BinarySerializer {
+public class BcsSerializer: BinarySerializer {
     public let MAX_LENGTH = Int64(Int.max)
     public let MAX_CONTAINER_DEPTH: Int64 = 500
 

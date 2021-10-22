@@ -25,7 +25,7 @@ class SerdeTests: XCTestCase {
     }
 
     func testSerializer() {
-        let serializer = LcsSerializer()
+        let serializer = BcsSerializer()
         serializer.serialize_u8(value: 255) // 1
         serializer.serialize_u32(value: 1) // 4
         serializer.serialize_u32(value: 1) // 4
@@ -97,47 +97,47 @@ class SerdeTests: XCTestCase {
     }
 
     func testSerializeU128() {
-        let serializer = LcsSerializer()
+        let serializer = BcsSerializer()
         XCTAssertNoThrow(try serializer.serialize_u128(value: (BigInt8(1) << 128) - 1))
         XCTAssertEqual(serializer.output.getBuffer(), [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], "the array should be same")
 
-        let serializer2 = LcsSerializer()
+        let serializer2 = BcsSerializer()
         XCTAssertNoThrow(try serializer2.serialize_u128(value: BigInt8(1)))
         XCTAssertEqual(serializer2.output.getBuffer(), [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "the array should be same")
 
-        let serializer3 = LcsSerializer()
+        let serializer3 = BcsSerializer()
         XCTAssertNoThrow(try serializer3.serialize_u128(value: BigInt8(0)))
         XCTAssertEqual(serializer3.output.getBuffer(), [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "the array should be same")
 
-        let serializer4 = LcsSerializer()
+        let serializer4 = BcsSerializer()
         XCTAssertThrowsError(try serializer4.serialize_u128(value: BigInt8(-1)))
         XCTAssertThrowsError(try serializer4.serialize_u128(value: (BigInt8(1) << 128) + 1))
     }
 
     func testSerializeI128() {
-        let serializer = LcsSerializer()
+        let serializer = BcsSerializer()
         XCTAssertNoThrow(try serializer.serialize_i128(value: BigInt8(-1)))
         XCTAssertEqual(serializer.output.getBuffer(), [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], "the array should be same")
 
-        let serializer2 = LcsSerializer()
+        let serializer2 = BcsSerializer()
         XCTAssertNoThrow(try serializer2.serialize_i128(value: BigInt8(1)))
         XCTAssertEqual(serializer2.output.getBuffer(), [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "the array should be same")
 
-        let serializer3 = LcsSerializer()
+        let serializer3 = BcsSerializer()
         XCTAssertNoThrow(try serializer3.serialize_i128(value: (BigInt8(1) << 127) - 1))
         XCTAssertEqual(serializer3.output.getBuffer(), [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 127], "the array should be same")
 
-        let serializer4 = LcsSerializer()
+        let serializer4 = BcsSerializer()
         XCTAssertNoThrow(try serializer4.serialize_i128(value: -(BigInt8(1) << 127)))
         XCTAssertEqual(serializer4.output.getBuffer(), [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x80], "the array should be same")
 
-        let serializer5 = LcsSerializer()
+        let serializer5 = BcsSerializer()
         XCTAssertThrowsError(try serializer5.serialize_i128(value: BigInt8(1) << 127))
         XCTAssertThrowsError(try serializer5.serialize_i128(value: (BigInt8(1) << 127) + 1))
     }
 
     func testULEB128Encoding() {
-        let serializer = LcsSerializer()
+        let serializer = BcsSerializer()
         serializer.serialize_len(value: 0)
         serializer.serialize_len(value: 1)
         serializer.serialize_len(value: 127)
