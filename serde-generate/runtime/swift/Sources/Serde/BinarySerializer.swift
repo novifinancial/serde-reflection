@@ -1,10 +1,10 @@
 //  Copyright (c) Facebook, Inc. and its affiliates.
 
+import Foundation
+
 public enum BinarySerializerError: Error {
     case serializationException(issue: String)
 }
-
-import Foundation
 
 public class BinarySerializer: Serializer {
     public var output = OutputStream.toMemory()

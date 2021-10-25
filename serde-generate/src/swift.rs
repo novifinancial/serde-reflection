@@ -465,7 +465,7 @@ return obj
 
     fn output_variant(&mut self, name: &str, variant: &VariantFormat) -> Result<()> {
         use VariantFormat::*;
-        self.output_comment(&name)?;
+        self.output_comment(name)?;
         match variant {
             Unit => {
                 writeln!(self.out, "case {}", name)?;
@@ -507,7 +507,7 @@ return obj
                 .enumerate()
                 .map(|(i, f)| Named {
                     name: format!("x{}", i),
-                    value: f.clone(),
+                    value: f,
                 })
                 .collect(),
             Struct(fields) => fields.clone(),
@@ -657,7 +657,7 @@ public static func {1}Deserialize(input: [UInt8]) throws -> {0} {{
         writeln!(self.out, "indirect public enum {} {{", name)?;
         self.current_namespace.push(name.to_string());
         self.out.indent();
-        for (_, variant) in variants {
+        for variant in variants.values() {
             self.output_variant(&variant.name, &variant.value)?;
         }
 
@@ -805,7 +805,7 @@ switch index {{"#,
                 })
                 .collect(),
             Enum(variants) => {
-                self.output_enum_container(name, &variants)?;
+                self.output_enum_container(name, variants)?;
                 return Ok(());
             }
         };
