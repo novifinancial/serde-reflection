@@ -2,7 +2,7 @@
 
 // See https://forums.swift.org/t/using-indirect-modifier-for-struct-properties/37600/16
 @propertyWrapper
-public enum Indirect<T> {
+public enum Indirect<T>: Hashable where T: Hashable {
     indirect case wrapped(T)
 
     public init(wrappedValue initialValue: T) {

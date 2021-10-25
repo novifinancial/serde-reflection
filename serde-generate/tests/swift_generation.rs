@@ -30,7 +30,7 @@ fn test_that_swift_code_compiles_with_config(
     test_that_swift_code_compiles_with_config_and_registry(config, &get_small_registry().unwrap());
     test_that_swift_code_compiles_with_config_and_registry(
         config,
-        &test_utils::get_registry_without_complex_map().unwrap(),
+        &test_utils::get_registry().unwrap(),
     )
 }
 

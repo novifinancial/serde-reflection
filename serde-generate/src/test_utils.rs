@@ -136,22 +136,6 @@ pub fn get_registry() -> Result<Registry> {
     tracer.registry()
 }
 
-/// The registry corresponding to the test data structures above.
-pub fn get_registry_without_complex_map() -> Result<Registry> {
-    let mut tracer = Tracer::new(TracerConfig::default());
-    let samples = Samples::new();
-    tracer.trace_type::<SerdeData>(&samples)?;
-    tracer.trace_type::<List<SerdeData>>(&samples)?;
-    tracer.trace_type::<CStyleEnum>(&samples)?;
-    let mut registry = tracer.registry()?;
-    let cmap = registry.get_mut("SerdeData").unwrap();
-    if let serde_reflection::ContainerFormat::Enum(variants) = cmap {
-        variants.remove(&(variants.len() as u32 - 1));
-        variants.remove(&(variants.len() as u32 - 1));
-    }
-    Ok(registry)
-}
-
 /// Manually generate sample values.
 /// Avoid maps with more than one element when `has_canonical_maps` is false so that
 /// we can test re-serialization.
