@@ -8,7 +8,7 @@ use std::{collections::BTreeMap, fs::File, io::Write, process::Command, sync::Mu
 use tempfile::{tempdir, TempDir};
 
 lazy_static::lazy_static! {
-    // Avoid interleaving compiler calls because the output is very messy.
+    // Avoid interleaving compiler calls because the output gets very messy.
     static ref MUTEX: Mutex<()> = Mutex::new(());
 }
 
@@ -39,24 +39,14 @@ fn test_that_swift_code_compiles_with_config_and_registry(
     registry: &Registry,
 ) -> (TempDir, std::path::PathBuf) {
     let dir = tempdir().unwrap();
-    let status = Command::new("swift")
-        .current_dir(dir.path())
-        .arg("package")
-        .arg("init")
-        .arg("--name")
-        .arg("Testing")
-        .status()
-        .unwrap();
-    assert!(status.success());
-
+    std::fs::create_dir_all(dir.path().join("Sources/Testing")).unwrap_or(());
     let serde_package_path = std::env::current_dir()
         .unwrap()
         .join("../serde-generate/runtime/swift");
     let mut file = File::create(dir.path().join("Package.swift")).unwrap();
     write!(
         file,
-        r#"
-// swift-tools-version:5.3
+        r#"// swift-tools-version:5.3
 
 import PackageDescription
 
@@ -74,9 +64,6 @@ let package = Package(
         .target(
             name: "Testing",
             dependencies: ["Serde"]),
-        .testTarget(
-            name: "TestingTests",
-            dependencies: ["Testing"]),
     ]
 )
 "#,
