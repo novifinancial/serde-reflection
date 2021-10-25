@@ -2,8 +2,6 @@
 
 import Foundation
 
-import Foundation
-
 public enum BcsDeserializerError: Error {
     case bcsException(issue: String)
 }
