@@ -12,7 +12,7 @@ public class BincodeSerializer: BinarySerializer {
     }
 
     override public func serialize_variant_index(value: Int) {
-        output.write(data: Data(fromArray: [value]))
+        output.write(data: Data(fromArray: [Int32(value)]))
     }
 
     override public func sort_map_entries(offsets _: [Int]) {

@@ -6,7 +6,12 @@ use serde_generate::{
     test_utils::{Choice, Runtime, Test},
     CodeGeneratorConfig,
 };
-use std::{fs::File, io::Write, process::Command};
+use std::{fs::File, io::Write, process::Command, sync::Mutex};
+
+lazy_static::lazy_static! {
+    // Avoid interleaving compiler calls because the output gets very messy.
+    static ref MUTEX: Mutex<()> = Mutex::new(());
+}
 
 #[test]
 fn test_swift_runtime_autotests() {
@@ -24,31 +29,28 @@ fn test_swift_runtime_autotests() {
     assert!(status.success());
 }
 
-// TODO: fix crash in runtime and enable test
 #[test]
-#[ignore]
 fn test_swift_bcs_runtime_on_simple_data() {
     test_swift_runtime_on_simple_data(Runtime::Bcs);
 }
 
 #[test]
-#[ignore]
 fn test_swift_bincode_runtime_on_simple_data() {
     test_swift_runtime_on_simple_data(Runtime::Bincode);
 }
 
 fn test_swift_runtime_on_simple_data(runtime: Runtime) {
-    // TODO: remove this and replace `my_path` by `dir.path()` below.
-    let my_path = std::path::Path::new("/Users/mathieubaudet/git/serde-reflection/test");
-    std::fs::remove_dir_all(my_path).unwrap_or(());
-    std::fs::create_dir_all(my_path).unwrap();
-    // let dir = tempfile::tempdir().unwrap();
-    std::fs::create_dir_all(my_path.join("Sources/Testing")).unwrap();
-    std::fs::create_dir_all(my_path.join("Sources/main")).unwrap();
+    // To see the source, uncomment this and replace `dir.path()` by `my_path` below.
+    // let my_path = std::path::Path::new("../test");
+    // std::fs::remove_dir_all(my_path).unwrap_or(());
+    // std::fs::create_dir_all(my_path).unwrap();
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::create_dir_all(dir.path().join("Sources/Testing")).unwrap();
+    std::fs::create_dir_all(dir.path().join("Sources/main")).unwrap();
     let serde_package_path = std::env::current_dir()
         .unwrap()
         .join("../serde-generate/runtime/swift");
-    let mut file = File::create(my_path.join("Package.swift")).unwrap();
+    let mut file = File::create(dir.path().join("Package.swift")).unwrap();
     write!(
         file,
         r#"// swift-tools-version:5.3
@@ -75,7 +77,7 @@ let package = Package(
     )
     .unwrap();
 
-    let codegen_path = my_path.join("Sources/Testing/Testing.swift");
+    let codegen_path = dir.path().join("Sources/Testing/Testing.swift");
     let mut codegen = File::create(&codegen_path).unwrap();
     let config =
         CodeGeneratorConfig::new("Testing".to_string()).with_encodings(vec![runtime.into()]);
@@ -89,7 +91,7 @@ let package = Package(
         c: Choice::C { x: 7 },
     });
 
-    let main_path = my_path.join("Sources/main/main.swift");
+    let main_path = dir.path().join("Sources/main/main.swift");
     let mut main = File::create(main_path).unwrap();
     writeln!(
         main,
@@ -97,7 +99,7 @@ let package = Package(
 import Serde
 import Testing
 
-let input : [UInt8] = [{0}]
+var input : [UInt8] = [{0}]
 let value = try Test.{1}Deserialize(input: input)
 
 let value2 = Test.init(
@@ -105,17 +107,25 @@ let value2 = Test.init(
     b: Tuple2.init(-3, 5),
     c: Choice.C(x: 7)
 )
-if (value != value2) {{ assertionFailure("value != value2") }}
+assert(value == value2, "value != value2")
 
 let output = try value2.{1}Serialize()
-if (input != output)  {{ assertionFailure("input != output") }}
+assert(input == output, "input != output")
 
+input += [0]
 do {{
-    let input2 : [UInt8] = [0, 1]
-    let _ = try Test.{1}Deserialize(input: input2)
+    let _ = try Test.{1}Deserialize(input: input)
     assertionFailure("Was expecting an error")
 }}
 catch {{}}
+
+// TODO: This causes a crash at the moment.
+// do {{
+//     let input2 : [UInt8] = [0, 1]
+//     let _ = try Test.{1}Deserialize(input: input2)
+//     assertionFailure("Was expecting an error")
+// }}
+// catch {{}}
 "#,
         reference
             .iter()
@@ -126,10 +136,13 @@ catch {{}}
     )
     .unwrap();
 
-    let status = Command::new("swift")
-        .current_dir(my_path)
-        .arg("run")
-        .status()
-        .unwrap();
-    assert!(status.success());
+    {
+        let _lock = MUTEX.lock().unwrap();
+        let status = Command::new("swift")
+            .current_dir(dir.path())
+            .arg("run")
+            .status()
+            .unwrap();
+        assert!(status.success());
+    }
 }
