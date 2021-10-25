@@ -156,7 +156,8 @@ where
             Map { key, value } => {
                 format!("[{}: {}]", self.quote_type(key), self.quote_type(value))
             }
-            Tuple(formats) => format!("({})", self.quote_types(formats)),
+            // Sadly, Swift tuples are not hashable.
+            Tuple(formats) => format!("Tuple{}<{}>", formats.len(), self.quote_types(formats)),
             TupleArray { content, size: _ } => {
                 // Sadly, there are no fixed-size arrays in Swift.
                 format!("[{}]", self.quote_type(content))
@@ -335,7 +336,7 @@ serializer.sort_map_entries(offsets: offsets)
             Tuple(formats) => {
                 writeln!(self.out)?;
                 for (index, format) in formats.iter().enumerate() {
-                    let expr = format!("value.{}", index);
+                    let expr = format!("value.field{}", index);
                     writeln!(self.out, "{}", self.quote_serialize_value(&expr, format))?;
                 }
             }
@@ -431,8 +432,9 @@ return obj
                 write!(
                     self.out,
                     r#"
-return ({})
+return Tuple{}.init({})
 "#,
+                    formats.len(),
                     formats
                         .iter()
                         .map(|f| self.quote_deserialize(f))
@@ -519,7 +521,7 @@ return obj
         // Struct
         writeln!(self.out)?;
         self.output_comment(name)?;
-        writeln!(self.out, "public struct {} {{", name)?;
+        writeln!(self.out, "public struct {}: Hashable {{", name)?;
         self.enter_class(name);
         for field in fields {
             self.output_comment(&field.name)?;
@@ -654,7 +656,7 @@ public static func {1}Deserialize(input: [UInt8]) throws -> {0} {{
     ) -> Result<()> {
         writeln!(self.out)?;
         self.output_comment(name)?;
-        writeln!(self.out, "indirect public enum {} {{", name)?;
+        writeln!(self.out, "indirect public enum {}: Hashable {{", name)?;
         self.current_namespace.push(name.to_string());
         self.out.indent();
         for variant in variants.values() {
