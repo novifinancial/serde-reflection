@@ -24,10 +24,10 @@ public class BcsSerializer: BinarySerializer {
     }
 
     override public func serialize_variant_index(value: Int) {
-        return serialize_u32_as_uleb128(value: (UInt32)(value))
+        serialize_u32_as_uleb128(value: (UInt32)(value))
     }
 
     override public func sort_map_entries(offsets _: [Int]) {
-        // Not required by the format.
+        // TODO
     }
 }
