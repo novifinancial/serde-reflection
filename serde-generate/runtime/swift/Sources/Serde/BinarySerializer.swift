@@ -111,22 +111,18 @@ public class BinarySerializer: Serializer {
 
     public func serialize_i8(value: Int8) {
         output.write(data: Data(fromArray: [value]))
-        return print(value)
     }
 
     public func serialize_i16(value: Int16) {
         output.write(data: Data(fromArray: [value]))
-        return print(value)
     }
 
     public func serialize_i32(value: Int32) {
         output.write(data: Data(fromArray: [value]))
-        return print(value)
     }
 
     public func serialize_i64(value: Int64) {
         output.write(data: Data(fromArray: [value]))
-        return print(value)
     }
 
     public func serialize_i128(value: BigInt8) throws {
@@ -152,16 +148,15 @@ public class BinarySerializer: Serializer {
     }
 
     public func serialize_len(value: Int64) {
-        output.write(data: Data(fromArray: [value]))
+        assertionFailure("Not implemented")
     }
 
     public func serialize_variant_index(value: Int) {
-        output.write(data: Data(fromArray: [value]))
-        print(value)
+        assertionFailure("Not implemented")
     }
 
     public func sort_map_entries(offsets _: [Int]) {
-        // Not required by the format.
+        assertionFailure("Not implemented")
     }
 
     private func write<T>(value: T) {

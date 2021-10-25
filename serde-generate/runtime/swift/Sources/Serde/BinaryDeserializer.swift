@@ -18,15 +18,13 @@ public class BinaryDeserializer: Deserializer {
     }
 
     public func deserialize_len() throws -> Int64 {
-        let value: Int64 = reader.readInt64()
-        if value < 0 || value > Int.max {
-            throw BincodeDeserializerError.invalidInput(issue: "Incorrect length value")
-        }
-        return value
+        assertionFailure("Not implemented")
+        return 0
     }
 
-    public func deserialize_variant_index() -> Int {
-        return Int(reader.readInt32())
+    public func deserialize_variant_index() throws -> Int {
+        assertionFailure("Not implemented")
+        return 0
     }
 
     public func deserialize_char() throws -> Character {
@@ -147,6 +145,6 @@ public class BinaryDeserializer: Deserializer {
     }
 
     public func check_that_key_slices_are_increasing(key1: Slice, key2: Slice) throws {
-        // Pass
+        assertionFailure("Not implemented")
     }
 }

@@ -31,15 +31,11 @@ public class BcsDeserializer: BinaryDeserializer {
     }
 
     override public func deserialize_len() throws -> Int64 {
-        let value: Int64 = reader.readInt64()
-        if value < 0 || value > Int.max {
-            throw BcsDeserializerError.invalidInput(issue: "Incorrect length value")
-        }
-        return value
+        return Int64(try deserialize_uleb128_as_u32())
     }
 
-    override public func deserialize_variant_index() -> Int {
-        return Int(reader.readInt32())
+    override public func deserialize_variant_index() throws -> Int {
+        return Int(try deserialize_uleb128_as_u32())
     }
 
     public func check_that_key_slices_are_increasing(key1 _: Range<Int>, key2 _: Range<Int>) {
