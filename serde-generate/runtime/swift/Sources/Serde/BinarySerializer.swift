@@ -3,7 +3,7 @@
 import Foundation
 
 public enum BinarySerializerError: Error {
-    case serializationException(issue: String)
+    case invalidValue(issue: String)
 }
 
 public class BinarySerializer: Serializer {
@@ -21,7 +21,7 @@ public class BinarySerializer: Serializer {
 
     public func increase_container_depth() throws {
         if containerDepthBudget == 0 {
-            throw BinarySerializerError.serializationException(issue: "Exceeded maximum container depth")
+            throw BinarySerializerError.invalidValue(issue: "Exceeded maximum container depth")
         }
         containerDepthBudget -= 1
     }
@@ -31,7 +31,7 @@ public class BinarySerializer: Serializer {
     }
 
     public func serialize_char(value _: Character) throws {
-        throw BinarySerializerError.serializationException(issue: "Not implemented: char serialization")
+        throw BinarySerializerError.invalidValue(issue: "Not implemented: char serialization")
     }
 
     public func serialize_f32(value: Float) {
@@ -95,7 +95,7 @@ public class BinarySerializer: Serializer {
 
     public func serialize_u128(value: BigInt8) throws {
         if value >> 128 != 0 {
-            throw BinarySerializerError.serializationException(issue: "Invalid value for an unsigned int128")
+            throw BinarySerializerError.invalidValue(issue: "Invalid value for an unsigned int128")
         }
 
         assert(value._data.count <= 16 || value._data[16] == 0)
@@ -132,12 +132,12 @@ public class BinarySerializer: Serializer {
     public func serialize_i128(value: BigInt8) throws {
         if value >= 0 {
             if value >> 127 != 0 {
-                throw BinarySerializerError.serializationException(issue: "Invalid value for a signed int128")
+                throw BinarySerializerError.invalidValue(issue: "Invalid value for a signed int128")
             }
             try serialize_u128(value: value)
         } else {
             if -(value + 1) >> 127 != 0 {
-                throw BinarySerializerError.serializationException(issue: "Invalid value for a signed int128")
+                throw BinarySerializerError.invalidValue(issue: "Invalid value for a signed int128")
             }
             try serialize_u128(value: value + (BigInt8(1) << 128))
         }
