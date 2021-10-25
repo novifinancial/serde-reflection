@@ -3,7 +3,7 @@
 import Foundation
 
 public enum BcsDeserializerError: Error {
-    case bcsException(issue: String)
+    case invalidInput(issue: String)
 }
 
 public class BcsDeserializer: BinaryDeserializer {
@@ -18,22 +18,22 @@ public class BcsDeserializer: BinaryDeserializer {
             let digit: UInt8 = (UInt8)(x & 0x7F)
             value |= ((Int64)(digit) << shift)
             if value < 0 || value > Int.max {
-                throw BcsDeserializerError.bcsException(issue: "Overflow while parsing uleb128-encoded uint32 value")
+                throw BcsDeserializerError.invalidInput(issue: "Overflow while parsing uleb128-encoded uint32 value")
             }
             if digit == x {
                 if shift > 0, digit == 0 {
-                    throw BcsDeserializerError.bcsException(issue: "Invalid uleb128 number (unexpected zero digit)")
+                    throw BcsDeserializerError.invalidInput(issue: "Invalid uleb128 number (unexpected zero digit)")
                 }
                 return (Int)(value)
             }
         }
-        throw BincodeDeserializerError.bincodeDeserializerException(issue: "Overflow while parsing uleb128-encoded uint32 value")
+        throw BcsDeserializerError.invalidInput(issue: "Overflow while parsing uleb128-encoded uint32 value")
     }
 
     override public func deserialize_len() throws -> Int64 {
         let value: Int64 = reader.readInt64()
         if value < 0 || value > Int.max {
-            throw BincodeDeserializerError.bincodeDeserializerException(issue: "Incorrect length value")
+            throw BcsDeserializerError.invalidInput(issue: "Incorrect length value")
         }
         return value
     }

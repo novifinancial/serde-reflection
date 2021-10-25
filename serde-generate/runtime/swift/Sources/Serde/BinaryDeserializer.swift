@@ -3,7 +3,7 @@
 import Foundation
 
 public enum BinaryDeserializerError: Error {
-    case deserializationException(issue: String)
+    case invalidInput(issue: String)
 }
 
 public class BinaryDeserializer: Deserializer {
@@ -20,7 +20,7 @@ public class BinaryDeserializer: Deserializer {
     public func deserialize_len() throws -> Int64 {
         let value: Int64 = reader.readInt64()
         if value < 0 || value > Int.max {
-            throw BincodeDeserializerError.bincodeDeserializerException(issue: "Incorrect length value")
+            throw BincodeDeserializerError.invalidInput(issue: "Incorrect length value")
         }
         return value
     }
@@ -30,7 +30,7 @@ public class BinaryDeserializer: Deserializer {
     }
 
     public func deserialize_char() throws -> Character {
-        throw BinaryDeserializerError.deserializationException(issue: "Not implemented: char deserialization")
+        throw BinaryDeserializerError.invalidInput(issue: "Not implemented: char deserialization")
     }
 
     public func deserialize_f32() -> Float {
@@ -43,7 +43,7 @@ public class BinaryDeserializer: Deserializer {
 
     public func increase_container_depth() throws {
         if containerDepthBudget == 0 {
-            throw BinaryDeserializerError.deserializationException(issue: "Exceeded maximum container depth")
+            throw BinaryDeserializerError.invalidInput(issue: "Exceeded maximum container depth")
         }
         containerDepthBudget -= 1
     }
@@ -55,11 +55,11 @@ public class BinaryDeserializer: Deserializer {
     public func deserialize_str() throws -> String {
         let len: Int64 = try deserialize_len()
         if len < 0 || len > Int.max {
-            throw BinaryDeserializerError.deserializationException(issue: "Incorrect length value for Swift string")
+            throw BinaryDeserializerError.invalidInput(issue: "Incorrect length value for Swift string")
         }
         let content: [UInt8] = reader.readBytes(count: (Int)(len))
         if content.count < len {
-            throw BinaryDeserializerError.deserializationException(issue: "Need len - \(content.count) more bytes for string")
+            throw BinaryDeserializerError.invalidInput(issue: "Need len - \(content.count) more bytes for string")
         }
         return String(bytes: content, encoding: .utf8)!
     }
@@ -67,11 +67,11 @@ public class BinaryDeserializer: Deserializer {
     public func deserialize_bytes() throws -> [UInt8] {
         let len: Int64 = try deserialize_len()
         if len < 0 || len > Int.max {
-            throw BinaryDeserializerError.deserializationException(issue: "Incorrect length value for Swift array")
+            throw BinaryDeserializerError.invalidInput(issue: "Incorrect length value for Swift array")
         }
         let content: [UInt8] = reader.readBytes(count: (Int)(len))
         if content.count < len {
-            throw BinaryDeserializerError.deserializationException(issue: "Need  \(len) - \(content.count) more bytes for byte array")
+            throw BinaryDeserializerError.invalidInput(issue: "Need  \(len) - \(content.count) more bytes for byte array")
         }
         return content
     }
@@ -128,7 +128,7 @@ public class BinaryDeserializer: Deserializer {
     public func deserialize_i128() throws -> BigInt8 {
         let content: [UInt8] = reader.readBytes(count: 16)
         if content.count < 16 {
-            throw BinaryDeserializerError.deserializationException(issue: "Need more bytes to deserialize 128-bit integer")
+            throw BinaryDeserializerError.invalidInput(issue: "Need more bytes to deserialize 128-bit integer")
         }
         return BigInt8(content.map { UInt8($0) })
     }
@@ -138,16 +138,15 @@ public class BinaryDeserializer: Deserializer {
         switch value {
         case 0: return false
         case 1: return true
-        default: throw BinaryDeserializerError.deserializationException(issue: "Incorrect value for Option tag: \(value)")
+        default: throw BinaryDeserializerError.invalidInput(issue: "Incorrect value for Option tag: \(value)")
         }
     }
 
     public func get_buffer_offset() -> Int {
-        // TODO
-        return 0
+        return self.reader.tell
     }
 
     public func check_that_key_slices_are_increasing(key1: Slice, key2: Slice) throws {
-        // TODO
+        // Pass
     }
 }
