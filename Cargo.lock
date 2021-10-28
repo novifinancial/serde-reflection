@@ -348,7 +348,7 @@ dependencies = [
 
 [[package]]
 name = "serde-generate"
-version = "0.20.2"
+version = "0.20.3"
 dependencies = [
  "bcs",
  "bincode",
