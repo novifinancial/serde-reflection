@@ -9,11 +9,11 @@ class BincodeDeserializer extends BinaryDeserializer {
   BincodeDeserializer(Uint8List input) : super(input) {}
 
   int deserialize_len() {
-    return deserialize_u64();
+    return input.getUint32(offset);
   }
 
   int deserialize_variant_index() {
-    return deserialize_u64();
+    return input.getUint32(offset);
   }
 
   void check_that_key_slices_are_increasing(Slice key1, Slice key2) {
