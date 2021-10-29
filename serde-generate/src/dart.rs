@@ -289,7 +289,7 @@ where
             U8 => "int".into(),
             U16 => "int".into(),
             U32 => "int".into(),
-            U64 => "Uint64".into(),
+            U64 => "int".into(),
             U128 => "Uint128".into(),
             F32 => "double".into(),
             F64 => "double".into(),

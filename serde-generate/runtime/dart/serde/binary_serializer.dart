@@ -39,20 +39,8 @@ abstract class BinarySerializer {
     output.addAll(bdata.buffer.asUint8List());
   }
 
-  void serializeUint64(Uint64 val) {
-    BigInt number = val.toBigInt();
-    final _byteMask = BigInt.from(0xFF);
-    int bytes = 8;
-    var bdata = Uint8List(bytes);
-    for (int i = 0; i < bytes; i++) {
-      // big endian
-      // bdata[bytes - i - 1] = (number & _byteMask).toInt();
-
-      // little endian
-      bdata[i] = (number & _byteMask).toInt();
-      number = number >> 8;
-    }
-
+  void serializeUint64(int val) {
+    final bdata = ByteData(8)..setUint64(0, val, Endian.little);
     output.addAll(bdata.buffer.asUint8List());
   }
 
@@ -101,12 +89,12 @@ abstract class BinarySerializer {
   void serializeLength(int len);
 
   void serializeInt128(Int128 value) {
-    serializeInt64(value.low.toInt());
-    serializeInt64(value.high.toInt());
+    serializeInt64(value.low);
+    serializeInt64(value.high);
   }
 
   void serializeUint128(Uint128 value) {
-    serializeUint64(Uint64(value.low));
-    serializeUint64(Uint64(value.high));
+    serializeUint64(value.low);
+    serializeUint64(value.high);
   }
 }

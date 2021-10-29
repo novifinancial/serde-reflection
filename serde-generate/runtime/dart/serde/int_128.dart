@@ -12,11 +12,11 @@ class Int128 {
     final input = num.toSigned(128);
     final high = (input >> 64).toSigned(64);
     final low = (input & BigInt.from(0xFFFFFFFFFFFFFFFF)).toSigned(64);
-    return Int128(high, low);
+    return Int128(high.toInt(), low.toInt());
   }
 
-  final BigInt high;
-  final BigInt low;
+  final int high;
+  final int low;
 
   @override
   bool operator ==(Object other) {
@@ -37,5 +37,6 @@ class Int128 {
     return toBigInt().toString();
   }
 
-  BigInt toBigInt() => (high.toSigned(64) << 64) + low.toUnsigned(64);
+  BigInt toBigInt() =>
+      (BigInt.from(high).toSigned(64) << 64) + BigInt.from(low).toUnsigned(64);
 }

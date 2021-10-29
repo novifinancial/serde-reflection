@@ -2,6 +2,8 @@ part of serde;
 
 ///
 /// A Dart type to represent the Rust u128 type.
+///
+/// Warning: this currently clamps at a max value of 34028236692093846346337460743176821 while Rust is 340282366920938463463374607431768211455
 @immutable
 class Uint128 {
   Uint128(this.high, this.low);
@@ -14,11 +16,11 @@ class Uint128 {
     final input = num.toUnsigned(128);
     final high = (input >> 64).toUnsigned(64);
     final low = (input & BigInt.from(0xFFFFFFFFFFFFFFFF)).toUnsigned(64);
-    return Uint128(high, low);
+    return Uint128(high.toInt(), low.toInt());
   }
 
-  final BigInt high;
-  final BigInt low;
+  final int high;
+  final int low;
 
   @override
   bool operator ==(Object other) {
@@ -39,5 +41,7 @@ class Uint128 {
     return toBigInt().toString();
   }
 
-  BigInt toBigInt() => (high.toUnsigned(64) << 64) + low.toUnsigned(64);
+  BigInt toBigInt() =>
+      (BigInt.from(high).toUnsigned(64) << 64) +
+      BigInt.from(low).toUnsigned(64);
 }
