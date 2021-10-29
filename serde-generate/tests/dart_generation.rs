@@ -11,7 +11,7 @@ fn install_test_dependency(path: PathBuf) -> Result<()> {
     Ok(())
 }
 
-fn test_dart_code_compiles_with_config(
+fn test_that_dart_code_compiles_with_config(
     source_path: PathBuf,
     config: &CodeGeneratorConfig,
 ) -> PathBuf {
@@ -25,14 +25,14 @@ fn test_dart_code_compiles_with_config(
 
     let _result = install_test_dependency(source_path.to_path_buf());
 
-    let dart_analyze = Command::new("dart")
+    let status = Command::new("dart")
         .current_dir(source_path.to_path_buf())
         .args(["analyze"])
         .status()
         .unwrap();
 
     assert!(
-        dart_analyze.success(),
+        status.success(),
         "Generated Dart source code did not pass `dart analyze`"
     );
 
@@ -40,18 +40,18 @@ fn test_dart_code_compiles_with_config(
 }
 
 #[test]
-fn test_dart_code_compiles() {
+fn test_that_dart_code_compiles() {
     let source_path = tempdir().unwrap().path().join("dart_project");
 
     let config = CodeGeneratorConfig::new("example".to_string())
         .with_encodings(vec![Encoding::Bcs, Encoding::Bincode])
         .with_c_style_enums(true);
 
-    test_dart_code_compiles_with_config(source_path, &config);
+    test_that_dart_code_compiles_with_config(source_path, &config);
 }
 
 #[test]
-fn test_dart_code_compiles_with_comments() {
+fn test_that_dart_code_compiles_with_comments() {
     let source_path = tempdir().unwrap().path().join("dart_project");
 
     let comments = vec![(
@@ -66,7 +66,7 @@ fn test_dart_code_compiles_with_comments() {
         .with_c_style_enums(true)
         .with_comments(comments);
 
-    let path = test_dart_code_compiles_with_config(source_path, &config);
+    let path = test_that_dart_code_compiles_with_config(source_path, &config);
 
     // Comment was correctly generated.
     let content = std::fs::read_to_string(
