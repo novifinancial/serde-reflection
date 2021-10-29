@@ -28,12 +28,5 @@ class Bytes {
 
   @override
   int get hashCode => this.content.hashCode;
-
-  Bytes.fromJson(Map<String, dynamic> json)
-      : content = Uint8List.fromList(List<int>.from(json['content']));
-
-  Map<String, dynamic> toJson() => {
-    "content": content,
-  };
 }
 
