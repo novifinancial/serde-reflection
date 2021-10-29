@@ -1,6 +1,3 @@
-// Copyright (c) Facebook, Inc. and its affiliates
-// SPDX-License-Identifier: MIT OR Apache-2.0
-
 part of serde;
 
 abstract class BinarySerializer {
@@ -57,6 +54,9 @@ abstract class BinarySerializer {
     int bytes = 8;
     var bdata = Uint8List(bytes);
     for (int i = 0; i < bytes; i++) {
+      // big endian
+      // bdata[bytes - i - 1] = (number & _byteMask).toInt();
+
       // little endian
       bdata[i] = (number & _byteMask).toInt();
       number = number >> 8;
