@@ -1,4 +1,4 @@
-part of bcs_test;
+part of lcs_test;
 
 void runSerdeTests() {
   test('serializer u8list work', () {

@@ -1,12 +1,13 @@
-part of serde;
+import 'dart:typed_data';
 
 class Slice {
   int start;
   int end;
 
-  Slice(int start, int end)
-      : this.start = start,
-        this.end = end;
+  Slice(int start, int end) {
+    this.start = start;
+    this.end = end;
+  }
 
   // Lexicographic comparison between the (unsigned!) bytes referenced by `slice1` and `slice2`
   // into `content`.

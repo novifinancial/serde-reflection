@@ -1,23 +1,23 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
-part of bcs_test;
+part of lcs_test;
 
-void runBcsTests() {
+void runLcsTests() {
   test('serializer u32 work', () {
-    BcsSerializer serializer = new BcsSerializer();
+    LcsSerializer serializer = new LcsSerializer();
     serializer.serialize_u32(1);
     expect(serializer.get_bytes(), Uint8List.fromList([1, 0, 0, 0]));
   });
 
   test('deserializer u32 work', () {
-    BcsDeserializer serializer =
-        new BcsDeserializer(Uint8List.fromList([1, 0, 0, 0]));
+    LcsDeserializer serializer =
+        new LcsDeserializer(Uint8List.fromList([1, 0, 0, 0]));
     int result = serializer.deserialize_u32();
     expect(result, 1);
   });
 
   test('test slice work', () {
-    BcsSerializer serializer = new BcsSerializer();
+    LcsSerializer serializer = new LcsSerializer();
     serializer.serialize_u8(-1);
     serializer.serialize_u32(1);
     serializer.serialize_u32(1);
