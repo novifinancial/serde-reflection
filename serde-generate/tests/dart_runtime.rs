@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use serde_generate::{dart, test_utils, CodeGeneratorConfig, Encoding, SourceInstaller};
-use std::{io::Result, path::PathBuf, process::Command};
+use std::{io::Result, path::Path, process::Command};
 use tempfile::tempdir;
 
-fn install_test_dependency(path: PathBuf) -> Result<()> {
+fn install_test_dependency(path: &Path) -> Result<()> {
     Command::new("dart")
         .current_dir(path)
         .args(["pub", "add", "-d", "test"])
@@ -24,21 +24,19 @@ fn test_dart_runtime() {
         .with_encodings(vec![Encoding::Bcs, Encoding::Bincode])
         .with_c_style_enums(true);
 
-    let installer = dart::Installer::new(source_path.to_path_buf());
+    let installer = dart::Installer::new(source_path.clone());
     installer.install_module(&config, &registry).unwrap();
     installer.install_serde_runtime().unwrap();
     installer.install_bincode_runtime().unwrap();
     installer.install_bcs_runtime().unwrap();
 
-    install_test_dependency(source_path.to_path_buf()).unwrap();
+    install_test_dependency(&source_path).unwrap();
 
     let dart_test = Command::new("dart")
-        .current_dir(source_path.to_path_buf())
+        .current_dir(source_path)
         .args(["test"])
         .status()
         .unwrap();
 
     assert!(dart_test.success());
-
-    tempdir.close().unwrap();
 }

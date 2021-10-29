@@ -74,7 +74,7 @@ fn test_typescript_code_compiles_with_bcs() {
     let dir = tempdir().unwrap();
     let config =
         CodeGeneratorConfig::new("testing".to_string()).with_encodings(vec![Encoding::Bcs]);
-    test_typescript_code_compiles_with_config(&dir.path(), &config);
+    test_typescript_code_compiles_with_config(dir.path(), &config);
 }
 
 #[test]
@@ -85,7 +85,7 @@ fn test_typescript_code_compiles_with_comments() {
         .collect();
     let config = CodeGeneratorConfig::new("testing".to_string()).with_comments(comments);
 
-    let path = test_typescript_code_compiles_with_config(&dir.path(), &config);
+    let path = test_typescript_code_compiles_with_config(dir.path(), &config);
     // Comment was correctly generated.
     let content = std::fs::read_to_string(path.join("test.ts")).unwrap();
     assert!(content.contains(
@@ -115,5 +115,5 @@ fn test_typescript_code_compiles_with_external_definitions() {
     let config = CodeGeneratorConfig::new("testing".to_string())
         .with_external_definitions(external_definitions);
 
-    test_typescript_code_compiles_with_config(&dir.path(), &config);
+    test_typescript_code_compiles_with_config(dir.path(), &config);
 }

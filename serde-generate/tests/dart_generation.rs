@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use serde_generate::{dart, test_utils, CodeGeneratorConfig, Encoding, SourceInstaller};
-use std::{io::Result, path::PathBuf, process::Command};
+use std::{io::Result, path::Path, path::PathBuf, process::Command};
 use tempfile::tempdir;
 
-fn install_test_dependencies(path: PathBuf) -> Result<()> {
+fn install_test_dependencies(path: &Path) -> Result<()> {
     Command::new("dart")
-        .current_dir(path.to_path_buf())
+        .current_dir(path)
         .args(["pub", "add", "-d", "test"])
         .status()?;
 
@@ -17,16 +17,16 @@ fn install_test_dependencies(path: PathBuf) -> Result<()> {
 fn generate_with_config(source_path: PathBuf, config: &CodeGeneratorConfig) -> PathBuf {
     let registry = test_utils::get_registry().unwrap();
 
-    let installer = dart::Installer::new(source_path.to_path_buf());
-    installer.install_module(&config, &registry).unwrap();
+    let installer = dart::Installer::new(source_path.clone());
+    installer.install_module(config, &registry).unwrap();
     installer.install_serde_runtime().unwrap();
     installer.install_bincode_runtime().unwrap();
     installer.install_bcs_runtime().unwrap();
 
-    install_test_dependencies(source_path.to_path_buf()).unwrap();
+    install_test_dependencies(&source_path).unwrap();
 
     let dart_analyze = Command::new("dart")
-        .current_dir(source_path.to_path_buf())
+        .current_dir(&source_path)
         .args(["analyze"])
         .status()
         .unwrap();
