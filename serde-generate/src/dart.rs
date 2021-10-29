@@ -808,7 +808,7 @@ return obj;
                 writeln!(
                     self.out,
                     "\nint get hashCode => {}.hashCode;",
-                    fields.first().unwrap().name.to_mixed_case()
+                    fields.first().unwrap().name
                 )?;
             } else {
                 let use_hash_all = field_count > 20;
