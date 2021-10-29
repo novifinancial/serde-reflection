@@ -26,7 +26,7 @@ fn test_dart_code_compiles_with_config(
     installer.install_bincode_runtime().unwrap();
     installer.install_bcs_runtime().unwrap();
 
-    install_test_dependency(source_path.to_path_buf()).unwrap();
+    let _result = install_test_dependency(source_path.to_path_buf());
 
     let dart_analyze = Command::new("dart")
         .current_dir(source_path.to_path_buf())
@@ -44,21 +44,18 @@ fn test_dart_code_compiles_with_config(
 
 #[test]
 fn test_dart_code_compiles() {
-    let tempdir = tempdir().unwrap();
-    let source_path = tempdir.path().join("dart_project");
+    let source_path = tempdir().unwrap().path().join("dart_project");
 
     let config = CodeGeneratorConfig::new("example".to_string())
         .with_encodings(vec![Encoding::Bcs, Encoding::Bincode])
         .with_c_style_enums(true);
 
     test_dart_code_compiles_with_config(source_path, &config);
-    tempdir.close().unwrap();
 }
 
 #[test]
 fn test_dart_code_compiles_with_comments() {
-    let tempdir = tempdir().unwrap();
-    let source_path = tempdir.path().join("dart_project");
+    let source_path = tempdir().unwrap().path().join("dart_project");
 
     let comments = vec![(
         vec!["example".to_string(), "SerdeData".to_string()],
@@ -89,20 +86,15 @@ fn test_dart_code_compiles_with_comments() {
 /// comments
 "#
     ));
-
-    tempdir.close().unwrap();
 }
 
 #[test]
 fn test_dart_code_compiles_with_class_enums() {
-    let tempdir = tempdir().unwrap();
-    let source_path = tempdir.path().join("dart_project");
+    let source_path = tempdir().unwrap().path().join("dart_project");
 
     let config = CodeGeneratorConfig::new("example".to_string())
         .with_encodings(vec![Encoding::Bcs, Encoding::Bincode])
         .with_c_style_enums(false);
 
     test_dart_code_compiles_with_config(source_path, &config);
-
-    tempdir.close().unwrap();
 }

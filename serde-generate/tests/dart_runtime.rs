@@ -15,9 +15,7 @@ fn install_test_dependency(path: PathBuf) -> Result<()> {
 }
 #[test]
 fn test_dart_runtime() {
-    let tempdir = tempdir().unwrap();
-    let source_path = tempdir.path().join("dart_project");
-
+    let source_path = tempdir().unwrap().path().join("dart_project");
     let registry = test_utils::get_registry().unwrap();
 
     let config = CodeGeneratorConfig::new("example".to_string())
@@ -39,6 +37,4 @@ fn test_dart_runtime() {
         .unwrap();
 
     assert!(dart_test.success());
-
-    tempdir.close().unwrap();
 }
