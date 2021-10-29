@@ -345,10 +345,7 @@ where
         use Format::*;
         match format {
             TypeName(name) => {
-                format!(
-                    "{}.deserialize(deserializer)",
-                    self.quote_qualified_name(&self.get_class(name))
-                )
+                format!("{}.deserialize(deserializer)", self.get_class(name))
             }
             Unit => "deserializer.deserializeUnit()".to_string(),
             Bool => "deserializer.deserializeBool()".to_string(),
@@ -707,12 +704,6 @@ return obj;
                     "\n{}.deserialize(BinaryDeserializer deserializer) :",
                     self.quote_qualified_name(name)
                 )?;
-            } else if fields.len() > 0 {
-                writeln!(
-                    self.out,
-                    "\n{}.load(BinaryDeserializer deserializer) :",
-                    self.quote_qualified_name(name)
-                )?;
             } else {
                 writeln!(
                     self.out,
@@ -767,7 +758,7 @@ return obj;
 
         // Serialize
         if self.generator.config.serialization {
-            writeln!(self.out, "\nvoid serialize(BinarySerializer serializer) {{",)?;
+            writeln!(self.out, "\nvoid serialize(BinarySerializer serializer){{",)?;
             self.out.indent();
             if let Some(index) = variant_index {
                 writeln!(self.out, "serializer.serializeVariantIndex({});", index)?;
@@ -946,7 +937,7 @@ static {klass} {encoding}Deserialize(Uint8List input) {{
   return value;
 }}"#,
             klass = self.quote_qualified_name(name),
-            static_class = self.quote_qualified_name(&self.get_class(name)),
+            static_class = self.get_class(name),
             encoding = encoding.name(),
             encoding_class = encoding.name().to_camel_case()
         )
@@ -1085,7 +1076,7 @@ switch (index) {{"#,
                     self.out,
                     "case {}: return {}{}Item.load(deserializer);",
                     index,
-                    self.quote_qualified_name(name).to_camel_case(),
+                    self.quote_qualified_name(name),
                     self.quote_field(&variant.name),
                 )?;
             }
