@@ -107,7 +107,7 @@ dependencies:
             &mut out,
             r#"
 import 'src/serde.dart';
-import 'src/serde_generate.dart';"#
+"#
         )?;
         for encoding in &self.config.encodings {
             writeln!(&mut out, "import 'src/{}.dart';", encoding.name())?;
@@ -115,15 +115,13 @@ import 'src/serde_generate.dart';"#
 
         writeln!(
             &mut out,
-            r#"
-void main() {{
-  group('Serde', runSerdeTests);
-  group('Serde Generate', runSerdeGenerateTests);"#,
+            r#"void main() {{
+  group('Serde', runSerdeTests);"#,
         )?;
         for encoding in &self.config.encodings {
             writeln!(
                 &mut out,
-                "\tgroup('{0}', run{0}Tests);",
+                "  group('{0}', run{0}Tests);",
                 encoding.name().to_camel_case()
             )?;
         }
@@ -1230,41 +1228,6 @@ impl crate::SourceInstaller for Installer {
                 name = &config.module_name
             ),
         )?;
-
-        // update integration test runtime based on current config
-        let test_dir = self.install_dir.join("test").join("src");
-        let mut tmpl = std::fs::read_to_string(test_dir.join("serde_generate.dart"))?;
-        tmpl = tmpl.replace(
-            "<package_path>",
-            &format!(
-                "import 'package:{name}/{name}.dart';",
-                name = &config.module_name
-            ),
-        );
-        tmpl = if config.c_style_enums {
-            tmpl.replace(
-                "<enum_test>",
-                r#"test('C Enum', () {
-    final val = CStyleEnum.a;
-
-    expect(
-        CStyleEnumExtension.bincodeDeserialize(val.bincodeSerialize()),
-        equals(val));
-  });"#,
-            )
-        } else {
-            tmpl.replace(
-                "<enum_test>",
-                r#"test('Enum', () {
-    final val = CStyleEnumAItem();
-
-    expect(CStyleEnum.bincodeDeserialize(val.bincodeSerialize()), equals(val));
-  });"#,
-            )
-        };
-
-        std::fs::write(test_dir.join("serde_generate.dart"), tmpl)?;
-
         Ok(())
     }
 
