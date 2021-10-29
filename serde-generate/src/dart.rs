@@ -195,8 +195,7 @@ import '../serde/serde.dart';"#,
         name: &str,
         format: &ContainerFormat,
     ) -> Result<()> {
-        let mut file =
-            std::fs::File::create(dir_path.join(name.to_string().to_snake_case() + ".dart"))?;
+        let mut file = std::fs::File::create(dir_path.join(name.to_string().to_snake_case() + ".dart"))?;
         let mut emitter = DartEmitter {
             out: IndentedWriter::new(&mut file, IndentConfig::Space(2)),
             generator: self,
@@ -246,30 +245,18 @@ where
     fn to_json(&self, format: &Named<Format>) -> String {
         use Format::*;
         match &format.value {
-            TypeName(_) => format!(
-                "\"{0}\" : {1}.toJson() ",
-                format.name,
-                format.name.to_mixed_case()
-            ),
+            TypeName(_) => format!("\"{0}\" : {1}.toJson() ", format.name, format.name.to_mixed_case()),
             Unit | Bool | I8 | I16 | I32 | I64 | I128 | U8 | U16 | U32 | U64 | U128 | F32 | F64 => {
                 format!("\"{0}\" : {1} ", format.name, format.name.to_mixed_case())
             }
             Char | Str => format!("\"{0}\" : {1} ", format.name, format.name.to_mixed_case()),
             Bytes | Variable(_) | Map { key: _, value: _ } => {
-                format!(
-                    "\"{0}\" : {1}.toJson() ",
-                    format.name,
-                    format.name.to_mixed_case()
-                )
+                format!("\"{0}\" : {1}.toJson() ", format.name, format.name.to_mixed_case())
             }
             Option(_) => format!("\"{0}\" : {1}", format.name, format.name.to_mixed_case()),
             Seq(t) => {
                 if let TypeName(_) = t.borrow() {
-                    format!(
-                        "'{0}' : {1}.map((f) => f.toJson()).toList()",
-                        format.name,
-                        format.name.to_mixed_case()
-                    )
+                    format!("'{0}' : {1}.map((f) => f.toJson()).toList()", format.name, format.name.to_mixed_case())
                 } else {
                     format!("'{0}' : {1}", format.name, format.name.to_mixed_case())
                 }
@@ -286,43 +273,20 @@ where
         use Format::*;
         match &format.value {
             Unit | Bool | I8 | I16 | I32 | I64 | I128 | U8 | U16 | U32 | U64 | U128 | F32 | F64
-            | Char | Str => format!(
-                "{0} = json['{1}']",
-                format.name.to_mixed_case(),
-                format.name
-            ),
+            | Char | Str => format!("{0} = json['{1}']", format.name.to_mixed_case(), format.name),
             Bytes | Variable(_) | Map { key: _, value: _ } => {
-                format!(
-                    "{0} = Bytes.fromJson(json['{1}'])",
-                    format.name.to_mixed_case(),
-                    format.name
-                )
+                format!("{0} = Bytes.fromJson(json['{1}'])", format.name.to_mixed_case(), format.name)
             }
-            TypeName(t) => format!(
-                "{0} = {1}.fromJson(json['{2}'])",
-                format.name.to_mixed_case(),
-                t,
-                format.name
-            ),
-            Option(_) => format!(
-                "{0} = json['{1}']",
-                format.name.to_mixed_case(),
-                format.name
-            ),
+            TypeName(t) => format!("{0} = {1}.fromJson(json['{2}'])", format.name.to_mixed_case(), t, format.name),
+            Option(_) => format!("{0} = json['{1}']", format.name.to_mixed_case(), format.name),
             Seq(t) => {
                 if let TypeName(name) = t.borrow() {
                     format!(
                         "{0} = List<{1}>.from(json['{2}'].map((f) => {1}.fromJson(f)).toList())",
-                        format.name.to_mixed_case(),
-                        name,
-                        format.name
+                        format.name.to_mixed_case(), name, format.name
                     )
                 } else {
-                    format!(
-                        "{0} = json['{1}']",
-                        format.name.to_mixed_case(),
-                        format.name
-                    )
+                    format!("{0} = json['{1}']", format.name.to_mixed_case(), format.name)
                 }
             }
             Tuple(_) => format!("{0} = {1}", format.name.to_mixed_case(), format.name),
@@ -747,12 +711,7 @@ return obj;
         self.out.indent();
         let field_count = fields.len();
         for (i, field) in fields.iter().enumerate() {
-            write!(
-                self.out,
-                "this.{} = {}",
-                &field.name.to_mixed_case(),
-                &field.name.to_mixed_case()
-            )?;
+            write!(self.out, "this.{} = {}", &field.name.to_mixed_case(), &field.name.to_mixed_case())?;
             if i + 1 < field_count {
                 writeln!(self.out, ",")?;
             } else {
@@ -828,38 +787,38 @@ return obj;
                 }
             }
         }
-
         // Equality
         write!(self.out, "\n@override")?;
         write!(self.out, "\nbool operator ==(covariant {0} other) {{", name)?;
         self.out.indent();
+        writeln!(
+            self.out,
+            r#"
+if (other == null) return false;"#,
+        )?;
         let fields_num = fields.len();
 
         if fields_num > 0 {
-            writeln!(self.out, "\nreturn (other is {}) &&", name)?;
+            write!(self.out, "\nif (")?;
 
             for (index, field) in fields.iter().enumerate() {
                 let stmt = match &field.value {
-                    Format::Seq(_) => format!(
-                        " isListsEqual(this.{0}, other.{0})",
-                        &field.name.to_mixed_case()
-                    ),
+                    Format::Seq(_) => format!(" isListsEqual(this.{0} , other.{0}) ", &field.name.to_mixed_case()),
                     Format::TupleArray {
                         content: _,
                         size: _,
-                    } => format!(
-                        " isListsEqual(this.{0}, other.{0})",
-                        &field.name.to_mixed_case()
-                    ),
-                    _ => format!(" this.{0} == other.{0}", &field.name.to_mixed_case()),
+                    } => format!(" isListsEqual(this.{0}, other.{0}) ", &field.name.to_mixed_case()),
+                    _ => format!(" this.{0} == other.{0} ", &field.name.to_mixed_case()),
                 };
 
                 if index < fields_num - 1 {
-                    writeln!(self.out, " {} &&", stmt)?;
+                    writeln!(self.out, " {} &&", stmt,)?;
                 } else {
-                    writeln!(self.out, " {};", stmt)?;
+                    writeln!(self.out, " {} ){{", stmt,)?;
                 }
             }
+            writeln!(self.out, "return true;}}")?;
+            writeln!(self.out, "else return false;")?;
         } else {
             writeln!(self.out, "return true;")?;
         }
@@ -870,17 +829,15 @@ return obj;
         write!(self.out, "\n@override")?;
         writeln!(self.out, "\nint get hashCode {{")?;
         self.out.indent();
-        writeln!(self.out, "final props = [")?;
-        self.out.indent();
+        writeln!(self.out, "int value = 7;",)?;
         for field in fields {
-            writeln!(self.out, "{},", &field.name.to_mixed_case())?;
+            writeln!(
+                self.out,
+                "value = 31 * value + (this.{0} != null ? this.{0}.hashCode : 0);",
+                &field.name.to_mixed_case()
+            )?;
         }
-        self.out.unindent();
-        writeln!(self.out, "];")?;
-        writeln!(
-            self.out,
-            "return $jf(props.fold(0, (h, i) => $jc(h, i.hashCode)));"
-        )?;
+        writeln!(self.out, "return value;")?;
         self.out.unindent();
         writeln!(self.out, "}}")?;
 
