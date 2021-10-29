@@ -40,30 +40,6 @@ abstract class BinaryDeserializer {
     return result;
   }
 
-  int deserialize_i8() {
-    var result = this.input.getInt8(offset);
-    this.offset += 1;
-    return result;
-  }
-
-  int deserialize_i16() {
-    var result = this.input.getInt16(offset, Endian.little);
-    this.offset += 2;
-    return result;
-  }
-
-  int deserialize_i32() {
-    var result = this.input.getInt32(offset, Endian.little);
-    this.offset += 4;
-    return result;
-  }
-
-  int deserialize_i64() {
-    var result = this.input.getInt64(offset, Endian.little);
-    this.offset += 8;
-    return result;
-  }
-
   Bytes deserialize_bytes() {
     return new Bytes(deserialize_uint8list());
   }

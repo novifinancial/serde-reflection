@@ -10,7 +10,7 @@ class BincodeDeserializer extends BinaryDeserializer {
   }
 
   int deserialize_variant_index() {
-    return deserialize_u32();
+    return deserialize_u64();
   }
 
   void check_that_key_slices_are_increasing(Slice key1, Slice key2) {
