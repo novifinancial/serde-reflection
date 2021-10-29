@@ -3,40 +3,39 @@
 part of bcs;
 
 class BcsDeserializer extends BinaryDeserializer {
-  BcsDeserializer(Uint8List input) : super(input);
+  BcsDeserializer(Uint8List input) : super(input) {}
 
-  int deserializeUleb128AsUint32() {
-    var value = 0;
-    for (var shift = 0; shift < 32; shift += 7) {
-      final x = super.deserializeUint8();
-      final digit = (x & 0x7F);
+  int deserialize_uleb128_as_u32() {
+    int value = 0;
+    for (int shift = 0; shift < 32; shift += 7) {
+      int x = super.getUint8();
+      int digit = (x & 0x7F);
       value = value | (digit << shift);
       if (value > maxInt) {
-        throw Exception('Overflow while parsing uleb128-encoded uint32 value');
+        throw new Exception(
+            "Overflow while parsing uleb128-encoded uint32 value");
       }
       if (digit == x) {
         if (shift > 0 && digit == 0) {
-          throw Exception('Invalid uleb128 number (unexpected zero digit)');
+          throw new Exception("Invalid uleb128 number (unexpected zero digit)");
         }
         return value;
       }
     }
-    throw Exception('Overflow while parsing uleb128-encoded uint32 value');
+    throw new Exception("Overflow while parsing uleb128-encoded uint32 value");
   }
 
-  @override
-  int deserializeLength() {
-    return deserializeUleb128AsUint32();
+  int deserialize_len() {
+    return deserialize_uleb128_as_u32();
   }
 
-  @override
-  int deserializeVariantIndex() {
-    return deserializeUleb128AsUint32();
+  int deserialize_variant_index() {
+    return deserialize_uleb128_as_u32();
   }
 
-  void checkThatKeySlicesAreIncreasing(Slice key1, Slice key2) {
-    if (Slice.compareBytes(input.buffer.asUint8List(), key1, key2) >= 0) {
-      throw Exception(
+  void check_that_key_slices_are_increasing(Slice key1, Slice key2) {
+    if (Slice.compare_bytes(input.buffer.asUint8List(), key1, key2) >= 0) {
+      throw new Exception(
           "Error while decoding map: keys are not serialized in the expected order");
     }
   }

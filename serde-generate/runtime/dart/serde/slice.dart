@@ -9,7 +9,7 @@ class Slice {
 
   // Lexicographic comparison between the (unsigned!) bytes referenced by `slice1` and `slice2`
   // into `content`.
-  static int compareBytes(Uint8List content, Slice slice1, Slice slice2) {
+  static int compare_bytes(Uint8List content, Slice slice1, Slice slice2) {
     final start1 = slice1.start;
     final end1 = slice1.end;
     final start2 = slice2.start;

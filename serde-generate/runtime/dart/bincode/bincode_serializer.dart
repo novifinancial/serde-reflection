@@ -3,17 +3,15 @@
 part of bincode;
 
 class BincodeSerializer extends BinarySerializer {
-  @override
-  void serializeLength(int value) {
-    serializeUint64(value);
+  void serialize_len(int value) {
+    serialize_u64(value);
   }
 
-  @override
-  void serializeVariantIndex(int value) {
-    serializeUint32(value);
+  void serialize_variant_index(int value) {
+    serialize_u32(value);
   }
 
-  void sortMapEntries(Int32List offsets) {
+  void sort_map_entries(Int32List offsets) {
     // Not required by the format.
   }
 }

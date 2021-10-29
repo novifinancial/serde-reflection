@@ -3,19 +3,17 @@
 part of bincode;
 
 class BincodeDeserializer extends BinaryDeserializer {
-  BincodeDeserializer(Uint8List input) : super(input);
+  BincodeDeserializer(Uint8List input) : super(input) {}
 
-  @override
-  int deserializeLength() {
-    return deserializeUint64();
+  int deserialize_len() {
+    return deserialize_u64();
   }
 
-  @override
-  int deserializeVariantIndex() {
-    return deserializeUint32();
+  int deserialize_variant_index() {
+    return deserialize_u32();
   }
 
-  void checkThatKeySlicesAreIncreasing(Slice key1, Slice key2) {
+  void check_that_key_slices_are_increasing(Slice key1, Slice key2) {
     // Not required by the format.
   }
 }
