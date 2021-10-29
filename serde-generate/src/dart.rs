@@ -52,7 +52,7 @@ impl<'a> CodeGenerator<'a> {
         let mut dir_path = install_dir;
         std::fs::create_dir_all(&dir_path)?;
         self.write_package(&dir_path)?;
-        dir_path = dir_path.join("lib").join("src");
+        dir_path = dir_path.join("lib");
         for part in &current_namespace {
             dir_path = dir_path.join(part);
         }
@@ -1181,17 +1181,14 @@ impl crate::SourceInstaller for Installer {
     }
 
     fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.install_runtime(include_directory!("runtime/dart/serde"), "lib/src/serde")
+        self.install_runtime(include_directory!("runtime/dart/serde"), "lib/serde")
     }
 
     fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.install_runtime(
-            include_directory!("runtime/dart/bincode"),
-            "lib/src/bincode",
-        )
+        self.install_runtime(include_directory!("runtime/dart/bincode"), "lib/bincode")
     }
 
     fn install_bcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.install_runtime(include_directory!("runtime/dart/bcs"), "lib/src/bcs")
+        self.install_runtime(include_directory!("runtime/dart/bcs"), "lib/bcs")
     }
 }
