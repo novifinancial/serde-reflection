@@ -32,6 +32,7 @@ bool _elementEquals<T>(T? a, T? b) {
     return listEquals(a, b);
   } else if (a is Map && b is Map) {
     return mapEquals(a, b);
+  } else {
+    return a == b;
   }
-  return a == b;
 }
