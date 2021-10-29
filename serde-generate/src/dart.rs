@@ -819,12 +819,6 @@ return obj;
                     " listEquals({0}, other.{0})",
                     self.quote_field(&field.name.to_mixed_case())
                 ),
-                Format::Map { .. } => {
-                    format!(
-                        " mapEquals({0}, other.{0})",
-                        self.quote_field(&field.name.to_mixed_case())
-                    )
-                }
                 _ => format!(
                     " {0} == other.{0}",
                     self.quote_field(&field.name.to_mixed_case())

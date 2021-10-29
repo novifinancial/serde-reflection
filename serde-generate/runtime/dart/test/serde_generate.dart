@@ -55,7 +55,9 @@ void runSerdeGenerateTests() {
     );
 
     expect(
-        PrimitiveTypes.bincodeDeserialize(val.bincodeSerialize()), equals(val));
+        PrimitiveTypes.bincodeDeserialize(val.bincodeSerialize()).toString(),
+        equals(
+            'PrimitiveTypes(fBool: true, fU8: 255, fU16: 300, fU32: 3000000, fU64: 18446744073709551615, fU128: 340282366920938463463374607431768211455, fI8: -128, fI16: -400, fI32: -30000000, fI64: 9223372036854775807, fI128: 170141183460469231731687303715884105727, fF32: 623929.125, fF64: 9223372036854776000.0, fChar: 20)'));
   });
 
   test('Other Types', () {
@@ -76,6 +78,9 @@ void runSerdeGenerateTests() {
           [Struct(x: 1, y: Uint64.parse('3'))]
         ]);
 
-    expect(OtherTypes.bincodeDeserialize(val.bincodeSerialize()), equals(val));
+    expect(
+        OtherTypes.bincodeDeserialize(val.bincodeSerialize()).toString(),
+        equals(
+            "OtherTypes(fString: this is a string, fBytes: Instance of 'Bytes', fOption: null, fUnit: Instance of 'Unit', fSeq: [Struct(x: 5, y: 100), Struct(x: 5, y: 100)], fTuple: [100, 300], fStringmap: {key: 2000}, fIntset: {500: Instance of 'Unit'}, fNestedSeq: [[Struct(x: 1, y: 3)]])"));
   });
 }
