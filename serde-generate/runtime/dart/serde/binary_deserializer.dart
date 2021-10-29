@@ -101,10 +101,6 @@ abstract class BinaryDeserializer {
     return deserializeBool();
   }
 
-  int deserializeChar() {
-    return deserializeInt64();
-  }
-
   int deserializeVariantIndex();
 
   String deserializeString() {
@@ -124,8 +120,6 @@ abstract class BinaryDeserializer {
     final high = deserializeUint64();
     return Uint128(high.toBigInt(), low.toBigInt());
   }
-
-  void checkThatKeySlicesAreIncreasing(Slice key1, Slice key2);
 
   BigInt _bytesToBigInt(int byteLength, {required bool signed}) {
     BigInt number = BigInt.from(0);

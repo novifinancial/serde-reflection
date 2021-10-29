@@ -34,7 +34,6 @@ class BcsDeserializer extends BinaryDeserializer {
     return deserializeUleb128AsUint32();
   }
 
-  @override
   void checkThatKeySlicesAreIncreasing(Slice key1, Slice key2) {
     if (Slice.compareBytes(input.buffer.asUint8List(), key1, key2) >= 0) {
       throw Exception(

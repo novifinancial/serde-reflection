@@ -17,7 +17,6 @@ class BincodeDeserializer extends BinaryDeserializer {
     return deserializeUint32();
   }
 
-  @override
   void checkThatKeySlicesAreIncreasing(Slice key1, Slice key2) {
     // Not required by the format.
   }
