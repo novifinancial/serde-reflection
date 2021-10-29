@@ -701,14 +701,14 @@ return obj;
                     writeln!(
                         self.out,
                         "{} = {};",
-                        field.name.to_mixed_case(),
+                        field.name,
                         self.quote_deserialize(&field.value)
                     )?;
                 } else {
                     writeln!(
                         self.out,
                         "{} = {},",
-                        field.name.to_mixed_case(),
+                        field.name,
                         self.quote_deserialize(&field.value)
                     )?;
                 }
