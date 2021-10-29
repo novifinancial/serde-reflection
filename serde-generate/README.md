@@ -16,7 +16,6 @@ It can be used as a library or as a command-line tool (see `serdegen` below).
 The following programming languages are fully supported as target languages:
 
 * C++ 17
-* Dart >= 2.14
 * Java 8
 * Python 3 (requires numpy >= 1.20.1)
 * Rust 2018

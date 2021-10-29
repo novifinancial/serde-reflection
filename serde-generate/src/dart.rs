@@ -291,7 +291,7 @@ where
             U32 => "int".into(),
             U64 => "int".into(),
             U128 => "Uint128".into(),
-            F32 => "double".into(),
+            F32 => "float".into(),
             F64 => "double".into(),
             Char => "int".into(),
             Str => "String".into(),
