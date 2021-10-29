@@ -19,29 +19,4 @@ void main() {
     int result = serializer.deserialize_u32();
     expect(result, 1);
   });
-
-  test('test slice work', () {
-    LcsSerializer serializer = new LcsSerializer();
-    serializer.serialize_u8(-1);
-    serializer.serialize_u32(1);
-    serializer.serialize_u32(1);
-    serializer.serialize_u32(2);
-    expect(
-        serializer.getBytes(),
-        Uint8List.fromList([
-          -1,
-          /**/ 1,
-          /**/ 0,
-          0,
-          /**/ 0,
-          1,
-          0,
-          /**/ 0,
-          /**/ 0,
-          /**/ 2,
-          0,
-          0,
-          0
-        ]));
-  });
 }
