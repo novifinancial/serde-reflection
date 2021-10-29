@@ -722,7 +722,19 @@ return obj;
             writeln!(self.out, "@immutable\nclass {} {{", name)?;
         }
         self.enter_class(name);
-
+        // Fields
+        for field in fields {
+            //self.output_comment(&field.name)?;
+            writeln!(
+                self.out,
+                "final {} {};",
+                self.quote_type(&field.value),
+                field.name.to_mixed_case()
+            )?;
+        }
+        if !fields.is_empty() {
+            writeln!(self.out)?;
+        }
         // Constructor.
         writeln!(self.out, "const {}({{", name)?;
         self.out.indent();
@@ -736,6 +748,29 @@ return obj;
             writeln!(self.out, "}});")?;
         }
 
+        // Serialize
+        if self.generator.config.serialization {
+            writeln!(self.out, "\nvoid serialize(BinarySerializer serializer){{",)?;
+            self.out.indent();
+            if let Some(index) = variant_index {
+                writeln!(self.out, "serializer.serialize_variant_index({});", index)?;
+            }
+            for field in fields {
+                writeln!(
+                    self.out,
+                    "{}",
+                    self.quote_serialize_value(&field.name.to_mixed_case(), &field.value)
+                )?;
+            }
+            self.out.unindent();
+            writeln!(self.out, "}}")?;
+
+            if variant_index.is_none() {
+                for encoding in &self.generator.config.encodings {
+                    self.output_class_serialize_for_encoding(*encoding)?;
+                }
+            }
+        }
         // Deserialize (struct) or Load (variant)
         if self.generator.config.serialization {
             if variant_index.is_none() {
@@ -779,73 +814,6 @@ return obj;
             }
         }
 
-        if field_count > 0 {
-            if variant_index.is_none() {
-                writeln!(self.out, "\n{}.fromJson(dynamic json) :", name)?;
-            } else {
-                //enum
-                writeln!(self.out, "\n{}.loadJson(dynamic json) :", name)?;
-            }
-            self.out.indent();
-            if redefine {
-                writeln!(self.out, "{} = json;", &fields[0].name)?;
-            } else {
-                for (index, field) in fields.iter().enumerate() {
-                    if index == field_count - 1 {
-                        writeln!(self.out, "{};", self.from_json(field))?;
-                    } else {
-                        writeln!(self.out, "{},", self.from_json(field))?;
-                    }
-                }
-            }
-            self.out.unindent();
-        } else if variant_index.is_none() {
-            writeln!(self.out, "\n{}.fromJson(dynamic json);", name)?;
-        } else {
-            writeln!(self.out, "\n{}.loadJson(dynamic json);", name)?; //enum
-        }
-
-        // Fields
-        if !fields.is_empty() {
-            writeln!(self.out)?;
-        }
-        for field in fields {
-            //self.output_comment(&field.name)?;
-            writeln!(
-                self.out,
-                "final {} {};",
-                self.quote_type(&field.value),
-                field.name.to_mixed_case()
-            )?;
-        }
-        if !fields.is_empty() {
-            writeln!(self.out)?;
-        }
-
-        // Serialize
-        if self.generator.config.serialization {
-            writeln!(self.out, "\nvoid serialize(BinarySerializer serializer){{",)?;
-            self.out.indent();
-            if let Some(index) = variant_index {
-                writeln!(self.out, "serializer.serialize_variant_index({});", index)?;
-            }
-            for field in fields {
-                writeln!(
-                    self.out,
-                    "{}",
-                    self.quote_serialize_value(&field.name.to_mixed_case(), &field.value)
-                )?;
-            }
-            self.out.unindent();
-            writeln!(self.out, "}}")?;
-
-            if variant_index.is_none() {
-                for encoding in &self.generator.config.encodings {
-                    self.output_class_serialize_for_encoding(*encoding)?;
-                }
-            }
-        }
-
         // Equality
         write!(self.out, "\n@override")?;
         write!(self.out, "\nbool operator ==(Object other) {{")?;
@@ -878,8 +846,8 @@ return obj;
         self.out.unindent();
         writeln!(self.out, "}}")?;
 
-        // Hashing
         if field_count > 0 {
+            // Hashing
             write!(self.out, "\n@override")?;
 
             if field_count == 1 {
@@ -916,6 +884,32 @@ return obj;
                 self.out.unindent();
                 self.out.unindent();
             }
+        }
+
+        if field_count > 0 {
+            if variant_index.is_none() {
+                writeln!(self.out, "\n{}.fromJson(dynamic json) :", name)?;
+            } else {
+                //enum
+                writeln!(self.out, "\n{}.loadJson(dynamic json) :", name)?;
+            }
+            self.out.indent();
+            if redefine {
+                writeln!(self.out, "{} = json;", &fields[0].name)?;
+            } else {
+                for (index, field) in fields.iter().enumerate() {
+                    if index == field_count - 1 {
+                        writeln!(self.out, "{};", self.from_json(field))?;
+                    } else {
+                        writeln!(self.out, "{},", self.from_json(field))?;
+                    }
+                }
+            }
+            self.out.unindent();
+        } else if variant_index.is_none() {
+            writeln!(self.out, "\n{}.fromJson(dynamic json);", name)?;
+        } else {
+            writeln!(self.out, "\n{}.loadJson(dynamic json);", name)?; //enum
         }
 
         if !redefine {
@@ -976,7 +970,7 @@ return fullString;"
             self.out,
             r#"
 Uint8List {0}Serialize() {{
-    final serializer = {1}Serializer();
+    var serializer = new {1}Serializer();
     serialize(serializer);
     return serializer.get_bytes();
 }}"#,
