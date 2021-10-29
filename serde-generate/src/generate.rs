@@ -23,7 +23,6 @@ enum Language {
     Rust,
     Java,
     Go,
-    Dart,
     TypeScript,
     CSharp,
 }
@@ -141,9 +140,6 @@ fn main() {
                         .unwrap(),
                     Language::Java => {
                         panic!("Code generation in Java requires `--target-source-dir`")
-                    }
-                    Language::Dart => {
-                        panic!("Code generation in Dart requires `--install-dir`")
                     }
                     Language::TypeScript => typescript::CodeGenerator::new(&config)
                         .output(&mut out, &registry)
