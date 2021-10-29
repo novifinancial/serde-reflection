@@ -79,12 +79,7 @@ abstract class BinarySerializer {
 
   void serializeLength(int len);
 
-  void serializeInt128(Int128 value) {
-    serializeInt64(value.low);
-    serializeInt64(value.high);
-  }
-
-  void serializeUint128(Uint128 value) {
+  void serializeUint128(Int128 value) {
     serializeUint64(value.low);
     serializeUint64(value.high);
   }

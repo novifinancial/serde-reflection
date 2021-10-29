@@ -103,15 +103,9 @@ abstract class BinaryDeserializer {
 
   int deserializeLength();
 
-  Int128 deserializeInt128() {
+  Int128 deserializeUint128() {
     final low = deserializeUint64();
     final high = deserializeUint64();
     return Int128(high, low);
-  }
-
-  Uint128 deserializeUint128() {
-    final low = deserializeUint64();
-    final high = deserializeUint64();
-    return Uint128(high, low);
   }
 }

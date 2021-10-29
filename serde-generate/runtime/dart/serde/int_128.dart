@@ -1,20 +1,13 @@
 part of serde;
 
-typedef Uint128 = Int128;
-
 @immutable
 class Int128 {
-  Int128(this.high, this.low);
-
-  factory Int128.parse(String num, {int? radix}) {
-    return Int128.fromBigInt(BigInt.parse(num, radix: radix));
-  }
+  const Int128(this.high, this.low);
 
   factory Int128.fromBigInt(BigInt num) {
-    final input = num.toSigned(128);
-    final high = (input >> 64).toSigned(64);
-    final low = (input & BigInt.from(0xFFFFFFFFFFFFFFFF)).toSigned(64);
-    return Int128(high.toInt(), low.toInt());
+    final high = (num >> 64).toInt();
+    final low = (num & BigInt.from(0xFFFFFFFFFFFFFFFF)).toInt();
+    return Int128(high, low);
   }
 
   final int high;
@@ -36,9 +29,8 @@ class Int128 {
 
   @override
   String toString() {
-    return '$high$low';
+    return "$high$low";
   }
 
-  BigInt toBigInt() =>
-      (BigInt.from(high).toSigned(64) << 64) + BigInt.from(low).toUnsigned(64);
+  BigInt toBigInt() => (BigInt.from(high) << 64) + BigInt.from(low);
 }

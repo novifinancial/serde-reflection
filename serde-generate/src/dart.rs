@@ -186,8 +186,6 @@ import '../serde/serde.dart';"#,
             }
         }
 
-        writeln!(&mut emitter.out, "\nexport '../serde/serde.dart';")?;
-
         writeln!(&mut emitter.out, "\npart 'trait_helpers.dart';")?;
         for name in registry.keys() {
             writeln!(&mut emitter.out, "part '{}.dart';", name.to_snake_case())?;
@@ -290,7 +288,7 @@ where
             U16 => "int".into(),
             U32 => "int".into(),
             U64 => "int".into(),
-            U128 => "Uint128".into(),
+            U128 => "Int128".into(),
             F32 => "float".into(),
             F64 => "double".into(),
             Char => "int".into(),
