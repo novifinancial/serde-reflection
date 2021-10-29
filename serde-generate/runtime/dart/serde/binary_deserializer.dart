@@ -69,12 +69,6 @@ abstract class BinaryDeserializer {
     return result;
   }
 
-  double deserializeFloat64() {
-    final result = input.getFloat64(_offset, Endian.little);
-    _offset += 8;
-    return result;
-  }
-
   Bytes deserializeBytes() {
     return Bytes(deserializeUint8List());
   }
