@@ -3,6 +3,7 @@ use crate::{common, CodeGeneratorConfig, Encoding};
 use heck::{CamelCase, MixedCase, SnakeCase};
 use include_dir::include_dir as include_directory;
 use serde_reflection::{ContainerFormat, Format, FormatHolder, Named, Registry, VariantFormat};
+use std::borrow::Borrow;
 use std::collections::BTreeMap;
 use std::{
     collections::HashMap,
@@ -76,9 +77,10 @@ environment:
   sdk: '>=2.14.0 <3.0.0'
 
 dependencies:
-  meta: ^1.0.0
-  tuple: ^2.0.0
-"#,
+  tuple: '2.0.0'
+  json_serializable: '5.0.2'
+  hex: ^0.2.0
+            "#,
             self.config.module_name
         )?;
         Ok(())
@@ -157,6 +159,7 @@ part 'src/starcoin_test.dart';"#
             r#"library {}_types;
 
 import 'dart:typed_data';
+import 'package:hex/hex.dart';
 import 'package:meta/meta.dart';
 import 'package:tuple/tuple.dart';
 import '../serde/serde.dart';"#,
@@ -238,6 +241,98 @@ where
 
     fn quote_qualified_name(&self, name: &str) -> String {
         name.to_string()
+    }
+
+    fn to_json(&self, format: &Named<Format>) -> String {
+        use Format::*;
+        match &format.value {
+            TypeName(_) => format!(
+                "\"{0}\" : {1}.toJson() ",
+                format.name,
+                format.name.to_mixed_case()
+            ),
+            Unit | Bool | I8 | I16 | I32 | I64 | I128 | U8 | U16 | U32 | U64 | U128 | F32 | F64 => {
+                format!("\"{0}\" : {1} ", format.name, format.name.to_mixed_case())
+            }
+            Char | Str => format!("\"{0}\" : {1} ", format.name, format.name.to_mixed_case()),
+            Bytes | Variable(_) | Map { key: _, value: _ } => {
+                format!(
+                    "\"{0}\" : {1}.toJson() ",
+                    format.name,
+                    format.name.to_mixed_case()
+                )
+            }
+            Option(_) => format!("\"{0}\" : {1}", format.name, format.name.to_mixed_case()),
+            Seq(t) => {
+                if let TypeName(_) = t.borrow() {
+                    format!(
+                        "'{0}' : {1}.map((f) => f.toJson()).toList()",
+                        format.name,
+                        format.name.to_mixed_case()
+                    )
+                } else {
+                    format!("'{0}' : {1}", format.name, format.name.to_mixed_case())
+                }
+            }
+            Tuple(_) => format!("\"{0}\" : {1} ", format.name, format.name.to_mixed_case()),
+            TupleArray {
+                content: _,
+                size: _,
+            } => format!("\"{0}\" : {1} ", format.name, format.name.to_mixed_case()),
+        }
+    }
+
+    fn from_json(&self, format: &Named<Format>) -> String {
+        use Format::*;
+        match &format.value {
+            Unit | Bool | I8 | I16 | I32 | I64 | I128 | U8 | U16 | U32 | U64 | U128 | F32 | F64
+            | Char | Str => format!(
+                "{0} = json['{1}']",
+                format.name.to_mixed_case(),
+                format.name
+            ),
+            Bytes | Variable(_) | Map { key: _, value: _ } => {
+                format!(
+                    "{0} = Bytes.fromJson(json['{1}'])",
+                    format.name.to_mixed_case(),
+                    format.name
+                )
+            }
+            TypeName(t) => format!(
+                "{0} = {1}.fromJson(json['{2}'])",
+                format.name.to_mixed_case(),
+                t,
+                format.name
+            ),
+            Option(_) => format!(
+                "{0} = json['{1}']",
+                format.name.to_mixed_case(),
+                format.name
+            ),
+            Seq(t) => {
+                if let TypeName(name) = t.borrow() {
+                    format!(
+                        "{0} = List<{1}>.from(json['{2}'].map((f) => {1}.fromJson(f)).toList())",
+                        format.name.to_mixed_case(),
+                        name,
+                        format.name
+                    )
+                } else {
+                    format!(
+                        "{0} = json['{1}']",
+                        format.name.to_mixed_case(),
+                        format.name
+                    )
+                }
+            }
+            Tuple(_) => format!("{0} = {1}", format.name.to_mixed_case(), format.name),
+            TupleArray { content, size: _ } => format!(
+                "{0} = List<{1}>.from(json['{2}'])",
+                format.name.to_mixed_case(),
+                self.quote_type(content),
+                format.name
+            ),
+        }
     }
 
     fn quote_type(&self, format: &Format) -> String {
@@ -580,10 +675,12 @@ return obj;
     }
 
     fn output_container(&mut self, name: &str, format: &ContainerFormat) -> Result<()> {
+        let mut redefine = false;
         use ContainerFormat::*;
         let fields = match format {
             UnitStruct => Vec::new(),
             NewTypeStruct(format) => {
+                redefine = true;
                 vec![Named {
                     name: "value".to_string(),
                     value: format.as_ref().clone(),
@@ -603,7 +700,7 @@ return obj;
                 return Ok(());
             }
         };
-        self.output_struct_or_variant_container(None, None, name, &fields)
+        self.output_struct_or_variant_container(None, None, name, &fields, redefine, name)
     }
 
     fn output_struct_or_variant_container(
@@ -612,6 +709,8 @@ return obj;
         variant_index: Option<u32>,
         name: &str,
         fields: &[Named<Format>],
+        redefine: bool,
+        actual_name: &str,
     ) -> Result<()> {
         let field_count = fields.len();
 
@@ -678,6 +777,32 @@ return obj;
                     self.output_class_deserialize_for_encoding(name, *encoding)?;
                 }
             }
+        }
+
+        if field_count > 0 {
+            if variant_index.is_none() {
+                writeln!(self.out, "\n{}.fromJson(dynamic json) :", name)?;
+            } else {
+                //enum
+                writeln!(self.out, "\n{}.loadJson(dynamic json) :", name)?;
+            }
+            self.out.indent();
+            if redefine {
+                writeln!(self.out, "{} = json;", &fields[0].name)?;
+            } else {
+                for (index, field) in fields.iter().enumerate() {
+                    if index == field_count - 1 {
+                        writeln!(self.out, "{};", self.from_json(field))?;
+                    } else {
+                        writeln!(self.out, "{},", self.from_json(field))?;
+                    }
+                }
+            }
+            self.out.unindent();
+        } else if variant_index.is_none() {
+            writeln!(self.out, "\n{}.fromJson(dynamic json);", name)?;
+        } else {
+            writeln!(self.out, "\n{}.loadJson(dynamic json);", name)?; //enum
         }
 
         // Fields
@@ -791,6 +916,24 @@ return obj;
                 self.out.unindent();
                 self.out.unindent();
             }
+        }
+
+        if !redefine {
+            writeln!(self.out, "\ndynamic toJson() => {{")?;
+
+            self.out.indent();
+
+            for (_, field) in fields.iter().enumerate() {
+                writeln!(self.out, "{},", self.to_json(field))?;
+            }
+            if let Some(index) = variant_index {
+                writeln!(self.out, "\"type\" : {},", index)?;
+                writeln!(self.out, "\"type_name\" : \"{}\"", actual_name)?;
+            }
+            self.out.unindent();
+            writeln!(self.out, "}};")?;
+        } else if field_count > 0 {
+            writeln!(self.out, "\ndynamic toJson() => {};", &fields[0].name)?;
         }
 
         // Generate a toString implementation in each class
@@ -911,6 +1054,35 @@ switch (index) {{"#,
                 self.output_class_serialize_for_encoding(*encoding)?;
                 self.output_class_deserialize_for_encoding(name, *encoding)?;
             }
+
+            writeln!(
+                self.out,
+                r#"
+static {} fromJson(dynamic json){{
+  final type = json['type'] as int;
+  switch (type) {{"#,
+                name,
+            )?;
+            self.out.indent();
+            self.out.indent();
+            for (index, variant) in variants {
+                writeln!(
+                    self.out,
+                    "case {}: return {}{}Item.loadJson(json);",
+                    index, name, variant.name,
+                )?;
+            }
+            writeln!(
+                self.out,
+                "default: throw new Exception(\"Unknown type for {}: \" + type.toString());",
+                name,
+            )?;
+            self.out.unindent();
+            writeln!(self.out, "}}")?;
+            self.out.unindent();
+            writeln!(self.out, "}}")?;
+
+            writeln!(self.out, "\ndynamic toJson();",)?;
         }
         self.out.unindent();
         self.out.unindent();
@@ -933,6 +1105,7 @@ switch (index) {{"#,
                 *index,
                 &format!("{}{}Item", base, &variant.name),
                 &variant.value,
+                &variant.name,
             )?;
         }
         Ok(())
@@ -944,6 +1117,7 @@ switch (index) {{"#,
         index: u32,
         name: &str,
         variant: &VariantFormat,
+        actual_name: &str,
     ) -> Result<()> {
         use VariantFormat::*;
         let fields = match variant {
@@ -963,7 +1137,14 @@ switch (index) {{"#,
             Struct(fields) => fields.clone(),
             Variable(_) => panic!("incorrect value"),
         };
-        self.output_struct_or_variant_container(Some(base), Some(index), name, &fields)
+        self.output_struct_or_variant_container(
+            Some(base),
+            Some(index),
+            name,
+            &fields,
+            false,
+            actual_name,
+        )
     }
 }
 

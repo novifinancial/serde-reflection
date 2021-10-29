@@ -11,6 +11,10 @@ part of serde;
 class Bytes {
   const Bytes(this.content);
 
+  factory Bytes.fromJson(String json) {
+    return Bytes(Uint8List.fromList(HEX.decode(json)));
+  }
+
   final Uint8List content;
 
   @override
@@ -23,4 +27,6 @@ class Bytes {
 
   @override
   int get hashCode => content.hashCode;
+
+  String toJson() => HEX.encode(content);
 }

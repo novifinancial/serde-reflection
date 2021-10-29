@@ -8,5 +8,8 @@ void runSerdeTests() {
       list2[i] = 1;
     }
     expect(list1, list2);
+
+    var bytes = Bytes(list1);
+    expect(Bytes.fromJson(jsonDecode(jsonEncode(bytes))), bytes);
   });
 }
