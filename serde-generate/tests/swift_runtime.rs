@@ -4,7 +4,7 @@
 use serde_generate::{
     swift, test_utils,
     test_utils::{Choice, Runtime, Test},
-    CodeGeneratorConfig,
+    CodeGeneratorConfig, SourceInstaller,
 };
 use std::{fs::File, io::Write, process::Command, sync::Mutex};
 
@@ -45,45 +45,12 @@ fn test_swift_runtime_on_simple_data(runtime: Runtime) {
     // std::fs::remove_dir_all(my_path).unwrap_or(());
     // std::fs::create_dir_all(my_path).unwrap();
     let dir = tempfile::tempdir().unwrap();
-    std::fs::create_dir_all(dir.path().join("Sources/Testing")).unwrap();
-    std::fs::create_dir_all(dir.path().join("Sources/main")).unwrap();
-    let serde_package_path = std::env::current_dir()
-        .unwrap()
-        .join("../serde-generate/runtime/swift");
-    let mut file = File::create(dir.path().join("Package.swift")).unwrap();
-    write!(
-        file,
-        r#"// swift-tools-version:5.3
-
-import PackageDescription
-
-let package = Package(
-    name: "Testing",
-    dependencies: [
-        .package(name: "Serde", path: "{}"),
-    ],
-    targets: [
-        .target(
-            name: "Testing",
-            dependencies: ["Serde"]),
-        .target(
-            name: "main",
-            dependencies: ["Serde", "Testing"]
-        ),
-    ]
-)
-"#,
-        serde_package_path.to_str().unwrap()
-    )
-    .unwrap();
-
-    let codegen_path = dir.path().join("Sources/Testing/Testing.swift");
-    let mut codegen = File::create(&codegen_path).unwrap();
     let config =
         CodeGeneratorConfig::new("Testing".to_string()).with_encodings(vec![runtime.into()]);
     let registry = test_utils::get_simple_registry().unwrap();
-    let generator = swift::CodeGenerator::new(&config);
-    generator.output(&mut codegen, &registry).unwrap();
+    let installer = swift::Installer::new(dir.path().to_path_buf());
+    installer.install_module(&config, &registry).unwrap();
+    installer.install_serde_runtime().unwrap(); // also installs bcs and bincode
 
     let reference = runtime.serialize(&Test {
         a: vec![4, 6],
@@ -91,6 +58,7 @@ let package = Package(
         c: Choice::C { x: 7 },
     });
 
+    std::fs::create_dir_all(dir.path().join("Sources/main")).unwrap();
     let main_path = dir.path().join("Sources/main/main.swift");
     let mut main = File::create(main_path).unwrap();
     writeln!(
@@ -133,6 +101,32 @@ catch {{}}
             .collect::<Vec<_>>()
             .join(", "),
         runtime.name(),
+    )
+    .unwrap();
+
+    let mut file = File::create(dir.path().join("Package.swift")).unwrap();
+    write!(
+        file,
+        r#"// swift-tools-version:5.3
+
+import PackageDescription
+
+let package = Package(
+    name: "Testing",
+    targets: [
+        .target(
+            name: "Serde",
+            dependencies: []),
+        .target(
+            name: "Testing",
+            dependencies: ["Serde"]),
+        .target(
+            name: "main",
+            dependencies: ["Serde", "Testing"]
+        ),
+    ]
+)
+"#
     )
     .unwrap();
 

@@ -20,7 +20,6 @@
 //! The following languages are partially supported and still considered under development:
 //!
 //! * TypeScript 4 (packaged and tested with Deno)
-//! * Swift 5.3
 //!
 //! ## Supported Encodings
 //!

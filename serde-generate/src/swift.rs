@@ -9,6 +9,7 @@ use crate::{
     CodeGeneratorConfig, Encoding,
 };
 use heck::CamelCase;
+use include_dir::include_dir as include_directory;
 use serde_reflection::{ContainerFormat, Format, FormatHolder, Named, Registry, VariantFormat};
 use std::{
     collections::{BTreeMap, HashMap},
@@ -818,26 +819,25 @@ switch index {{"#,
 /// Installer for generated source files in Swift.
 pub struct Installer {
     install_dir: PathBuf,
-    serde_module_path: Option<String>,
 }
 
 impl Installer {
-    pub fn new(install_dir: PathBuf, serde_module_path: Option<String>) -> Self {
-        Installer {
-            install_dir,
-            serde_module_path,
-        }
+    pub fn new(install_dir: PathBuf) -> Self {
+        Installer { install_dir }
     }
 
-    fn runtime_installation_message(&self, name: &str) {
-        eprintln!(
-            "Not installing sources for published package {}{}",
-            match &self.serde_module_path {
-                None => String::new(),
-                Some(path) => format!("{}/", path),
-            },
-            name
-        );
+    fn install_runtime(
+        &self,
+        source_dir: include_dir::Dir,
+        path: &str,
+    ) -> std::result::Result<(), Box<dyn std::error::Error>> {
+        let dir_path = self.install_dir.join(path);
+        std::fs::create_dir_all(&dir_path)?;
+        for entry in source_dir.files() {
+            let mut file = std::fs::File::create(dir_path.join(entry.path()))?;
+            file.write_all(entry.contents())?;
+        }
+        Ok(())
     }
 }
 
@@ -849,31 +849,29 @@ impl crate::SourceInstaller for Installer {
         config: &CodeGeneratorConfig,
         registry: &Registry,
     ) -> std::result::Result<(), Self::Error> {
-        let dir_path = self.install_dir.join(&config.module_name);
+        let dir_path = self.install_dir.join("Sources").join(&config.module_name);
         std::fs::create_dir_all(&dir_path)?;
-        let source_path = dir_path.join("lib.swift");
+        let source_path = dir_path.join(format!("{}.swift", config.module_name.to_camel_case()));
         let mut file = std::fs::File::create(source_path)?;
-
         let generator = CodeGenerator::new(config);
-        // if let Some(path) = &self.serde_module_path {
-        //     generator = generator.with_serde_module_path(path.clone());
-        // }
         generator.output(&mut file, registry)?;
         Ok(())
     }
 
     fn install_serde_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.runtime_installation_message("serde");
-        Ok(())
+        self.install_runtime(
+            include_directory!("runtime/swift/Sources/Serde"),
+            "Sources/Serde",
+        )
     }
 
     fn install_bincode_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.runtime_installation_message("bincode");
+        // Ignored. Currently always installed with Serde.
         Ok(())
     }
 
     fn install_bcs_runtime(&self) -> std::result::Result<(), Self::Error> {
-        self.runtime_installation_message("bcs");
+        // Ignored. Currently always installed with Serde.
         Ok(())
     }
 }

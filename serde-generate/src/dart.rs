@@ -1,14 +1,16 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use crate::indent::{IndentConfig, IndentedWriter};
-use crate::{common, CodeGeneratorConfig, Encoding};
+use crate::{
+    common,
+    indent::{IndentConfig, IndentedWriter},
+    CodeGeneratorConfig, Encoding,
+};
 use heck::{CamelCase, MixedCase, SnakeCase};
 use include_dir::include_dir as include_directory;
 use serde_reflection::{ContainerFormat, Format, FormatHolder, Named, Registry, VariantFormat};
-use std::collections::BTreeMap;
 use std::{
-    collections::HashMap,
+    collections::{BTreeMap, HashMap},
     io::{Result, Write},
     path::{Path, PathBuf},
 };
