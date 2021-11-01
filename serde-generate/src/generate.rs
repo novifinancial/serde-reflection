@@ -8,8 +8,8 @@
 //! '''
 
 use serde_generate::{
-    cpp, csharp, dart, golang, java, python3, rust, swift, typescript, CodeGeneratorConfig, Encoding,
-    SourceInstaller,
+    cpp, csharp, dart, golang, java, python3, rust, swift, typescript, CodeGeneratorConfig,
+    Encoding, SourceInstaller,
 };
 use serde_reflection::Registry;
 use std::path::PathBuf;
@@ -174,9 +174,7 @@ fn main() {
                     Language::Dart => Box::new(dart::Installer::new(install_dir)),
                     Language::TypeScript => Box::new(typescript::Installer::new(install_dir)),
                     Language::CSharp => Box::new(csharp::Installer::new(install_dir)),
-                    Language::Swift => {
-                        Box::new(swift::Installer::new(install_dir, serde_package_name_opt))
-                    }
+                    Language::Swift => Box::new(swift::Installer::new(install_dir)),
                 };
 
             if let Some((registry, name)) = named_registry_opt {
