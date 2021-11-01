@@ -1014,8 +1014,8 @@
     <span class="ident">TupleArray</span>([<span class="ident">u32</span>; <span class="number">3</span>]),
     <span class="ident">UnitVector</span>(<span class="ident">Vec</span><span class="op">&lt;</span>()<span class="op">&gt;</span>),
     <span class="ident">SimpleList</span>(<span class="ident">SimpleList</span>),
-    <span class="ident">ComplexMap</span>(<span class="ident">BTreeMap</span><span class="op">&lt;</span>([<span class="ident">u32</span>; <span class="number">2</span>], [<span class="ident">u8</span>; <span class="number">4</span>]), ()<span class="op">&gt;</span>),
     <span class="ident">CStyleEnum</span>(<span class="ident">CStyleEnum</span>),
+    <span class="ident">ComplexMap</span>(<span class="ident">BTreeMap</span><span class="op">&lt;</span>([<span class="ident">u32</span>; <span class="number">2</span>], [<span class="ident">u8</span>; <span class="number">4</span>]), ()<span class="op">&gt;</span>),
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">PartialEq</span>)]</span>
@@ -1090,7 +1090,7 @@
     <span class="ident">E</span> <span class="op">=</span> <span class="number">10</span>,
 }
 
-<span class="doccomment">/// The registry corresponding to the test data structures above .</span>
+<span class="doccomment">/// The registry corresponding to the test data structures above.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_registry</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Registry</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tracer</span> <span class="op">=</span> <span class="ident">Tracer::new</span>(<span class="ident">TracerConfig::default</span>());
     <span class="kw">let</span> <span class="ident">samples</span> <span class="op">=</span> <span class="ident">Samples::new</span>();
@@ -1253,9 +1253,9 @@
 
     <span class="kw">let</span> <span class="ident">v11</span> <span class="op">=</span> <span class="ident">SerdeData::SimpleList</span>(<span class="ident">SimpleList</span>(<span class="prelude-val">Some</span>(<span class="ident">Box::new</span>(<span class="ident">SimpleList</span>(<span class="prelude-val">None</span>)))));
 
-    <span class="kw">let</span> <span class="ident">v12</span> <span class="op">=</span> <span class="ident">SerdeData::ComplexMap</span>(<span class="macro">btreemap!</span> { ([<span class="number">1</span>,<span class="number">2</span>], [<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>]) <span class="op">=</span><span class="op">&gt;</span> ()});
+    <span class="kw">let</span> <span class="ident">v12</span> <span class="op">=</span> <span class="ident">SerdeData::CStyleEnum</span>(<span class="ident">CStyleEnum::C</span>);
 
-    <span class="kw">let</span> <span class="ident">v13</span> <span class="op">=</span> <span class="ident">SerdeData::CStyleEnum</span>(<span class="ident">CStyleEnum::C</span>);
+    <span class="kw">let</span> <span class="ident">v13</span> <span class="op">=</span> <span class="ident">SerdeData::ComplexMap</span>(<span class="macro">btreemap!</span> { ([<span class="number">1</span>,<span class="number">2</span>], [<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>]) <span class="op">=</span><span class="op">&gt;</span> ()});
 
     <span class="macro">vec!</span>[
         <span class="ident">v0</span>, <span class="ident">v1</span>, <span class="ident">v2</span>, <span class="ident">v2bis</span>, <span class="ident">v2ter</span>, <span class="ident">v3</span>, <span class="ident">v4</span>, <span class="ident">v5</span>, <span class="ident">v6</span>, <span class="ident">v7</span>, <span class="ident">v8</span>, <span class="ident">v9</span>, <span class="ident">v10</span>, <span class="ident">v11</span>, <span class="ident">v12</span>, <span class="ident">v13</span>,
@@ -1723,6 +1723,10 @@ SerdeData:
         NEWTYPE:
           TYPENAME: SimpleList
     11:
+      CStyleEnum:
+        NEWTYPE:
+          TYPENAME: CStyleEnum
+    12:
       ComplexMap:
         NEWTYPE:
           MAP:
@@ -1735,10 +1739,6 @@ SerdeData:
                     CONTENT: U8
                     SIZE: 4
             VALUE: UNIT
-    12:
-      CStyleEnum:
-        NEWTYPE:
-          TYPENAME: CStyleEnum
 SimpleList:
   NEWTYPESTRUCT:
     OPTION:

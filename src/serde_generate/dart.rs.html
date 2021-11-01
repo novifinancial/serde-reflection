@@ -1246,18 +1246,22 @@
 <span id="1246">1246</span>
 <span id="1247">1247</span>
 <span id="1248">1248</span>
+<span id="1249">1249</span>
+<span id="1250">1250</span>
 </pre><pre class="rust">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
 
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::indent</span>::{<span class="ident">IndentConfig</span>, <span class="ident">IndentedWriter</span>};
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">common</span>, <span class="ident">CodeGeneratorConfig</span>, <span class="ident">Encoding</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{
+    <span class="ident">common</span>,
+    <span class="ident">indent</span>::{<span class="ident">IndentConfig</span>, <span class="ident">IndentedWriter</span>},
+    <span class="ident">CodeGeneratorConfig</span>, <span class="ident">Encoding</span>,
+};
 <span class="kw">use</span> <span class="ident">heck</span>::{<span class="ident">CamelCase</span>, <span class="ident">MixedCase</span>, <span class="ident">SnakeCase</span>};
 <span class="kw">use</span> <span class="ident">include_dir::include_dir</span> <span class="kw">as</span> <span class="ident">include_directory</span>;
 <span class="kw">use</span> <span class="ident">serde_reflection</span>::{<span class="ident">ContainerFormat</span>, <span class="ident">Format</span>, <span class="ident">FormatHolder</span>, <span class="ident">Named</span>, <span class="ident">Registry</span>, <span class="ident">VariantFormat</span>};
-<span class="kw">use</span> <span class="ident">std::collections::BTreeMap</span>;
 <span class="kw">use</span> <span class="ident">std</span>::{
-    <span class="ident">collections::HashMap</span>,
+    <span class="ident">collections</span>::{<span class="ident">BTreeMap</span>, <span class="ident">HashMap</span>},
     <span class="ident">io</span>::{<span class="prelude-ty">Result</span>, <span class="ident">Write</span>},
     <span class="ident">path</span>::{<span class="ident">Path</span>, <span class="ident">PathBuf</span>},
 };
