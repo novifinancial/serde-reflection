@@ -12,6 +12,7 @@ use tempfile::tempdir;
 fn install_test_dependencies(path: &Path) -> Result<()> {
     Command::new("dart")
         .current_dir(path)
+        .env("PUB_CACHE", "../.pub-cache")
         .args(["pub", "add", "-d", "test"])
         .status()?;
 
@@ -31,6 +32,7 @@ fn generate_with_config(source_path: PathBuf, config: &CodeGeneratorConfig) -> P
 
     let dart_analyze = Command::new("dart")
         .current_dir(&source_path)
+        .env("PUB_CACHE", "../.pub-cache")
         .args(["analyze"])
         .status()
         .unwrap();
