@@ -8,6 +8,7 @@ use tempfile::tempdir;
 fn install_test_dependency(path: &Path) -> Result<()> {
     Command::new("dart")
         .current_dir(path)
+        .env("PUB_CACHE", "../.pub-cache")
         .args(["pub", "add", "-d", "test"])
         .status()?;
 
@@ -34,6 +35,7 @@ fn test_dart_runtime() {
 
     let dart_test = Command::new("dart")
         .current_dir(source_path)
+        .env("PUB_CACHE", "../.pub-cache")
         .args(["test"])
         .status()
         .unwrap();
