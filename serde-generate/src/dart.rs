@@ -1218,7 +1218,21 @@ impl crate::SourceInstaller for Installer {
         let generator = CodeGenerator::new(config);
         generator.output(self.install_dir.clone(), registry)?;
         generator.output_test(&self.install_dir)?;
-        self.install_runtime(include_directory!("runtime/dart/test"), "test/src")?;
+        std::fs::create_dir_all(self.install_dir.join("test/src")).unwrap();
+
+        let tests = include_directory!("runtime/dart/test");
+        let mv_test = |file| {
+            std::fs::copy(
+                tests.path().join("runtime/dart/test").join(&file),
+                self.install_dir.join("test/src").join(&file),
+            )
+            .unwrap();
+        };
+
+        mv_test("serde.dart".to_string());
+        for encoding in &config.encodings {
+            mv_test(encoding.name().to_snake_case() + ".dart");
+        }
 
         // write the main module file to export the public api
         std::fs::write(
