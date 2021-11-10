@@ -14,12 +14,12 @@ public protocol Deserializer {
     func deserialize_u16() throws -> UInt16
     func deserialize_u32() throws -> UInt32
     func deserialize_u64() throws -> UInt64
-    func deserialize_u128() throws -> BigInt8
+    func deserialize_u128() throws -> UInt128
     func deserialize_i8() throws -> Int8
     func deserialize_i16() throws -> Int16
     func deserialize_i32() throws -> Int32
     func deserialize_i64() throws -> Int64
-    func deserialize_i128() throws -> BigInt8
+    func deserialize_i128() throws -> Int128
     func deserialize_len() throws -> Int64
     func deserialize_variant_index() throws -> Int
     func deserialize_option_tag() throws -> Bool
