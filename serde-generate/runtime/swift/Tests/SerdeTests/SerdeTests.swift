@@ -78,42 +78,34 @@ class SerdeTests: XCTestCase {
 
     func testSerializeU128() throws {
         let serializer = BcsSerializer()
-        XCTAssertNoThrow(try serializer.serialize_u128(value: (BigInt8(1) << 128) - 1))
+        XCTAssertNoThrow(try serializer.serialize_u128(value: UInt128(high: UInt64.max, low: UInt64.max)))
         XCTAssertEqual(serializer.output.getBuffer(), [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], "the array should be same")
 
         let serializer2 = BcsSerializer()
-        XCTAssertNoThrow(try serializer2.serialize_u128(value: BigInt8(1)))
+        XCTAssertNoThrow(try serializer2.serialize_u128(value: UInt128(high: 0, low: 1)))
         XCTAssertEqual(serializer2.output.getBuffer(), [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "the array should be same")
 
         let serializer3 = BcsSerializer()
-        XCTAssertNoThrow(try serializer3.serialize_u128(value: BigInt8(0)))
+        XCTAssertNoThrow(try serializer3.serialize_u128(value: UInt128(high: 0, low: 0)))
         XCTAssertEqual(serializer3.output.getBuffer(), [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "the array should be same")
-
-        let serializer4 = BcsSerializer()
-        XCTAssertThrowsError(try serializer4.serialize_u128(value: BigInt8(-1)))
-        XCTAssertThrowsError(try serializer4.serialize_u128(value: (BigInt8(1) << 128) + 1))
     }
 
     func testSerializeI128() throws {
         let serializer = BcsSerializer()
-        XCTAssertNoThrow(try serializer.serialize_i128(value: BigInt8(-1)))
+        XCTAssertNoThrow(try serializer.serialize_i128(value: Int128(high: -1, low: UInt64.max)))
         XCTAssertEqual(serializer.output.getBuffer(), [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], "the array should be same")
 
         let serializer2 = BcsSerializer()
-        XCTAssertNoThrow(try serializer2.serialize_i128(value: BigInt8(1)))
+        XCTAssertNoThrow(try serializer2.serialize_i128(value: Int128(high: 0, low: 1)))
         XCTAssertEqual(serializer2.output.getBuffer(), [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "the array should be same")
 
         let serializer3 = BcsSerializer()
-        XCTAssertNoThrow(try serializer3.serialize_i128(value: (BigInt8(1) << 127) - 1))
+        XCTAssertNoThrow(try serializer3.serialize_i128(value: Int128(high: Int64.max, low: UInt64.max)))
         XCTAssertEqual(serializer3.output.getBuffer(), [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 127], "the array should be same")
 
         let serializer4 = BcsSerializer()
-        XCTAssertNoThrow(try serializer4.serialize_i128(value: -(BigInt8(1) << 127)))
+        XCTAssertNoThrow(try serializer4.serialize_i128(value: Int128(high: Int64.min, low: 0)))
         XCTAssertEqual(serializer4.output.getBuffer(), [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x80], "the array should be same")
-
-        let serializer5 = BcsSerializer()
-        XCTAssertThrowsError(try serializer5.serialize_i128(value: BigInt8(1) << 127))
-        XCTAssertThrowsError(try serializer5.serialize_i128(value: (BigInt8(1) << 127) + 1))
     }
 
     func testULEB128Encoding() throws {
@@ -124,46 +116,5 @@ class SerdeTests: XCTestCase {
         try serializer.serialize_len(value: 128)
         try serializer.serialize_len(value: 3000)
         XCTAssertEqual(serializer.output.getBuffer(), [0, 1, 127, 128, 1, 184, 23], "the array should be same")
-    }
-
-    func randomBitLength() -> Int {
-        return Int.random(in: 2 ... 1000)
-    }
-
-    func testBigInt8() throws {
-        let x: BigInt8 = 100
-        let xComp = UInt8(x)
-        XCTAssertEqual(x.description, xComp.description, "should be same")
-
-        let y: BigInt8 = -100
-        let yComp = Int8(y)
-        XCTAssertEqual(y.description, yComp.description, "should be same")
-
-        let zComp = Int.min + 1
-        let z = BigInt8(zComp)
-        XCTAssertEqual(z.description, zComp.description, "should be same")
-
-        let randomBits = BigInt8(randomBits: 1_000_000)
-        XCTAssertGreaterThan(randomBits, randomBits - 1, "should be bigger")
-        let negativeRandomBits = -randomBits
-        XCTAssertGreaterThan(negativeRandomBits, negativeRandomBits - 1, "should be bigger")
-
-        let (x0, y0, x1, y1) = (
-            BigInt8(randomBits: randomBitLength()),
-            BigInt8(randomBits: randomBitLength()),
-            BigInt8(randomBits: randomBitLength()),
-            BigInt8(randomBits: randomBitLength())
-        )
-        let r1 = (x0 + y0) * (x1 + y1)
-        let r2 = ((x0 * x1) + (x0 * y1), (y0 * x1) + (y0 * y1))
-        XCTAssertEqual(r1, r2.0 + r2.1, "should be same")
-
-        let x2 = BigInt8(-1)
-        let z1 = -1 as Int
-        for i in 0 ..< 64 {
-            let a = x2 << i
-            let b = z1 << i
-            XCTAssertEqual(a.description, b.description, "should be same")
-        }
     }
 }

@@ -94,20 +94,9 @@ public class BinarySerializer: Serializer {
         try writeByte(UInt8(truncatingIfNeeded: value >> 56))
     }
 
-    public func serialize_u128(value: BigInt8) throws {
-        if value >> 128 != 0 {
-            throw BinarySerializerError.invalidValue(issue: "Invalid value for an unsigned int128")
-        }
-
-        assert(value._data.count <= 16 || value._data[16] == 0)
-
-        for i in 0 ..< 16 {
-            if i < value._data.count {
-                try writeByte(value._data[i])
-            } else {
-                try writeByte(0)
-            }
-        }
+    public func serialize_u128(value: UInt128) throws {
+        try serialize_u64(value: value.low)
+        try serialize_u64(value: value.high)
     }
 
     public func serialize_i8(value: Int8) throws {
@@ -126,18 +115,9 @@ public class BinarySerializer: Serializer {
         try serialize_u64(value: UInt64(bitPattern: value))
     }
 
-    public func serialize_i128(value: BigInt8) throws {
-        if value >= 0 {
-            if value >> 127 != 0 {
-                throw BinarySerializerError.invalidValue(issue: "Invalid value for a signed int128")
-            }
-            try serialize_u128(value: value)
-        } else {
-            if -(value + 1) >> 127 != 0 {
-                throw BinarySerializerError.invalidValue(issue: "Invalid value for a signed int128")
-            }
-            try serialize_u128(value: value + (BigInt8(1) << 128))
-        }
+    public func serialize_i128(value: Int128) throws {
+        try serialize_u64(value: value.low)
+        try serialize_i64(value: value.high)
     }
 
     public func serialize_option_tag(value: Bool) throws {

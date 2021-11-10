@@ -124,13 +124,10 @@ public class BinaryDeserializer: Deserializer {
         return x
     }
 
-    public func deserialize_u128() throws -> BigInt8 {
-        let signed: BigInt8 = try deserialize_i128()
-        if signed >= 0 {
-            return signed
-        } else {
-            return signed + (BigInt8(1) << 128)
-        }
+    public func deserialize_u128() throws -> UInt128 {
+        let low = try deserialize_u64()
+        let high = try deserialize_u64()
+        return UInt128(high: high, low: low)
     }
 
     public func deserialize_i8() throws -> Int8 {
@@ -149,9 +146,10 @@ public class BinaryDeserializer: Deserializer {
         return Int64(bitPattern: try deserialize_u64())
     }
 
-    public func deserialize_i128() throws -> BigInt8 {
-        let content = try readBytes(count: 16)
-        return BigInt8(content)
+    public func deserialize_i128() throws -> Int128 {
+        let low = try deserialize_u64()
+        let high = try deserialize_i64()
+        return Int128(high: high, low: low)
     }
 
     public func deserialize_option_tag() throws -> Bool {
