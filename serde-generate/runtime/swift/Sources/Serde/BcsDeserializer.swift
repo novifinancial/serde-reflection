@@ -14,7 +14,7 @@ public class BcsDeserializer: BinaryDeserializer {
     private func deserialize_uleb128_as_u32() throws -> Int {
         var value: Int64 = 0
         for shift in stride(from: 0, to: 32, by: 7) {
-            let x: UInt8 = reader.readUInt8()
+            let x = try deserialize_u8()
             let digit: UInt8 = (UInt8)(x & 0x7F)
             value |= ((Int64)(digit) << shift)
             if value < 0 || value > Int.max {
@@ -39,6 +39,6 @@ public class BcsDeserializer: BinaryDeserializer {
     }
 
     public func check_that_key_slices_are_increasing(key1 _: Range<Int>, key2 _: Range<Int>) {
-        // TODO
+        // TODO:
     }
 }
