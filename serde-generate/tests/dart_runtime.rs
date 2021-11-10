@@ -1,10 +1,10 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use include_dir::include_dir as include_directory;
-use serde_generate::{dart, test_utils, CodeGeneratorConfig, Encoding, SourceInstaller};
-use std::{io::Result, path::Path, process::Command};
+use serde_generate::{dart, test_utils, CodeGeneratorConfig, SourceInstaller};
+use std::{fs::File, io::Result, io::Write, path::Path, process::Command};
 use tempfile::tempdir;
+use test_utils::{Choice, Runtime, Test};
 
 fn install_test_dependency(path: &Path) -> Result<()> {
     Command::new("dart")
@@ -17,14 +17,25 @@ fn install_test_dependency(path: &Path) -> Result<()> {
 }
 
 #[test]
-fn test_dart_runtime() {
-    let tempdir = tempdir().unwrap();
-    let source_path = tempdir.path().join("dart_project");
+fn test_dart_bcs_runtime_on_simple_data() {
+    test_dart_runtime_on_simple_data(Runtime::Bcs);
+}
 
-    let registry = test_utils::get_registry().unwrap();
+#[test]
+fn test_dart_bincode_runtime_on_simple_data() {
+    test_dart_runtime_on_simple_data(Runtime::Bincode);
+}
+
+fn test_dart_runtime_on_simple_data(runtime: Runtime) {
+    let tempdir = tempdir().unwrap();
+    let source_path = tempdir
+        .path()
+        .join(format!("dart_project_{}", runtime.name().to_lowercase()));
+
+    let registry = test_utils::get_simple_registry().unwrap();
 
     let config = CodeGeneratorConfig::new("example".to_string())
-        .with_encodings(vec![Encoding::Bcs, Encoding::Bincode])
+        .with_encodings(vec![runtime.into()])
         .with_c_style_enums(false);
 
     let installer = dart::Installer::new(source_path.clone());
@@ -35,109 +46,62 @@ fn test_dart_runtime() {
 
     install_test_dependency(&source_path).unwrap();
 
-    copy_runtime_test(Encoding::Bcs, &config, &source_path, false);
+    let mut source = File::create(source_path.join("test/runtime_test.dart")).unwrap();
+    writeln!(
+        source,
+        r#"
+import 'dart:typed_data';
+import 'package:example/example.dart';
+import 'package:test/test.dart';
+import 'package:tuple/tuple.dart';
+import '../lib/src/bcs/bcs.dart';
+import '../lib/src/bincode/bincode.dart';
 
-    let dart_bcs_test = Command::new("dart")
+void main() {{"#
+    )
+    .unwrap();
+    let reference = runtime.serialize(&Test {
+        a: vec![4, 6],
+        b: (-3, 5),
+        c: Choice::C { x: 7 },
+    });
+
+    writeln!(
+        source,
+        r#"
+    test('{1} serialization matches deserialization', () {{
+        final expectedBytes = Uint8List.fromList([{0}]);
+        Test deserializedInstance = Test.{1}Deserialize(expectedBytes);
+
+        Test expectedInstance = Test(
+            a: [4, 6],
+            b: Tuple2(-3, Uint64.parse('5')),
+            c: ChoiceCItem(x: 7),
+        );
+
+        expect(deserializedInstance, equals(expectedInstance));
+
+        final serializedBytes = expectedInstance.{1}Serialize();
+
+        expect(serializedBytes, equals(expectedBytes));
+    }});"#,
+        reference
+            .iter()
+            .map(|x| format!("{}", x))
+            .collect::<Vec<_>>()
+            .join(", "),
+        runtime.name().to_lowercase(),
+    )
+    .unwrap();
+
+    writeln!(source, "}}").unwrap();
+
+    let dart_test = Command::new("dart")
         .current_dir(&source_path)
         .env("PUB_CACHE", "../.pub-cache")
         .args(["test", "test/runtime_test.dart"])
         .status()
         .unwrap();
 
-    assert!(dart_bcs_test.success());
-
-    copy_runtime_test(Encoding::Bincode, &config, &source_path, false);
-
-    let dart_bincode_test = Command::new("dart")
-        .current_dir(&source_path)
-        .env("PUB_CACHE", "../.pub-cache")
-        .args(["test", "test/runtime_test.dart"])
-        .status()
-        .unwrap();
-
-    assert!(dart_bincode_test.success());
-}
-
-#[test]
-fn test_dart_runtime_with_c_enums() {
-    let tempdir = tempdir().unwrap();
-    let source_path = tempdir.path().join("dart_project");
-
-    let registry = test_utils::get_registry().unwrap();
-
-    let config = CodeGeneratorConfig::new("example".to_string())
-        .with_encodings(vec![Encoding::Bcs, Encoding::Bincode])
-        .with_c_style_enums(true);
-
-    let installer = dart::Installer::new(source_path.clone());
-    installer.install_module(&config, &registry).unwrap();
-    installer.install_serde_runtime().unwrap();
-    installer.install_bincode_runtime().unwrap();
-    installer.install_bcs_runtime().unwrap();
-
-    install_test_dependency(&source_path).unwrap();
-
-    copy_runtime_test(Encoding::Bcs, &config, &source_path, true);
-
-    let dart_bcs_test = Command::new("dart")
-        .current_dir(&source_path)
-        .env("PUB_CACHE", "../.pub-cache")
-        .args(["test", "test/runtime_test.dart"])
-        .status()
-        .unwrap();
-
-    assert!(dart_bcs_test.success());
-
-    copy_runtime_test(Encoding::Bincode, &config, &source_path, true);
-
-    let dart_bincode_test = Command::new("dart")
-        .current_dir(&source_path)
-        .env("PUB_CACHE", "../.pub-cache")
-        .args(["test", "test/runtime_test.dart"])
-        .status()
-        .unwrap();
-
-    assert!(dart_bincode_test.success());
-}
-
-fn copy_runtime_test(
-    encoding: Encoding,
-    config: &CodeGeneratorConfig,
-    source_path: &std::path::PathBuf,
-    with_c_style_enums: bool,
-) {
-    let tests = include_directory!("runtime/dart/test");
-    let mut tmpl =
-        std::fs::read_to_string(tests.path().join("runtime/dart/test/runtime.dart")).unwrap();
-
-    tmpl = tmpl.replace(
-        "<package_path>",
-        &format!(
-            "import 'package:{name}/{name}.dart';",
-            name = &config.module_name()
-        ),
-    );
-    tmpl = if with_c_style_enums {
-        tmpl.replace(
-            "<enum_test>",
-            r#"test('C Enum', () {
-        final val = CStyleEnum.a;
-        expect(
-            CStyleEnumExtension.<encoding>Deserialize(val.<encoding>Serialize()),
-            equals(val));
-      });"#,
-        )
-    } else {
-        tmpl.replace(
-            "<enum_test>",
-            r#"test('Enum', () {
-        final val = CStyleEnumAItem();
-        expect(CStyleEnum.<encoding>Deserialize(val.<encoding>Serialize()), equals(val));
-      });"#,
-        )
-    };
-
-    tmpl = tmpl.replace("<encoding>", encoding.name());
-
-    std::fs::write(source_path.join("test/runtime_test.dart"), tmpl).unwrap();
+    assert!(dart_test.success());
 }
