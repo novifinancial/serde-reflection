@@ -12,14 +12,14 @@ public class BincodeDeserializer: BinaryDeserializer {
     }
 
     override public func deserialize_len() throws -> Int64 {
-        let value: Int64 = reader.readInt64()
+        let value = try deserialize_i64()
         if value < 0 || value > Int.max {
             throw BincodeDeserializerError.invalidInput(issue: "Incorrect length value")
         }
         return value
     }
 
-    override public func deserialize_variant_index() -> Int {
-        return Int(reader.readInt32())
+    override public func deserialize_variant_index() throws -> Int {
+        return Int(try deserialize_i32())
     }
 }

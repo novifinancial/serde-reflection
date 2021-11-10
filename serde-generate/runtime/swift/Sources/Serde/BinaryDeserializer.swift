@@ -7,14 +7,24 @@ public enum BinaryDeserializerError: Error {
 }
 
 public class BinaryDeserializer: Deserializer {
-    let reader: BinaryReader
     fileprivate let input: [UInt8]
+    fileprivate var location: Int
     fileprivate var containerDepthBudget: Int64
 
     init(input: [UInt8], maxContainerDepth: Int64) {
         self.input = input
-        reader = BinaryReader(data: UPData(withData: Data(input)) as Readable)
+        location = 0
         containerDepthBudget = maxContainerDepth
+    }
+
+    private func readBytes(count: Int) throws -> [UInt8] {
+        let newLocation = location + count
+        if newLocation > input.count {
+            throw BinaryDeserializerError.invalidInput(issue: "Input is too small")
+        }
+        let bytes = input[location ..< newLocation]
+        location = newLocation
+        return Array(bytes)
     }
 
     public func deserialize_len() throws -> Int64 {
@@ -31,12 +41,14 @@ public class BinaryDeserializer: Deserializer {
         throw BinaryDeserializerError.invalidInput(issue: "Not implemented: char deserialization")
     }
 
-    public func deserialize_f32() -> Float {
-        return reader.readFloat()
+    public func deserialize_f32() throws -> Float {
+        let num = try deserialize_u32()
+        return Float(bitPattern: num)
     }
 
-    public func deserialize_f64() -> Double {
-        return reader.readDouble()
+    public func deserialize_f64() throws -> Double {
+        let num = try deserialize_u64()
+        return Double(bitPattern: num)
     }
 
     public func increase_container_depth() throws {
@@ -55,10 +67,7 @@ public class BinaryDeserializer: Deserializer {
         if len < 0 || len > Int.max {
             throw BinaryDeserializerError.invalidInput(issue: "Incorrect length value for Swift string")
         }
-        let content: [UInt8] = reader.readBytes(count: (Int)(len))
-        if content.count < len {
-            throw BinaryDeserializerError.invalidInput(issue: "Need len - \(content.count) more bytes for string")
-        }
+        let content = try readBytes(count: Int(len))
         return String(bytes: content, encoding: .utf8)!
     }
 
@@ -67,35 +76,52 @@ public class BinaryDeserializer: Deserializer {
         if len < 0 || len > Int.max {
             throw BinaryDeserializerError.invalidInput(issue: "Incorrect length value for Swift array")
         }
-        let content: [UInt8] = reader.readBytes(count: (Int)(len))
-        if content.count < len {
-            throw BinaryDeserializerError.invalidInput(issue: "Need  \(len) - \(content.count) more bytes for byte array")
-        }
+        let content = try readBytes(count: Int(len))
         return content
     }
 
     public func deserialize_bool() throws -> Bool {
-        return reader.readBool()
+        let byte = try readBytes(count: 1)[0]
+        // TODO: reject values > 1
+        return byte != 0
     }
 
-    public func deserialize_unit() -> Unit {
+    public func deserialize_unit() throws -> Unit {
         return Unit()
     }
 
-    public func deserialize_u8() -> UInt8 {
-        return reader.readUInt8()
+    public func deserialize_u8() throws -> UInt8 {
+        let bytes = try readBytes(count: 1)
+        return bytes[0]
     }
 
-    public func deserialize_u16() -> UInt16 {
-        return reader.readUInt16()
+    public func deserialize_u16() throws -> UInt16 {
+        let bytes = try readBytes(count: 2)
+        var x = UInt16(bytes[0])
+        x += UInt16(bytes[1]) << 8
+        return x
     }
 
-    public func deserialize_u32() -> UInt32 {
-        return reader.readUInt32()
+    public func deserialize_u32() throws -> UInt32 {
+        let bytes = try readBytes(count: 4)
+        var x = UInt32(bytes[0])
+        x += UInt32(bytes[1]) << 8
+        x += UInt32(bytes[2]) << 16
+        x += UInt32(bytes[3]) << 24
+        return x
     }
 
-    public func deserialize_u64() -> UInt64 {
-        return reader.readUInt64()
+    public func deserialize_u64() throws -> UInt64 {
+        let bytes = try readBytes(count: 8)
+        var x = UInt64(bytes[0])
+        x += UInt64(bytes[1]) << 8
+        x += UInt64(bytes[2]) << 16
+        x += UInt64(bytes[3]) << 24
+        x += UInt64(bytes[4]) << 32
+        x += UInt64(bytes[5]) << 40
+        x += UInt64(bytes[6]) << 48
+        x += UInt64(bytes[7]) << 56
+        return x
     }
 
     public func deserialize_u128() throws -> BigInt8 {
@@ -107,32 +133,29 @@ public class BinaryDeserializer: Deserializer {
         }
     }
 
-    public func deserialize_i8() -> Int8 {
-        return reader.readInt8()
+    public func deserialize_i8() throws -> Int8 {
+        return Int8(bitPattern: try deserialize_u8())
     }
 
-    public func deserialize_i16() -> Int16 {
-        return reader.readInt16()
+    public func deserialize_i16() throws -> Int16 {
+        return Int16(bitPattern: try deserialize_u16())
     }
 
-    public func deserialize_i32() -> Int32 {
-        return reader.readInt32()
+    public func deserialize_i32() throws -> Int32 {
+        return Int32(bitPattern: try deserialize_u32())
     }
 
-    public func deserialize_i64() -> Int64 {
-        return reader.readInt64()
+    public func deserialize_i64() throws -> Int64 {
+        return Int64(bitPattern: try deserialize_u64())
     }
 
     public func deserialize_i128() throws -> BigInt8 {
-        let content: [UInt8] = reader.readBytes(count: 16)
-        if content.count < 16 {
-            throw BinaryDeserializerError.invalidInput(issue: "Need more bytes to deserialize 128-bit integer")
-        }
-        return BigInt8(content.map { UInt8($0) })
+        let content = try readBytes(count: 16)
+        return BigInt8(content)
     }
 
     public func deserialize_option_tag() throws -> Bool {
-        let value: UInt8 = reader.readUInt8()
+        let value = try deserialize_u8()
         switch value {
         case 0: return false
         case 1: return true
@@ -141,10 +164,10 @@ public class BinaryDeserializer: Deserializer {
     }
 
     public func get_buffer_offset() -> Int {
-        return self.reader.tell
+        return location
     }
 
-    public func check_that_key_slices_are_increasing(key1: Slice, key2: Slice) throws {
+    public func check_that_key_slices_are_increasing(key1 _: Slice, key2 _: Slice) throws {
         assertionFailure("Not implemented")
     }
 }

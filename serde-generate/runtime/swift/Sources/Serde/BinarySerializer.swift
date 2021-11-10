@@ -147,11 +147,11 @@ public class BinarySerializer: Serializer {
         return output.getOffset()
     }
 
-    public func serialize_len(value: Int64) {
+    public func serialize_len(value _: Int64) {
         assertionFailure("Not implemented")
     }
 
-    public func serialize_variant_index(value: Int) {
+    public func serialize_variant_index(value _: Int) {
         assertionFailure("Not implemented")
     }
 
