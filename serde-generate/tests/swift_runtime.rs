@@ -87,13 +87,12 @@ do {{
 }}
 catch {{}}
 
-// TODO: This causes a crash at the moment.
-// do {{
-//     let input2 : [UInt8] = [0, 1]
-//     let _ = try Test.{1}Deserialize(input: input2)
-//     assertionFailure("Was expecting an error")
-// }}
-// catch {{}}
+do {{
+    let input2 : [UInt8] = [0, 1]
+    let _ = try Test.{1}Deserialize(input: input2)
+    assertionFailure("Was expecting an error")
+}}
+catch {{}}
 "#,
         reference
             .iter()
