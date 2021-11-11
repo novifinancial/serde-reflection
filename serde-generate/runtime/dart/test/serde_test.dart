@@ -3,9 +3,9 @@
 
 import 'package:test/test.dart';
 
-import '../../lib/src/serde/serde.dart';
+import '../lib/src/serde/serde.dart';
 
-void runSerdeTests() {
+void main() {
   test('Uint64', () {
     expect(Uint64.parse('0').toString(), '0');
     expect(Uint64.parse('184').toString(), '184');

@@ -97,41 +97,6 @@ dependencies:
         Ok(())
     }
 
-    fn output_test(&self, install_dir: &Path) -> Result<()> {
-        let test_dir_path = install_dir.join("test");
-        std::fs::create_dir_all(&test_dir_path)?;
-
-        let mut file = std::fs::File::create(test_dir_path.join("all_test.dart".to_string()))?;
-        let mut out = IndentedWriter::new(&mut file, IndentConfig::Space(2));
-        writeln!(&mut out, r#"import 'package:test/test.dart';"#,)?;
-
-        writeln!(
-            &mut out,
-            r#"
-import 'src/serde.dart';
-"#
-        )?;
-        for encoding in &self.config.encodings {
-            writeln!(&mut out, "import 'src/{}.dart';", encoding.name())?;
-        }
-
-        writeln!(
-            &mut out,
-            r#"void main() {{
-  group('Serde', runSerdeTests);"#,
-        )?;
-        for encoding in &self.config.encodings {
-            writeln!(
-                &mut out,
-                "  group('{0}', run{0}Tests);",
-                encoding.name().to_camel_case()
-            )?;
-        }
-
-        writeln!(&mut out, "}}")?;
-        Ok(())
-    }
-
     fn write_library(
         &self,
         install_dir: &Path,
@@ -1217,23 +1182,6 @@ impl crate::SourceInstaller for Installer {
     ) -> std::result::Result<(), Self::Error> {
         let generator = CodeGenerator::new(config);
         generator.output(self.install_dir.clone(), registry)?;
-        generator.output_test(&self.install_dir)?;
-        std::fs::create_dir_all(self.install_dir.join("test/src")).unwrap();
-
-        let tests = include_directory!("runtime/dart/test");
-        let mv_test = |file| {
-            std::fs::copy(
-                tests.path().join("runtime/dart/test").join(&file),
-                self.install_dir.join("test/src").join(&file),
-            )
-            .unwrap();
-        };
-
-        mv_test("serde.dart".to_string());
-        for encoding in &config.encodings {
-            mv_test(encoding.name().to_snake_case() + ".dart");
-        }
-
         // write the main module file to export the public api
         std::fs::write(
             self.install_dir

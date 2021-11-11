@@ -3,9 +3,9 @@
 
 import 'dart:typed_data';
 import 'package:test/test.dart';
-import '../../lib/src/bincode/bincode.dart';
+import '../lib/src/bincode/bincode.dart';
 
-void runBincodeTests() {
+void main() {
   test('serializeUint32', () {
     BincodeSerializer serializer = BincodeSerializer();
     serializer.serializeUint32(1);

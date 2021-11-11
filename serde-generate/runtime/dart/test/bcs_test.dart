@@ -3,9 +3,9 @@
 
 import 'dart:typed_data';
 import 'package:test/test.dart';
-import '../../lib/src/bcs/bcs.dart';
+import '../lib/src/bcs/bcs.dart';
 
-void runBcsTests() {
+void main() {
   test('serializeUint32', () {
     BcsSerializer serializer = BcsSerializer();
     serializer.serializeUint32(1);
