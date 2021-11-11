@@ -20,8 +20,8 @@ public protocol Serializer {
     func serialize_i32(value: Int32) throws
     func serialize_i64(value: Int64) throws
     func serialize_i128(value: Int128) throws
-    func serialize_len(value: Int64) throws
-    func serialize_variant_index(value: Int) throws
+    func serialize_len(value: Int) throws
+    func serialize_variant_index(value: UInt32) throws
     func serialize_option_tag(value: Bool) throws
     func increase_container_depth() throws
     func decrease_container_depth() throws

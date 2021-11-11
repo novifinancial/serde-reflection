@@ -8,9 +8,9 @@ public enum BinarySerializerError: Error {
 
 public class BinarySerializer: Serializer {
     public var output = OutputStream.toMemory()
-    private var containerDepthBudget: Int64
+    private var containerDepthBudget: Int
 
-    public init(maxContainerDepth: Int64) {
+    public init(maxContainerDepth: Int) {
         output.open()
         containerDepthBudget = maxContainerDepth
     }
@@ -51,7 +51,7 @@ public class BinarySerializer: Serializer {
     }
 
     public func serialize_bytes(value: [UInt8]) throws {
-        try serialize_len(value: Int64(value.count))
+        try serialize_len(value: value.count)
         output.write(data: Data(value))
     }
 
@@ -128,11 +128,11 @@ public class BinarySerializer: Serializer {
         return output.getOffset()
     }
 
-    public func serialize_len(value _: Int64) throws {
+    public func serialize_len(value _: Int) throws {
         assertionFailure("Not implemented")
     }
 
-    public func serialize_variant_index(value _: Int) throws {
+    public func serialize_variant_index(value _: UInt32) throws {
         assertionFailure("Not implemented")
     }
 

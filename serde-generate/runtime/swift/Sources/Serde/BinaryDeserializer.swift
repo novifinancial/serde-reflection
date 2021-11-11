@@ -9,9 +9,9 @@ public enum BinaryDeserializerError: Error {
 public class BinaryDeserializer: Deserializer {
     fileprivate let input: [UInt8]
     fileprivate var location: Int
-    fileprivate var containerDepthBudget: Int64
+    fileprivate var containerDepthBudget: Int
 
-    init(input: [UInt8], maxContainerDepth: Int64) {
+    init(input: [UInt8], maxContainerDepth: Int) {
         self.input = input
         location = 0
         containerDepthBudget = maxContainerDepth
@@ -27,12 +27,12 @@ public class BinaryDeserializer: Deserializer {
         return Array(bytes)
     }
 
-    public func deserialize_len() throws -> Int64 {
+    public func deserialize_len() throws -> Int {
         assertionFailure("Not implemented")
         return 0
     }
 
-    public func deserialize_variant_index() throws -> Int {
+    public func deserialize_variant_index() throws -> UInt32 {
         assertionFailure("Not implemented")
         return 0
     }
@@ -63,20 +63,13 @@ public class BinaryDeserializer: Deserializer {
     }
 
     public func deserialize_str() throws -> String {
-        let len: Int64 = try deserialize_len()
-        if len < 0 || len > Int.max {
-            throw BinaryDeserializerError.invalidInput(issue: "Incorrect length value for Swift string")
-        }
-        let content = try readBytes(count: Int(len))
-        return String(bytes: content, encoding: .utf8)!
+        let bytes = try deserialize_bytes()
+        return String(bytes: bytes, encoding: .utf8)!
     }
 
     public func deserialize_bytes() throws -> [UInt8] {
-        let len: Int64 = try deserialize_len()
-        if len < 0 || len > Int.max {
-            throw BinaryDeserializerError.invalidInput(issue: "Incorrect length value for Swift array")
-        }
-        let content = try readBytes(count: Int(len))
+        let len = try deserialize_len()
+        let content = try readBytes(count: len)
         return content
     }
 

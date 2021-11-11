@@ -307,7 +307,7 @@ if let value = value {{
                 write!(
                     self.out,
                     r#"
-try serializer.serialize_len(value: Int64(value.count))
+try serializer.serialize_len(value: value.count)
 for item in value {{
     {}
 }}
@@ -320,7 +320,7 @@ for item in value {{
                 write!(
                     self.out,
                     r#"
-try serializer.serialize_len(value: Int64(value.count))
+try serializer.serialize_len(value: value.count)
 var offsets : [Int]  = []
 for (key, value) in value {{
     offsets.append(serializer.get_buffer_offset())
