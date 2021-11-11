@@ -16,6 +16,7 @@
 //! * Rust 2018
 //! * Go >= 1.14
 //! * C# (NetCoreApp >= 2.1)
+//! * Swift 5.3
 //!
 //! The following languages are partially supported and still considered under development:
 //!
