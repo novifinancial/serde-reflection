@@ -1,8 +1,10 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+use include_dir::include_dir as include_directory;
 use serde_generate::{dart, test_utils, CodeGeneratorConfig, SourceInstaller};
-use std::{fs::File, io::Result, io::Write, path::Path, process::Command};
+use std::fs::{copy, create_dir_all, read_dir, File};
+use std::{io::Result, io::Write, path::Path, process::Command};
 use tempfile::tempdir;
 use test_utils::{Choice, Runtime, Test};
 
@@ -14,6 +16,43 @@ fn install_test_dependency(path: &Path) -> Result<()> {
         .status()?;
 
     Ok(())
+}
+
+#[test]
+fn test_dart_runtime_autotest() {
+    let tests = include_directory!("runtime/dart/test");
+    let tempdir = tempdir().unwrap();
+    let source_path = tempdir.path().join("dart_project_autotest");
+
+    let registry = test_utils::get_simple_registry().unwrap();
+    let config = CodeGeneratorConfig::new("example".to_string());
+
+    let installer = dart::Installer::new(source_path.clone());
+    installer.install_module(&config, &registry).unwrap();
+    installer.install_serde_runtime().unwrap();
+    installer.install_bincode_runtime().unwrap();
+    installer.install_bcs_runtime().unwrap();
+
+    create_dir_all(source_path.join("test")).unwrap();
+    for f in read_dir(tests.path().join("runtime/dart/test")).unwrap() {
+        let file = f.unwrap();
+        copy(
+            file.path().to_path_buf(),
+            source_path.join("test").join(file.file_name()),
+        )
+        .unwrap();
+    }
+
+    install_test_dependency(&source_path).unwrap();
+
+    let dart_test = Command::new("dart")
+        .current_dir(&source_path)
+        .env("PUB_CACHE", "../.pub-cache")
+        .args(["test"])
+        .status()
+        .unwrap();
+
+    assert!(dart_test.success());
 }
 
 #[test]
@@ -43,6 +82,8 @@ fn test_dart_runtime_on_simple_data(runtime: Runtime) {
     installer.install_serde_runtime().unwrap();
     installer.install_bincode_runtime().unwrap();
     installer.install_bcs_runtime().unwrap();
+
+    create_dir_all(source_path.join("test")).unwrap();
 
     install_test_dependency(&source_path).unwrap();
 
