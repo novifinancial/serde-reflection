@@ -8,18 +8,18 @@ public enum BincodeDeserializerError: Error {
 
 public class BincodeDeserializer: BinaryDeserializer {
     public init(input: [UInt8]) {
-        super.init(input: input, maxContainerDepth: Int64.max)
+        super.init(input: input, maxContainerDepth: Int.max)
     }
 
-    override public func deserialize_len() throws -> Int64 {
+    override public func deserialize_len() throws -> Int {
         let value = try deserialize_i64()
         if value < 0 || value > Int.max {
             throw BincodeDeserializerError.invalidInput(issue: "Incorrect length value")
         }
-        return value
+        return Int(value)
     }
 
-    override public func deserialize_variant_index() throws -> Int {
-        return Int(try deserialize_i32())
+    override public func deserialize_variant_index() throws -> UInt32 {
+        return try deserialize_u32()
     }
 }

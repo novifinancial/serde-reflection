@@ -20,8 +20,8 @@ public protocol Deserializer {
     func deserialize_i32() throws -> Int32
     func deserialize_i64() throws -> Int64
     func deserialize_i128() throws -> Int128
-    func deserialize_len() throws -> Int64
-    func deserialize_variant_index() throws -> Int
+    func deserialize_len() throws -> Int
+    func deserialize_variant_index() throws -> UInt32
     func deserialize_option_tag() throws -> Bool
     func get_buffer_offset() -> Int
     func check_that_key_slices_are_increasing(key1: Slice, key2: Slice) throws
