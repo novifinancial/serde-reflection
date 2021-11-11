@@ -7,16 +7,13 @@ public enum BinarySerializerError: Error {
 }
 
 public class BinarySerializer: Serializer {
-    public var output = OutputStream.toMemory()
+    private var output: [UInt8]
     private var containerDepthBudget: Int
 
     public init(maxContainerDepth: Int) {
-        output.open()
+        output = []
+        output.reserveCapacity(64)
         containerDepthBudget = maxContainerDepth
-    }
-
-    deinit {
-        output.close()
     }
 
     public func increase_container_depth() throws {
@@ -43,7 +40,7 @@ public class BinarySerializer: Serializer {
     }
 
     public func get_bytes() -> [UInt8] {
-        return output.getBuffer()
+        return output
     }
 
     public func serialize_str(value: String) throws {
@@ -52,46 +49,44 @@ public class BinarySerializer: Serializer {
 
     public func serialize_bytes(value: [UInt8]) throws {
         try serialize_len(value: value.count)
-        output.write(data: Data(value))
+        output.append(contentsOf: value)
     }
 
     public func serialize_bool(value: Bool) throws {
-        try writeByte(value ? 1 : 0)
+        writeByte(value ? 1 : 0)
     }
 
     public func serialize_unit(value _: Unit) throws {}
 
-    func writeByte(_ value: UInt8) throws {
-        if output.write(data: Data([value])) != 1 {
-            throw BinarySerializerError.invalidValue(issue: "Error while outputting byte")
-        }
+    func writeByte(_ value: UInt8) {
+        output.append(value)
     }
 
     public func serialize_u8(value: UInt8) throws {
-        try writeByte(value)
+        writeByte(value)
     }
 
     public func serialize_u16(value: UInt16) throws {
-        try writeByte(UInt8(truncatingIfNeeded: value))
-        try writeByte(UInt8(truncatingIfNeeded: value >> 8))
+        writeByte(UInt8(truncatingIfNeeded: value))
+        writeByte(UInt8(truncatingIfNeeded: value >> 8))
     }
 
     public func serialize_u32(value: UInt32) throws {
-        try writeByte(UInt8(truncatingIfNeeded: value))
-        try writeByte(UInt8(truncatingIfNeeded: value >> 8))
-        try writeByte(UInt8(truncatingIfNeeded: value >> 16))
-        try writeByte(UInt8(truncatingIfNeeded: value >> 24))
+        writeByte(UInt8(truncatingIfNeeded: value))
+        writeByte(UInt8(truncatingIfNeeded: value >> 8))
+        writeByte(UInt8(truncatingIfNeeded: value >> 16))
+        writeByte(UInt8(truncatingIfNeeded: value >> 24))
     }
 
     public func serialize_u64(value: UInt64) throws {
-        try writeByte(UInt8(truncatingIfNeeded: value))
-        try writeByte(UInt8(truncatingIfNeeded: value >> 8))
-        try writeByte(UInt8(truncatingIfNeeded: value >> 16))
-        try writeByte(UInt8(truncatingIfNeeded: value >> 24))
-        try writeByte(UInt8(truncatingIfNeeded: value >> 32))
-        try writeByte(UInt8(truncatingIfNeeded: value >> 40))
-        try writeByte(UInt8(truncatingIfNeeded: value >> 48))
-        try writeByte(UInt8(truncatingIfNeeded: value >> 56))
+        writeByte(UInt8(truncatingIfNeeded: value))
+        writeByte(UInt8(truncatingIfNeeded: value >> 8))
+        writeByte(UInt8(truncatingIfNeeded: value >> 16))
+        writeByte(UInt8(truncatingIfNeeded: value >> 24))
+        writeByte(UInt8(truncatingIfNeeded: value >> 32))
+        writeByte(UInt8(truncatingIfNeeded: value >> 40))
+        writeByte(UInt8(truncatingIfNeeded: value >> 48))
+        writeByte(UInt8(truncatingIfNeeded: value >> 56))
     }
 
     public func serialize_u128(value: UInt128) throws {
@@ -121,11 +116,11 @@ public class BinarySerializer: Serializer {
     }
 
     public func serialize_option_tag(value: Bool) throws {
-        try writeByte(value ? 1 : 0)
+        writeByte(value ? 1 : 0)
     }
 
     public func get_buffer_offset() -> Int {
-        return output.getOffset()
+        return output.count
     }
 
     public func serialize_len(value _: Int) throws {

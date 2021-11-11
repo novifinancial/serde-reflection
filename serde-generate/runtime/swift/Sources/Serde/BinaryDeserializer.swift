@@ -64,7 +64,10 @@ public class BinaryDeserializer: Deserializer {
 
     public func deserialize_str() throws -> String {
         let bytes = try deserialize_bytes()
-        return String(bytes: bytes, encoding: .utf8)!
+        guard let value = String(bytes: bytes, encoding: .utf8) else {
+            throw BinaryDeserializerError.invalidInput(issue: "Incorrect UTF8 string")
+        }
+        return value
     }
 
     public func deserialize_bytes() throws -> [UInt8] {
@@ -74,9 +77,12 @@ public class BinaryDeserializer: Deserializer {
     }
 
     public func deserialize_bool() throws -> Bool {
-        let byte = try readBytes(count: 1)[0]
-        // TODO: reject values > 1
-        return byte != 0
+        let value = try deserialize_u8()
+        switch value {
+        case 0: return false
+        case 1: return true
+        default: throw BinaryDeserializerError.invalidInput(issue: "Incorrect value for boolean: \(value)")
+        }
     }
 
     public func deserialize_unit() throws -> Unit {
@@ -150,7 +156,7 @@ public class BinaryDeserializer: Deserializer {
         switch value {
         case 0: return false
         case 1: return true
-        default: throw BinaryDeserializerError.invalidInput(issue: "Incorrect value for Option tag: \(value)")
+        default: throw BinaryDeserializerError.invalidInput(issue: "Incorrect value for option tag: \(value)")
         }
     }
 

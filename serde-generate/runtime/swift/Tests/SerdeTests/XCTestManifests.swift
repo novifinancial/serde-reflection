@@ -6,7 +6,6 @@
         //   `swift test --generate-linuxmain`
         // to regenerate.
         static let __allTests__SerdeTests = [
-            ("testBigInt8", testBigInt8),
             ("testDeserializer", testDeserializer),
             ("testExample", testExample),
             ("testPerformanceExample", testPerformanceExample),

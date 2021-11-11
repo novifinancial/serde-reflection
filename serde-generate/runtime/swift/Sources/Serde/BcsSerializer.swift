@@ -17,10 +17,10 @@ public class BcsSerializer: BinarySerializer {
     private func serialize_u32_as_uleb128(value: UInt32) throws {
         var input = value
         while input >= 0x80 {
-            try writeByte(UInt8((value & 0x7F) | 0x80))
+            writeByte(UInt8((value & 0x7F) | 0x80))
             input >>= 7
         }
-        try writeByte(UInt8(input))
+        writeByte(UInt8(input))
     }
 
     override public func serialize_len(value: Int) throws {
