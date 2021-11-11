@@ -2,6 +2,10 @@
 
 import Foundation
 
+public enum SerializationError: Error {
+    case invalidValue(issue: String)
+}
+
 public protocol Serializer {
     func serialize_str(value: String) throws
     func serialize_bytes(value: [UInt8]) throws

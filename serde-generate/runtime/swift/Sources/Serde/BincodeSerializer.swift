@@ -2,10 +2,6 @@
 
 import Foundation
 
-public enum BincodeSerializerError: Error {
-    case invalidInput(issue: String)
-}
-
 public class BincodeSerializer: BinarySerializer {
     public let MAX_LENGTH: Int = 1 << 31 - 1
 
@@ -15,7 +11,7 @@ public class BincodeSerializer: BinarySerializer {
 
     override public func serialize_len(value: Int) throws {
         if value < 0 || value > MAX_LENGTH {
-            throw BincodeSerializerError.invalidInput(issue: "Invalid length value")
+            throw SerializationError.invalidValue(issue: "Invalid length value")
         }
         try serialize_u64(value: UInt64(value))
     }

@@ -2,10 +2,6 @@
 
 import Foundation
 
-public enum BincodeDeserializerError: Error {
-    case invalidInput(issue: String)
-}
-
 public class BincodeDeserializer: BinaryDeserializer {
     public let MAX_LENGTH: Int = 1 << 31 - 1
 
@@ -16,7 +12,7 @@ public class BincodeDeserializer: BinaryDeserializer {
     override public func deserialize_len() throws -> Int {
         let value = try deserialize_i64()
         if value < 0 || value > MAX_LENGTH {
-            throw BincodeDeserializerError.invalidInput(issue: "Incorrect length value")
+            throw DeserializationError.invalidInput(issue: "Incorrect length value")
         }
         return Int(value)
     }

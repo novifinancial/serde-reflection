@@ -2,6 +2,10 @@
 
 import Foundation
 
+public enum DeserializationError: Error {
+    case invalidInput(issue: String)
+}
+
 public protocol Deserializer {
     func deserialize_str() throws -> String
     func deserialize_bytes() throws -> [UInt8]
