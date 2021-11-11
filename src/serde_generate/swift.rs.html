@@ -1018,12 +1018,12 @@
             <span class="ident">I16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Int16&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">I32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Int32&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">I64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Int64&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">I128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;BigInt8&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">I128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Int128&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">U8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;UInt8&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">U16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;UInt16&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">U32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;UInt32&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">U64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;UInt64&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">U128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;BigInt8&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">U128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;UInt128&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">F32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Float&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">F64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Double&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">Char</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Character&quot;</span>.<span class="ident">into</span>(),
@@ -1185,7 +1185,7 @@ if let value = value {{
                 <span class="macro">write!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">r#&quot;
-try serializer.serialize_len(value: Int64(value.count))
+try serializer.serialize_len(value: value.count)
 for item in value {{
     {}
 }}
@@ -1198,7 +1198,7 @@ for item in value {{
                 <span class="macro">write!</span>(
                     <span class="self">self</span>.<span class="ident">out</span>,
                     <span class="string">r#&quot;
-try serializer.serialize_len(value: Int64(value.count))
+try serializer.serialize_len(value: value.count)
 var offsets : [Int]  = []
 for (key, value) in value {{
     offsets.append(serializer.get_buffer_offset())
@@ -1518,7 +1518,7 @@ public static func {1}Deserialize(input: [UInt8]) throws -&gt; {0} {{
     let deserializer = {2}Deserializer.init(input: input);
     let obj = try deserialize(deserializer: deserializer)
     if deserializer.get_buffer_offset() &lt; input.count {{
-        throw BinaryDeserializerError.invalidInput(issue: &quot;Some input bytes were not read&quot;)
+        throw DeserializationError.invalidInput(issue: &quot;Some input bytes were not read&quot;)
     }}
     return obj
 }}&quot;#</span>,
@@ -1642,7 +1642,7 @@ switch index {{&quot;#</span>,
             }
             <span class="macro">writeln!</span>(
                 <span class="self">self</span>.<span class="ident">out</span>,
-                <span class="string">&quot;default: throw BinaryDeserializerError.invalidInput(issue: \&quot;Unknown variant index for {}: \\(index)\&quot;)&quot;</span>,
+                <span class="string">&quot;default: throw DeserializationError.invalidInput(issue: \&quot;Unknown variant index for {}: \\(index)\&quot;)&quot;</span>,
                 <span class="ident">name</span>,
             )<span class="question-mark">?</span>;
             <span class="macro">writeln!</span>(<span class="self">self</span>.<span class="ident">out</span>, <span class="string">&quot;}}&quot;</span>)<span class="question-mark">?</span>;
