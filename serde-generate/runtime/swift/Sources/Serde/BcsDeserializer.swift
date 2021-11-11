@@ -2,10 +2,6 @@
 
 import Foundation
 
-public enum BcsDeserializerError: Error {
-    case invalidInput(issue: String)
-}
-
 public class BcsDeserializer: BinaryDeserializer {
     public let MAX_LENGTH: Int = 1 << 31 - 1
     public let MAX_CONTAINER_DEPTH: Int = 500
@@ -21,22 +17,22 @@ public class BcsDeserializer: BinaryDeserializer {
             let digit = x & 0x7F
             value |= UInt64(digit) << shift
             if value > UInt32.max {
-                throw BcsDeserializerError.invalidInput(issue: "Overflow while parsing uleb128-encoded uint32 value")
+                throw DeserializationError.invalidInput(issue: "Overflow while parsing uleb128-encoded uint32 value")
             }
             if digit == x {
                 if shift > 0, digit == 0 {
-                    throw BcsDeserializerError.invalidInput(issue: "Invalid uleb128 number (unexpected zero digit)")
+                    throw DeserializationError.invalidInput(issue: "Invalid uleb128 number (unexpected zero digit)")
                 }
                 return UInt32(value)
             }
         }
-        throw BcsDeserializerError.invalidInput(issue: "Overflow while parsing uleb128-encoded uint32 value")
+        throw DeserializationError.invalidInput(issue: "Overflow while parsing uleb128-encoded uint32 value")
     }
 
     override public func deserialize_len() throws -> Int {
         let value = try deserialize_uleb128_as_u32()
         if value > MAX_LENGTH {
-            throw BcsDeserializerError.invalidInput(issue: "Overflow while parsing length value")
+            throw DeserializationError.invalidInput(issue: "Overflow while parsing length value")
         }
         return Int(value)
     }
@@ -47,7 +43,7 @@ public class BcsDeserializer: BinaryDeserializer {
 
     override public func check_that_key_slices_are_increasing(key1: Slice, key2: Slice) throws {
         guard input[key1.start ..< key1.end].lexicographicallyPrecedes(input[key2.start ..< key2.end]) else {
-            throw BcsDeserializerError.invalidInput(issue: "Invalid ordering of keys")
+            throw DeserializationError.invalidInput(issue: "Invalid ordering of keys")
         }
     }
 }

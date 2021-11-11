@@ -640,7 +640,7 @@ public static func {1}Deserialize(input: [UInt8]) throws -> {0} {{
     let deserializer = {2}Deserializer.init(input: input);
     let obj = try deserialize(deserializer: deserializer)
     if deserializer.get_buffer_offset() < input.count {{
-        throw BinaryDeserializerError.invalidInput(issue: "Some input bytes were not read")
+        throw DeserializationError.invalidInput(issue: "Some input bytes were not read")
     }}
     return obj
 }}"#,
@@ -764,7 +764,7 @@ switch index {{"#,
             }
             writeln!(
                 self.out,
-                "default: throw BinaryDeserializerError.invalidInput(issue: \"Unknown variant index for {}: \\(index)\")",
+                "default: throw DeserializationError.invalidInput(issue: \"Unknown variant index for {}: \\(index)\")",
                 name,
             )?;
             writeln!(self.out, "}}")?;

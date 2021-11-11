@@ -2,10 +2,6 @@
 
 import Foundation
 
-public enum BcsSerializerError: Error {
-    case invalidInput(issue: String)
-}
-
 public class BcsSerializer: BinarySerializer {
     public let MAX_LENGTH: Int = 1 << 31 - 1
     public let MAX_CONTAINER_DEPTH: Int = 500
@@ -25,7 +21,7 @@ public class BcsSerializer: BinarySerializer {
 
     override public func serialize_len(value: Int) throws {
         if value < 0 || value > MAX_LENGTH {
-            throw BcsSerializerError.invalidInput(issue: "Invalid length value")
+            throw SerializationError.invalidValue(issue: "Invalid length value")
         }
         try serialize_u32_as_uleb128(value: UInt32(value))
     }

@@ -2,10 +2,6 @@
 
 import Foundation
 
-public enum BinarySerializerError: Error {
-    case invalidValue(issue: String)
-}
-
 public class BinarySerializer: Serializer {
     var output: [UInt8]
     private var containerDepthBudget: Int
@@ -18,7 +14,7 @@ public class BinarySerializer: Serializer {
 
     public func increase_container_depth() throws {
         if containerDepthBudget == 0 {
-            throw BinarySerializerError.invalidValue(issue: "Exceeded maximum container depth")
+            throw SerializationError.invalidValue(issue: "Exceeded maximum container depth")
         }
         containerDepthBudget -= 1
     }
@@ -28,7 +24,7 @@ public class BinarySerializer: Serializer {
     }
 
     public func serialize_char(value _: Character) throws {
-        throw BinarySerializerError.invalidValue(issue: "Not implemented: char serialization")
+        throw SerializationError.invalidValue(issue: "Not implemented: char serialization")
     }
 
     public func serialize_f32(value: Float) throws {

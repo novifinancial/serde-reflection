@@ -2,14 +2,10 @@
 
 import Foundation
 
-public enum BinaryDeserializerError: Error {
-    case invalidInput(issue: String)
-}
-
 public class BinaryDeserializer: Deserializer {
     let input: [UInt8]
-    fileprivate var location: Int
-    fileprivate var containerDepthBudget: Int
+    private var location: Int
+    private var containerDepthBudget: Int
 
     init(input: [UInt8], maxContainerDepth: Int) {
         self.input = input
@@ -20,7 +16,7 @@ public class BinaryDeserializer: Deserializer {
     private func readBytes(count: Int) throws -> [UInt8] {
         let newLocation = location + count
         if newLocation > input.count {
-            throw BinaryDeserializerError.invalidInput(issue: "Input is too small")
+            throw DeserializationError.invalidInput(issue: "Input is too small")
         }
         let bytes = input[location ..< newLocation]
         location = newLocation
@@ -38,7 +34,7 @@ public class BinaryDeserializer: Deserializer {
     }
 
     public func deserialize_char() throws -> Character {
-        throw BinaryDeserializerError.invalidInput(issue: "Not implemented: char deserialization")
+        throw DeserializationError.invalidInput(issue: "Not implemented: char deserialization")
     }
 
     public func deserialize_f32() throws -> Float {
@@ -53,7 +49,7 @@ public class BinaryDeserializer: Deserializer {
 
     public func increase_container_depth() throws {
         if containerDepthBudget == 0 {
-            throw BinaryDeserializerError.invalidInput(issue: "Exceeded maximum container depth")
+            throw DeserializationError.invalidInput(issue: "Exceeded maximum container depth")
         }
         containerDepthBudget -= 1
     }
@@ -65,7 +61,7 @@ public class BinaryDeserializer: Deserializer {
     public func deserialize_str() throws -> String {
         let bytes = try deserialize_bytes()
         guard let value = String(bytes: bytes, encoding: .utf8) else {
-            throw BinaryDeserializerError.invalidInput(issue: "Incorrect UTF8 string")
+            throw DeserializationError.invalidInput(issue: "Incorrect UTF8 string")
         }
         return value
     }
@@ -81,7 +77,7 @@ public class BinaryDeserializer: Deserializer {
         switch value {
         case 0: return false
         case 1: return true
-        default: throw BinaryDeserializerError.invalidInput(issue: "Incorrect value for boolean: \(value)")
+        default: throw DeserializationError.invalidInput(issue: "Incorrect value for boolean: \(value)")
         }
     }
 
@@ -156,7 +152,7 @@ public class BinaryDeserializer: Deserializer {
         switch value {
         case 0: return false
         case 1: return true
-        default: throw BinaryDeserializerError.invalidInput(issue: "Incorrect value for option tag: \(value)")
+        default: throw DeserializationError.invalidInput(issue: "Incorrect value for option tag: \(value)")
         }
     }
 
