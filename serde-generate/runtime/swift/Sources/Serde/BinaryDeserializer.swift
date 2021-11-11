@@ -7,7 +7,7 @@ public enum BinaryDeserializerError: Error {
 }
 
 public class BinaryDeserializer: Deserializer {
-    fileprivate let input: [UInt8]
+    let input: [UInt8]
     fileprivate var location: Int
     fileprivate var containerDepthBudget: Int
 

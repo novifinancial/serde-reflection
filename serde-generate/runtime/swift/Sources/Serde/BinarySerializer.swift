@@ -7,7 +7,7 @@ public enum BinarySerializerError: Error {
 }
 
 public class BinarySerializer: Serializer {
-    private var output: [UInt8]
+    var output: [UInt8]
     private var containerDepthBudget: Int
 
     public init(maxContainerDepth: Int) {
