@@ -11,7 +11,7 @@ class SerdeTests: XCTestCase {
         try serializer.serialize_u32(value: 1) // 4
         try serializer.serialize_u32(value: 2) // 4
         XCTAssertEqual(serializer.get_buffer_offset(), 13, "the buffer size should be same")
-        XCTAssertEqual(serializer.output.getBuffer(), [255, 1, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0], "the array should be same")
+        XCTAssertEqual(serializer.get_bytes(), [255, 1, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0], "the array should be same")
     }
 
     func testDeserializer() throws {
@@ -79,33 +79,33 @@ class SerdeTests: XCTestCase {
     func testSerializeU128() throws {
         let serializer = BcsSerializer()
         XCTAssertNoThrow(try serializer.serialize_u128(value: UInt128(high: UInt64.max, low: UInt64.max)))
-        XCTAssertEqual(serializer.output.getBuffer(), [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], "the array should be same")
+        XCTAssertEqual(serializer.get_bytes(), [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], "the array should be same")
 
         let serializer2 = BcsSerializer()
         XCTAssertNoThrow(try serializer2.serialize_u128(value: UInt128(high: 0, low: 1)))
-        XCTAssertEqual(serializer2.output.getBuffer(), [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "the array should be same")
+        XCTAssertEqual(serializer2.get_bytes(), [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "the array should be same")
 
         let serializer3 = BcsSerializer()
         XCTAssertNoThrow(try serializer3.serialize_u128(value: UInt128(high: 0, low: 0)))
-        XCTAssertEqual(serializer3.output.getBuffer(), [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "the array should be same")
+        XCTAssertEqual(serializer3.get_bytes(), [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "the array should be same")
     }
 
     func testSerializeI128() throws {
         let serializer = BcsSerializer()
         XCTAssertNoThrow(try serializer.serialize_i128(value: Int128(high: -1, low: UInt64.max)))
-        XCTAssertEqual(serializer.output.getBuffer(), [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], "the array should be same")
+        XCTAssertEqual(serializer.get_bytes(), [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], "the array should be same")
 
         let serializer2 = BcsSerializer()
         XCTAssertNoThrow(try serializer2.serialize_i128(value: Int128(high: 0, low: 1)))
-        XCTAssertEqual(serializer2.output.getBuffer(), [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "the array should be same")
+        XCTAssertEqual(serializer2.get_bytes(), [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "the array should be same")
 
         let serializer3 = BcsSerializer()
         XCTAssertNoThrow(try serializer3.serialize_i128(value: Int128(high: Int64.max, low: UInt64.max)))
-        XCTAssertEqual(serializer3.output.getBuffer(), [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 127], "the array should be same")
+        XCTAssertEqual(serializer3.get_bytes(), [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 127], "the array should be same")
 
         let serializer4 = BcsSerializer()
         XCTAssertNoThrow(try serializer4.serialize_i128(value: Int128(high: Int64.min, low: 0)))
-        XCTAssertEqual(serializer4.output.getBuffer(), [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x80], "the array should be same")
+        XCTAssertEqual(serializer4.get_bytes(), [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x80], "the array should be same")
     }
 
     func testULEB128Encoding() throws {
@@ -115,6 +115,6 @@ class SerdeTests: XCTestCase {
         try serializer.serialize_len(value: 127)
         try serializer.serialize_len(value: 128)
         try serializer.serialize_len(value: 3000)
-        XCTAssertEqual(serializer.output.getBuffer(), [0, 1, 127, 128, 1, 184, 23], "the array should be same")
+        XCTAssertEqual(serializer.get_bytes(), [0, 1, 127, 128, 1, 184, 23], "the array should be same")
     }
 }

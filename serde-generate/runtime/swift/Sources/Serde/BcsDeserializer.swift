@@ -45,7 +45,7 @@ public class BcsDeserializer: BinaryDeserializer {
         return try deserialize_uleb128_as_u32()
     }
 
-    public func check_that_key_slices_are_increasing(key1 _: Range<Int>, key2 _: Range<Int>) {
+    override public func check_that_key_slices_are_increasing(key1 _: Slice, key2 _: Slice) throws {
         // TODO:
     }
 }
