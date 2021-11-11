@@ -38,13 +38,11 @@ public class BinaryDeserializer: Deserializer {
     }
 
     public func deserialize_f32() throws -> Float {
-        let num = try deserialize_u32()
-        return Float(bitPattern: num)
+        throw DeserializationError.invalidInput(issue: "Not implemented: f32 deserialization")
     }
 
     public func deserialize_f64() throws -> Double {
-        let num = try deserialize_u64()
-        return Double(bitPattern: num)
+        throw DeserializationError.invalidInput(issue: "Not implemented: f64 deserialization")
     }
 
     public func increase_container_depth() throws {

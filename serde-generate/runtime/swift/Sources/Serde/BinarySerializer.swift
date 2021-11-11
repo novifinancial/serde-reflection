@@ -28,11 +28,11 @@ public class BinarySerializer: Serializer {
     }
 
     public func serialize_f32(value: Float) throws {
-        try serialize_u32(value: value.bitPattern)
+        throw SerializationError.invalidValue(issue: "Not implemented: f32 serialization")
     }
 
     public func serialize_f64(value: Double) throws {
-        try serialize_u64(value: value.bitPattern)
+        throw SerializationError.invalidValue(issue: "Not implemented: f64 serialization")
     }
 
     public func get_bytes() -> [UInt8] {
