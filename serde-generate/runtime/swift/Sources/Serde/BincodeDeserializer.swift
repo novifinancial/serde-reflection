@@ -17,6 +17,16 @@ public class BincodeDeserializer: BinaryDeserializer {
         return Int(value)
     }
 
+    override public func deserialize_f32() throws -> Float {
+        let num = try deserialize_u32()
+        return Float(bitPattern: num)
+    }
+
+    override public func deserialize_f64() throws -> Double {
+        let num = try deserialize_u64()
+        return Double(bitPattern: num)
+    }
+
     override public func deserialize_variant_index() throws -> UInt32 {
         return try deserialize_u32()
     }

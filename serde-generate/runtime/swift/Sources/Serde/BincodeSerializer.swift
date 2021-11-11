@@ -16,6 +16,14 @@ public class BincodeSerializer: BinarySerializer {
         try serialize_u64(value: UInt64(value))
     }
 
+    override public func serialize_f32(value: Float) throws {
+        try serialize_u32(value: value.bitPattern)
+    }
+
+    override public func serialize_f64(value: Double) throws {
+        try serialize_u64(value: value.bitPattern)
+    }
+
     override public func serialize_variant_index(value: UInt32) throws {
         try serialize_u32(value: value)
     }
