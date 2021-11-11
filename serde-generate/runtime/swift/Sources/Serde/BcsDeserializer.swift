@@ -45,7 +45,9 @@ public class BcsDeserializer: BinaryDeserializer {
         return try deserialize_uleb128_as_u32()
     }
 
-    override public func check_that_key_slices_are_increasing(key1 _: Slice, key2 _: Slice) throws {
-        // TODO:
+    override public func check_that_key_slices_are_increasing(key1: Slice, key2: Slice) throws {
+        guard input[key1.start ..< key1.end].lexicographicallyPrecedes(input[key2.start ..< key2.end]) else {
+            throw BcsDeserializerError.invalidInput(issue: "Invalid ordering of keys")
+        }
     }
 }

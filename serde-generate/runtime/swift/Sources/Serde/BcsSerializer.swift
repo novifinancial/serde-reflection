@@ -34,7 +34,28 @@ public class BcsSerializer: BinarySerializer {
         try serialize_u32_as_uleb128(value: value)
     }
 
-    override public func sort_map_entries(offsets _: [Int]) {
-        // TODO:
+    override public func sort_map_entries(offsets: [Int]) {
+        if offsets.count <= 1 {
+            return
+        }
+        let offset0 = offsets[0]
+        var slices: [Slice] = []
+        slices.reserveCapacity(offsets.count)
+        for i in 0 ..< (offsets.count - 1) {
+            slices.append(Slice(start: offsets[i], end: offsets[i + 1]))
+        }
+        slices.append(Slice(start: offsets[offsets.count - 1], end: output.count))
+        slices.sort(by: { key1, key2 in
+            output[key1.start ..< key1.end].lexicographicallyPrecedes(output[key2.start ..< key2.end])
+        })
+
+        let content = output
+        var position = offset0
+        for slice in slices {
+            for i in slice.start ..< slice.end {
+                output[position] = content[i]
+                position += 1
+            }
+        }
     }
 }
