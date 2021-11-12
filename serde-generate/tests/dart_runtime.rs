@@ -3,6 +3,7 @@
 
 use include_dir::include_dir as include_directory;
 use serde_generate::{dart, test_utils, CodeGeneratorConfig, SourceInstaller};
+use serde_reflection::Registry;
 use std::fs::{copy, create_dir_all, read_dir, File};
 use std::{io::Result, io::Write, path::Path, process::Command};
 use tempfile::tempdir;
@@ -24,11 +25,12 @@ fn test_dart_runtime_autotest() {
     let tempdir = tempdir().unwrap();
     let source_path = tempdir.path().join("dart_project_autotest");
 
-    let registry = test_utils::get_simple_registry().unwrap();
     let config = CodeGeneratorConfig::new("example".to_string());
 
     let installer = dart::Installer::new(source_path.clone());
-    installer.install_module(&config, &registry).unwrap();
+    installer
+        .install_module(&config, &Registry::default())
+        .unwrap();
     installer.install_serde_runtime().unwrap();
     installer.install_bincode_runtime().unwrap();
     installer.install_bcs_runtime().unwrap();
