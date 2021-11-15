@@ -80,7 +80,9 @@ Currently, `serde-generate` generates type definitions and supports [Bincode](ht
 * Rust
 * Go
 * C#
+* Swift
 * Typescript (in progress)
+* Dart (in progress)
 
 ## Benefits
 
