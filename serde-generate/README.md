@@ -26,6 +26,7 @@ The following programming languages are fully supported as target languages:
 The following languages are partially supported and still considered under development:
 
 * TypeScript 4 (packaged and tested with Deno)
+* Dart >= 2
 
 ### Supported Encodings
 
