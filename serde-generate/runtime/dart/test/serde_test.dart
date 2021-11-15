@@ -3,7 +3,7 @@
 
 import 'package:test/test.dart';
 
-import '../lib/src/serde/serde.dart';
+import '../serde/serde.dart';
 
 void main() {
   test('Uint64', () {

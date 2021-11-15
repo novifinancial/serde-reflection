@@ -3,7 +3,7 @@
 
 import 'dart:typed_data';
 import 'package:test/test.dart';
-import '../lib/src/bcs/bcs.dart';
+import '../bcs/bcs.dart';
 
 void main() {
   test('serializeUint32', () {
