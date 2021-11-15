@@ -22,5 +22,7 @@ class BcsSerializer extends BinarySerializer {
     serializeUint32AsUleb128(value);
   }
 
-  void sortMapEntries(Uint8List offsets) {}
+  void sortMapEntries(Uint8List offsets) {
+    // TODO(#120)
+  }
 }
