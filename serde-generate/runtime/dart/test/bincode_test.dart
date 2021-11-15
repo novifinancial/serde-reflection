@@ -3,7 +3,7 @@
 
 import 'dart:typed_data';
 import 'package:test/test.dart';
-import '../lib/src/bincode/bincode.dart';
+import '../bincode/bincode.dart';
 
 void main() {
   test('serializeUint32', () {

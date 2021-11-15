@@ -1,10 +1,8 @@
 // Copyright (c) Facebook, Inc. and its affiliates
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use include_dir::include_dir as include_directory;
 use serde_generate::{dart, test_utils, CodeGeneratorConfig, SourceInstaller};
-use serde_reflection::Registry;
-use std::fs::{copy, create_dir_all, read_dir, File};
+use std::fs::{create_dir_all, File};
 use std::{io::Result, io::Write, path::Path, process::Command};
 use tempfile::tempdir;
 use test_utils::{Choice, Runtime, Test};
@@ -21,36 +19,11 @@ fn install_test_dependency(path: &Path) -> Result<()> {
 
 #[test]
 fn test_dart_runtime_autotest() {
-    let tests = include_directory!("runtime/dart/test");
-    let tempdir = tempdir().unwrap();
-    let source_path = tempdir.path().join("dart_project_autotest");
-
-    let config = CodeGeneratorConfig::new("example".to_string());
-
-    let installer = dart::Installer::new(source_path.clone());
-    installer
-        .install_module(&config, &Registry::default())
-        .unwrap();
-    installer.install_serde_runtime().unwrap();
-    installer.install_bincode_runtime().unwrap();
-    installer.install_bcs_runtime().unwrap();
-
-    create_dir_all(source_path.join("test")).unwrap();
-    for f in read_dir(tests.path().join("runtime/dart/test")).unwrap() {
-        let file = f.unwrap();
-        copy(
-            file.path().to_path_buf(),
-            source_path.join("test").join(file.file_name()),
-        )
-        .unwrap();
-    }
-
-    install_test_dependency(&source_path).unwrap();
-
+    // Not setting PUB_CACHE here because this is the only test run with the default
+    // config anyway.
     let dart_test = Command::new("dart")
-        .current_dir(&source_path)
-        .env("PUB_CACHE", "../.pub-cache")
-        .args(["test"])
+        .current_dir(&"runtime/dart")
+        .args(["test", "-r", "expanded"])
         .status()
         .unwrap();
 
