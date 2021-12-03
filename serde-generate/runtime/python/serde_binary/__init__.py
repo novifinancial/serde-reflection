@@ -142,8 +142,9 @@ class BinarySerializer:
                     self.serialize_any(item, item_type)
 
             elif getattr(obj_type, "__origin__") == tuple:  # Tuple
-                for i in range(len(obj)):
-                    self.serialize_any(obj[i], types[i])
+                if len(types) is not 1 or types[0] is not ():
+                    for i in range(len(obj)):
+                        self.serialize_any(obj[i], types[i])
 
             elif getattr(obj_type, "__origin__") == typing.Union:  # Option
                 assert len(types) == 2 and types[1] == type(None)
@@ -347,6 +348,8 @@ class BinaryDeserializer:
 
             elif getattr(obj_type, "__origin__") == tuple:  # Tuple
                 result = []
+                if len(types) is 1 and types[0] is ():
+                    return tuple()
                 for i in range(len(types)):
                     item = self.deserialize_any(types[i])
                     result.append(item)

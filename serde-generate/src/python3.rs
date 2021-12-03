@@ -166,7 +166,13 @@ import typing
                 self.quote_type(key),
                 self.quote_type(value)
             ),
-            Tuple(formats) => format!("typing.Tuple[{}]", self.quote_types(formats)),
+            Tuple(formats) => {
+                if formats.is_empty() {
+                    "typing.Tuple[()]".into()
+                } else {
+                    format!("typing.Tuple[{}]", self.quote_types(formats))
+                }
+            }
             TupleArray { content, size } => format!(
                 "typing.Tuple[{}]",
                 self.quote_types(&vec![content.as_ref().clone(); *size])
