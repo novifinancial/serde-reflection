@@ -961,6 +961,17 @@
 <span id="961">961</span>
 <span id="962">962</span>
 <span id="963">963</span>
+<span id="964">964</span>
+<span id="965">965</span>
+<span id="966">966</span>
+<span id="967">967</span>
+<span id="968">968</span>
+<span id="969">969</span>
+<span id="970">970</span>
+<span id="971">971</span>
+<span id="972">972</span>
+<span id="973">973</span>
+<span id="974">974</span>
 </pre><pre class="rust">
 <span class="comment">// Copyright (c) Facebook, Inc. and its affiliates</span>
 <span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0</span>
@@ -1016,6 +1027,8 @@
     <span class="ident">SimpleList</span>(<span class="ident">SimpleList</span>),
     <span class="ident">CStyleEnum</span>(<span class="ident">CStyleEnum</span>),
     <span class="ident">ComplexMap</span>(<span class="ident">BTreeMap</span><span class="op">&lt;</span>([<span class="ident">u32</span>; <span class="number">2</span>], [<span class="ident">u8</span>; <span class="number">4</span>]), ()<span class="op">&gt;</span>),
+    <span class="ident">EmptyTupleVariant</span>(),
+    <span class="ident">EmptyStructVariant</span> {},
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">PartialEq</span>)]</span>
@@ -1257,8 +1270,11 @@
 
     <span class="kw">let</span> <span class="ident">v13</span> <span class="op">=</span> <span class="ident">SerdeData::ComplexMap</span>(<span class="macro">btreemap!</span> { ([<span class="number">1</span>,<span class="number">2</span>], [<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>]) <span class="op">=</span><span class="op">&gt;</span> ()});
 
+    <span class="kw">let</span> <span class="ident">v14</span> <span class="op">=</span> <span class="ident">SerdeData::EmptyTupleVariant</span>();
+    <span class="kw">let</span> <span class="ident">v15</span> <span class="op">=</span> <span class="ident">SerdeData::EmptyStructVariant</span> {};
+
     <span class="macro">vec!</span>[
-        <span class="ident">v0</span>, <span class="ident">v1</span>, <span class="ident">v2</span>, <span class="ident">v2bis</span>, <span class="ident">v2ter</span>, <span class="ident">v3</span>, <span class="ident">v4</span>, <span class="ident">v5</span>, <span class="ident">v6</span>, <span class="ident">v7</span>, <span class="ident">v8</span>, <span class="ident">v9</span>, <span class="ident">v10</span>, <span class="ident">v11</span>, <span class="ident">v12</span>, <span class="ident">v13</span>,
+        <span class="ident">v0</span>, <span class="ident">v1</span>, <span class="ident">v2</span>, <span class="ident">v2bis</span>, <span class="ident">v2ter</span>, <span class="ident">v3</span>, <span class="ident">v4</span>, <span class="ident">v5</span>, <span class="ident">v6</span>, <span class="ident">v7</span>, <span class="ident">v8</span>, <span class="ident">v9</span>, <span class="ident">v10</span>, <span class="ident">v11</span>, <span class="ident">v12</span>, <span class="ident">v13</span>, <span class="ident">v14</span>, <span class="ident">v15</span>,
     ]
 }
 
@@ -1562,7 +1578,7 @@
 
 <span class="attribute">#[<span class="ident">test</span>]</span>
 <span class="kw">fn</span> <span class="ident">test_get_sample_values</span>() {
-    <span class="macro">assert_eq!</span>(<span class="ident">get_sample_values</span>(<span class="bool-val">false</span>, <span class="bool-val">true</span>).<span class="ident">len</span>(), <span class="number">16</span>);
+    <span class="macro">assert_eq!</span>(<span class="ident">get_sample_values</span>(<span class="bool-val">false</span>, <span class="bool-val">true</span>).<span class="ident">len</span>(), <span class="number">18</span>);
 }
 
 <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1739,6 +1755,12 @@ SerdeData:
                     CONTENT: U8
                     SIZE: 4
             VALUE: UNIT
+    13:
+      EmptyTupleVariant:
+        TUPLE: []
+    14:
+      EmptyStructVariant:
+        STRUCT: []
 SimpleList:
   NEWTYPESTRUCT:
     OPTION:
@@ -1870,14 +1892,14 @@ UnitStruct: UNITSTRUCT
 
 <span class="attribute">#[<span class="ident">test</span>]</span>
 <span class="kw">fn</span> <span class="ident">test_bincode_get_positive_samples</span>() {
-    <span class="macro">assert_eq!</span>(<span class="ident">test_get_positive_samples</span>(<span class="ident">Runtime::Bincode</span>), <span class="number">16</span>);
+    <span class="macro">assert_eq!</span>(<span class="ident">test_get_positive_samples</span>(<span class="ident">Runtime::Bincode</span>), <span class="number">18</span>);
 }
 
 <span class="attribute">#[<span class="ident">test</span>]</span>
 <span class="comment">// This test requires --release because of deserialization of long (unit) vectors.</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">debug_assertions</span>))]</span>
 <span class="kw">fn</span> <span class="ident">test_bcs_get_positive_samples</span>() {
-    <span class="macro">assert_eq!</span>(<span class="ident">test_get_positive_samples</span>(<span class="ident">Runtime::Bcs</span>), <span class="number">98</span>);
+    <span class="macro">assert_eq!</span>(<span class="ident">test_get_positive_samples</span>(<span class="ident">Runtime::Bcs</span>), <span class="number">100</span>);
 }
 
 <span class="comment">// Make sure all the &quot;positive&quot; samples successfully deserialize with the reference Rust</span>
@@ -1901,7 +1923,7 @@ UnitStruct: UNITSTRUCT
 <span class="comment">// This test requires --release because of deserialization of long (unit) vectors.</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">debug_assertions</span>))]</span>
 <span class="kw">fn</span> <span class="ident">test_bcs_get_negative_samples</span>() {
-    <span class="macro">assert_eq!</span>(<span class="ident">test_get_negative_samples</span>(<span class="ident">Runtime::Bcs</span>), <span class="number">61</span>);
+    <span class="macro">assert_eq!</span>(<span class="ident">test_get_negative_samples</span>(<span class="ident">Runtime::Bcs</span>), <span class="number">63</span>);
 }
 
 <span class="comment">// Make sure all the &quot;negative&quot; samples fail to deserialize with the reference Rust</span>
