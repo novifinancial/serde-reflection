@@ -2,8 +2,12 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use serde_generate::{dart, test_utils, CodeGeneratorConfig, SourceInstaller};
-use std::fs::{create_dir_all, File};
-use std::{io::Result, io::Write, path::Path, process::Command};
+use std::{
+    fs::{create_dir_all, File},
+    io::{Result, Write},
+    path::Path,
+    process::Command,
+};
 use tempfile::tempdir;
 use test_utils::{Choice, Runtime, Test};
 

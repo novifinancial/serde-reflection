@@ -52,6 +52,8 @@ pub enum SerdeData {
     SimpleList(SimpleList),
     CStyleEnum(CStyleEnum),
     ComplexMap(BTreeMap<([u32; 2], [u8; 4]), ()>),
+    EmptyTupleVariant(),
+    EmptyStructVariant {},
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -293,8 +295,11 @@ pub fn get_sample_values(has_canonical_maps: bool, has_floats: bool) -> Vec<Serd
 
     let v13 = SerdeData::ComplexMap(btreemap! { ([1,2], [3,4,5,6]) => ()});
 
+    let v14 = SerdeData::EmptyTupleVariant();
+    let v15 = SerdeData::EmptyStructVariant {};
+
     vec![
-        v0, v1, v2, v2bis, v2ter, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13,
+        v0, v1, v2, v2bis, v2ter, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15,
     ]
 }
 
@@ -598,7 +603,7 @@ impl Runtime {
 
 #[test]
 fn test_get_sample_values() {
-    assert_eq!(get_sample_values(false, true).len(), 16);
+    assert_eq!(get_sample_values(false, true).len(), 18);
 }
 
 #[test]
@@ -775,6 +780,12 @@ SerdeData:
                     CONTENT: U8
                     SIZE: 4
             VALUE: UNIT
+    13:
+      EmptyTupleVariant:
+        TUPLE: []
+    14:
+      EmptyStructVariant:
+        STRUCT: []
 SimpleList:
   NEWTYPESTRUCT:
     OPTION:
@@ -906,14 +917,14 @@ fn test_get_alternate_sample_with_container_depth(runtime: Runtime) {
 
 #[test]
 fn test_bincode_get_positive_samples() {
-    assert_eq!(test_get_positive_samples(Runtime::Bincode), 16);
+    assert_eq!(test_get_positive_samples(Runtime::Bincode), 18);
 }
 
 #[test]
 // This test requires --release because of deserialization of long (unit) vectors.
 #[cfg(not(debug_assertions))]
 fn test_bcs_get_positive_samples() {
-    assert_eq!(test_get_positive_samples(Runtime::Bcs), 98);
+    assert_eq!(test_get_positive_samples(Runtime::Bcs), 100);
 }
 
 // Make sure all the "positive" samples successfully deserialize with the reference Rust
@@ -937,7 +948,7 @@ fn test_bincode_get_negative_samples() {
 // This test requires --release because of deserialization of long (unit) vectors.
 #[cfg(not(debug_assertions))]
 fn test_bcs_get_negative_samples() {
-    assert_eq!(test_get_negative_samples(Runtime::Bcs), 61);
+    assert_eq!(test_get_negative_samples(Runtime::Bcs), 63);
 }
 
 // Make sure all the "negative" samples fail to deserialize with the reference Rust

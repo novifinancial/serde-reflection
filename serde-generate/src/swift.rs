@@ -477,19 +477,27 @@ return obj
                 writeln!(self.out, "case {}({})", name, self.quote_type(format))?;
             }
             Tuple(formats) => {
-                writeln!(self.out, "case {}({})", name, self.quote_types(formats))?;
+                if formats.is_empty() {
+                    writeln!(self.out, "case {}", name)?;
+                } else {
+                    writeln!(self.out, "case {}({})", name, self.quote_types(formats))?;
+                }
             }
             Struct(fields) => {
-                writeln!(
-                    self.out,
-                    "case {}({})",
-                    name,
-                    fields
-                        .iter()
-                        .map(|f| format!("{}: {}", f.name, self.quote_type(&f.value)))
-                        .collect::<Vec<_>>()
-                        .join(", ")
-                )?;
+                if fields.is_empty() {
+                    writeln!(self.out, "case {}", name)?;
+                } else {
+                    writeln!(
+                        self.out,
+                        "case {}({})",
+                        name,
+                        fields
+                            .iter()
+                            .map(|f| format!("{}: {}", f.name, self.quote_type(&f.value)))
+                            .collect::<Vec<_>>()
+                            .join(", ")
+                    )?;
+                }
             }
             Variable(_) => panic!("incorrect value"),
         }
