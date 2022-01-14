@@ -1,3 +1,5 @@
+// Copyright (c) Facebook, Inc. and its affiliates.
+
 #if !canImport(ObjectiveC)
     import XCTest
 
