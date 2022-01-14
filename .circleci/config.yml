@@ -34,6 +34,7 @@ jobs:
       - run:
           name: Setup Additional Languages
           command: |
+            sudo apt-get update
             sudo apt-get install -y apt-transport-https python3-all-dev python3-pip default-jdk golang-1.15-go
             echo 'export PATH=$PATH:/usr/lib/go-1.15/bin' >> $BASH_ENV
             python3 -m pip install pyre-check==0.0.59
