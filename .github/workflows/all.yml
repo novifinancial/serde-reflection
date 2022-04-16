@@ -1,0 +1,87 @@
+name: All tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup
+      run: |
+        rustup toolchain install 1.55.0-x86_64-unknown-linux-gnu
+        rustup component add rustfmt --toolchain 1.55.0-x86_64-unknown-linux-gnu
+        rustup component add clippy --toolchain 1.55.0-x86_64-unknown-linux-gnu
+    - name: Version Information
+      run: rustc --version; cargo --version; rustup --version
+    - name: Install Rust Components
+      run: rustup component add rustfmt clippy
+    - name: Component Version Information
+      run: cargo fmt -- --version; cargo clippy -- --version
+    - name: Setup Env
+      run: |
+        echo 'export RUSTFLAGS="-D warnings"' >> $BASH_ENV
+    - name: Lint (rustfmt)
+      run: |
+        cargo fmt -- --check
+    - name: Lint (clippy)
+      run: |
+        cargo clippy --all-features
+          build
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Additional Languages
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y apt-transport-https python3-all-dev python3-pip default-jdk golang-1.15-go
+        echo 'export PATH=$PATH:/usr/lib/go-1.15/bin' >> $BASH_ENV
+        python3 -m pip install pyre-check==0.0.59
+        python3 -m pip install numpy==1.20.1
+        wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+        sudo dpkg -i packages-microsoft-prod.deb
+        sudo apt-get update
+        sudo apt-get install -y dotnet-sdk-2.1 dotnet-sdk-3.1
+        curl -fsSL https://deno.land/x/install/install.sh | sh
+        echo 'export DENO_INSTALL="/home/circleci/.deno"' >> $BASH_ENV
+        echo 'export PATH="$DENO_INSTALL/bin:$PATH"' >> $BASH_ENV
+        sudo sh -c 'wget -qO- https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -'
+        sudo sh -c 'wget -qO- https://storage.googleapis.com/download.dartlang.org/linux/debian/dart_stable.list > /etc/apt/sources.list.d/dart_stable.list'
+        sudo apt-get update
+        sudo apt-get install dart
+        sudo apt-get install binutils git gnupg2 libc6-dev libcurl4 libedit2 libgcc-9-dev libpython2.7 libsqlite3-0 libstdc++-9-dev libxml2 libz3-dev pkg-config tzdata zlib1g-dev -y
+        wget https://swift.org/builds/swift-5.3.3-release/ubuntu2004/swift-5.3.3-RELEASE/swift-5.3.3-RELEASE-ubuntu20.04.tar.gz
+        tar xzf swift-5.3.3-RELEASE-ubuntu20.04.tar.gz
+        sudo mkdir -p /opt
+        sudo mv swift-5.3.3-RELEASE-ubuntu20.04 /opt/swift
+        echo 'export PATH="/opt/swift/usr/bin:$PATH"' >> $BASH_ENV
+    - name: Version Information
+      run: |
+        rustc --version
+        cargo --version
+        rustup --version
+        python3 --version
+        clang++ --version
+        javac -version
+        go version
+        dotnet --list-sdks
+        deno --version
+        dart --version
+        swift --version
+    - name: Setup Env
+      run: |
+        echo 'export RUSTFLAGS="-D warnings"' >> $BASH_ENV
+    - name: Build and Test
+      run: |
+        cargo build --all-targets
+        cargo test
+        cargo build --release --all-targets --all-features
+        cargo test --release --all-features
