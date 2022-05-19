@@ -1,3 +1,7 @@
+This repository is no longer maintained by Novi / Meta.
+
+The main contributor (@ma2bd) is now using [this repository](https://github.com/zefchain/serde-reflection) to maintain the project.
+
 # serde-reflection: Format Description and Code Generation for Serde
 
 [![Build Status](https://circleci.com/gh/novifinancial/serde-reflection/tree/main.svg?style=shield&circle-token=4380502426d703f8f000b5467195728e5e8e4ff5)](https://circleci.com/gh/novifinancial/serde-reflection/tree/main)
